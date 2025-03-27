@@ -142,6 +142,11 @@ public abstract class Mob extends Char {
 		}
 	}
 
+	private void Polished_tickProjCooldown() {
+		ChampionEnemy.Projecting proj = buff(ChampionEnemy.Projecting.class);
+		if(proj != null) proj.Polished_cooldown--;
+	}
+
 	private static final String STATE	= "state";
 	private static final String SEEN	= "seen";
 	private static final String TARGET	= "target";
@@ -258,6 +263,8 @@ public abstract class Mob extends Char {
 			Dungeon.level.updateFieldOfView( this, fieldOfView );
 			GameScene.updateFog(pos, viewDistance+(int)Math.ceil(speed()));
 		}
+
+		Polished_tickProjCooldown();
 
 		return result;
 	}
@@ -675,6 +682,8 @@ public abstract class Mob extends Char {
 	
 	@Override
 	public int defenseSkill( Char enemy ) {
+		if(this.buff(ChampionEnemy.Blessed.class) != null) return this.defenseSkill;
+
 		if (buff(GuidingLight.Illuminated.class) != null && Dungeon.hero.heroClass == HeroClass.CLERIC){
 			//if the attacker is the cleric, they must be using a weapon they have the str for
 			if (enemy instanceof Hero){
@@ -1027,6 +1036,19 @@ public abstract class Mob extends Char {
 		}
 		target = cell;
 	}
+
+	private boolean Polished_huntNoti = false;
+	private void Polished_growingHunt() {
+		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
+
+		if(grow != null && grow.Polished_hunt()) {
+			target=Dungeon.hero.pos;
+			if(!Polished_huntNoti) {
+				GLog.w(Messages.get(grow.getClass(), "hunt"));
+				Polished_huntNoti = true;
+			}
+		}
+	}
 	
 	public String description() {
 		return Messages.get(this, "desc");
@@ -1185,6 +1207,8 @@ public abstract class Mob extends Char {
 		
 		protected boolean continueWandering(){
 			enemySeen = false;
+
+			Polished_growingHunt();
 			
 			int oldPos = pos;
 			if (target != -1 && getCloser( target )) {
