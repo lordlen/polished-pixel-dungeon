@@ -39,7 +39,7 @@ public class Debug {
     public static final boolean DEBUG_MODE = false;
 
 
-    public static float Spawn_Multiplier = 1;
+    public static float Spawn_Multiplier = 10;
     public static float Respawn_Multiplier = 1;
 
     public static final int Starting_Floor = 1;
