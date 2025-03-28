@@ -36,7 +36,7 @@ public class Debug {
 
     //SHOULD ALWAYS BE SET TO FALSE ON OFFICIAL RELEASES.
     //public static final boolean DEBUG_MODE = DeviceCompat.isDebug();
-    public static final boolean DEBUG_MODE = true;
+    public static final boolean DEBUG_MODE = false;
 
 
     public static float Spawn_Multiplier = 1;
