@@ -19,7 +19,7 @@ allprojects {
 
         //just add 1000 to the SPD code
         appVersionCode = 1833
-        appVersionName = '1.0.0-SPD_3.0.2'
+        appVersionName = '1.2.0e-SPD3.0.2'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 
