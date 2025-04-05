@@ -259,7 +259,7 @@ public class Hero extends Char {
 			if (item instanceof Dewdrop && waterskin == null) return false;
 			if (item instanceof Dewdrop && waterskin.isFull()) return false;
 			if (!(item instanceof Dewdrop || item instanceof Plant.Seed || item instanceof Runestone || item instanceof Berry)) return false;
-			if(!Dungeon.hero.belongings.backpack.canHold(item)) return false;
+			if(!Dungeon.hero.belongings.backpack.Polished_canHoldGlobal(item)) return false;
 
 			return (SPDSettings.Polished.autoPickup() && noEnemiesSeen() && noEnemiesLast);
 		}
@@ -846,6 +846,9 @@ public class Hero extends Char {
 	
 	@Override
 	public boolean act() {
+		if(paralysed > 0 || (!(curAction instanceof HeroAction.Move) && !(curAction instanceof HeroAction.PickUp))) {
+			Polished.noEnemiesLast = Polished.noEnemiesSeen();
+		}
 		
 		//calls to dungeon.observe will also update hero's local FOV.
 		fieldOfView = Dungeon.level.heroFOV;
@@ -867,10 +870,6 @@ public class Hero extends Char {
 		checkVisibleMobs();
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshBoss();
-
-		if(paralysed > 0 || !(curAction instanceof HeroAction.Move)) {
-			Polished.noEnemiesLast = Polished.noEnemiesSeen();
-		}
 
 		if (paralysed > 0) {
 			
@@ -1104,6 +1103,8 @@ public class Hero extends Char {
 			
 			Heap heap = Dungeon.level.heaps.get( pos );
 			if (heap != null) {
+				Polished.noEnemiesLast = Polished.noEnemiesSeen();
+
 				Item item = heap.peek();
 				if (item.doPickUp( this )) {
 					heap.pickUp();
@@ -1168,7 +1169,7 @@ public class Hero extends Char {
 			return false;
 
 		} else if (getCloser( dst )) {
-
+			if(justMoved) Polished.noEnemiesLast = Polished.noEnemiesSeen();
 			return true;
 
 		} else {
