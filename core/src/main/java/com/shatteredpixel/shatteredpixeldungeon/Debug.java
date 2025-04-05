@@ -39,7 +39,7 @@ public class Debug {
     //SHOULD ALWAYS BE SET TO FALSE ON OFFICIAL RELEASES.
     public static final boolean DEBUG_MODE = DeviceCompat.isDebug();
 
-
+    public static final int Starting_HP = 20;
     public static float Spawn_Multiplier = 1;
     public static float Respawn_Multiplier = 1;
 

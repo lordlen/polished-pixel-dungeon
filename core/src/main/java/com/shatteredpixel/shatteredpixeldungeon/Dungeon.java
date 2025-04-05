@@ -99,6 +99,10 @@ import java.util.TimeZone;
 
 public class Dungeon {
 
+	public static class Polished {
+		public static final int DEFAULT_VIEW_DISTANCE = 8;
+	}
+
 	private static void updateNearbyTiles(boolean[] extendedHeroFOV, int pos) {
 		for (int i = 0; i < 3; i++) {
 			int offset = pos + level.pointToCell(-1, -1+i);
