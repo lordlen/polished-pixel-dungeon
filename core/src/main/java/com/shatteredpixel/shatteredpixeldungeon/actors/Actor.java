@@ -102,14 +102,6 @@ public abstract class Actor implements Bundlable {
 		return time - now;
 	}
 
-	public void resetTime() {
-		spendConstant(-time);
-		if (this instanceof Char){
-			for (Buff b : ((Char) this).buffs()){
-				b.spendConstant(-time);
-			}
-		}
-	}
 	public void clearTime() {
 		spendConstant(-Actor.now());
 		if (this instanceof Char){
@@ -119,6 +111,13 @@ public abstract class Actor implements Bundlable {
 		}
 	}
 
+	public void Polished_timeToNow() {
+		if(all().contains(this)) {
+			time = now;
+		} else {
+			time = 0;
+		}
+	}
 	public void timeToNow() {
 		time = now;
 	}
