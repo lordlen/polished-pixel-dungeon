@@ -866,6 +866,10 @@ public class Hero extends Char {
 	
 	@Override
 	public boolean act() {
+		if(paralysed > 0 || (!(curAction instanceof HeroAction.Move) && !(curAction instanceof HeroAction.PickUp))) {
+			Polished.noEnemiesLast = Polished.noEnemiesSeen();
+		}
+
 		//Do an input block check before updating fov to account for enemies entering the edge of your vision
 		if(fieldOfView != null && fieldOfView.length == Dungeon.level.length()) {
 			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
@@ -875,14 +879,11 @@ public class Hero extends Char {
 						GameScene.Polished.blockInput();
 					}
 					m.polished.spot(true);
+					Polished.noEnemiesLast = false;
 				} else {
 					m.polished.spot(false);
 				}
 			}
-		}
-
-		if(paralysed > 0 || (!(curAction instanceof HeroAction.Move) && !(curAction instanceof HeroAction.PickUp))) {
-			Polished.noEnemiesLast = Polished.noEnemiesSeen();
 		}
 		
 		//calls to dungeon.observe will also update hero's local FOV.
