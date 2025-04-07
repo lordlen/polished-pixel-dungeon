@@ -387,6 +387,11 @@ public class SpiritBow extends Weapon {
 						updateQuickslot();
 					}
 				}
+				if(flurryCount == -1) {
+					curCharges -= Polished_chargeCost();
+					updateQuickslot();
+				}
+				
 				if (sniperSpecial && SpiritBow.this.augment != Augment.SPEED) sniperSpecial = false;
 			}
 		}
