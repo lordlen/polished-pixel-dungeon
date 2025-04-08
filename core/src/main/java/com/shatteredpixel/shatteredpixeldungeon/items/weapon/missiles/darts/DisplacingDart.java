@@ -103,7 +103,8 @@ public class DisplacingDart extends TippedDart {
 				}
 				*/
 			}
-			
+
+			Buff.append(attacker, TalismanOfForesight.CharAwareness.class, 5f).charID = defender.id();
 			if (chosenPos != -1){
 				ScrollOfTeleportation.appear( defender, chosenPos );
 				Dungeon.level.occupyCell(defender );
@@ -111,7 +112,6 @@ public class DisplacingDart extends TippedDart {
 					Dungeon.observe();
 					GameScene.updateFog();
 				}
-				Buff.append(attacker, TalismanOfForesight.CharAwareness.class, 5f).charID = defender.id();
 			}
 		
 		}
