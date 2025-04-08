@@ -80,7 +80,7 @@ public class DisplacingDart extends TippedDart {
 
 			if (!visiblePositions.isEmpty()) {
 				Random.shuffle(visiblePositions);
-				chosenPos = visiblePositions.getFirst();
+				chosenPos = visiblePositions.get(0);
 
 				/*
 				for (int pos : visiblePositions) {
@@ -92,7 +92,7 @@ public class DisplacingDart extends TippedDart {
 				 */
 			} else {
 				Random.shuffle(nonVisiblePositions);
-				chosenPos = nonVisiblePositions.getFirst();
+				chosenPos = nonVisiblePositions.get(0);
 
 				/*
 				for (int pos : nonVisiblePositions) {
