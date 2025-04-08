@@ -23,6 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.watabou.input.GameAction;
+import com.watabou.noosa.Game;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -40,6 +42,38 @@ public class QuickSlot {
 	//note that the current max size is coded at 6, due to UI constraints, but it could be much much bigger with no issue.
 	public static int SIZE = 7;
 	private Item[] slots = new Item[SIZE];
+
+	public static class Polished {
+		public static GameAction bufferedAction = null;
+		private static long timer_Action = 0;
+		//millis
+		private static final int bufferPeriod_Action = 100;
+
+		public static void bufferAction(GameAction action, boolean animation) {
+			if(!actionQueued()) bufferedAction = action;
+			else bufferedAction = null;
+
+			//bufferedAction = action;
+
+			timer_Action = Game.realTime + (animation ? bufferPeriod_Action : 2*bufferPeriod_Action);
+		}
+		public static boolean actionQueued() {
+			return bufferedAction != null && Game.realTime <= timer_Action;
+		}
+
+		public static int bufferedCell = -1;
+		private static long timer_Cell = 0;
+		//millis
+		private static final int bufferPeriod_Cell = 100;
+
+		public static void bufferCell(int cell) {
+			bufferedCell = cell;
+			timer_Cell = Game.realTime + bufferPeriod_Cell;
+		}
+		public static boolean cellQueued() {
+			return bufferedCell != -1 && Game.realTime <= timer_Cell;
+		}
+	}
 
 
 	//direct array interaction methods, everything should build from these methods.
