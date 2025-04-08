@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.BArray;
 import com.watabou.utils.PathFinder;
+import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
@@ -50,7 +51,8 @@ public class DisplacingDart extends TippedDart {
 
 		//attempts to teleport the enemy to a position 8-10 cells away from the hero
 		//prioritizes the closest visible cell to the defender, or closest non-visible if no visible are present
-		//grants vision on the defender if teleport goes to non-visible
+		//POLISHED: no priority, randomly picks one
+		//grants vision on the defender
 		if (!defender.properties().contains(Char.Property.IMMOVABLE)){
 			
 			ArrayList<Integer> visiblePositions = new ArrayList<>();
@@ -77,19 +79,29 @@ public class DisplacingDart extends TippedDart {
 			int chosenPos = -1;
 
 			if (!visiblePositions.isEmpty()) {
+				Random.shuffle(visiblePositions);
+				chosenPos = visiblePositions.getFirst();
+
+				/*
 				for (int pos : visiblePositions) {
 					if (chosenPos == -1 || Dungeon.level.trueDistance(defender.pos, chosenPos)
 							> Dungeon.level.trueDistance(defender.pos, pos)){
 						chosenPos = pos;
 					}
 				}
+				 */
 			} else {
+				Random.shuffle(nonVisiblePositions);
+				chosenPos = nonVisiblePositions.getFirst();
+
+				/*
 				for (int pos : nonVisiblePositions) {
 					if (chosenPos == -1 || Dungeon.level.trueDistance(defender.pos, chosenPos)
 							> Dungeon.level.trueDistance(defender.pos, pos)){
 						chosenPos = pos;
 					}
 				}
+				*/
 			}
 			
 			if (chosenPos != -1){
