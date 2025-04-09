@@ -911,7 +911,7 @@ public class Hero extends Char {
 			
 			curAction = null;
 			
-			spendAndNext( TICK );
+			spendAndNextConstant( TICK );
 			return false;
 		}
 		
