@@ -36,7 +36,7 @@ public class Debug {
 
     private static final boolean DebuggingStats = false;
     //                                                                  Debug  /  Default
-    public static final float Spawn_Multiplier = DebuggingStats ?       .6f     : 1f;
+    public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1f;
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1f;
 
     public static final int Starting_Floor = DebuggingStats ?           6       : 1;
@@ -64,9 +64,6 @@ public class Debug {
                 StoneOfBlast.class, StoneOfBlink.class, StoneOfShock.class,
                 TimekeepersHourglass.class, Food.class
             ));
-
-            if(Dungeon.isChallenged(Challenges.DARKNESS))
-                Starting_Items.add(Torch.class);
         }
     }
     public static void Starting_Bag() {
@@ -75,6 +72,8 @@ public class Debug {
         for(Class<?extends Item> itemType : Debug.Starting_Items) {
             DebugCollect(itemType);
         }
+        if(Dungeon.isChallenged(Challenges.DARKNESS))
+            DebugCollect(Torch.class);
 
         //DebugCollect(ClothArmor.class, 0, 1, Swiftness.class);
 
