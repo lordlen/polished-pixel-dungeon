@@ -398,18 +398,6 @@ public class SpiritBow extends Weapon {
 		public void throwSound() {
 			Sample.INSTANCE.play( Assets.Sounds.ATK_SPIRITBOW, 1, Random.Float(0.87f, 1.15f) );
 		}
-		
-		private int Polished_chargeCost() {
-			return sniperSpecial && SpiritBow.this.augment != Augment.NONE ? 2 : 1;
-		}
-		private void Polished_spendCharges() {
-			curCharges -= Polished_chargeCost();
-			updateQuickslot();
-
-			int nature = Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
-			if(curCharges == 1 && nature > 0)
-				Barkskin.conditionallyAppend(Dungeon.hero, nature+1, 4);
-		}
 
 		private int Polished_chargeCost() {
 			return sniperSpecial && SpiritBow.this.augment != Augment.NONE ? 2 : 1;
