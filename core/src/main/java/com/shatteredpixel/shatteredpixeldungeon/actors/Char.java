@@ -1001,6 +1001,12 @@ public abstract class Char extends Actor {
 			}
 		}
 
+		if(HP < 0 && this instanceof Brute && isAlive()) {
+			int overkill = -HP;
+			Brute.BruteRage rage = buff(Brute.BruteRage.class);
+			if(rage != null) rage.absorbDamage(overkill);
+		}
+
 		if (HP < 0 && src instanceof Char && alignment == Alignment.ENEMY){
 			if (((Char) src).buff(Kinetic.KineticTracker.class) != null){
 				int dmgToAdd = -HP;

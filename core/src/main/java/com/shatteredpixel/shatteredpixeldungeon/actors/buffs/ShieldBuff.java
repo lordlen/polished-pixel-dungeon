@@ -26,7 +26,7 @@ import com.watabou.utils.Bundle;
 
 public abstract class ShieldBuff extends Buff {
 	
-	private int shielding;
+	protected int shielding;
 
 	protected boolean detachesAtZero = true;
 	

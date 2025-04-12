@@ -121,7 +121,16 @@ public class Brute extends Mob {
 		{
 			type = buffType.POSITIVE;
 		}
-		
+
+		@Override
+		public int absorbDamage( int dmg ){
+			shielding += dmg;
+			shielding = Math.min(shielding, target.HT);
+
+			target.needsShieldUpdate = true;
+			return 0;
+		}
+
 		@Override
 		public boolean act() {
 			
@@ -130,7 +139,7 @@ public class Brute extends Mob {
 				return true;
 			}
 			
-			absorbDamage( Math.round(4*AscensionChallenge.statModifier(target)));
+			absorbDamage( Math.round(-3*AscensionChallenge.statModifier(target)));
 			
 			if (shielding() <= 0){
 				target.die(null);
