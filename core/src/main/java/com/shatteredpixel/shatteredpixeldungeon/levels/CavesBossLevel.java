@@ -126,7 +126,7 @@ public class CavesBossLevel extends Level {
 			if (map[i] == Terrain.EMPTY) {
 				if (patch[i - 14*width()]){
 					map[i] = Terrain.WATER;
-				} else if (Random.Int(Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 4 : 8) == 0){
+				} else if (Random.Int(Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 8 : 12) == 0){
 					map[i] = Terrain.INACTIVE_TRAP;
 				}
 			}

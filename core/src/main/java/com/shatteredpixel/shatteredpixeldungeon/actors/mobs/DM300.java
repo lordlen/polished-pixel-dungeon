@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import com.badlogic.gdx.utils.Null;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
@@ -30,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
@@ -41,6 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Sleep;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Speed;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.WallOfLight;
@@ -158,20 +161,30 @@ public class DM300 extends Mob {
 
 	@Override
 	protected boolean act() {
+		if (Dungeon.hero.invisible <= 0){
+			//beckon(Dungeon.hero.pos);
+			//enemy = Dungeon.hero;
+		}
 
 		if (paralysed > 0){
 			return super.act();
 		}
 
+		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
+			fieldOfView = new boolean[Dungeon.level.length()];
+			Dungeon.level.updateFieldOfView( this, fieldOfView );
+		}
+
+		//if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
 		//ability logic only triggers if DM is not supercharged
 		if (!supercharged){
 			if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
 
 			//in case DM-300 hasn't been able to act yet
-			if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
+			/*if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
 				fieldOfView = new boolean[Dungeon.level.length()];
 				Dungeon.level.updateFieldOfView( this, fieldOfView );
-			}
+			}*/
 
 			//determine if DM can reach its enemy
 			boolean canReach;
@@ -193,7 +206,7 @@ public class DM300 extends Mob {
 				if (Dungeon.hero.invisible <= 0 && canReach){
 					beckon(Dungeon.hero.pos);
 				}
-			} else {
+			} else if(enemy != null && fieldOfView[enemy.pos] && Dungeon.hero.invisible <= 0){
 
 				if ((enemy == null || !enemy.isAlive()) && Dungeon.hero.invisible <= 0) {
 					enemy = Dungeon.hero;
@@ -292,8 +305,8 @@ public class DM300 extends Mob {
 
 			if (Dungeon.hero.invisible <= 0){
 				beckon(Dungeon.hero.pos);
-				state = HUNTING;
 				enemy = Dungeon.hero;
+				state = HUNTING;
 			}
 
 		}
@@ -324,7 +337,7 @@ public class DM300 extends Mob {
 
 		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
-		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP && state == HUNTING) {
+		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP/* && state == HUNTING*/) {
 
 			//don't gain energy from cells that are energized
 			if (CavesBossLevel.PylonEnergy.volumeAt(pos, CavesBossLevel.PylonEnergy.class) > 0){
@@ -340,7 +353,21 @@ public class DM300 extends Mob {
 				sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(30 + (HT - HP)/10), FloatingText.SHIELDING);
 			}
 
-			Buff.affect(this, Barrier.class).setShield( 30 + (HT - HP)/10);
+			//Buff.affect(this, Barrier.class).setShield( 30 + (HT - HP)/10);
+			Actor.add(new Actor(){
+
+				{
+					actPriority = VFX_PRIO;
+				}
+
+				@Override
+				protected boolean act() {
+					Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3f);
+
+					Actor.remove(this);
+					return true;
+				}
+			});
 
 		}
 	}
@@ -377,14 +404,14 @@ public class DM300 extends Mob {
 
 		Ballistica trajectory = new Ballistica(pos, target.pos, Ballistica.STOP_TARGET);
 
-		int gasMulti = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2 : 1;
+		float gasMulti = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 1.5f : 1;
 
 		for (int i : trajectory.subPath(0, trajectory.dist)){
-			GameScene.add(Blob.seed(i, 20*gasMulti, ToxicGas.class));
-			gasVented += 20*gasMulti;
+			GameScene.add(Blob.seed(i, Math.round(20*gasMulti), ToxicGas.class));
+			gasVented += Math.round(20*gasMulti);
 		}
 
-		GameScene.add(Blob.seed(trajectory.collisionPos, 100*gasMulti, ToxicGas.class));
+		GameScene.add(Blob.seed(trajectory.collisionPos, Math.round(100*gasMulti), ToxicGas.class));
 
 		if (gasVented < 250*gasMulti){
 			int toVentAround = (int)Math.ceil(((250*gasMulti) - gasVented)/8f);
@@ -537,7 +564,7 @@ public class DM300 extends Mob {
 		((DM300Sprite)sprite).updateChargeState(false);
 
 		//adjust turns since last ability to prevent DM immediately using an ability when charge ends
-		turnsSinceLastAbility = Math.max(turnsSinceLastAbility, MIN_COOLDOWN-3);
+		turnsSinceLastAbility = Math.min(turnsSinceLastAbility, MIN_COOLDOWN-3);
 
 		if (pylonsActivated < totalPylonsToActivate()){
 			yell(Messages.get(this, "charge_lost"));
@@ -595,28 +622,59 @@ public class DM300 extends Mob {
 		yell( Messages.get(this, "defeated") );
 	}
 
+	private int POLISHED_cooldown = 0;
 	@Override
 	protected boolean getCloser(int target) {
-		if (super.getCloser(target)){
+		/*if(POLISHED_cooldown > 0) {
+			POLISHED_cooldown--;
+			return false;
+		}*/
+
+		int dist = Integer.MAX_VALUE;
+		int move = -1;
+		boolean destroy = false;
+		for (int i : PathFinder.NEIGHBOURS8){
+			int tempDist = Dungeon.level.distance(pos+i, target);
+
+			if (Actor.findChar(pos+i) == null && dist >= tempDist){
+				if(dist > tempDist) {
+					move = pos+i;
+					dist = tempDist;
+					destroy = true;
+				}
+				if(Dungeon.level.openSpace[pos+i]) destroy=false;
+			}
+		}
+
+		if (!destroy && super.getCloser(target)){
+			if(POLISHED_cooldown > 0) {
+				POLISHED_cooldown--;
+			}
 			return true;
 		} else {
-
-			if (!supercharged || state != HUNTING || rooted || target == pos || Dungeon.level.adjacent(pos, target)) {
+			if(POLISHED_cooldown > 0) {
+				POLISHED_cooldown--;
 				return false;
 			}
 
-			int bestpos = pos;
+			if (/*!supercharged || */state != HUNTING || rooted || target == pos || Dungeon.level.adjacent(pos, target)) {
+				return false;
+			}
+
+			/*int bestpos = pos;
 			for (int i : PathFinder.NEIGHBOURS8){
 				if (Actor.findChar(pos+i) == null &&
 						Dungeon.level.trueDistance(bestpos, target) > Dungeon.level.trueDistance(pos+i, target)){
 					bestpos = pos+i;
 				}
-			}
-			if (bestpos != pos){
+			}*/
+			if (/*bestpos != pos*/ move != pos){
 				Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 
 				Rect gate = CavesBossLevel.gate;
 				for (int i : PathFinder.NEIGHBOURS9){
+					if(!Dungeon.level.adjacent(pos+i, /*bestpos*/move) && move != pos+i) continue;
+
 					if (Dungeon.level.map[pos+i] == Terrain.WALL || Dungeon.level.map[pos+i] == Terrain.WALL_DECO){
 						Point p = Dungeon.level.cellToPoint(pos+i);
 						if (p.y < gate.bottom && p.x >= gate.left-2 && p.x < gate.right+2){
@@ -634,18 +692,23 @@ public class DM300 extends Mob {
 				}
 				Dungeon.level.cleanWalls();
 				Dungeon.observe();
-				spend(Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2f : 3f);
 
-				bestpos = pos;
+				int delay = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2 : 4;
+				if(supercharged || buff(Adrenaline.class) != null) delay--;
+
+				POLISHED_cooldown=delay;
+				spend(TICK);
+
+				/*bestpos = pos;
 				for (int i : PathFinder.NEIGHBOURS8){
 					if (Actor.findChar(pos+i) == null && Dungeon.level.openSpace[pos+i] &&
 							Dungeon.level.trueDistance(bestpos, target) > Dungeon.level.trueDistance(pos+i, target)){
 						bestpos = pos+i;
 					}
-				}
+				}*/
 
-				if (bestpos != pos) {
-					move(bestpos);
+				if (/*bestpos*/move != pos) {
+					move(/*bestpos*/move);
 				}
 				PixelScene.shake( 5, 1f );
 
@@ -683,7 +746,7 @@ public class DM300 extends Mob {
 		@Override
 		public void affectChar(Char ch) {
 			if (!(ch instanceof DM300)){
-				Buff.prolong(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 3);
+				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 4 : 3);
 				if (ch == Dungeon.hero) {
 					Statistics.bossScores[2] -= 100;
 				}
