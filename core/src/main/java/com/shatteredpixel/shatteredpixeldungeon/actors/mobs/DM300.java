@@ -479,7 +479,7 @@ public class DM300 extends Mob {
 		do {
 			safeCell = rockCenter + PathFinder.NEIGHBOURS8[Random.Int(8)];
 		} while (safeCell == pos
-				|| (Dungeon.level.solid[safeCell] && Random.Int(2) == 0)
+				|| (Dungeon.level.solid[safeCell] && Random.Int(4) != 0)
 				|| (Blob.volumeAt(safeCell, CavesBossLevel.PylonEnergy.class) > 0 && Random.Int(2) == 0));
 
 		ArrayList<Integer> rockCells = new ArrayList<>();
