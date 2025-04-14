@@ -385,7 +385,7 @@ public class DM300 extends Mob {
 
 				@Override
 				protected boolean act() {
-					Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3f);
+					Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3.5f);
 
 					Actor.remove(this);
 					return true;
