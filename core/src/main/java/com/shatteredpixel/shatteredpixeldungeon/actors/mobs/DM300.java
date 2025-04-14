@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import com.badlogic.gdx.math.Path;
 import com.badlogic.gdx.utils.Null;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
@@ -34,11 +35,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Sleep;
@@ -78,6 +81,8 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Rect;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 public class DM300 extends Mob {
 
@@ -172,8 +177,9 @@ public class DM300 extends Mob {
 
 		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
 			fieldOfView = new boolean[Dungeon.level.length()];
-			Dungeon.level.updateFieldOfView( this, fieldOfView );
+			//Dungeon.level.updateFieldOfView( this, fieldOfView );
 		}
+		Dungeon.level.updateFieldOfView( this, fieldOfView );
 
 		//if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
 		//ability logic only triggers if DM is not supercharged
@@ -202,11 +208,15 @@ public class DM300 extends Mob {
 				}
 			}
 
+			ConeAOE aim = null;
+			if(enemy != null) aim = new ConeAOE(new Ballistica(pos, enemy.pos, Ballistica.WONT_STOP), Float.POSITIVE_INFINITY, 30, Ballistica.STOP_SOLID);
+
 			if (state != HUNTING){
 				if (Dungeon.hero.invisible <= 0 && canReach){
 					beckon(Dungeon.hero.pos);
 				}
-			} else if(enemy != null && fieldOfView[enemy.pos] && Dungeon.hero.invisible <= 0){
+			} else if(aim != null && Dungeon.hero.invisible <= 0 &&
+					(fieldOfView[enemy.pos] || aim.cells.contains(enemy.pos))){
 
 				if ((enemy == null || !enemy.isAlive()) && Dungeon.hero.invisible <= 0) {
 					enemy = Dungeon.hero;
@@ -218,7 +228,7 @@ public class DM300 extends Mob {
 					//try to fire gas at an enemy we can't reach
 					if (turnsSinceLastAbility >= MIN_COOLDOWN){
 						//use a coneAOE to try and account for trickshotting angles
-						ConeAOE aim = new ConeAOE(new Ballistica(pos, enemy.pos, Ballistica.WONT_STOP), Float.POSITIVE_INFINITY, 30, Ballistica.STOP_SOLID);
+						//ConeAOE aim = new ConeAOE(new Ballistica(pos, enemy.pos, Ballistica.WONT_STOP), Float.POSITIVE_INFINITY, 30, Ballistica.STOP_SOLID);
 						if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC)) {
 							lastAbility = GAS;
 							turnsSinceLastAbility = 0;
@@ -304,7 +314,9 @@ public class DM300 extends Mob {
 			}
 
 			if (Dungeon.hero.invisible <= 0){
-				beckon(Dungeon.hero.pos);
+				//Buff.affect(this, MindVision.class, 3f);
+				//beckon(Dungeon.hero.pos);
+				target=Dungeon.hero.pos;
 				enemy = Dungeon.hero;
 				state = HUNTING;
 			}
@@ -333,18 +345,23 @@ public class DM300 extends Mob {
 
 	@Override
 	public void move(int step, boolean travelling) {
+		int oldpos = pos;
 		super.move(step, travelling);
+		int newpos = pos;
+
+		destroyWalls(oldpos, newpos);
+
 
 		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
-		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP/* && state == HUNTING*/) {
+		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP /*&& distance(enemy) <= 8*/ && state == HUNTING) {
 
 			//don't gain energy from cells that are energized
 			if (CavesBossLevel.PylonEnergy.volumeAt(pos, CavesBossLevel.PylonEnergy.class) > 0){
 				return;
 			}
 
-			if (Dungeon.level.heroFOV[pos]) {
+			if (/*Dungeon.level.heroFOV[pos]*/true) {
 				if (buff(Barrier.class) == null) {
 					GLog.w(Messages.get(this, "shield"));
 				}
@@ -565,6 +582,7 @@ public class DM300 extends Mob {
 
 		//adjust turns since last ability to prevent DM immediately using an ability when charge ends
 		turnsSinceLastAbility = Math.min(turnsSinceLastAbility, MIN_COOLDOWN-3);
+		spend(TICK);
 
 		if (pylonsActivated < totalPylonsToActivate()){
 			yell(Messages.get(this, "charge_lost"));
@@ -623,6 +641,47 @@ public class DM300 extends Mob {
 	}
 
 	private int POLISHED_cooldown = 0;
+
+	void destroyWalls(int oldpos, int newpos) {
+		if(!Dungeon.level.openSpace[newpos] && newpos != oldpos) {
+
+			Rect gate = CavesBossLevel.gate;
+			for (int i : PathFinder.NEIGHBOURS9){
+				if(!Dungeon.level.adjacent(pos+i, oldpos) && oldpos != pos+i) continue;
+
+				if (Dungeon.level.map[pos+i] == Terrain.WALL || Dungeon.level.map[pos+i] == Terrain.WALL_DECO){
+					Point p = Dungeon.level.cellToPoint(pos+i);
+					if (p.y < gate.bottom && p.x >= gate.left-2 && p.x < gate.right+2){
+						continue; //don't break the gate or walls around the gate
+					}
+					if (!CavesBossLevel.diggableArea.inside(p)){
+						continue; //Don't break any walls out of the boss arena
+					}
+					Level.set(pos+i, Terrain.EMPTY_DECO);
+					GameScene.updateMap(pos+i);
+				}
+				if (Dungeon.level.blobs.get(WallOfLight.LightWall.class) != null){
+					Dungeon.level.blobs.get(WallOfLight.LightWall.class).clear(pos+i);
+				}
+			}
+			Dungeon.level.cleanWalls();
+			Dungeon.observe();
+
+			//make sure DM always takes 2 full turns per dig
+			if(supercharged || buff(Adrenaline.class) != null) spend(1 / speed());
+			spend(TICK);
+
+			int cd = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2 : 4;
+			if(supercharged || buff(Adrenaline.class) != null) cd--;
+			POLISHED_cooldown=cd;
+
+			properties.add(Property.LARGE);
+
+			Sample.INSTANCE.play( Assets.Sounds.ROCKS );
+			PixelScene.shake( 5, 1f );
+		}
+	}
+
 	@Override
 	protected boolean getCloser(int target) {
 		/*if(POLISHED_cooldown > 0) {
@@ -631,92 +690,109 @@ public class DM300 extends Mob {
 		}*/
 
 		int dist = Integer.MAX_VALUE;
-		int move = -1;
 		boolean destroy = false;
+
 		for (int i : PathFinder.NEIGHBOURS8){
 			int tempDist = Dungeon.level.distance(pos+i, target);
 
-			if (Actor.findChar(pos+i) == null && dist >= tempDist){
+			if (Actor.findChar(pos+i) == null && Dungeon.level.passable[pos+i] && dist >= tempDist){
 				if(dist > tempDist) {
-					move = pos+i;
 					dist = tempDist;
 					destroy = true;
 				}
+
 				if(Dungeon.level.openSpace[pos+i]) destroy=false;
 			}
 		}
 
-		if (!destroy && super.getCloser(target)){
-			if(POLISHED_cooldown > 0) {
-				POLISHED_cooldown--;
-			}
-			return true;
-		} else {
-			if(POLISHED_cooldown > 0) {
-				POLISHED_cooldown--;
-				return false;
-			}
+		if(POLISHED_cooldown > 0) {
+			POLISHED_cooldown--;
 
-			if (/*!supercharged || */state != HUNTING || rooted || target == pos || Dungeon.level.adjacent(pos, target)) {
-				return false;
-			}
-
-			/*int bestpos = pos;
-			for (int i : PathFinder.NEIGHBOURS8){
-				if (Actor.findChar(pos+i) == null &&
-						Dungeon.level.trueDistance(bestpos, target) > Dungeon.level.trueDistance(pos+i, target)){
-					bestpos = pos+i;
-				}
-			}*/
-			if (/*bestpos != pos*/ move != pos){
-				Sample.INSTANCE.play( Assets.Sounds.ROCKS );
-
-				Rect gate = CavesBossLevel.gate;
-				for (int i : PathFinder.NEIGHBOURS9){
-					if(!Dungeon.level.adjacent(pos+i, /*bestpos*/move) && move != pos+i) continue;
-
-					if (Dungeon.level.map[pos+i] == Terrain.WALL || Dungeon.level.map[pos+i] == Terrain.WALL_DECO){
-						Point p = Dungeon.level.cellToPoint(pos+i);
-						if (p.y < gate.bottom && p.x >= gate.left-2 && p.x < gate.right+2){
-							continue; //don't break the gate or walls around the gate
-						}
-						if (!CavesBossLevel.diggableArea.inside(p)){
-							continue; //Don't break any walls out of the boss arena
-						}
-						Level.set(pos+i, Terrain.EMPTY_DECO);
-						GameScene.updateMap(pos+i);
-					}
-					if (Dungeon.level.blobs.get(WallOfLight.LightWall.class) != null){
-						Dungeon.level.blobs.get(WallOfLight.LightWall.class).clear(pos+i);
-					}
-				}
-				Dungeon.level.cleanWalls();
-				Dungeon.observe();
-
-				int delay = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2 : 4;
-				if(supercharged || buff(Adrenaline.class) != null) delay--;
-
-				POLISHED_cooldown=delay;
-				spend(TICK);
-
-				/*bestpos = pos;
-				for (int i : PathFinder.NEIGHBOURS8){
-					if (Actor.findChar(pos+i) == null && Dungeon.level.openSpace[pos+i] &&
-							Dungeon.level.trueDistance(bestpos, target) > Dungeon.level.trueDistance(pos+i, target)){
-						bestpos = pos+i;
-					}
-				}*/
-
-				if (/*bestpos*/move != pos) {
-					move(/*bestpos*/move);
-				}
-				PixelScene.shake( 5, 1f );
-
-				return true;
-			}
-
-			return false;
+			if(destroy) return false;
+		} else if(state == HUNTING) {
+			properties.remove(Property.LARGE);
 		}
+
+		//if(state == WANDERING) properties.add(Property.LARGE);
+
+		boolean temp = super.getCloser(target);
+
+		properties.add(Property.LARGE);
+		return temp;
+
+//		if (!destroy && super.getCloser(target)){
+//			if(POLISHED_cooldown > 0) {
+//				POLISHED_cooldown--;
+//			}
+//			return true;
+//		} else {
+//			if(POLISHED_cooldown > 0) {
+//				POLISHED_cooldown--;
+//				return false;
+//			}
+//
+//			if (/*!supercharged || */state != HUNTING || rooted || target == pos || Dungeon.level.adjacent(pos, target)) {
+//				return false;
+//			}
+//
+//			/*int bestpos = pos;
+//			for (int i : PathFinder.NEIGHBOURS8){
+//				if (Actor.findChar(pos+i) == null &&
+//						Dungeon.level.trueDistance(bestpos, target) > Dungeon.level.trueDistance(pos+i, target)){
+//					bestpos = pos+i;
+//				}
+//			}*/
+//			if (/*bestpos != pos*/ move != pos){
+//				Sample.INSTANCE.play( Assets.Sounds.ROCKS );
+//
+//				Rect gate = CavesBossLevel.gate;
+//				for (int i : PathFinder.NEIGHBOURS9){
+//					if(!Dungeon.level.adjacent(pos+i, /*bestpos*/move) && move != pos+i) continue;
+//
+//					if (Dungeon.level.map[pos+i] == Terrain.WALL || Dungeon.level.map[pos+i] == Terrain.WALL_DECO){
+//						Point p = Dungeon.level.cellToPoint(pos+i);
+//						if (p.y < gate.bottom && p.x >= gate.left-2 && p.x < gate.right+2){
+//							continue; //don't break the gate or walls around the gate
+//						}
+//						if (!CavesBossLevel.diggableArea.inside(p)){
+//							continue; //Don't break any walls out of the boss arena
+//						}
+//						Level.set(pos+i, Terrain.EMPTY_DECO);
+//						GameScene.updateMap(pos+i);
+//					}
+//					if (Dungeon.level.blobs.get(WallOfLight.LightWall.class) != null){
+//						Dungeon.level.blobs.get(WallOfLight.LightWall.class).clear(pos+i);
+//					}
+//				}
+//				Dungeon.level.cleanWalls();
+//				Dungeon.observe();
+//
+//				int delay = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2 : 4;
+//				if(supercharged || buff(Adrenaline.class) != null) delay--;
+//				POLISHED_cooldown=delay;
+//
+//				if(supercharged || buff(Adrenaline.class) != null) spend(1 / speed());
+//				spend(TICK);
+//
+//
+//				/*bestpos = pos;
+//				for (int i : PathFinder.NEIGHBOURS8){
+//					if (Actor.findChar(pos+i) == null && Dungeon.level.openSpace[pos+i] &&
+//							Dungeon.level.trueDistance(bestpos, target) > Dungeon.level.trueDistance(pos+i, target)){
+//						bestpos = pos+i;
+//					}
+//				}*/
+//
+//				if (/*bestpos*/move != pos) {
+//					move(/*bestpos*/move);
+//				}
+//				PixelScene.shake( 5, 1f );
+//
+//				return true;
+//			}
+//
+//			return false;
+//		}
 	}
 
 	@Override
