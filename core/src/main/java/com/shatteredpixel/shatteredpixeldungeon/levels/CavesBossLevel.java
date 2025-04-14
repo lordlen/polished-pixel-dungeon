@@ -530,8 +530,8 @@ public class CavesBossLevel extends Level {
 	private static short[][] entranceVariants = {
 			entrance1,
 			entrance2,
-			entrance3,
-			entrance4
+			entrance3//,
+			//entrance4
 	};
 
 	private void buildEntrance(){
