@@ -343,6 +343,12 @@ public class DM300 extends Mob {
 		return enemy;
 	}
 
+	public void test() {
+		enemy = Dungeon.hero;
+		target = enemy.pos;
+		state = HUNTING;
+	}
+
 	@Override
 	public void move(int step, boolean travelling) {
 		int oldpos = pos;
@@ -354,7 +360,7 @@ public class DM300 extends Mob {
 
 		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
-		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP /*&& distance(enemy) <= 8*/ && state == HUNTING) {
+		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP /*&& distance(enemy) <= 8*/ && state == HUNTING && HP != HT) {
 
 			//don't gain energy from cells that are energized
 			if (CavesBossLevel.PylonEnergy.volumeAt(pos, CavesBossLevel.PylonEnergy.class) > 0){

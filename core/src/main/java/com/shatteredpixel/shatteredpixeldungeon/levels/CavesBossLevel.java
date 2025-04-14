@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Electricity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM300;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Pylon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RipperDemon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -324,10 +325,15 @@ public class CavesBossLevel extends Level {
 		Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 
 		DM300 boss = new DM300();
-		boss.state = boss.WANDERING;
+		boss.test();
+		//boss.state = boss.WANDERING;
+
+		int dist = -1;
 		do {
 			boss.pos = pointToCell(Random.element(mainArena.getPoints()));
-		} while (!openSpace[boss.pos] || map[boss.pos] == Terrain.EMPTY_SP || Actor.findChar(boss.pos) != null);
+			dist = Dungeon.level.distance(boss.pos, Dungeon.hero.pos);
+		} while (!openSpace[boss.pos] || map[boss.pos] == Terrain.EMPTY_SP || Actor.findChar(boss.pos) != null ||
+				dist > 15 || dist <= 12);
 		GameScene.add( boss );
 
 		Game.runOnRenderThread(new Callback() {
