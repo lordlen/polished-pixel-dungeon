@@ -164,6 +164,22 @@ public class DM300 extends Mob {
 		}
 	}
 
+
+	boolean canReach() {
+		if (enemy == null || !enemy.isAlive()){
+			if (Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
+				return true;
+			} else {
+				return (Dungeon.findStep(this, Dungeon.hero.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
+			}
+		} else {
+			if (Dungeon.level.adjacent(pos, enemy.pos)){
+				return true;
+			} else {
+				return (Dungeon.findStep(this, enemy.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
+			}
+		}
+	}
 	@Override
 	protected boolean act() {
 		if (Dungeon.hero.invisible <= 0){
@@ -695,11 +711,14 @@ public class DM300 extends Mob {
 			return false;
 		}*/
 
-		int dist = Integer.MAX_VALUE;
-		boolean destroy = false;
+		int minDist = Integer.MAX_VALUE;
+		boolean destroy = true;
 
 		for (int i : PathFinder.NEIGHBOURS8){
-			int tempDist = Dungeon.level.distance(pos+i, target);
+			if(Actor.findChar(pos+i) == null && Dungeon.level.passable[pos+i])
+				minDist = Math.min(minDist, Dungeon.level.distance(pos+i, target));
+
+			/*int tempDist = Dungeon.level.distance(pos+i, target);
 
 			if (Actor.findChar(pos+i) == null && Dungeon.level.passable[pos+i] && dist >= tempDist){
 				if(dist > tempDist) {
@@ -708,14 +727,19 @@ public class DM300 extends Mob {
 				}
 
 				if(Dungeon.level.openSpace[pos+i]) destroy=false;
-			}
+			}*/
+		}
+		for (int i : PathFinder.NEIGHBOURS8) {
+			if (Actor.findChar(pos+i) == null && Dungeon.level.passable[pos+i] &&
+				Dungeon.level.openSpace[pos+i] && Dungeon.level.distance(pos+i, target) == minDist)
+				destroy = false;
 		}
 
 		if(POLISHED_cooldown > 0) {
 			POLISHED_cooldown--;
 
 			if(destroy) return false;
-		} else if(state == HUNTING) {
+		} else if(state == HUNTING && destroy || !canReach()) {
 			properties.remove(Property.LARGE);
 		}
 
