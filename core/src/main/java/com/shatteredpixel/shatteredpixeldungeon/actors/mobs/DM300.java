@@ -376,17 +376,17 @@ public class DM300 extends Mob {
 
 		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
-		if (!flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP /*&& distance(enemy) <= 8*/ && state == HUNTING && HP != HT) {
+		if (!supercharged && !flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP /*&& distance(enemy) <= 8*/ && state == HUNTING && HP != HT) {
 
-			//don't gain energy from cells that are energized
+			/*//don't gain energy from cells that are energized
 			if (CavesBossLevel.PylonEnergy.volumeAt(pos, CavesBossLevel.PylonEnergy.class) > 0){
 				return;
-			}
+			}*/
 
 			if (/*Dungeon.level.heroFOV[pos]*/true) {
-				if (buff(Barrier.class) == null) {
+				/*if (buff(Barrier.class) == null) {
 					GLog.w(Messages.get(this, "shield"));
-				}
+				}*/
 				Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
 				sprite.emitter().start(SparkParticle.STATIC, 0.05f, 20);
 				sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(30 + (HT - HP)/10), FloatingText.SHIELDING);
