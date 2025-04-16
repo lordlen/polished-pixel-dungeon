@@ -33,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Electricity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM300;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Pylon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RipperDemon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -59,6 +58,7 @@ import com.watabou.noosa.Tilemap;
 import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.GameMath;
@@ -324,16 +324,23 @@ public class CavesBossLevel extends Level {
 		PixelScene.shake( 3, 0.7f );
 		Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 
-		DM300 boss = new DM300();
-		boss.test();
-		//boss.state = boss.WANDERING;
 
-		int dist = -1;
-		do {
-			boss.pos = pointToCell(Random.element(mainArena.getPoints()));
-			dist = Dungeon.level.distance(boss.pos, Dungeon.hero.pos);
-		} while (!openSpace[boss.pos] || map[boss.pos] == Terrain.EMPTY_SP || Actor.findChar(boss.pos) != null ||
-				dist > 15 || dist <= 12);
+		PathFinder.buildDistanceMap( Dungeon.hero.pos, BArray.not( Dungeon.level.solid, null ), 15 );
+		ArrayList<Integer> candidates = new ArrayList<>();
+		for (Point p : mainArena.getPoints()){
+			int pos = pointToCell(p);
+
+			if (openSpace[pos] && map[pos] != Terrain.EMPTY_SP && Actor.findChar(pos) == null &&
+				PathFinder.distance[pos] >= 13 && PathFinder.distance[pos] <= 15) {
+				candidates.add(pos);
+			}
+		}
+		int placeholder = pointToCell(Random.element(mainArena.getPoints()));
+
+		DM300 boss = new DM300();
+		//12-14 tiles distance on spawn
+		boss.pos = candidates.isEmpty() ? placeholder : Random.element(candidates);
+		boss.bossSpawn();
 		GameScene.add( boss );
 
 		Game.runOnRenderThread(new Callback() {
