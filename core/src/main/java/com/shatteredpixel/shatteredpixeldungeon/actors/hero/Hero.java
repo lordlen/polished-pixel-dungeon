@@ -257,6 +257,9 @@ public class Hero extends Char {
 
 			hero.lvl = newLvl;
 			hero.updateHT(true);
+
+			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+			if(bow != null) bow.Polished_resetCharges();
 		}
 
 		public static boolean noEnemiesLast = false;
