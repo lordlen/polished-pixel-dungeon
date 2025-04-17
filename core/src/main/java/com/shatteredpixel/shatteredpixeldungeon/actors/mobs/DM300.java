@@ -82,7 +82,7 @@ public class DM300 extends Mob {
 	{
 		spriteClass = DM300Sprite.class;
 
-		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 500 : 375;
+		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 480 : 360;
 		EXP = 30;
 		defenseSkill = 15;
 
