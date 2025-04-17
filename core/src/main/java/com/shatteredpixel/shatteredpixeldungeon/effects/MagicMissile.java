@@ -74,6 +74,9 @@ public class MagicMissile extends Emitter {
 	public static final int POISON          = 15;
 	public static final int LIGHT_MISSILE   = 16;
 
+	//POLISHED
+	public static final int TOXIC       	= 31;
+
 	public static final int MAGIC_MISS_CONE = 100;
 	public static final int FROST_CONE      = 101;
 	public static final int FIRE_CONE       = 102;
@@ -201,6 +204,11 @@ public class MagicMissile extends Emitter {
 			case LIGHT_MISSILE:
 				size( 4 );
 				pour( WhiteParticle.YELLOW, 0.01f );
+				break;
+
+			case TOXIC:
+				size( 3 );
+				pour( CorrosionParticle.MISSILE, 0.01f );
 				break;
 
 			case MAGIC_MISS_CONE:

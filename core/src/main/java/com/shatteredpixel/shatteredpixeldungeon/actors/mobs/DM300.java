@@ -159,20 +159,25 @@ public class DM300 extends Mob {
 
 	@Override
 	protected boolean act() {
+		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
+			fieldOfView = new boolean[Dungeon.level.length()];
+		}
+		Dungeon.level.updateFieldOfView( this, fieldOfView );
+
 		if (Dungeon.hero.invisible <= 0) {
-			//pause for 1 turn on vision loss, except on supercharge/last phase
-			if(((supercharged || lastPhase()) /*&& target == pos*/) || state != HUNTING)
+			if(HP < HT) {
+				//pause for 1 turn on vision loss, except on supercharge/last phase
+				if(((supercharged || lastPhase()) /*&& target == pos*/) || state != HUNTING)
+					aggroHero();
+			} else if(canReach() && state != HUNTING) {
 				aggroHero();
+				//state = WANDERING;
+			}
 		}
 
 		if (paralysed > 0){
 			return super.act();
 		}
-
-		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
-			fieldOfView = new boolean[Dungeon.level.length()];
-		}
-		Dungeon.level.updateFieldOfView( this, fieldOfView );
 
 		if (!supercharged){
 			if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
@@ -668,11 +673,22 @@ public class DM300 extends Mob {
 
 			properties.add(Property.LARGE);
 
+			//Make sure DM isn't too aggressive on spawn
+			if(HP == HT) clearEnemy();
+
 			Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 			PixelScene.shake( 5, 1f );
 		}
 	}
 
+	@Override
+	protected boolean cellIsPathable( int cell ){
+		if (HP == HT && !Dungeon.level.openSpace[cell] &&
+			CavesBossLevel.insideEntrance(cell)) {
+			return false;
+		}
+		return super.cellIsPathable(cell);
+	}
 	@Override
 	protected boolean getCloser(int target) {
 		int minDist = Integer.MAX_VALUE;

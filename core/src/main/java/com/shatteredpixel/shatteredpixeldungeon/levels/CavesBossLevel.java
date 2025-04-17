@@ -325,7 +325,13 @@ public class CavesBossLevel extends Level {
 		Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 
 
-		PathFinder.buildDistanceMap( Dungeon.hero.pos, BArray.not( Dungeon.level.solid, null ), 15 );
+		boolean[] pass = BArray.not( Dungeon.level.solid, null );
+		for (int pos = 0; pos < Dungeon.level.length; pos++) {
+			if(!Dungeon.level.openSpace[pos] && insideEntrance(pos))
+				pass[pos] = false;
+		}
+
+		PathFinder.buildDistanceMap( Dungeon.hero.pos, pass, 15 );
 		ArrayList<Integer> candidates = new ArrayList<>();
 		for (Point p : mainArena.getPoints()){
 			int pos = pointToCell(p);
@@ -565,6 +571,10 @@ public class CavesBossLevel extends Level {
 
 		Painter.set(this, entrance, Terrain.ENTRANCE);
 		transitions.add(new LevelTransition(this, entrance, LevelTransition.Type.REGULAR_ENTRANCE));
+	}
+
+	public static boolean insideEntrance(int cell) {
+		return mainArena.shrink(2).inside(Dungeon.level.cellToPoint(cell));
 	}
 
 	private static short[] corner1 = {
