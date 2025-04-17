@@ -174,9 +174,9 @@ public class DM300 extends Mob {
 	}
 	@Override
 	protected boolean act() {
-		if (Dungeon.hero.invisible <= 0){
-			//beckon(Dungeon.hero.pos);
-			//enemy = Dungeon.hero;
+		if (Dungeon.hero.invisible <= 0) {
+			if((supercharged && target == pos) || state != HUNTING) //Buff.Polished.prolongAligned(this, MagicalSight.class, 1f);
+				aggroHero();
 		}
 
 		if (paralysed > 0){
@@ -185,131 +185,90 @@ public class DM300 extends Mob {
 
 		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
 			fieldOfView = new boolean[Dungeon.level.length()];
-			//Dungeon.level.updateFieldOfView( this, fieldOfView );
 		}
 		Dungeon.level.updateFieldOfView( this, fieldOfView );
 
-		//if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
-		//ability logic only triggers if DM is not supercharged
 		if (!supercharged){
 			if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
 
-			//in case DM-300 hasn't been able to act yet
-			/*if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
-				fieldOfView = new boolean[Dungeon.level.length()];
-				Dungeon.level.updateFieldOfView( this, fieldOfView );
-			}*/
-
-			//determine if DM can reach its enemy
-			boolean canReach;
-			if (enemy == null || !enemy.isAlive()){
-				if (Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
-					canReach = true;
-				} else {
-					canReach = (Dungeon.findStep(this, Dungeon.hero.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
-				}
-			} else {
-				if (Dungeon.level.adjacent(pos, enemy.pos)){
-					canReach = true;
-				} else {
-					canReach = (Dungeon.findStep(this, enemy.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
-				}
-			}
-
 			ConeAOE aim = null;
-			if(enemy != null) aim = new ConeAOE(new Ballistica(pos, enemy.pos, Ballistica.WONT_STOP), Float.POSITIVE_INFINITY, 30, Ballistica.STOP_SOLID);
+			if(enemy != null) aim = new ConeAOE(new Ballistica(pos, enemy.pos, Ballistica.WONT_STOP), viewDistance, 30, Ballistica.STOP_SOLID);
 
-			if (state != HUNTING){
-				if (Dungeon.hero.invisible <= 0 && canReach){
-					beckon(Dungeon.hero.pos);
-				}
-			} else if(aim != null && Dungeon.hero.invisible <= 0 &&
-					(fieldOfView[enemy.pos] || aim.cells.contains(enemy.pos))){
-
-				if ((enemy == null || !enemy.isAlive()) && Dungeon.hero.invisible <= 0) {
-					enemy = Dungeon.hero;
-				}
+			if(state == HUNTING && enemy != null && enemy.isAlive() && Dungeon.hero.invisible <= 0 &&
+					(fieldOfView[enemy.pos] || aim.cells.contains(enemy.pos))) {
 
 				//more aggressive ability usage when DM can't reach its target
-				if (enemy != null && enemy.isAlive() && !canReach){
+				if (!canReach() && turnsSinceLastAbility >= MIN_COOLDOWN) {
 
-					//try to fire gas at an enemy we can't reach
-					if (turnsSinceLastAbility >= MIN_COOLDOWN){
-						//use a coneAOE to try and account for trickshotting angles
-						//ConeAOE aim = new ConeAOE(new Ballistica(pos, enemy.pos, Ballistica.WONT_STOP), Float.POSITIVE_INFINITY, 30, Ballistica.STOP_SOLID);
-						if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC)) {
-							lastAbility = GAS;
-							turnsSinceLastAbility = 0;
+					//use a coneAOE to try and account for trickshotting angles
+					if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC)) {
+						lastAbility = GAS;
+						turnsSinceLastAbility = 0;
 
-							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								sprite.zap(enemy.pos);
-								return false;
-							} else {
-								ventGas(enemy);
-								Sample.INSTANCE.play(Assets.Sounds.GAS);
-								return true;
-							}
-						//if we can't gas, or if target is inorganic then drop rocks
-						//unless enemy is already stunned, we don't want to stunlock them
-						} else if (enemy.paralysed <= 0) {
-							lastAbility = ROCKS;
-							turnsSinceLastAbility = 0;
-							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								((DM300Sprite)sprite).slam(enemy.pos);
-								return false;
-							} else {
-								dropRocks(enemy);
-								Sample.INSTANCE.play(Assets.Sounds.ROCKS);
-								return true;
-							}
+						if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+							sprite.zap(enemy.pos);
+							return false;
+						} else {
+							ventGas(enemy);
+							Sample.INSTANCE.play(Assets.Sounds.GAS);
+							return true;
 						}
+					//if we can't gas, or if target is inorganic then drop rocks
+					//unless enemy is already stunned, we don't want to stunlock them
+					} else if (enemy.paralysed <= 0) {
+						lastAbility = ROCKS;
+						turnsSinceLastAbility = 0;
+						if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+							((DM300Sprite)sprite).slam(enemy.pos);
+							return false;
+						} else {
+							dropRocks(enemy);
+							Sample.INSTANCE.play(Assets.Sounds.ROCKS);
+							return true;
+						}
+					}
+				} else if (turnsSinceLastAbility > abilityCooldown) {
 
+					if (lastAbility == NONE) {
+						//50/50 either ability
+						lastAbility = Random.Int(2) == 0 ? GAS : ROCKS;
+					} else if (lastAbility == GAS) {
+						//more likely to use rocks
+						lastAbility = Random.Int(4) == 0 ? GAS : ROCKS;
+					} else {
+						//more likely to use gas
+						lastAbility = Random.Int(4) != 0 ? GAS : ROCKS;
 					}
 
-				} else if (enemy != null && enemy.isAlive() && fieldOfView[enemy.pos]) {
-					if (turnsSinceLastAbility > abilityCooldown) {
+					if (Char.hasProp(enemy, Property.INORGANIC)){
+						lastAbility = ROCKS;
+					}
 
-						if (lastAbility == NONE) {
-							//50/50 either ability
-							lastAbility = Random.Int(2) == 0 ? GAS : ROCKS;
-						} else if (lastAbility == GAS) {
-							//more likely to use rocks
-							lastAbility = Random.Int(4) == 0 ? GAS : ROCKS;
+					//doesn't spend a turn if enemy is at a distance
+					if (Dungeon.level.adjacent(pos, enemy.pos)){
+						spend(TICK);
+					}
+
+					turnsSinceLastAbility = 0;
+					abilityCooldown = Random.NormalIntRange(MIN_COOLDOWN, MAX_COOLDOWN);
+
+					if (lastAbility == GAS) {
+						if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+							sprite.zap(enemy.pos);
+							return false;
 						} else {
-							//more likely to use gas
-							lastAbility = Random.Int(4) != 0 ? GAS : ROCKS;
+							ventGas(enemy);
+							Sample.INSTANCE.play(Assets.Sounds.GAS);
+							return true;
 						}
-
-						if (Char.hasProp(enemy, Property.INORGANIC)){
-							lastAbility = ROCKS;
-						}
-
-						//doesn't spend a turn if enemy is at a distance
-						if (Dungeon.level.adjacent(pos, enemy.pos)){
-							spend(TICK);
-						}
-
-						turnsSinceLastAbility = 0;
-						abilityCooldown = Random.NormalIntRange(MIN_COOLDOWN, MAX_COOLDOWN);
-
-						if (lastAbility == GAS) {
-							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								sprite.zap(enemy.pos);
-								return false;
-							} else {
-								ventGas(enemy);
-								Sample.INSTANCE.play(Assets.Sounds.GAS);
-								return true;
-							}
+					} else {
+						if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+							((DM300Sprite)sprite).slam(enemy.pos);
+							return false;
 						} else {
-							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								((DM300Sprite)sprite).slam(enemy.pos);
-								return false;
-							} else {
-								dropRocks(enemy);
-								Sample.INSTANCE.play(Assets.Sounds.ROCKS);
-								return true;
-							}
+							dropRocks(enemy);
+							Sample.INSTANCE.play(Assets.Sounds.ROCKS);
+							return true;
 						}
 					}
 				}
@@ -320,15 +279,6 @@ public class DM300 extends Mob {
 				yell(Messages.get(this, "supercharged"));
 				chargeAnnounced = true;
 			}
-
-			if (Dungeon.hero.invisible <= 0){
-				//Buff.affect(this, MindVision.class, 3f);
-				//beckon(Dungeon.hero.pos);
-				target=Dungeon.hero.pos;
-				enemy = Dungeon.hero;
-				state = HUNTING;
-			}
-
 		}
 
 		return super.act();
@@ -351,7 +301,7 @@ public class DM300 extends Mob {
 		return enemy;
 	}
 
-	public void bossSpawn() {
+	public void aggroHero() {
 		enemy = Dungeon.hero;
 		target = enemy.pos;
 		state = HUNTING;
@@ -361,19 +311,13 @@ public class DM300 extends Mob {
 	public void move(int step, boolean travelling) {
 		int oldpos = pos;
 		super.move(step, travelling);
-		int newpos = pos;
 
-		destroyWalls(oldpos, newpos);
+		destroyWalls(oldpos, pos);
 
 
 		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
-		if (!supercharged && !flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP /*&& distance(enemy) <= 8*/ && state == HUNTING && HP != HT) {
-
-			/*//don't gain energy from cells that are energized
-			if (CavesBossLevel.PylonEnergy.volumeAt(pos, CavesBossLevel.PylonEnergy.class) > 0){
-				return;
-			}*/
+		if (!supercharged && !flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP && state == HUNTING && HP != HT) {
 
 			if (/*Dungeon.level.heroFOV[pos]*/true) {
 				/*if (buff(Barrier.class) == null) {
@@ -384,7 +328,6 @@ public class DM300 extends Mob {
 				sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(30 + (HT - HP)/10), FloatingText.SHIELDING);
 			}
 
-			//Buff.affect(this, Barrier.class).setShield( 30 + (HT - HP)/10);
 			Actor.add(new Actor(){
 
 				{
@@ -698,28 +641,12 @@ public class DM300 extends Mob {
 
 	@Override
 	protected boolean getCloser(int target) {
-		/*if(POLISHED_cooldown > 0) {
-			POLISHED_cooldown--;
-			return false;
-		}*/
-
 		int minDist = Integer.MAX_VALUE;
 		boolean destroy = true;
 
 		for (int i : PathFinder.NEIGHBOURS8){
 			if(Actor.findChar(pos+i) == null && Dungeon.level.passable[pos+i])
 				minDist = Math.min(minDist, Dungeon.level.distance(pos+i, target));
-
-			/*int tempDist = Dungeon.level.distance(pos+i, target);
-
-			if (Actor.findChar(pos+i) == null && Dungeon.level.passable[pos+i] && dist >= tempDist){
-				if(dist > tempDist) {
-					dist = tempDist;
-					destroy = true;
-				}
-
-				if(Dungeon.level.openSpace[pos+i]) destroy=false;
-			}*/
 		}
 		for (int i : PathFinder.NEIGHBOURS8) {
 			if (Actor.findChar(pos+i) == null && Dungeon.level.passable[pos+i] &&
@@ -730,15 +657,12 @@ public class DM300 extends Mob {
 		if(POLISHED_cooldown > 0) {
 			POLISHED_cooldown--;
 
-			if(destroy) return false;
-		} else if(state == HUNTING && destroy || !canReach()) {
+			if(destroy) return true;
+		} else if(state == HUNTING && (destroy || !canReach())) {
 			properties.remove(Property.LARGE);
 		}
 
-		//if(state == WANDERING) properties.add(Property.LARGE);
-
 		boolean temp = super.getCloser(target);
-
 		properties.add(Property.LARGE);
 		return temp;
 

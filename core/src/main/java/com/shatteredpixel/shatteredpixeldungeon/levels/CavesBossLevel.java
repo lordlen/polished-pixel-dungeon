@@ -340,7 +340,7 @@ public class CavesBossLevel extends Level {
 		DM300 boss = new DM300();
 		//12-14 tiles distance on spawn
 		boss.pos = candidates.isEmpty() ? placeholder : Random.element(candidates);
-		boss.bossSpawn();
+		boss.aggroHero();
 		GameScene.add( boss );
 
 		Game.runOnRenderThread(new Callback() {
