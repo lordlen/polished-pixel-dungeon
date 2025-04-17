@@ -165,7 +165,7 @@ public class DM300 extends Mob {
 		Dungeon.level.updateFieldOfView( this, fieldOfView );
 
 		if (Dungeon.hero.invisible <= 0) {
-			if(HP < HT) {
+			if(fightStarted()) {
 				//pause for 1 turn on vision loss, except on supercharge/last phase
 				if(((supercharged || lastPhase()) /*&& target == pos*/) || state != HUNTING)
 					aggroHero();
@@ -181,7 +181,8 @@ public class DM300 extends Mob {
 			return super.act();
 		}
 
-		if (!supercharged){
+		//no ability usage on supercharge/spawn
+		if (!supercharged && !fightStarted()){
 			if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
 
 			ConeAOE aim = null;
@@ -261,7 +262,7 @@ public class DM300 extends Mob {
 					}
 				}
 			}
-		} else {
+		} else if(supercharged) {
 
 			if (!chargeAnnounced){
 				yell(Messages.get(this, "supercharged"));
@@ -356,7 +357,7 @@ public class DM300 extends Mob {
 	@Override
 	public void notice() {
 		super.notice();
-		if (!BossHealthBar.isAssigned()) {
+		/*if (!BossHealthBar.isAssigned()) {
 			BossHealthBar.assignBoss(this);
 			turnsSinceLastAbility = 0;
 			yell(Messages.get(this, "notice"));
@@ -365,7 +366,7 @@ public class DM300 extends Mob {
 					((DriedRose.GhostHero) ch).sayBoss();
 				}
 			}
-		}
+		}*/
 	}
 
 	void gasZap(Char target) {
@@ -496,8 +497,19 @@ public class DM300 extends Mob {
 
 	@Override
 	public void damage(int dmg, Object src) {
-		if (!BossHealthBar.isAssigned()){
+		/*if (!BossHealthBar.isAssigned()){
 			notice();
+		}*/
+
+		if (!BossHealthBar.isAssigned()) {
+			BossHealthBar.assignBoss(this);
+			turnsSinceLastAbility = 0;
+			yell(Messages.get(this, "notice"));
+			for (Char ch : Actor.chars()){
+				if (ch instanceof DriedRose.GhostHero){
+					((DriedRose.GhostHero) ch).sayBoss();
+				}
+			}
 		}
 
 		int preHP = HP;
@@ -529,6 +541,9 @@ public class DM300 extends Mob {
 
 	}
 
+	boolean fightStarted() {
+		return HP < HT;
+	}
 	public int totalPylonsToActivate(){
 		return Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 3 : 2;
 	}
@@ -676,7 +691,7 @@ public class DM300 extends Mob {
 			properties.add(Property.LARGE);
 
 			//Make sure DM isn't too aggressive on spawn
-			if(HP == HT) {
+			if(!fightStarted()) {
 				clearEnemy();
 
 				Actor.addDelayed(new Actor() {
@@ -701,18 +716,20 @@ public class DM300 extends Mob {
 
 	@Override
 	public boolean[] modifyPassable( boolean[] pass ){
-		if(HP < HT) return pass;
-
-		for (int pos = 0; pos < Dungeon.level.length(); pos++) {
-			if(!Dungeon.level.openSpace[pos] && CavesBossLevel.insideEntrance(pos))
-				pass[pos] = false;
+		if(fightStarted() || (enemy != null && CavesBossLevel.insideEntrance(enemy.pos))) return pass;
+		else {
+			for (int pos = 0; pos < Dungeon.level.length(); pos++) {
+				if(!Dungeon.level.openSpace[pos] && CavesBossLevel.insideEntrance(pos))
+					pass[pos] = false;
+			}
+			return pass;
 		}
-		return pass;
 	}
 	@Override
 	protected boolean cellIsPathable( int cell ){
-		if (HP == HT && !Dungeon.level.openSpace[cell] &&
-			CavesBossLevel.insideEntrance(cell)) {
+		if (!fightStarted() && !Dungeon.level.openSpace[cell] &&
+			CavesBossLevel.insideEntrance(cell) &&
+			(enemy == null || !CavesBossLevel.insideEntrance(enemy.pos))) {
 			return false;
 		}
 		return super.cellIsPathable(cell);
