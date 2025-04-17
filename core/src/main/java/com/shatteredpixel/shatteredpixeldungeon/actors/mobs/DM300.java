@@ -796,7 +796,7 @@ public class DM300 extends Mob {
 
 		@Override
 		public void affectChar(Char ch) {
-			if (!(ch instanceof DM300)){
+			if (!(ch instanceof DM300) && !ch.isImmune(this.getClass())){
 				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 4 : 3);
 				if (ch == Dungeon.hero) {
 					Statistics.bossScores[2] -= 100;
