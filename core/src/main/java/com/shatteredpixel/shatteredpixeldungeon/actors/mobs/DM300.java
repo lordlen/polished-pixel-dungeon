@@ -160,7 +160,8 @@ public class DM300 extends Mob {
 	@Override
 	protected boolean act() {
 		if (Dungeon.hero.invisible <= 0) {
-			if((supercharged && target == pos) || state != HUNTING)
+			//pause for 1 turn on vision loss, except on supercharge/last phase
+			if(((supercharged || lastPhase()) /*&& target == pos*/) || state != HUNTING)
 				aggroHero();
 		}
 
@@ -523,6 +524,10 @@ public class DM300 extends Mob {
 
 	public int totalPylonsToActivate(){
 		return Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 3 : 2;
+	}
+	boolean lastPhase() {
+		int threshold = HT / (totalPylonsToActivate()+1);
+		return HP <= threshold;
 	}
 
 	@Override
