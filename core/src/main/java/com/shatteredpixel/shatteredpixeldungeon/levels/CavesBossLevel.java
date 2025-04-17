@@ -325,9 +325,9 @@ public class CavesBossLevel extends Level {
 		Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 
 
-		boolean[] pass = BArray.not( Dungeon.level.solid, null );
-		for (int pos = 0; pos < Dungeon.level.length; pos++) {
-			if(!Dungeon.level.openSpace[pos] && insideEntrance(pos))
+		boolean[] pass = BArray.not( solid, null );
+		for (int pos = 0; pos < length; pos++) {
+			if(!openSpace[pos] && insideEntrance(pos))
 				pass[pos] = false;
 		}
 

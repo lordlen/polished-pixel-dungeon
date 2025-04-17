@@ -169,6 +169,8 @@ public class DM300 extends Mob {
 				//pause for 1 turn on vision loss, except on supercharge/last phase
 				if(((supercharged || lastPhase()) /*&& target == pos*/) || state != HUNTING)
 					aggroHero();
+
+			//at start of the fight, only aggro on the open
 			} else if(canReach() && state != HUNTING) {
 				aggroHero();
 				//state = WANDERING;
@@ -674,13 +676,39 @@ public class DM300 extends Mob {
 			properties.add(Property.LARGE);
 
 			//Make sure DM isn't too aggressive on spawn
-			if(HP == HT) clearEnemy();
+			if(HP == HT) {
+				clearEnemy();
+
+				Actor.addDelayed(new Actor() {
+					{
+						actPriority = curActorPriority()+1;
+					}
+
+					@Override
+					protected boolean act() {
+						if(sprite != null) sprite.showLost();
+						Actor.remove(this);
+
+						return true;
+					}
+				}, cooldown());
+			}
 
 			Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 			PixelScene.shake( 5, 1f );
 		}
 	}
 
+	@Override
+	public boolean[] modifyPassable( boolean[] pass ){
+		if(HP < HT) return pass;
+
+		for (int pos = 0; pos < Dungeon.level.length(); pos++) {
+			if(!Dungeon.level.openSpace[pos] && CavesBossLevel.insideEntrance(pos))
+				pass[pos] = false;
+		}
+		return pass;
+	}
 	@Override
 	protected boolean cellIsPathable( int cell ){
 		if (HP == HT && !Dungeon.level.openSpace[cell] &&
