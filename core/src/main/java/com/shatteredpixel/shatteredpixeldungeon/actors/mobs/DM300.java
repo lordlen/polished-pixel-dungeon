@@ -172,6 +172,17 @@ public class DM300 extends Mob {
 			}
 		}
 	}
+
+	@Override
+	public synchronized boolean remove( Buff buff ) {
+		boolean remove = super.remove(buff);
+
+		if(remove && buff instanceof Adrenaline && !supercharged)
+			((DM300Sprite)sprite).updateChargeState(false);
+
+		return remove;
+	}
+
 	@Override
 	protected boolean act() {
 		if (Dungeon.hero.invisible <= 0) {
@@ -320,12 +331,10 @@ public class DM300 extends Mob {
 		if (!supercharged && !flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP && state == HUNTING && HP != HT) {
 
 			if (/*Dungeon.level.heroFOV[pos]*/true) {
-				/*if (buff(Barrier.class) == null) {
-					GLog.w(Messages.get(this, "shield"));
-				}*/
+				GLog.w(Messages.get(this, "wires"));
 				Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
 				sprite.emitter().start(SparkParticle.STATIC, 0.05f, 20);
-				sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(30 + (HT - HP)/10), FloatingText.SHIELDING);
+				//sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(30 + (HT - HP)/10), FloatingText.SHIELDING);
 			}
 
 			Actor.add(new Actor(){
@@ -337,6 +346,8 @@ public class DM300 extends Mob {
 				@Override
 				protected boolean act() {
 					Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3.5f);
+					((DM300Sprite)sprite).updateChargeState(true);
+					((DM300Sprite)sprite).charge();
 
 					Actor.remove(this);
 					return true;
