@@ -186,7 +186,7 @@ public class DM300 extends Mob {
 	@Override
 	protected boolean act() {
 		if (Dungeon.hero.invisible <= 0) {
-			if((supercharged && target == pos) || state != HUNTING) //Buff.Polished.prolongAligned(this, MagicalSight.class, 1f);
+			if((supercharged && target == pos) || state != HUNTING)
 				aggroHero();
 		}
 
@@ -253,11 +253,6 @@ public class DM300 extends Mob {
 
 					if (Char.hasProp(enemy, Property.INORGANIC)){
 						lastAbility = ROCKS;
-					}
-
-					//doesn't spend a turn if enemy is at a distance
-					if (Dungeon.level.adjacent(pos, enemy.pos)){
-						spend(TICK);
 					}
 
 					turnsSinceLastAbility = 0;
@@ -383,6 +378,10 @@ public class DM300 extends Mob {
 	}
 
 	public void ventGas( Char target ){
+		if (Dungeon.level.adjacent(pos, enemy.pos)){
+			spend(TICK);
+		}
+
 		Dungeon.hero.interrupt();
 
 		int gasVented = 0;
@@ -415,11 +414,15 @@ public class DM300 extends Mob {
 
 	public void dropRocks( Char target ) {
 
+		if (Dungeon.level.distance(pos, enemy.pos) <= 2){
+			spend(TICK);
+		}
+
 		Dungeon.hero.interrupt();
 		final int rockCenter;
 
 		//knock back 2 tiles if adjacent
-		if (Dungeon.level.adjacent(pos, target.pos)){
+		/*if (Dungeon.level.adjacent(pos, target.pos)){
 			int oppositeAdjacent = target.pos + (target.pos - pos);
 			Ballistica trajectory = new Ballistica(target.pos, oppositeAdjacent, Ballistica.MAGIC_BOLT);
 			WandOfBlastWave.throwChar(target, trajectory, 2, false, false, this);
@@ -429,7 +432,10 @@ public class DM300 extends Mob {
 			rockCenter = trajectory.path.get(Math.min(trajectory.dist, 2));
 
 		//knock back 1 tile if there's 1 tile of space
-		} else if (fieldOfView[target.pos] && Dungeon.level.distance(pos, target.pos) == 2) {
+		} else if (fieldOfView[target.pos] && Dungeon.level.distance(pos, target.pos) == 2)*/
+
+		//knock back if adjacent
+		if (fieldOfView[target.pos] && Dungeon.level.adjacent(pos, target.pos)) {
 			int oppositeAdjacent = target.pos + (target.pos - pos);
 			Ballistica trajectory = new Ballistica(target.pos, oppositeAdjacent, Ballistica.MAGIC_BOLT);
 			WandOfBlastWave.throwChar(target, trajectory, 1, false, false, this);
