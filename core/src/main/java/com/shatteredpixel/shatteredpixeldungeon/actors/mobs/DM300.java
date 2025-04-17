@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.CorrosiveGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -156,33 +157,6 @@ public class DM300 extends Mob {
 		}
 	}
 
-
-	boolean canReach() {
-		if (enemy == null || !enemy.isAlive()){
-			if (Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
-				return true;
-			} else {
-				return (Dungeon.findStep(this, Dungeon.hero.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
-			}
-		} else {
-			if (Dungeon.level.adjacent(pos, enemy.pos)){
-				return true;
-			} else {
-				return (Dungeon.findStep(this, enemy.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
-			}
-		}
-	}
-
-	@Override
-	public synchronized boolean remove( Buff buff ) {
-		boolean remove = super.remove(buff);
-
-		if(remove && buff instanceof Adrenaline && !supercharged)
-			((DM300Sprite)sprite).updateChargeState(false);
-
-		return remove;
-	}
-
 	@Override
 	protected boolean act() {
 		if (Dungeon.hero.invisible <= 0) {
@@ -217,7 +191,7 @@ public class DM300 extends Mob {
 						turnsSinceLastAbility = 0;
 
 						if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-							sprite.zap(enemy.pos);
+							gasZap(enemy);
 							return false;
 						} else {
 							ventGas(enemy);
@@ -260,7 +234,7 @@ public class DM300 extends Mob {
 
 					if (lastAbility == GAS) {
 						if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-							sprite.zap(enemy.pos);
+							gasZap(enemy);
 							return false;
 						} else {
 							ventGas(enemy);
@@ -306,11 +280,25 @@ public class DM300 extends Mob {
 		}
 		return enemy;
 	}
-
 	public void aggroHero() {
 		enemy = Dungeon.hero;
 		target = enemy.pos;
 		state = HUNTING;
+	}
+	boolean canReach() {
+		if (enemy == null || !enemy.isAlive()){
+			if (Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
+				return true;
+			} else {
+				return (Dungeon.findStep(this, Dungeon.hero.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
+			}
+		} else {
+			if (Dungeon.level.adjacent(pos, enemy.pos)){
+				return true;
+			} else {
+				return (Dungeon.findStep(this, enemy.pos, Dungeon.level.openSpace, fieldOfView, true) != -1);
+			}
+		}
 	}
 
 	@Override
@@ -372,25 +360,39 @@ public class DM300 extends Mob {
 		}
 	}
 
+	void gasZap(Char target) {
+		Ballistica trajectory = new Ballistica(pos, target.pos, Ballistica.STOP_TARGET);
+		int cell = trajectory.path.get(trajectory.dist+1);
+		if(Dungeon.level.solid[cell]) cell = trajectory.collisionPos;
+
+		sprite.zap(cell);
+	}
 	public void onZapComplete(){
 		ventGas(enemy);
 		next();
 	}
 
 	public void ventGas( Char target ){
-		if (Dungeon.level.adjacent(pos, enemy.pos)){
+		if (Dungeon.level.adjacent(pos, target.pos)){
 			spend(TICK);
 		}
-
 		Dungeon.hero.interrupt();
 
-		int gasVented = 0;
-
-		Ballistica trajectory = new Ballistica(pos, target.pos, Ballistica.STOP_TARGET);
-
+		//int gasVented = 0;
 		float gasMulti = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 1.5f : 1;
 
-		for (int i : trajectory.subPath(0, trajectory.dist)){
+		Ballistica trajectory = new Ballistica(pos, target.pos, Ballistica.STOP_TARGET);
+		int cell = trajectory.path.get(trajectory.dist+1);
+		if(Dungeon.level.solid[cell]) cell = trajectory.collisionPos;
+
+		GameScene.add(Blob.seed(cell, Math.round(100*gasMulti), ToxicGas.class));
+		for (int i : PathFinder.NEIGHBOURS4){
+			if (!Dungeon.level.solid[cell+i]) {
+				GameScene.add(Blob.seed(cell + i, Math.round(30*gasMulti), ToxicGas.class));
+			}
+		}
+
+		/*for (int i : trajectory.subPath(0, trajectory.dist)){
 			GameScene.add(Blob.seed(i, Math.round(20*gasMulti), ToxicGas.class));
 			gasVented += Math.round(20*gasMulti);
 		}
@@ -402,8 +404,8 @@ public class DM300 extends Mob {
 			for (int i : PathFinder.NEIGHBOURS8){
 				GameScene.add(Blob.seed(pos+i, toVentAround, ToxicGas.class));
 			}
+		}*/
 
-		}
 
 	}
 
@@ -575,6 +577,16 @@ public class DM300 extends Mob {
 				}
 			});
 		}
+	}
+
+	@Override
+	public synchronized boolean remove( Buff buff ) {
+		boolean remove = super.remove(buff);
+
+		if(remove && buff instanceof Adrenaline && !supercharged)
+			((DM300Sprite)sprite).updateChargeState(false);
+
+		return remove;
 	}
 
 	@Override
