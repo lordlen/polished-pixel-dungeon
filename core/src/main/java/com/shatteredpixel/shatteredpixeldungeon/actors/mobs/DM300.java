@@ -182,7 +182,7 @@ public class DM300 extends Mob {
 		}
 
 		//no ability usage on supercharge/spawn
-		if (!supercharged && !fightStarted()){
+		if (!supercharged && fightStarted()){
 			if (turnsSinceLastAbility >= 0) turnsSinceLastAbility++;
 
 			ConeAOE aim = null;

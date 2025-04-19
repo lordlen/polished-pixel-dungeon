@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.RainbowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ToxicParticle;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
@@ -208,7 +209,7 @@ public class MagicMissile extends Emitter {
 
 			case TOXIC:
 				size( 3 );
-				pour( CorrosionParticle.MISSILE, 0.01f );
+				pour( ToxicParticle.MISSILE, 0.03f );
 				break;
 
 			case MAGIC_MISS_CONE:
