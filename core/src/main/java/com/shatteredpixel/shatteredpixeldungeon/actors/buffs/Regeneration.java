@@ -53,12 +53,6 @@ public class Regeneration extends Buff {
 				return true;
 			}
 
-			if(POLISHED_delay > 0) {
-				POLISHED_delay--;
-				spend(TICK);
-				return true;
-			}
-
 			//if other trinkets ever get buffs like this should probably make the buff attaching
 			// behaviour more like wands/rings/artifacts
 			if (ChaoticCenser.averageTurnsUntilGas() != -1){
