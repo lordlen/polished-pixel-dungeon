@@ -60,10 +60,6 @@ public class TrinketCatalyst extends Item {
 		unique = true;
 	}
 
-	public int energyVal() {
-		return 6;
-	}
-
 	@Override
 	public int energyVal() {
 		return 6;
