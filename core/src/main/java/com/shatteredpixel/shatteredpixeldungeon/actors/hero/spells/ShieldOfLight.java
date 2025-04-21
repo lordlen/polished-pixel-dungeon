@@ -40,8 +40,14 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Random;
 
 public class ShieldOfLight extends TargetedClericSpell {
+
+	public static int drRoll() {
+		int min = 1 + Dungeon.hero.pointsInTalent(Talent.SHIELD_OF_LIGHT);
+		return Random.NormalIntRange(min, 2*min);
+	}
 
 	public static ShieldOfLight INSTANCE = new ShieldOfLight();
 

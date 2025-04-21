@@ -31,10 +31,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PrismaticGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BodyForm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
@@ -196,9 +198,17 @@ public class PrismaticImage extends NPC {
 	
 	@Override
 	public int defenseProc(Char enemy, int damage) {
-		if (hero != null && hero.belongings.armor() != null){
-			damage = hero.belongings.armor().proc( enemy, this, damage );
+		if (hero != null) {
+			if(hero.belongings.armor() != null) {
+				damage = hero.belongings.armor().proc( enemy, this, damage );
+			} else {
+				if (hero.buff(BodyForm.BodyFormBuff.class) != null
+					&& hero.buff(BodyForm.BodyFormBuff.class).glyph() != null){
+					damage = hero.buff(BodyForm.BodyFormBuff.class).glyph().proc(new ClothArmor(), enemy, this, damage);
+				}
+			}
 		}
+
 		return super.defenseProc(enemy, damage);
 	}
 

@@ -21,13 +21,17 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments;
 
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite.Glowing;
+import com.watabou.utils.Random;
+import com.watabou.utils.Reflection;
 
 public class Grim extends Weapon.Enchantment {
 	
@@ -57,6 +61,30 @@ public class Grim extends Weapon.Enchantment {
 		}
 
 		return damage;
+	}
+
+	public static int execute(Char enemy, int dmg) {
+		GrimTracker tracker = enemy.buff(GrimTracker.class);
+
+		float finalChance = tracker.maxChance;
+		finalChance *= (float)Math.pow( (float)((enemy.HT - enemy.HP) / enemy.HT), 2);
+
+		int extraDmg = 0;
+		if (Random.Float() < finalChance && enemy.HP > 0) {
+			boolean isBoss = enemy.properties().contains(Char.Property.BOSS);
+
+			extraDmg = isBoss ? 2*dmg : Math.round(enemy.HP * enemy.resist(Grim.class));
+			enemy.hurt(extraDmg, Reflection.newInstance(Grim.class));
+
+			enemy.sprite.emitter().burst( ShadowParticle.UP, 5 );
+			if (!enemy.isAlive() && tracker.qualifiesForBadge){
+				Badges.validateGrimWeapon();
+			}
+
+			tracker.detach();
+		}
+
+		return extraDmg;
 	}
 	
 	@Override

@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.AuraOfProtect
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BodyForm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.LifeLinkSpell;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
@@ -445,42 +446,45 @@ public class Armor extends EquipableItem {
 	public int proc( Char attacker, Char defender, int damage ) {
 
 		if (defender.buff(MagicImmune.class) == null) {
+
 			Glyph trinityGlyph = null;
 			if (Dungeon.hero.buff(BodyForm.BodyFormBuff.class) != null){
 				trinityGlyph = Dungeon.hero.buff(BodyForm.BodyFormBuff.class).glyph();
+
 				if (glyph != null && trinityGlyph != null && trinityGlyph.getClass() == glyph.getClass()){
 					trinityGlyph = null;
 				}
 			}
 
-			if (defender instanceof Hero && isEquipped((Hero) defender)
-					&& defender.buff(HolyWard.HolyArmBuff.class) != null){
-				if (glyph != null &&
-						(((Hero) defender).subClass == HeroSubClass.PALADIN || hasCurseGlyph())){
+			if (trinityGlyph != null){
+				damage = trinityGlyph.proc( this, attacker, defender, damage );
+			}
+
+
+			boolean heroRelated =
+					defender instanceof Hero || defender instanceof PrismaticImage
+					|| AuraOfProtection.AuraBuff.proc(defender);
+			boolean holyWard =
+					defender.buff(HolyWard.HolyArmBuff.class) != null
+					|| (heroRelated && Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null);
+
+			if (holyWard) {
+				//Paladin gets to proc both glyph + holy ward
+				if( ( glyph != null && Dungeon.hero.subClass == HeroSubClass.PALADIN && heroRelated )
+					|| hasCurseGlyph() )
+				{
 					damage = glyph.proc( this, attacker, defender, damage );
 				}
-				if (trinityGlyph != null){
-					damage = trinityGlyph.proc( this, attacker, defender, damage );
-				}
-				int blocking = ((Hero) defender).subClass == HeroSubClass.PALADIN ? 3 : 1;
+
+				int blocking = heroRelated && Dungeon.hero.subClass == HeroSubClass.PALADIN ? 3 : 1;
 				damage -= Math.round(blocking * Glyph.genericProcChanceMultiplier(defender));
 
 			} else {
 				if (glyph != null) {
 					damage = glyph.proc(this, attacker, defender, damage);
 				}
-				if (trinityGlyph != null){
-					damage = trinityGlyph.proc( this, attacker, defender, damage );
-				}
-				//so that this effect procs for allies using this armor via aura of protection
-				if (defender.alignment == Dungeon.hero.alignment
-						&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
-						&& (Dungeon.level.distance(defender.pos, Dungeon.hero.pos) <= 2 || defender.buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)
-						&& Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null) {
-					int blocking = Dungeon.hero.subClass == HeroSubClass.PALADIN ? 3 : 1;
-					damage -= Math.round(blocking * Glyph.genericProcChanceMultiplier(defender));
-				}
 			}
+
 			damage = Math.max(damage, 0);
 		}
 		

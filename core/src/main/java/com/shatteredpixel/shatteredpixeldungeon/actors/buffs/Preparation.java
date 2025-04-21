@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Brute;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -161,6 +163,26 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 
 	public boolean canKO( Char defender ){
 		return !defender.isInvulnerable(target.getClass()) && AttackLevel.getLvl(turnsInvis).canKO(defender);
+	}
+
+	public void proc(Char enemy) {
+		if (target != null && enemy.alignment != target.alignment && canKO(enemy)){
+			enemy.HP = 0;
+			if (enemy.buff(Brute.BruteRage.class) != null){
+				enemy.buff(Brute.BruteRage.class).detach();
+			}
+
+			if (!enemy.isAlive()) {
+				enemy.die(this);
+			} else {
+				//helps with triggering any on-damage effects that need to activate
+				enemy.damage(-1, this);
+				DeathMark.processFearTheReaper(enemy);
+			}
+			if (enemy.sprite != null) {
+				enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
+			}
+		}
 	}
 	
 	@Override

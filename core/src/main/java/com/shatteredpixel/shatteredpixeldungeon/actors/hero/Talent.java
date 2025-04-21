@@ -44,8 +44,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ScrollEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WandEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.DivineSense;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.RecallInscription;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Brute;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
@@ -387,6 +389,38 @@ public enum Talent {
 	}
 	public static class CombinedLethalityAbilityTracker extends FlavourBuff{
 		public MeleeWeapon weapon;
+
+		public void proc(Char enemy) {
+			if(!(target instanceof Hero)) return;
+			Hero hero = (Hero)target;
+
+			if (hero.belongings.attackingWeapon() instanceof MeleeWeapon && weapon != hero.belongings.attackingWeapon()){
+
+				if ( enemy.isAlive() && enemy.alignment != hero.alignment &&
+					 !Char.hasProp(enemy, Char.Property.BOSS) && !Char.hasProp(enemy, Char.Property.MINIBOSS) &&
+					 (enemy.HP / (float)enemy.HT) <= 0.4f * hero.pointsInTalent(Talent.COMBINED_LETHALITY)/3f) {
+
+					enemy.HP = 0;
+					if (enemy.buff(Brute.BruteRage.class) != null){
+						enemy.buff(Brute.BruteRage.class).detach();
+					}
+
+					if (!enemy.isAlive()) {
+						enemy.die(this);
+					} else {
+						//helps with triggering any on-damage effects that need to activate
+						enemy.damage(-1, this);
+						DeathMark.processFearTheReaper(enemy);
+					}
+
+					if (enemy.sprite != null) {
+						enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Talent.CombinedLethalityAbilityTracker.class, "executed"));
+					}
+				}
+
+				detach();
+			}
+		}
 	};
 	public static class CombinedEnergyAbilityTracker extends FlavourBuff{
 		public boolean monkAbilused = false;

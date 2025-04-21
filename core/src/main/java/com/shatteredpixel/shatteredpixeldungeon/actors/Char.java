@@ -89,7 +89,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BeamingRay;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.GuidingLight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.LifeLinkSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ShieldOfLight;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Brute;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalSpire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DwarfKing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
@@ -101,7 +100,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Bulk;
@@ -132,7 +130,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazin
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sickle;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
@@ -364,264 +361,10 @@ public abstract class Char extends Actor {
 		}
 	}
 
-	final public boolean attack( Char enemy ){
-		return attack(enemy, 1f, 0f, 1f);
-	}
-	
-	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
-
-		if (enemy == null) return false;
-		
-		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
-
-		if (enemy.isInvulnerable(getClass())) {
-
-			if (visibleFight) {
-				enemy.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "invulnerable") );
-
-				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1f, Random.Float(0.96f, 1.05f));
-			}
-
-			return false;
-
-		} else if (hit( this, enemy, accMulti, false )) {
-			
-			int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
-			
-			if (this instanceof Hero){
-				Hero h = (Hero)this;
-				if (h.belongings.attackingWeapon() instanceof MissileWeapon
-						&& h.subClass == HeroSubClass.SNIPER
-						&& !Dungeon.level.adjacent(h.pos, enemy.pos)){
-					dr = 0;
-				}
-
-				if (h.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
-					dr = 0;
-				}
-			}
-
-			//we use a float here briefly so that we don't have to constantly round while
-			// potentially applying various multiplier effects
-			float dmg;
-			Preparation prep = buff(Preparation.class);
-			if (prep != null){
-				dmg = prep.damageRoll(this);
-				if (this == Dungeon.hero && Dungeon.hero.hasTalent(Talent.BOUNTY_HUNTER)) {
-					Buff.affect(Dungeon.hero, Talent.BountyHunterTracker.class, 0.0f);
-				}
-			} else {
-				dmg = damageRoll();
-			}
-
-			dmg = dmg*dmgMulti;
-
-			//flat damage bonus is affected by multipliers
-			dmg += dmgBonus;
-
-			if (enemy.buff(GuidingLight.Illuminated.class) != null){
-				enemy.buff(GuidingLight.Illuminated.class).detach();
-				if (this == Dungeon.hero && Dungeon.hero.hasTalent(Talent.SEARING_LIGHT)){
-					dmg += 2 + 2*Dungeon.hero.pointsInTalent(Talent.SEARING_LIGHT);
-				}
-				if (this != Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.PRIEST){
-					enemy.damage(Dungeon.hero.lvl, GuidingLight.INSTANCE);
-				}
-			}
-
-			Berserk berserk = buff(Berserk.class);
-			if (berserk != null) dmg = berserk.damageFactor(dmg);
-
-			if (buff( Fury.class ) != null) {
-				dmg *= 1.5f;
-			}
-
-			if (buff( PowerOfMany.PowerBuff.class) != null){
-				if (buff( BeamingRay.BeamingRayBoost.class) != null
-					&& buff( BeamingRay.BeamingRayBoost.class).object == enemy.id()){
-					dmg *= 1.3f + 0.05f*Dungeon.hero.pointsInTalent(Talent.BEAMING_RAY);
-				} else {
-					dmg *= 1.25f;
-				}
-			}
-
-			for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-				dmg *= buff.meleeDamageFactor(Dungeon.level.adjacent(this.pos, enemy.pos));
-			}
-
-			dmg *= AscensionChallenge.statModifier(this);
-
-			//friendly endure
-			Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-			if (endure != null) dmg = endure.damageFactor(dmg);
-
-			//enemy endure
-			endure = enemy.buff(Endure.EndureTracker.class);
-			if (endure != null){
-				dmg = endure.adjustDamageTaken(dmg);
-			}
-
-			if (enemy.buff(ScrollOfChallenge.ChallengeArena.class) != null){
-				dmg *= 0.67f;
-			}
-
-			if (Dungeon.hero.alignment == enemy.alignment
-					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
-					&& (Dungeon.level.distance(enemy.pos, Dungeon.hero.pos) <= 2 || enemy.buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)){
-				dmg *= 0.925f - 0.075f*Dungeon.hero.pointsInTalent(Talent.AURA_OF_PROTECTION);
-			}
-
-			if (enemy.buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				dmg *= 0.2f;
-			}
-
-			//POLISHED: do we let them stack?
-			if ( buff(Weakness.class) != null ){
-				dmg *= 0.67f;
-			} else if(buff(Brittle.class) != null) {
-				dmg *= 0.75f;
-			}
-
-			//characters influenced by aggression deal 1/2 damage to bosses
-			if ( enemy.buff(StoneOfAggression.Aggression.class) != null
-					&& enemy.alignment == alignment
-					&& (Char.hasProp(enemy, Property.BOSS) || Char.hasProp(enemy, Property.MINIBOSS))){
-				dmg *= 0.5f;
-				//yog-dzewa specifically takes 1/4 damage
-				if (enemy instanceof YogDzewa){
-					dmg *= 0.5f;
-				}
-			}
-			
-			int effectiveDamage = enemy.defenseProc( this, Math.round(dmg) );
-			//do not trigger on-hit logic if defenseProc returned a negative value
-			if (effectiveDamage >= 0) {
-				effectiveDamage = Math.max(effectiveDamage - dr, 0);
-
-				if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
-					effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
-					enemy.buff(Viscosity.ViscosityTracker.class).detach();
-				}
-
-				//vulnerable specifically applies after armor reductions
-				//POLISHED: do we let them stack?
-				if (enemy.buff(Vulnerable.class) != null) {
-					effectiveDamage *= 1.33f;
-				} else if(enemy.buff(Brittle.class) != null) {
-					effectiveDamage *= 1.25f;
-				}
-
-				effectiveDamage = attackProc(enemy, effectiveDamage);
-			}
-			if (visibleFight) {
-				if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
-					hitSound(Random.Float(0.87f, 1.15f));
-				}
-			}
-
-			// If the enemy is already dead, interrupt the attack.
-			// This matters as defence procs can sometimes inflict self-damage, such as armor glyphs.
-			if (!enemy.isAlive()){
-				return true;
-			}
-
-			enemy.damage( effectiveDamage, this );
-
-			if (buff(FireImbue.class) != null)  buff(FireImbue.class).proc(enemy);
-			if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
-
-			if (enemy.isAlive() && enemy.alignment != alignment && prep != null && prep.canKO(enemy)){
-				enemy.HP = 0;
-				if (enemy.buff(Brute.BruteRage.class) != null){
-					enemy.buff(Brute.BruteRage.class).detach();
-				}
-				if (!enemy.isAlive()) {
-					enemy.die(this);
-				} else {
-					//helps with triggering any on-damage effects that need to activate
-					enemy.damage(-1, this);
-					DeathMark.processFearTheReaper(enemy);
-				}
-				if (enemy.sprite != null) {
-					enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
-				}
-			}
-
-			Talent.CombinedLethalityAbilityTracker combinedLethality = buff(Talent.CombinedLethalityAbilityTracker.class);
-			if (combinedLethality != null && this instanceof Hero && ((Hero) this).belongings.attackingWeapon() instanceof MeleeWeapon && combinedLethality.weapon != ((Hero) this).belongings.attackingWeapon()){
-				if ( enemy.isAlive() && enemy.alignment != alignment && !Char.hasProp(enemy, Property.BOSS)
-						&& !Char.hasProp(enemy, Property.MINIBOSS) &&
-						(enemy.HP/(float)enemy.HT) <= 0.4f*((Hero)this).pointsInTalent(Talent.COMBINED_LETHALITY)/3f) {
-					enemy.HP = 0;
-					if (enemy.buff(Brute.BruteRage.class) != null){
-						enemy.buff(Brute.BruteRage.class).detach();
-					}
-					if (!enemy.isAlive()) {
-						enemy.die(this);
-					} else {
-						//helps with triggering any on-damage effects that need to activate
-						enemy.damage(-1, this);
-						DeathMark.processFearTheReaper(enemy);
-					}
-					if (enemy.sprite != null) {
-						enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Talent.CombinedLethalityAbilityTracker.class, "executed"));
-					}
-				}
-				combinedLethality.detach();
-			}
-
-			if (enemy.sprite != null) {
-				enemy.sprite.bloodBurstA(sprite.center(), effectiveDamage);
-				enemy.sprite.flash();
-			}
-
-			if (!enemy.isAlive() && visibleFight) {
-				if (enemy == Dungeon.hero) {
-					
-					if (this == Dungeon.hero) {
-						return true;
-					}
-
-					if (this instanceof WandOfLivingEarth.EarthGuardian
-							|| this instanceof MirrorImage || this instanceof PrismaticImage){
-						Badges.validateDeathFromFriendlyMagic();
-					}
-					Dungeon.fail( this );
-					GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );
-					
-				} else if (this == Dungeon.hero) {
-					GLog.i( Messages.capitalize(Messages.get(Char.class, "defeat", enemy.name())) );
-				}
-			}
-			
-			return true;
-			
-		} else {
-
-			enemy.sprite.showStatus( CharSprite.NEUTRAL, enemy.defenseVerb() );
-			if (visibleFight) {
-				//TODO enemy.defenseSound? currently miss plays for monks/crab even when they parry
-				Sample.INSTANCE.play(Assets.Sounds.MISS);
-			}
-			
-			return false;
-			
-		}
-	}
-
-	public static int INFINITE_ACCURACY = 1_000_000;
-	public static int INFINITE_EVASION = 1_000_000;
-
-	final public static boolean hit( Char attacker, Char defender, boolean magic ) {
+	public static boolean hit( Char attacker, Char defender, boolean magic ) {
 		return hit(attacker, defender, magic ? 2f : 1f, magic);
 	}
-
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
-		//uncomment this if you wanna make proj go on cooldown on dodges aswell.
-		//ChampionEnemy.Projecting proj = attacker.buff(ChampionEnemy.Projecting.class);
-		//boolean adjacent = Dungeon.level.adjacent(attacker.pos, defender.pos);
-		//if(proj != null && !adjacent) proj.Polished_cooldown = 2;
-
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
 
@@ -661,7 +404,7 @@ public abstract class Char extends Actor {
 			// + 3%/5%
 			acuRoll *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 		}
-		
+
 		float defRoll = Random.Float( defStat );
 		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
 		if (defender.buff(  Hex.class) != null) defRoll *= 0.75f;
@@ -678,9 +421,503 @@ public abstract class Char extends Actor {
 			// + 3%/5%
 			defRoll *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 		}
-		
+
 		return (acuRoll * accMulti) >= defRoll;
 	}
+
+	final public boolean attack( Char enemy ){
+		return attack(enemy, 1f, 0f, 1f);
+	}
+	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
+
+		if (enemy == null) return false;
+		
+		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
+
+		if (enemy.isInvulnerable(getClass())) {
+
+			if (visibleFight) {
+				enemy.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "invulnerable") );
+
+				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1f, Random.Float(0.96f, 1.05f));
+			}
+
+			return false;
+
+		} else if (hit( this, enemy, accMulti, false )) {
+
+			// we use a float here briefly so that we don't have to constantly round while
+			// potentially applying various multiplier effects
+			float dmg;
+			Preparation prep = buff(Preparation.class);
+			if (prep != null){
+				dmg = prep.damageRoll(this);
+				if (this == Dungeon.hero && Dungeon.hero.hasTalent(Talent.BOUNTY_HUNTER)) {
+					Buff.affect(Dungeon.hero, Talent.BountyHunterTracker.class, 0.0f);
+				}
+			} else {
+				dmg = damageRoll();
+			}
+
+			dmg = dmg*dmgMulti;
+
+			//flat damage bonus is affected by multipliers
+			dmg += dmgBonus;
+
+			if (enemy.buff(GuidingLight.Illuminated.class) != null){
+				enemy.buff(GuidingLight.Illuminated.class).detach();
+				if (this == Dungeon.hero && Dungeon.hero.hasTalent(Talent.SEARING_LIGHT)){
+					dmg += 2 + 2*Dungeon.hero.pointsInTalent(Talent.SEARING_LIGHT);
+				}
+				if (this != Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.PRIEST){
+					enemy.damage(Dungeon.hero.lvl, GuidingLight.INSTANCE);
+				}
+			}
+
+			Berserk berserk = buff(Berserk.class);
+			if (berserk != null) dmg = berserk.damageFactor(dmg);
+
+			if (buff( Fury.class ) != null) {
+				dmg *= 1.5f;
+			}
+
+			//POLISHED: do we let them stack?
+			if ( buff(Weakness.class) != null ){
+				dmg *= 0.67f;
+			} else if(buff(Brittle.class) != null) {
+				dmg *= 0.75f;
+			}
+
+			if (buff( PowerOfMany.PowerBuff.class) != null){
+				if (buff( BeamingRay.BeamingRayBoost.class) != null
+					&& buff( BeamingRay.BeamingRayBoost.class).object == enemy.id()){
+					dmg *= 1.3f + 0.05f*Dungeon.hero.pointsInTalent(Talent.BEAMING_RAY);
+				} else {
+					dmg *= 1.25f;
+				}
+			}
+
+			for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
+				dmg *= buff.meleeDamageFactor(Dungeon.level.adjacent(this.pos, enemy.pos));
+			}
+
+			dmg *= AscensionChallenge.statModifier(this);
+
+			Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
+			if (endure != null) dmg = endure.damageFactor(dmg);
+
+
+			// Defense/Attack procs
+			int effectiveDamage = enemy.resistDamage(dmg, this, true);
+
+			effectiveDamage = attackProc(enemy, effectiveDamage);
+			//
+
+
+			if (visibleFight) {
+				if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
+					hitSound(Random.Float(0.87f, 1.15f));
+				}
+			}
+
+			// If the enemy is already dead, interrupt the attack.
+			// This matters as defence procs can sometimes inflict self-damage, such as armor glyphs.
+			/*if (!enemy.isAlive()){
+				return true;
+			}*/
+
+			enemy.damage( effectiveDamage, this, false, true );
+
+			if(prep != null && enemy.isAlive()) prep.proc(enemy);
+
+			Talent.CombinedLethalityAbilityTracker combinedLethality = buff(Talent.CombinedLethalityAbilityTracker.class);
+			if(combinedLethality != null && enemy.isAlive()) combinedLethality.proc(enemy);
+
+
+			if (enemy.sprite != null) {
+				enemy.sprite.bloodBurstA(sprite.center(), effectiveDamage);
+				enemy.sprite.flash();
+			}
+
+			if (!enemy.isAlive() && visibleFight) {
+				if (enemy == Dungeon.hero) {
+					if (this == Dungeon.hero) {
+						return true;
+					}
+
+					if (this instanceof WandOfLivingEarth.EarthGuardian
+						|| this instanceof MirrorImage || this instanceof PrismaticImage) {
+						Badges.validateDeathFromFriendlyMagic();
+					}
+					Dungeon.fail( this );
+					GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );
+					
+				} else if (this == Dungeon.hero) {
+					GLog.i( Messages.capitalize(Messages.get(Char.class, "defeat", enemy.name())) );
+				}
+			}
+			
+			return true;
+			
+		} else {
+
+			enemy.sprite.showStatus( CharSprite.NEUTRAL, enemy.defenseVerb() );
+			if (visibleFight) {
+				//TODO enemy.defenseSound? currently miss plays for monks/crab even when they parry
+				Sample.INSTANCE.play(Assets.Sounds.MISS);
+			}
+			
+			return false;
+			
+		}
+	}
+
+	public int resistDamage(float dmg, Object src, boolean physical) {
+		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
+		if (endure != null){
+			dmg = endure.adjustDamageTaken(dmg);
+		}
+
+		if (buff(ScrollOfChallenge.ChallengeArena.class) != null){
+			dmg *= 0.67f;
+		}
+
+		if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
+			dmg *= 0.2f;
+		}
+
+		if (Dungeon.hero.alignment == alignment
+				&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
+				&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)){
+			dmg *= 0.925f - 0.075f*Dungeon.hero.pointsInTalent(Talent.AURA_OF_PROTECTION);
+		}
+
+		if (buff(PowerOfMany.PowerBuff.class) != null){
+			if (buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null){
+				dmg *= 0.70f - 0.05f*Dungeon.hero.pointsInTalent(Talent.LIFE_LINK);
+			} else {
+				dmg *= 0.75f;
+			}
+		}
+
+
+		int procDamage;
+		if(src instanceof Char) {
+			Char ch = (Char)src;
+
+			//characters influenced by aggression deal 1/2 damage to bosses
+			if (buff(StoneOfAggression.Aggression.class) != null && ch.alignment == alignment &&
+				( Char.hasProp(this, Property.BOSS) || Char.hasProp(this, Property.MINIBOSS) )
+			){
+				dmg *= 0.5f;
+				//yog-dzewa specifically takes 1/4 damage
+				if (this instanceof YogDzewa){
+					dmg *= 0.5f;
+				}
+			}
+
+			procDamage = defenseProc( ch, Math.round(dmg) );
+		} else {
+			procDamage = Math.round(dmg);
+		}
+
+
+		if(physical) {
+			int defRoll = Math.round(drRoll() * AscensionChallenge.statModifier(this));
+
+			if (src instanceof Hero){
+				Hero hero = (Hero)src;
+
+				if (hero.belongings.attackingWeapon() instanceof MissileWeapon
+					&& hero.subClass == HeroSubClass.SNIPER
+					&& !Dungeon.level.adjacent(hero.pos, pos)
+				){
+					defRoll = 0;
+				}
+
+				if (hero.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
+					defRoll = 0;
+				}
+			}
+
+			dmg = Math.max(procDamage - defRoll, 0);
+
+			//vulnerable specifically applies after armor reductions
+			//POLISHED: do we let them stack?
+			if (buff(Vulnerable.class) != null) {
+				dmg *= 1.33f;
+			} else if(buff(Brittle.class) != null) {
+				dmg *= 1.25f;
+			}
+		} else {
+			dmg = procDamage;
+		}
+
+
+		if (this.buff(Doom.class) != null && !isImmune(Doom.class)){
+			dmg *= 1.67f;
+		}
+
+		if (alignment != Alignment.ALLY && this.buff(DeathMark.DeathMarkTracker.class) != null){
+			dmg *= 1.25f;
+		}
+
+		Class<?> srcClass = src.getClass();
+		if (isImmune( srcClass )) {
+			dmg = 0;
+		} else {
+			dmg *= resist( srcClass );
+		}
+
+
+		int finalDamage = Math.round(dmg);
+		ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
+		if (giant != null){
+			boolean externalAttack = isExternal(this, src);
+
+			//we ceil these specifically to favor the player vs. champ dmg reduction
+			// most important vs. giant champions in the earlygame
+			int reduced = (int)Math.ceil(dmg * giant.damageTakenFactor(externalAttack));
+			finalDamage = Math.max(finalDamage, reduced);
+		}
+
+		//TODO improve this when I have proper damage source logic
+		if (AntiMagic.RESISTS.contains(src.getClass())){
+			finalDamage -= AntiMagic.drRoll(this, glyphLevel(AntiMagic.class));
+			if (buff(ArcaneArmor.class) != null) {
+				finalDamage -= Random.NormalIntRange(0, buff(ArcaneArmor.class).level());
+			}
+
+			finalDamage = Math.max(finalDamage, 0);
+		}
+
+		return finalDamage;
+	}
+
+	//TODO it would be nice to have a pre-armor and post-armor proc.
+	// atm defense is always pre-armor and attack is always post-armor
+	public int defenseProc( Char enemy, int damage ) {
+
+		if (AuraOfProtection.AuraBuff.proc(this)) {
+			damage = Dungeon.hero.belongings.armor().proc( enemy, this, damage );
+		}
+
+		WandOfLivingEarth.RockArmor rockArmor = buff(WandOfLivingEarth.RockArmor.class);
+		if (rockArmor != null) {
+			damage = rockArmor.absorb(damage);
+		}
+
+		Earthroot.Armor armor = buff( Earthroot.Armor.class );
+		if (armor != null) {
+			damage = armor.absorb( damage );
+		}
+
+		ShieldOfLight.ShieldOfLightTracker shield = buff( ShieldOfLight.ShieldOfLightTracker.class);
+		if (shield != null && shield.object == enemy.id()){
+			damage = Math.max(damage - ShieldOfLight.drRoll(), 0);
+
+		} else if (this == Dungeon.hero
+				&& Dungeon.hero.heroClass != HeroClass.CLERIC
+				&& Dungeon.hero.hasTalent(Talent.SHIELD_OF_LIGHT)
+				&& TargetHealthIndicator.instance.target() == enemy){
+			//33/50%
+			if (Random.Int(6) < 1+Dungeon.hero.pointsInTalent(Talent.SHIELD_OF_LIGHT)){
+				damage = Math.max(damage-1, 0);;
+			}
+		}
+
+		return damage;
+	}
+	public int attackProc( Char enemy, int damage ) {
+		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
+			buff.onAttackProc( enemy );
+		}
+
+		if (buff(FireImbue.class) != null)  buff(FireImbue.class).proc(enemy);
+		if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
+
+		return damage;
+	}
+
+	public void damage( int dmg, Object src ) {
+		damage(dmg, src, true, false);
+	}
+
+	public void damage( int dmg, Object src, boolean resist, boolean physical ) {
+
+		if (!isAlive() || dmg < 0) {
+			return;
+		}
+		if(isInvulnerable(src.getClass())){
+			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
+			return;
+		}
+
+		LifeLink link = buff(LifeLink.class);
+		if (link != null) {
+			dmg = link.shareDamage(this, dmg, src);
+		}
+
+		//POLISHED: FIX RESISTANCES
+		if (buff(Sickle.HarvestBleedTracker.class) != null){
+			buff(Sickle.HarvestBleedTracker.class).detach();
+
+			if (!isImmune(Bleeding.class)){
+				Bleeding b = Buff.affect(this, Bleeding.class);
+
+				b.announced = false;
+				b.set(dmg, Sickle.HarvestBleedTracker.class);
+				b.attachTo(this);
+				sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int)b.level());
+				return;
+			}
+		}
+
+
+		//
+		if(resist) resistDamage(dmg, src, physical);
+
+		int total = hurt(dmg, src);
+
+		if (buff(Grim.GrimTracker.class) != null){
+			total += Grim.execute(this, total);
+		}
+		//
+
+
+		if (sprite != null) {
+			//defaults to normal damage icon if no other ones apply
+			int                                                         icon = FloatingText.PHYS_DMG;
+			if (NO_ARMOR_PHYSICAL_SOURCES.contains(src.getClass()))     icon = FloatingText.PHYS_DMG_NO_BLOCK;
+			if (AntiMagic.RESISTS.contains(src.getClass()))             icon = FloatingText.MAGIC_DMG;
+			if (src instanceof Pickaxe)                                 icon = FloatingText.PICK_DMG;
+
+			//special case for sniper when using ranged attacks
+			if (src == Dungeon.hero
+					&& Dungeon.hero.subClass == HeroSubClass.SNIPER
+					&& !Dungeon.level.adjacent(Dungeon.hero.pos, pos)
+					&& Dungeon.hero.belongings.attackingWeapon() instanceof MissileWeapon){
+				icon = FloatingText.PHYS_DMG_NO_BLOCK;
+			}
+
+			//special case for monk using unarmed abilities
+			if (src == Dungeon.hero
+					&& Dungeon.hero.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
+				icon = FloatingText.PHYS_DMG_NO_BLOCK;
+			}
+
+			if (src instanceof Hunger)                                  icon = FloatingText.HUNGER;
+			if (src instanceof Burning)                                 icon = FloatingText.BURNING;
+			if (src instanceof Chill || src instanceof Frost)           icon = FloatingText.FROST;
+			if (src instanceof GeyserTrap || src instanceof StormCloud) icon = FloatingText.WATER;
+			if (src instanceof Burning)                                 icon = FloatingText.BURNING;
+			if (src instanceof Electricity)                             icon = FloatingText.SHOCKING;
+			if (src instanceof Bleeding)                                icon = FloatingText.BLEEDING;
+			if (src instanceof ToxicGas)                                icon = FloatingText.TOXIC;
+			if (src instanceof Corrosion)                               icon = FloatingText.CORROSION;
+			if (src instanceof Poison)                                  icon = FloatingText.POISON;
+			if (src instanceof Ooze)                                    icon = FloatingText.OOZE;
+			if (src instanceof Viscosity.DeferedDamage)                 icon = FloatingText.DEFERRED;
+			if (src instanceof Corruption)                              icon = FloatingText.CORRUPTION;
+			if (src instanceof AscensionChallenge)                      icon = FloatingText.AMULET;
+
+			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(total), icon);
+		}
+	}
+
+	public int hurt(int dmg, Object src) {
+		if (!isAlive() || dmg < 0) {
+			return 0;
+		}
+		if(isInvulnerable(src.getClass())){
+			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
+			return 0;
+		}
+
+		if (buff(Viscosity.ViscosityTracker.class) != null) {
+			dmg = buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+			buff(Viscosity.ViscosityTracker.class).detach();
+		}
+
+		Terror t = buff(Terror.class);
+		if (t != null){
+			t.recover();
+		}
+		Dread d = buff(Dread.class);
+		if (d != null){
+			d.recover();
+		}
+		Charm c = buff(Charm.class);
+		if (c != null){
+			c.recover(src);
+		}
+		if (buff(Frost.class) != null){
+			Buff.detach( this, Frost.class );
+		}
+		if (buff(MagicalSleep.class) != null){
+			Buff.detach(this, MagicalSleep.class);
+		}
+		if (buff( Paralysis.class ) != null) {
+			buff( Paralysis.class ).processDamage(dmg);
+		}
+
+
+		//
+		int shielded = dmg;
+		//FIXME: when I add proper damage properties, should add an IGNORES_SHIELDS property to use here.
+		if (!(src instanceof Hunger) && !(src instanceof Grim)){
+			for (ShieldBuff s : buffs(ShieldBuff.class)){
+				dmg = s.absorbDamage(dmg);
+				if (dmg == 0) break;
+			}
+		}
+		shielded -= dmg;
+		HP -= dmg;
+		//
+
+
+		if (HP > 0 && shielded > 0 && shielding() == 0){
+			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
+				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
+			}
+		}
+
+		if(src instanceof Char) {
+			Char ch = (Char) src;
+			Kinetic.KineticTracker tracker = ch.buff(Kinetic.KineticTracker.class);
+
+			if (HP < 0 && alignment != ch.alignment && tracker != null){
+				int dmgToAdd = -HP;
+				dmgToAdd -= tracker.conservedDamage;
+				dmgToAdd = Math.round(dmgToAdd * Weapon.Enchantment.Polished_procChanceMultiplier(ch, Dungeon.hero.belongings.attackingWeapon()));
+
+				if (dmgToAdd > 0) {
+					Buff.affect(ch, Kinetic.ConservedDamage.class).setBonus(dmgToAdd);
+				}
+				tracker.detach();
+			}
+		}
+
+		if (HP < 0) HP = 0;
+		if (!isAlive()) {
+			die( src );
+		} else if (HP == 0 && buff(DeathMark.DeathMarkTracker.class) != null){
+			DeathMark.processFearTheReaper(this);
+		}
+
+		if(isAlive()) {
+			if (buff( Electrified.class ) != null) {
+				buff( Electrified.class ).processDamage(dmg + shielded, src);
+			}
+		}
+
+		return dmg + shielded;
+	}
+
+
+
+	public static int INFINITE_ACCURACY = 1_000_000;
+	public static int INFINITE_EVASION = 1_000_000;
 
 	public int attackSkill( Char target ) {
 		return 0;
@@ -704,50 +941,6 @@ public abstract class Char extends Actor {
 	
 	public int damageRoll() {
 		return 1;
-	}
-	
-	//TODO it would be nice to have a pre-armor and post-armor proc.
-	// atm attack is always post-armor and defence is already pre-armor
-	
-	public int attackProc( Char enemy, int damage ) {
-		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-			buff.onAttackProc( enemy );
-		}
-		return damage;
-	}
-	
-	public int defenseProc( Char enemy, int damage ) {
-
-		Earthroot.Armor armor = buff( Earthroot.Armor.class );
-		if (armor != null) {
-			damage = armor.absorb( damage );
-		}
-
-		ShieldOfLight.ShieldOfLightTracker shield = buff( ShieldOfLight.ShieldOfLightTracker.class);
-		if (shield != null && shield.object == enemy.id()){
-			int min = 1 + Dungeon.hero.pointsInTalent(Talent.SHIELD_OF_LIGHT);
-			damage -= Random.NormalIntRange(min, 2*min);
-			damage = Math.max(damage, 0);
-		} else if (this == Dungeon.hero
-				&& Dungeon.hero.heroClass != HeroClass.CLERIC
-				&& Dungeon.hero.hasTalent(Talent.SHIELD_OF_LIGHT)
-				&& TargetHealthIndicator.instance.target() == enemy){
-			//33/50%
-			if (Random.Int(6) < 1+Dungeon.hero.pointsInTalent(Talent.SHIELD_OF_LIGHT)){
-				damage -= 1;
-			}
-		}
-
-		// hero and pris images skip this as they already benefit from hero's armor glyph proc
-		if (!(this instanceof Hero || this instanceof PrismaticImage)) {
-			if (Dungeon.hero.alignment == alignment && Dungeon.hero.belongings.armor() != null
-					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
-					&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)) {
-				damage = Dungeon.hero.belongings.armor().proc( enemy, this, damage );
-			}
-		}
-
-		return damage;
 	}
 
 	//Returns the level a glyph is at for a char, or -1 if they are not benefitting from that glyph
@@ -843,231 +1036,6 @@ public abstract class Char extends Actor {
 
 		}
 		else return false;
-	}
-	public void damage( int dmg, Object src ) {
-		
-		if (!isAlive() || dmg < 0) {
-			return;
-		}
-
-		if(isInvulnerable(src.getClass())){
-			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
-			return;
-		}
-
-		if (!(src instanceof LifeLink || src instanceof Hunger) && buff(LifeLink.class) != null){
-			HashSet<LifeLink> links = buffs(LifeLink.class);
-			for (LifeLink link : links.toArray(new LifeLink[0])){
-				if (Actor.findById(link.object) == null){
-					links.remove(link);
-					link.detach();
-				}
-			}
-			dmg = (int)Math.ceil(dmg / (float)(links.size()+1));
-			for (LifeLink link : links){
-				Char ch = (Char)Actor.findById(link.object);
-				if (ch != null) {
-					ch.damage(dmg, link);
-					if (!ch.isAlive()) {
-						link.detach();
-					}
-				}
-			}
-		}
-
-		//temporarily assign to a float to avoid rounding a bunch
-		float damage = dmg;
-
-		//if dmg is from a character we already reduced it in defenseProc
-		if (!(src instanceof Char)) {
-			if (Dungeon.hero.alignment == alignment
-					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
-					&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)) {
-				damage *= 0.925f - 0.075f*Dungeon.hero.pointsInTalent(Talent.AURA_OF_PROTECTION);
-			}
-		}
-
-		if (buff(PowerOfMany.PowerBuff.class) != null){
-			if (buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null){
-				damage *= 0.70f - 0.05f*Dungeon.hero.pointsInTalent(Talent.LIFE_LINK);
-			} else {
-				damage *= 0.75f;
-			}
-		}
-
-		Terror t = buff(Terror.class);
-		if (t != null){
-			t.recover();
-		}
-		Dread d = buff(Dread.class);
-		if (d != null){
-			d.recover();
-		}
-		Charm c = buff(Charm.class);
-		if (c != null){
-			c.recover(src);
-		}
-		if (this.buff(Frost.class) != null){
-			Buff.detach( this, Frost.class );
-		}
-		if (this.buff(MagicalSleep.class) != null){
-			Buff.detach(this, MagicalSleep.class);
-		}
-		if (this.buff(Doom.class) != null && !isImmune(Doom.class)){
-			damage *= 1.67f;
-		}
-		if (alignment != Alignment.ALLY && this.buff(DeathMark.DeathMarkTracker.class) != null){
-			damage *= 1.25f;
-		}
-
-		if (buff(Sickle.HarvestBleedTracker.class) != null){
-			buff(Sickle.HarvestBleedTracker.class).detach();
-
-			if (!isImmune(Bleeding.class)){
-				Bleeding b = buff(Bleeding.class);
-				if (b == null){
-					b = new Bleeding();
-				}
-				b.announced = false;
-				b.set(dmg, Sickle.HarvestBleedTracker.class);
-				b.attachTo(this);
-				sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int)b.level());
-				return;
-			}
-		}
-
-		Class<?> srcClass = src.getClass();
-		if (isImmune( srcClass )) {
-			damage = 0;
-		} else {
-			damage *= resist( srcClass );
-		}
-
-		dmg = Math.round(damage);
-
-
-		ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
-		if (giant != null){
-			boolean externalAttack = isExternal(this, src);
-
-			//we ceil these specifically to favor the player vs. champ dmg reduction
-			// most important vs. giant champions in the earlygame
-			dmg = (int) Math.ceil(dmg * giant.damageTakenFactor(externalAttack));
-		}
-		
-		//TODO improve this when I have proper damage source logic
-		if (AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, glyphLevel(AntiMagic.class));
-			if (buff(ArcaneArmor.class) != null) {
-				dmg -= Random.NormalIntRange(0, buff(ArcaneArmor.class).level());
-			}
-			if (dmg < 0) dmg = 0;
-		}
-
-		int inc_dmg = dmg;
-		if (buff( Paralysis.class ) != null) {
-			buff( Paralysis.class ).processDamage(dmg);
-		}
-
-		int shielded = dmg;
-		//FIXME: when I add proper damage properties, should add an IGNORES_SHIELDS property to use here.
-		if (!(src instanceof Hunger)){
-			for (ShieldBuff s : buffs(ShieldBuff.class)){
-				dmg = s.absorbDamage(dmg);
-				if (dmg == 0) break;
-			}
-		}
-		shielded -= dmg;
-		HP -= dmg;
-
-		if (buff( Electrified.class ) != null) {
-			buff( Electrified.class ).processDamage(dmg + shielded, src);
-		}
-
-		if (HP > 0 && shielded > 0 && shielding() == 0){
-			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
-				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
-			}
-		}
-
-		if (HP > 0 && buff(Grim.GrimTracker.class) != null){
-
-			float finalChance = buff(Grim.GrimTracker.class).maxChance;
-			finalChance *= (float)Math.pow( ((HT - HP) / (float)HT), 2);
-
-			if (Random.Float() < finalChance) {
-				boolean isBoss = properties().contains(Property.BOSS);
-
-				int extraDmg = isBoss ? 2*inc_dmg : Math.round(HP*resist(Grim.class));
-
-				dmg += extraDmg;
-				HP -= extraDmg;
-
-				sprite.emitter().burst( ShadowParticle.UP, 5 );
-				if (!isAlive() && buff(Grim.GrimTracker.class).qualifiesForBadge){
-					Badges.validateGrimWeapon();
-				}
-			}
-		}
-
-		if (HP < 0 && src instanceof Char && alignment == Alignment.ENEMY){
-			if (((Char) src).buff(Kinetic.KineticTracker.class) != null){
-				int dmgToAdd = -HP;
-				dmgToAdd -= ((Char) src).buff(Kinetic.KineticTracker.class).conservedDamage;
-				dmgToAdd = Math.round(dmgToAdd * Weapon.Enchantment.Polished_procChanceMultiplier((Char) src, Dungeon.hero.belongings.attackingWeapon()));
-				if (dmgToAdd > 0) {
-					Buff.affect((Char) src, Kinetic.ConservedDamage.class).setBonus(dmgToAdd);
-				}
-				((Char) src).buff(Kinetic.KineticTracker.class).detach();
-			}
-		}
-		
-		if (sprite != null) {
-			//defaults to normal damage icon if no other ones apply
-			int                                                         icon = FloatingText.PHYS_DMG;
-			if (NO_ARMOR_PHYSICAL_SOURCES.contains(src.getClass()))     icon = FloatingText.PHYS_DMG_NO_BLOCK;
-			if (AntiMagic.RESISTS.contains(src.getClass()))             icon = FloatingText.MAGIC_DMG;
-			if (src instanceof Pickaxe)                                 icon = FloatingText.PICK_DMG;
-
-			//special case for sniper when using ranged attacks
-			if (src == Dungeon.hero
-					&& Dungeon.hero.subClass == HeroSubClass.SNIPER
-					&& !Dungeon.level.adjacent(Dungeon.hero.pos, pos)
-					&& Dungeon.hero.belongings.attackingWeapon() instanceof MissileWeapon){
-				icon = FloatingText.PHYS_DMG_NO_BLOCK;
-			}
-
-			//special case for monk using unarmed abilities
-			if (src == Dungeon.hero
-					&& Dungeon.hero.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
-				icon = FloatingText.PHYS_DMG_NO_BLOCK;
-			}
-
-			if (src instanceof Hunger)                                  icon = FloatingText.HUNGER;
-			if (src instanceof Burning)                                 icon = FloatingText.BURNING;
-			if (src instanceof Chill || src instanceof Frost)           icon = FloatingText.FROST;
-			if (src instanceof GeyserTrap || src instanceof StormCloud) icon = FloatingText.WATER;
-			if (src instanceof Burning)                                 icon = FloatingText.BURNING;
-			if (src instanceof Electricity)                             icon = FloatingText.SHOCKING;
-			if (src instanceof Bleeding)                                icon = FloatingText.BLEEDING;
-			if (src instanceof ToxicGas)                                icon = FloatingText.TOXIC;
-			if (src instanceof Corrosion)                               icon = FloatingText.CORROSION;
-			if (src instanceof Poison)                                  icon = FloatingText.POISON;
-			if (src instanceof Ooze)                                    icon = FloatingText.OOZE;
-			if (src instanceof Viscosity.DeferedDamage)                 icon = FloatingText.DEFERRED;
-			if (src instanceof Corruption)                              icon = FloatingText.CORRUPTION;
-			if (src instanceof AscensionChallenge)                      icon = FloatingText.AMULET;
-
-			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), icon);
-		}
-
-		if (HP < 0) HP = 0;
-
-		if (!isAlive()) {
-			die( src );
-		} else if (HP == 0 && buff(DeathMark.DeathMarkTracker.class) != null){
-			DeathMark.processFearTheReaper(this);
-		}
 	}
 
 	//these are misc. sources of physical damage which do not apply armor, they get a different icon

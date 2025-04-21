@@ -29,7 +29,34 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 
+import java.util.HashSet;
+
 public class LifeLink extends FlavourBuff {
+
+	public int shareDamage(Char defender, int dmg, Object src) {
+		if(src instanceof LifeLink || src instanceof Hunger) return dmg;
+
+		HashSet<LifeLink> links = defender.buffs(LifeLink.class);
+		for (LifeLink link : links.toArray(new LifeLink[0])){
+			if (Actor.findById(link.object) == null){
+				links.remove(link);
+				link.detach();
+			}
+		}
+
+		dmg = (int)Math.ceil(dmg / (float)(links.size()+1));
+		for (LifeLink link : links){
+			Char ch = (Char)Actor.findById(link.object);
+			if (ch != null) {
+				ch.damage(dmg, link);
+				if (!ch.isAlive()) {
+					link.detach();
+				}
+			}
+		}
+
+		return dmg;
+	}
 
 	public int object = 0;
 

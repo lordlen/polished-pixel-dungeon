@@ -144,6 +144,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -1616,15 +1617,6 @@ public class Hero extends Char {
 				&& buff(BodyForm.BodyFormBuff.class).glyph() != null){
 				damage = buff(BodyForm.BodyFormBuff.class).glyph().proc(new ClothArmor(), enemy, this, damage);
 			}
-			if (buff(HolyWard.HolyArmBuff.class) != null){
-				int blocking = subClass == HeroSubClass.PALADIN ? 3 : 1;
-				damage -= Math.round(blocking * Armor.Glyph.genericProcChanceMultiplier(enemy));
-			}
-		}
-
-		WandOfLivingEarth.RockArmor rockArmor = buff(WandOfLivingEarth.RockArmor.class);
-		if (rockArmor != null) {
-			damage = rockArmor.absorb(damage);
 		}
 		
 		return super.defenseProc( enemy, damage );
@@ -1644,16 +1636,29 @@ public class Hero extends Char {
 	}
 
 	@Override
-	public void damage( int dmg, Object src ) {
-		if (buff(TimekeepersHourglass.timeStasis.class) != null
-				|| buff(TimeStasis.class) != null) {
-			return;
+	public int hurt(int dmg, Object src) {
+		if (!isAlive() || dmg < 0) {
+			return 0;
+		}
+		if (buff(TimekeepersHourglass.timeStasis.class) != null || buff(TimeStasis.class) != null) {
+			return 0;
+		}
+		if(isInvulnerable(src.getClass())){
+			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
+			return 0;
 		}
 
-		//regular damage interrupt, triggers on any damage except specific mild DOT effects
-		// unless the player recently hit 'continue moving', in which case this is ignored
-		if (!(src instanceof Hunger || src instanceof Viscosity.DeferedDamage) && damageInterrupt) {
-			interrupt();
+		int preHP = HP + shielding();
+		int total = super.hurt( dmg, src );
+		int postHP = HP + shielding();
+
+		if (src instanceof Hunger || src instanceof Grim) {
+			preHP  -= shielding();
+			postHP -= shielding();
+		}
+
+		if (buff(Challenge.DuelParticipant.class) != null){
+			buff(Challenge.DuelParticipant.class).addDamage(total);
 		}
 
 		if (this.buff(Drowsy.class) != null){
@@ -1661,79 +1666,59 @@ public class Hero extends Char {
 			GLog.w( Messages.get(this, "pain_resist") );
 		}
 
-		//temporarily assign to a float to avoid rounding a bunch
-		float damage = dmg;
 
-		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-		if (!(src instanceof Char)){
-			//reduce damage here if it isn't coming from a character (if it is we already reduced it)
-			if (endure != null){
-				damage = endure.adjustDamageTaken(dmg);
-			}
-			//the same also applies to challenge scroll damage reduction
-			if (buff(ScrollOfChallenge.ChallengeArena.class) != null){
-				damage *= 0.67f;
-			}
-			//and to monk meditate damage reduction
-			if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				damage *= 0.2f;
+		//regular damage interrupt, triggers on any damage except specific mild DOT effects
+		// unless the player recently hit 'continue moving', in which case this is ignored
+		if (!(src instanceof Hunger || src instanceof Viscosity.DeferedDamage) && damageInterrupt) {
+			interrupt();
+		}
+
+		if (total > 0) {
+			//flash red when hit for serious damage.
+			float percentDMG = total / (float)preHP; //percent of current HP that was taken
+			float percentHP = 1 - ((HT - postHP) / (float)HT); //percent health after damage was taken
+			// The flash intensity increases primarily based on damage taken and secondarily on missing HP.
+			float flashIntensity = 0.25f * (percentDMG * percentDMG) / percentHP;
+			//if the intensity is very low don't flash at all
+			if (flashIntensity >= 0.05f){
+				flashIntensity = Math.min(1/3f, flashIntensity); //cap intensity at 1/3
+				GameScene.flash( (int)(0xFF*flashIntensity) << 16 );
+				if (isAlive()) {
+					if (flashIntensity >= 1/6f) {
+						Sample.INSTANCE.play(Assets.Sounds.HEALTH_CRITICAL, 1/3f + flashIntensity * 2f);
+					} else {
+						Sample.INSTANCE.play(Assets.Sounds.HEALTH_WARN, 1/3f + flashIntensity * 4f);
+					}
+					//hero gets interrupted on taking serious damage, regardless of any other factor
+					interrupt();
+					damageInterrupt = true;
+				}
 			}
 		}
 
-		//unused, could be removed
-		CapeOfThorns.Thorns thorns = buff( CapeOfThorns.Thorns.class );
-		if (thorns != null) {
-			damage = thorns.proc((int)damage, (src instanceof Char ? (Char)src : null),  this);
-		}
+		return total;
+	}
 
+	@Override
+	public int resistDamage(float dmg, Object src, boolean physical) {
 		Talent.WarriorFoodImmunity immu = buff(Talent.WarriorFoodImmunity.class);
 		if (immu != null){
-			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       damage /= (immu.snack ? 2f : 4f);
-			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  damage = 0;
+			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg /= (immu.snack ? 2f : 4f);
+			else if (pointsInTalent(Talent.IRON_STOMACH) >= 2)  dmg = 0;
 		}
 
-		dmg = Math.round(damage);
+		dmg = super.resistDamage(dmg, src, physical);
 
-		//we ceil this one to avoid letting the player easily take 0 dmg from tenacity early
-		//POLISHED: we round normally, and then just set a min of 1. Why doesn't it work like this already?
-		int prevDmg = dmg;
-		dmg = Math.round(dmg * RingOfTenacity.damageMultiplier( this ));
-		dmg = Math.max(dmg, 1);
-		dmg = Math.min(dmg, prevDmg);
+		int tena = Math.round(dmg * RingOfTenacity.damageMultiplier( this ));
+		tena = Math.max(tena, 1);
+		dmg = Math.min(Math.round(dmg), tena);
 
-		int preHP = HP + shielding();
-		if (src instanceof Hunger) preHP -= shielding();
+		return (int)dmg;
+	}
+
+	@Override
+	public void damage( int dmg, Object src ) {
 		super.damage( dmg, src );
-		int postHP = HP + shielding();
-		if (src instanceof Hunger) postHP -= shielding();
-		int effectiveDamage = preHP - postHP;
-
-		if (effectiveDamage <= 0) return;
-
-		if (buff(Challenge.DuelParticipant.class) != null){
-			buff(Challenge.DuelParticipant.class).addDamage(effectiveDamage);
-		}
-
-		//flash red when hit for serious damage.
-		float percentDMG = effectiveDamage / (float)preHP; //percent of current HP that was taken
-		float percentHP = 1 - ((HT - postHP) / (float)HT); //percent health after damage was taken
-		// The flash intensity increases primarily based on damage taken and secondarily on missing HP.
-		float flashIntensity = 0.25f * (percentDMG * percentDMG) / percentHP;
-		//if the intensity is very low don't flash at all
-		if (flashIntensity >= 0.05f){
-			flashIntensity = Math.min(1/3f, flashIntensity); //cap intensity at 1/3
-			GameScene.flash( (int)(0xFF*flashIntensity) << 16 );
-			if (isAlive()) {
-				if (flashIntensity >= 1/6f) {
-					Sample.INSTANCE.play(Assets.Sounds.HEALTH_CRITICAL, 1/3f + flashIntensity * 2f);
-				} else {
-					Sample.INSTANCE.play(Assets.Sounds.HEALTH_WARN, 1/3f + flashIntensity * 4f);
-				}
-				//hero gets interrupted on taking serious damage, regardless of any other factor
-				interrupt();
-				damageInterrupt = true;
-			}
-		}
 	}
 
 	public void checkVisibleMobs() {

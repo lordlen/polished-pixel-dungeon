@@ -65,10 +65,6 @@ public class Viscosity extends Glyph {
 		private int level = 0;
 
 		public int deferDamage(int dmg){
-			//account for icon stomach (just skip the glyph)
-			if (target.buff(Talent.WarriorFoodImmunity.class) != null){
-				return dmg;
-			}
 
 			int level = Math.max( 0, this.level );
 
