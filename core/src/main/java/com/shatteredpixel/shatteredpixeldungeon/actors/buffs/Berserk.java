@@ -218,7 +218,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		BuffIndicator.refreshHero();
 	}
 	
-	public void damage(int damage){
+	public void damage(float damage){
 		if (state != State.NORMAL) return;
 		float maxPower = 1f + 0.1667f*((Hero)target).pointsInTalent(Talent.ENDLESS_RAGE);
 		power = Math.min(maxPower, power + (damage/(float)target.HT)/3f );

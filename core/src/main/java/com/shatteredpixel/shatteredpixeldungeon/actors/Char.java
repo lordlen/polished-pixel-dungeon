@@ -507,26 +507,21 @@ public abstract class Char extends Actor {
 			if (endure != null) dmg = endure.damageFactor(dmg);
 
 
-			// Defense/Attack procs
-			int effectiveDamage = enemy.resistDamage(dmg, this, true);
+			//
+			int effectiveDamage = enemy.damage( dmg, this, damageProperties(enemy) );
 
-			effectiveDamage = attackProc(enemy, effectiveDamage);
+			if(!enemy.isInvulnerable(getClass()))
+				effectiveDamage = attackProc(enemy, effectiveDamage);
 			//
 
 
 			if (visibleFight) {
+				//POLISHED: Check this?
 				if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
 					hitSound(Random.Float(0.87f, 1.15f));
 				}
 			}
 
-			// If the enemy is already dead, interrupt the attack.
-			// This matters as defence procs can sometimes inflict self-damage, such as armor glyphs.
-			/*if (!enemy.isAlive()){
-				return true;
-			}*/
-
-			enemy.damage( effectiveDamage, this, false, true );
 
 			if(prep != null && enemy.isAlive()) prep.proc(enemy);
 
@@ -572,62 +567,55 @@ public abstract class Char extends Actor {
 		}
 	}
 
-	public float resistPhysical(int dmg, Object src) {
-		int defRoll = Math.round(drRoll() * AscensionChallenge.statModifier(this));
-
-		if (src instanceof Hero){
-			Hero hero = (Hero)src;
-
-			if (hero.belongings.attackingWeapon() instanceof MissileWeapon
-					&& hero.subClass == HeroSubClass.SNIPER
-					&& !Dungeon.level.adjacent(hero.pos, pos)
-			){
-				defRoll = 0;
-			}
-
-			if (hero.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
-				defRoll = 0;
-			}
+	public int resistDamage(float dmg, Object src, HashSet<DamageProperty> properties) {
+		if (!isAlive() || dmg < 0) {
+			return 0;
+		}
+		if(isInvulnerable(src.getClass())){
+			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
+			return 0;
 		}
 
-		float damage = Math.max(dmg - defRoll, 0);
-
-		//vulnerable specifically applies after armor reductions
-		//POLISHED: do we let them stack?
-		if (buff(Vulnerable.class) != null) {
-			damage *= 1.33f;
-		} else if(buff(Brittle.class) != null) {
-			damage *= 1.25f;
-		}
-
-		return damage;
-	}
-
-	public int resistDamage(float dmg, Object src, boolean physical) {
-		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-		if (endure != null){
-			dmg = endure.adjustDamageTaken(dmg);
-		}
-
-		if (buff(ScrollOfChallenge.ChallengeArena.class) != null){
-			dmg *= 0.67f;
-		}
-
-		if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-			dmg *= 0.2f;
-		}
-
-		if (Dungeon.hero.alignment == alignment
-				&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
-				&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)){
-			dmg *= 0.925f - 0.075f*Dungeon.hero.pointsInTalent(Talent.AURA_OF_PROTECTION);
-		}
-
-		if (buff(PowerOfMany.PowerBuff.class) != null){
-			if (buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null){
-				dmg *= 0.70f - 0.05f*Dungeon.hero.pointsInTalent(Talent.LIFE_LINK);
+		if(properties.contains(DamageProperty.OBEYS_IMMUNITIES)) {
+			Class<?> srcClass = src.getClass();
+			if (isImmune( srcClass )) {
+				dmg = 0;
 			} else {
-				dmg *= 0.75f;
+				dmg *= resist( srcClass );
+			}
+		}
+
+		if(properties.contains(DamageProperty.RESISTED)) {
+			LifeLink link = buff(LifeLink.class);
+			if (link != null) {
+				dmg = link.shareDamage(this, dmg, src);
+			}
+
+			Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
+			if (endure != null){
+				dmg = endure.adjustDamageTaken(dmg);
+			}
+
+			if (buff(ScrollOfChallenge.ChallengeArena.class) != null){
+				dmg *= 0.67f;
+			}
+
+			if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
+				dmg *= 0.2f;
+			}
+
+			if (Dungeon.hero.alignment == alignment
+					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
+					&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)){
+				dmg *= 0.925f - 0.075f*Dungeon.hero.pointsInTalent(Talent.AURA_OF_PROTECTION);
+			}
+
+			if (buff(PowerOfMany.PowerBuff.class) != null){
+				if (buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null){
+					dmg *= 0.70f - 0.05f*Dungeon.hero.pointsInTalent(Talent.LIFE_LINK);
+				} else {
+					dmg *= 0.75f;
+				}
 			}
 		}
 
@@ -648,48 +636,82 @@ public abstract class Char extends Actor {
 			}
 
 			procDamage = defenseProc( ch, Math.round(dmg) );
+			dmg = procDamage;
 		} else {
 			procDamage = Math.round(dmg);
 		}
 
-		if(physical)
-			dmg = resistPhysical(procDamage, src);
-		else
-			dmg = procDamage;
 
+		if(properties.contains(DamageProperty.PHYSICAL)) {
 
-		if (this.buff(Doom.class) != null && !isImmune(Doom.class)){
-			dmg *= 1.67f;
+			WandOfLivingEarth.RockArmor rockArmor = buff(WandOfLivingEarth.RockArmor.class);
+			if (rockArmor != null) {
+				procDamage = rockArmor.absorb(procDamage);
+			}
+			Earthroot.Armor armor = buff( Earthroot.Armor.class );
+			if (armor != null) {
+				procDamage = armor.absorb( procDamage );
+			}
+
+			int defRoll = Math.round(drRoll() * AscensionChallenge.statModifier(this));
+			if (src instanceof Hero){
+				Hero hero = (Hero)src;
+
+				if( hero.belongings.attackingWeapon() instanceof MissileWeapon
+					&& hero.subClass == HeroSubClass.SNIPER
+					&& !Dungeon.level.adjacent(hero.pos, pos)
+				){
+					defRoll = 0;
+				}
+
+				if (hero.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
+					defRoll = 0;
+				}
+			}
+
+			dmg = Math.max(procDamage - defRoll, 0);
+			//vulnerable specifically applies after armor reductions
+			//POLISHED: do we let them stack?
+			if (buff(Vulnerable.class) != null) {
+				dmg *= 1.33f;
+			} else if(buff(Brittle.class) != null) {
+				dmg *= 1.25f;
+			}
 		}
 
-		if (alignment != Alignment.ALLY && this.buff(DeathMark.DeathMarkTracker.class) != null){
-			dmg *= 1.25f;
-		}
 
-		Class<?> srcClass = src.getClass();
-		if (isImmune( srcClass )) {
-			dmg = 0;
+		int finalDamage;
+		if(properties.contains(DamageProperty.RESISTED)) {
+
+			if (this.buff(Doom.class) != null && !isImmune(Doom.class)){
+				dmg *= 1.67f;
+			}
+			if (alignment != Alignment.ALLY && this.buff(DeathMark.DeathMarkTracker.class) != null){
+				dmg *= 1.25f;
+			}
+			finalDamage = Math.round(dmg);
+
+			ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
+			if (giant != null){
+				boolean externalAttack = isExternal(this, src);
+
+				//we ceil these specifically to favor the player vs. champ dmg reduction
+				// most important vs. giant champions in the earlygame
+				int reduced = (int)Math.ceil(dmg * giant.damageTakenFactor(externalAttack));
+				finalDamage = Math.max(finalDamage, reduced);
+			}
 		} else {
-			dmg *= resist( srcClass );
+			finalDamage = Math.round(dmg);
 		}
 
 
-		int finalDamage = Math.round(dmg);
-		ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
-		if (giant != null){
-			boolean externalAttack = isExternal(this, src);
+		if (properties.contains(DamageProperty.MAGIC) || AntiMagic.RESISTS.contains(src.getClass())){
 
-			//we ceil these specifically to favor the player vs. champ dmg reduction
-			// most important vs. giant champions in the earlygame
-			int reduced = (int)Math.ceil(dmg * giant.damageTakenFactor(externalAttack));
-			finalDamage = Math.max(finalDamage, reduced);
-		}
-
-		//TODO improve this when I have proper damage source logic
-		if (AntiMagic.RESISTS.contains(src.getClass())){
 			finalDamage -= AntiMagic.drRoll(this, glyphLevel(AntiMagic.class));
-			if (buff(ArcaneArmor.class) != null) {
-				finalDamage -= Random.NormalIntRange(0, buff(ArcaneArmor.class).level());
+
+			ArcaneArmor arcane = buff(ArcaneArmor.class);
+			if (arcane != null) {
+				finalDamage -= arcane.drRoll();
 			}
 		}
 		finalDamage = Math.max(finalDamage, 0);
@@ -703,16 +725,6 @@ public abstract class Char extends Actor {
 
 		if (AuraOfProtection.AuraBuff.proc(this)) {
 			damage = Dungeon.hero.belongings.armor().proc( enemy, this, damage );
-		}
-
-		WandOfLivingEarth.RockArmor rockArmor = buff(WandOfLivingEarth.RockArmor.class);
-		if (rockArmor != null) {
-			damage = rockArmor.absorb(damage);
-		}
-
-		Earthroot.Armor armor = buff( Earthroot.Armor.class );
-		if (armor != null) {
-			damage = armor.absorb( damage );
 		}
 
 		ShieldOfLight.ShieldOfLightTracker shield = buff( ShieldOfLight.ShieldOfLightTracker.class);
@@ -732,6 +744,13 @@ public abstract class Char extends Actor {
 		return damage;
 	}
 	public int attackProc( Char enemy, int damage ) {
+		if (!isAlive() || damage < 0) {
+			return 0;
+		}
+		if(enemy.isInvulnerable(getClass())) {
+			return 0;
+		}
+
 		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
 			buff.onAttackProc( enemy );
 		}
@@ -743,11 +762,10 @@ public abstract class Char extends Actor {
 	}
 
 	public void damage( int dmg, Object src ) {
-		damage(dmg, src, true, false);
+		damage(dmg, src, DamageProperty.DEFAULT);
 	}
 
-	public int damage( int dmg, Object src, boolean resist, boolean physical ) {
-
+	public int damage( float dmg, Object src, HashSet<DamageProperty> properties ) {
 		if (!isAlive() || dmg < 0) {
 			return 0;
 		}
@@ -756,46 +774,18 @@ public abstract class Char extends Actor {
 			return 0;
 		}
 
-		LifeLink link = buff(LifeLink.class);
-		if (link != null) {
-			dmg = link.shareDamage(this, dmg, src);
-		}
-
-
-		if(resist)
-			dmg = resistDamage(dmg, src, physical);
-		else {
-			if(src instanceof Char) {
-				Char ch = (Char)src;
-
-				//characters influenced by aggression deal 1/2 damage to bosses
-				if (buff(StoneOfAggression.Aggression.class) != null && ch.alignment == alignment &&
-					( Char.hasProp(this, Property.BOSS) || Char.hasProp(this, Property.MINIBOSS) )
-				){
-					//yog-dzewa specifically takes 1/4 damage
-					if (this instanceof YogDzewa){
-						dmg *= 0.25f;
-					} else {
-						dmg *= 0.5f;
-					}
-				}
-
-				dmg = defenseProc( ch, dmg );
-			}
-
-			dmg = Math.round(resistPhysical(dmg, src));
-		}
+		int effectiveDamage = resistDamage(dmg, src, properties);
 
 		Sickle.HarvestBleedTracker harvest = buff(Sickle.HarvestBleedTracker.class);
 		if (harvest != null){
 			harvest.detach();
-			if(harvest.apply(this, dmg)) return 0;
+			if(harvest.apply(this, effectiveDamage)) return effectiveDamage;
 		}
 
-		int total = hurt(dmg, src);
+		effectiveDamage = hurt(effectiveDamage, src, properties);
 
 		if (buff(Grim.GrimTracker.class) != null){
-			total += Grim.execute(this, total);
+			Grim.execute(this, effectiveDamage);
 		}
 
 
@@ -803,7 +793,8 @@ public abstract class Char extends Actor {
 			//defaults to normal damage icon if no other ones apply
 			int                                                         icon = FloatingText.PHYS_DMG;
 			if (NO_ARMOR_PHYSICAL_SOURCES.contains(src.getClass()))     icon = FloatingText.PHYS_DMG_NO_BLOCK;
-			if (AntiMagic.RESISTS.contains(src.getClass()))             icon = FloatingText.MAGIC_DMG;
+			if (properties.contains(DamageProperty.MAGIC)
+				|| AntiMagic.RESISTS.contains(src.getClass()))          icon = FloatingText.MAGIC_DMG;
 			if (src instanceof Pickaxe)                                 icon = FloatingText.PICK_DMG;
 
 			//special case for sniper when using ranged attacks
@@ -835,13 +826,13 @@ public abstract class Char extends Actor {
 			if (src instanceof Corruption)                              icon = FloatingText.CORRUPTION;
 			if (src instanceof AscensionChallenge)                      icon = FloatingText.AMULET;
 
-			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(total), icon);
+			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(effectiveDamage), icon);
 		}
 
-		return total;
+		return effectiveDamage;
 	}
 
-	public int hurt(int dmg, Object src) {
+	protected int hurt(int dmg, Object src, HashSet<DamageProperty> properties) {
 		if (!isAlive() || dmg < 0) {
 			return 0;
 		}
@@ -881,7 +872,7 @@ public abstract class Char extends Actor {
 		//
 		int shielded = dmg;
 		//FIXME: when I add proper damage properties, should add an IGNORES_SHIELDS property to use here.
-		if (!(src instanceof Hunger) && !(src instanceof Grim)){
+		if (!properties.contains(DamageProperty.IGNORE_SHIELDS)){
 			for (ShieldBuff s : buffs(ShieldBuff.class)){
 				dmg = s.absorbDamage(dmg);
 				if (dmg == 0) break;
@@ -1365,6 +1356,13 @@ public abstract class Char extends Actor {
 	//Is used in AI decision-making
 	public boolean isInvulnerable( Class effect ){
 		return buff(Challenge.SpectatorFreeze.class) != null || buff(Invulnerability.class) != null;
+	}
+
+	public HashSet<DamageProperty> damageProperties(Char target) {
+		HashSet<DamageProperty> props = DamageProperty.DEFAULT_ATTACK;
+		if(target.buff(Sickle.HarvestBleedTracker.class) != null) props.remove(DamageProperty.RESISTED);
+
+		return props;
 	}
 
 	protected HashSet<Property> properties = new HashSet<>();

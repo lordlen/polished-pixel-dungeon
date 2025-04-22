@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
@@ -33,10 +34,18 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite.Glowing;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 public class Grim extends Weapon.Enchantment {
 	
 	private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
-	
+
+	public static final HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
+			DamageProperty.RESISTED, DamageProperty.IGNORE_SHIELDS
+	));
+
+
 	@Override
 	public int proc( Weapon weapon, Char attacker, Char defender, int damage ) {
 
@@ -74,7 +83,7 @@ public class Grim extends Weapon.Enchantment {
 			boolean isBoss = enemy.properties().contains(Char.Property.BOSS);
 
 			extraDmg = isBoss ? 2*dmg : Math.round(enemy.HP * enemy.resist(Grim.class));
-			enemy.hurt(extraDmg, Reflection.newInstance(Grim.class));
+			enemy.damage(extraDmg, Reflection.newInstance(Grim.class), properties);
 
 			enemy.sprite.emitter().burst( ShadowParticle.UP, 5 );
 			if (!enemy.isAlive() && tracker.qualifiesForBadge){

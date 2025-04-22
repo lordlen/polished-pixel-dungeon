@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -44,8 +45,14 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class ChaliceOfBlood extends Artifact {
+
+	public static HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
+			DamageProperty.OBEYS_IMMUNITIES, DamageProperty.RESISTED, DamageProperty.PHYSICAL
+	));
 
 	{
 		image = ItemSpriteSheet.ARTIFACT_CHALICE1;
@@ -99,7 +106,7 @@ public class ChaliceOfBlood extends Artifact {
 
 	private void prick(Hero hero){
 		int damage = 5 + 3*(level()*level());
-		damage = hero.damage(damage, this, true, true);
+		damage = hero.damage(damage, this, properties);
 		damage = Math.max(damage, 1);
 
 		hero.sprite.operate( hero.pos );

@@ -33,22 +33,27 @@ import java.util.HashSet;
 
 public class LifeLink extends FlavourBuff {
 
-	public int shareDamage(Char defender, int dmg, Object src) {
+	public float shareDamage(Char defender, float dmg, Object src) {
 		if(src instanceof LifeLink || src instanceof Hunger) return dmg;
 
 		HashSet<LifeLink> links = defender.buffs(LifeLink.class);
 		for (LifeLink link : links.toArray(new LifeLink[0])){
-			if (Actor.findById(link.object) == null){
+
+			Actor ac = Actor.findById(link.object);
+			if( !(ac instanceof Char) || !((Char) ac).isAlive()) {
 				links.remove(link);
 				link.detach();
 			}
 		}
 
-		dmg = (int)Math.ceil(dmg / (float)(links.size()+1));
+		int shared = (int)(dmg / (links.size()+1));
 		for (LifeLink link : links){
 			Char ch = (Char)Actor.findById(link.object);
+
 			if (ch != null) {
-				ch.damage(dmg, link);
+				ch.damage(shared, link);
+				dmg -= shared;
+
 				if (!ch.isAlive()) {
 					link.detach();
 				}

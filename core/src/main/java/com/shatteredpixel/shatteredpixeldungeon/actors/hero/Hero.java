@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
@@ -197,6 +198,7 @@ import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public class Hero extends Char {
@@ -1540,6 +1542,12 @@ public class Hero extends Char {
 	@Override
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
+		if (!isAlive() || damage < 0) {
+			return 0;
+		}
+		if(enemy.isInvulnerable(getClass())) {
+			return 0;
+		}
 
 		KindOfWeapon wep;
 		if (RingOfForce.fightingUnarmed(this) && !RingOfForce.unarmedGetsWeaponEnchantment(this)){
@@ -1605,11 +1613,6 @@ public class Hero extends Char {
 	@Override
 	public int defenseProc( Char enemy, int damage ) {
 		
-		if (damage > 0 && subClass == HeroSubClass.BERSERKER){
-			Berserk berserk = Buff.affect(this, Berserk.class);
-			berserk.damage(damage);
-		}
-		
 		if (belongings.armor() != null) {
 			damage = belongings.armor().proc( enemy, this, damage );
 		} else {
@@ -1636,7 +1639,7 @@ public class Hero extends Char {
 	}
 
 	@Override
-	public int hurt(int dmg, Object src) {
+	public int hurt(int dmg, Object src, HashSet<DamageProperty> properties) {
 		if (!isAlive() || dmg < 0) {
 			return 0;
 		}
@@ -1649,10 +1652,10 @@ public class Hero extends Char {
 		}
 
 		int preHP = HP + shielding();
-		int total = super.hurt( dmg, src );
+		int total = super.hurt( dmg, src, properties );
 		int postHP = HP + shielding();
 
-		if (src instanceof Hunger || src instanceof Grim) {
+		if (properties.contains(DamageProperty.IGNORE_SHIELDS)) {
 			preHP  -= shielding();
 			postHP -= shielding();
 		}
@@ -1700,25 +1703,43 @@ public class Hero extends Char {
 	}
 
 	@Override
-	public int resistDamage(float dmg, Object src, boolean physical) {
-		Talent.WarriorFoodImmunity immu = buff(Talent.WarriorFoodImmunity.class);
-		if (immu != null){
-			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg /= (immu.snack ? 2f : 4f);
-			else if (pointsInTalent(Talent.IRON_STOMACH) >= 2)  dmg = 0;
+	public int resistDamage(float dmg, Object src, HashSet<DamageProperty> properties) {
+
+		if(properties.contains(DamageProperty.RESISTED)) {
+			Talent.WarriorFoodImmunity immu = buff(Talent.WarriorFoodImmunity.class);
+			if (immu != null){
+				if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg /= (immu.snack ? 2f : 4f);
+				else if (pointsInTalent(Talent.IRON_STOMACH) >= 2)  dmg = 0;
+			}
 		}
 
-		dmg = super.resistDamage(dmg, src, physical);
+		dmg = super.resistDamage(dmg, src, properties);
 
-		int tena = Math.round(dmg * RingOfTenacity.damageMultiplier( this ));
-		tena = Math.max(tena, 1);
-		dmg = Math.min(Math.round(dmg), tena);
+		if(properties.contains(DamageProperty.RESISTED)) {
+			int tena = Math.round(dmg * RingOfTenacity.damageMultiplier( this ));
+			tena = Math.max(tena, 1);
+			dmg = Math.min(Math.round(dmg), tena);
+		}
 
 		return (int)dmg;
 	}
 
 	@Override
-	public void damage( int dmg, Object src ) {
-		super.damage( dmg, src );
+	public int damage( float dmg, Object src, HashSet<DamageProperty> properties ) {
+		if (!isAlive() || dmg < 0) {
+			return 0;
+		}
+		if(isInvulnerable(src.getClass())){
+			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
+			return 0;
+		}
+
+		if (dmg > 0 && subClass == HeroSubClass.BERSERKER){
+			Berserk berserk = Buff.affect(this, Berserk.class);
+			berserk.damage(dmg);
+		}
+
+		return super.damage( dmg, src, properties );
 	}
 
 	public void checkVisibleMobs() {
