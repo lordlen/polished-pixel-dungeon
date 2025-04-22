@@ -789,7 +789,7 @@ public abstract class Char extends Actor {
 		Sickle.HarvestBleedTracker harvest = buff(Sickle.HarvestBleedTracker.class);
 		if (harvest != null){
 			harvest.detach();
-			if(harvest.apply(this, dmg)) return;
+			if(harvest.apply(this, dmg)) return 0;
 		}
 
 		int total = hurt(dmg, src);
