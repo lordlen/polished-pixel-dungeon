@@ -572,6 +572,37 @@ public abstract class Char extends Actor {
 		}
 	}
 
+	public float resistPhysical(int dmg, Object src) {
+		int defRoll = Math.round(drRoll() * AscensionChallenge.statModifier(this));
+
+		if (src instanceof Hero){
+			Hero hero = (Hero)src;
+
+			if (hero.belongings.attackingWeapon() instanceof MissileWeapon
+					&& hero.subClass == HeroSubClass.SNIPER
+					&& !Dungeon.level.adjacent(hero.pos, pos)
+			){
+				defRoll = 0;
+			}
+
+			if (hero.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
+				defRoll = 0;
+			}
+		}
+
+		float damage = Math.max(dmg - defRoll, 0);
+
+		//vulnerable specifically applies after armor reductions
+		//POLISHED: do we let them stack?
+		if (buff(Vulnerable.class) != null) {
+			damage *= 1.33f;
+		} else if(buff(Brittle.class) != null) {
+			damage *= 1.25f;
+		}
+
+		return damage;
+	}
+
 	public int resistDamage(float dmg, Object src, boolean physical) {
 		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
 		if (endure != null){
@@ -621,37 +652,10 @@ public abstract class Char extends Actor {
 			procDamage = Math.round(dmg);
 		}
 
-
-		if(physical) {
-			int defRoll = Math.round(drRoll() * AscensionChallenge.statModifier(this));
-
-			if (src instanceof Hero){
-				Hero hero = (Hero)src;
-
-				if (hero.belongings.attackingWeapon() instanceof MissileWeapon
-					&& hero.subClass == HeroSubClass.SNIPER
-					&& !Dungeon.level.adjacent(hero.pos, pos)
-				){
-					defRoll = 0;
-				}
-
-				if (hero.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
-					defRoll = 0;
-				}
-			}
-
-			dmg = Math.max(procDamage - defRoll, 0);
-
-			//vulnerable specifically applies after armor reductions
-			//POLISHED: do we let them stack?
-			if (buff(Vulnerable.class) != null) {
-				dmg *= 1.33f;
-			} else if(buff(Brittle.class) != null) {
-				dmg *= 1.25f;
-			}
-		} else {
+		if(physical)
+			dmg = resistPhysical(procDamage, src);
+		else
 			dmg = procDamage;
-		}
 
 
 		if (this.buff(Doom.class) != null && !isImmune(Doom.class)){
@@ -687,9 +691,8 @@ public abstract class Char extends Actor {
 			if (buff(ArcaneArmor.class) != null) {
 				finalDamage -= Random.NormalIntRange(0, buff(ArcaneArmor.class).level());
 			}
-
-			finalDamage = Math.max(finalDamage, 0);
 		}
+		finalDamage = Math.max(finalDamage, 0);
 
 		return finalDamage;
 	}
@@ -758,31 +761,42 @@ public abstract class Char extends Actor {
 			dmg = link.shareDamage(this, dmg, src);
 		}
 
-		//POLISHED: FIX RESISTANCES
-		if (buff(Sickle.HarvestBleedTracker.class) != null){
-			buff(Sickle.HarvestBleedTracker.class).detach();
 
-			if (!isImmune(Bleeding.class)){
-				Bleeding b = Buff.affect(this, Bleeding.class);
+		if(resist)
+			dmg = resistDamage(dmg, src, physical);
+		else {
+			if(src instanceof Char) {
+				Char ch = (Char)src;
 
-				b.announced = false;
-				b.set(dmg, Sickle.HarvestBleedTracker.class);
-				b.attachTo(this);
-				sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int)b.level());
-				return;
+				//characters influenced by aggression deal 1/2 damage to bosses
+				if (buff(StoneOfAggression.Aggression.class) != null && ch.alignment == alignment &&
+					( Char.hasProp(this, Property.BOSS) || Char.hasProp(this, Property.MINIBOSS) )
+				){
+					//yog-dzewa specifically takes 1/4 damage
+					if (this instanceof YogDzewa){
+						dmg *= 0.25f;
+					} else {
+						dmg *= 0.5f;
+					}
+				}
+
+				dmg = defenseProc( ch, dmg );
 			}
+
+			dmg = Math.round(resistPhysical(dmg, src));
 		}
 
-
-		//
-		if(resist) resistDamage(dmg, src, physical);
+		Sickle.HarvestBleedTracker harvest = buff(Sickle.HarvestBleedTracker.class);
+		if (harvest != null){
+			harvest.detach();
+			if(harvest.apply(this, dmg)) return;
+		}
 
 		int total = hurt(dmg, src);
 
 		if (buff(Grim.GrimTracker.class) != null){
 			total += Grim.execute(this, total);
 		}
-		//
 
 
 		if (sprite != null) {
