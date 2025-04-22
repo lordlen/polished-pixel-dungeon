@@ -99,31 +99,15 @@ public class ChaliceOfBlood extends Artifact {
 
 	private void prick(Hero hero){
 		int damage = 5 + 3*(level()*level());
-
-		Earthroot.Armor armor = hero.buff(Earthroot.Armor.class);
-		if (armor != null) {
-			damage = armor.absorb(damage);
-		}
-
-		WandOfLivingEarth.RockArmor rockArmor = hero.buff(WandOfLivingEarth.RockArmor.class);
-		if (rockArmor != null) {
-			damage = rockArmor.absorb(damage);
-		}
-
-		damage -= hero.drRoll();
+		damage = hero.damage(damage, this, true, true);
+		damage = Math.max(damage, 1);
 
 		hero.sprite.operate( hero.pos );
 		hero.busy();
 		hero.spend(3f);
 		GLog.w( Messages.get(this, "onprick") );
-		if (damage <= 0){
-			damage = 1;
-		} else {
-			Sample.INSTANCE.play(Assets.Sounds.CURSED);
-			hero.sprite.emitter().burst( ShadowParticle.CURSE, 4+(damage/10) );
-		}
-
-		hero.damage(damage, this);
+		Sample.INSTANCE.play(Assets.Sounds.CURSED);
+		hero.sprite.emitter().burst( ShadowParticle.CURSE, 4+(damage/10) );
 
 		if (!hero.isAlive()) {
 			Badges.validateDeathFromFriendlyMagic();

@@ -746,14 +746,14 @@ public abstract class Char extends Actor {
 		damage(dmg, src, true, false);
 	}
 
-	public void damage( int dmg, Object src, boolean resist, boolean physical ) {
+	public int damage( int dmg, Object src, boolean resist, boolean physical ) {
 
 		if (!isAlive() || dmg < 0) {
-			return;
+			return 0;
 		}
 		if(isInvulnerable(src.getClass())){
 			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
-			return;
+			return 0;
 		}
 
 		LifeLink link = buff(LifeLink.class);
@@ -837,6 +837,8 @@ public abstract class Char extends Actor {
 
 			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(total), icon);
 		}
+
+		return total;
 	}
 
 	public int hurt(int dmg, Object src) {
