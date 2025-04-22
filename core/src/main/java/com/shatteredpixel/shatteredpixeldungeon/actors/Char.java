@@ -834,7 +834,7 @@ public abstract class Char extends Actor {
 			return 0;
 		}
 
-		if (buff(Viscosity.ViscosityTracker.class) != null) {
+		if (buff(Viscosity.ViscosityTracker.class) != null && !(src instanceof Viscosity.DeferedDamage || src instanceof Hunger)) {
 			dmg = buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
 			buff(Viscosity.ViscosityTracker.class).detach();
 		}
