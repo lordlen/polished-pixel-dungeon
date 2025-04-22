@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
@@ -204,7 +205,7 @@ public class Eye extends Mob {
 					}
 				}
 
-				ch.damage( dmg, new DeathGaze() );
+				enemy.damage( dmg, this, DamageProperty.DEFAULT_ZAP );
 
 				if (Dungeon.level.heroFOV[pos]) {
 					ch.sprite.flash();
