@@ -292,15 +292,23 @@ public class WandOfLivingEarth extends DamageWand {
 			return 8 + wandLevel*4;
 		}
 
-		public int absorb( int damage ) {
-			int block = damage - damage/2;
+		public int absorb( int damage, boolean skeleExplosion ) {
+			int block = damage - damage / 2;
+			int pre = damage;
+
 			if (armor <= block) {
 				detach();
-				return damage - armor;
+				damage -= armor;
 			} else {
 				armor -= block;
-				return damage - block;
+				damage -= block;
 			}
+
+			//apply the % reduction twice
+			if(skeleExplosion) {
+				damage = Math.round((float)damage * damage/pre);
+			}
+			return damage;
 		}
 
 		public boolean isEmpowered(){

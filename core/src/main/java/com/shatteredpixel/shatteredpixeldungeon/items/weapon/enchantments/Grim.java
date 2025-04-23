@@ -42,7 +42,7 @@ public class Grim extends Weapon.Enchantment {
 	private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
 
 	public static final HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
-			DamageProperty.RESISTED, DamageProperty.IGNORE_SHIELDS
+			DamageProperty.IGNORE_SHIELDS
 	));
 
 
@@ -72,28 +72,31 @@ public class Grim extends Weapon.Enchantment {
 		return damage;
 	}
 
-	public static int execute(Char enemy, int dmg) {
+	public static int attemptExecute(Char enemy, int dmg) {
 		GrimTracker tracker = enemy.buff(GrimTracker.class);
 
-		float finalChance = tracker.maxChance;
+		float finalChance = tracker != null ? tracker.maxChance : 0;
 		finalChance *= (float)Math.pow( (float)((enemy.HT - enemy.HP) / enemy.HT), 2);
 
-		int extraDmg = 0;
 		if (Random.Float() < finalChance && enemy.HP > 0) {
-			boolean isBoss = enemy.properties().contains(Char.Property.BOSS);
+			return execute(enemy, dmg);
+		}
+		return 0;
+	}
 
-			extraDmg = isBoss ? 2*dmg : Math.round(enemy.HP * enemy.resist(Grim.class));
-			enemy.damage(extraDmg, Reflection.newInstance(Grim.class), properties);
+	public static int execute(Char enemy, int dmg) {
+		boolean isBoss = enemy.properties().contains(Char.Property.BOSS);
+		int exe = isBoss ? 2*dmg : enemy.HP;
+		enemy.damage(exe, Reflection.newInstance(Grim.class), properties);
 
-			enemy.sprite.emitter().burst( ShadowParticle.UP, 5 );
-			if (!enemy.isAlive() && tracker.qualifiesForBadge){
-				Badges.validateGrimWeapon();
-			}
-
+		enemy.sprite.emitter().burst( ShadowParticle.UP, 5 );
+		GrimTracker tracker = enemy.buff(GrimTracker.class);
+		if (!enemy.isAlive() && tracker != null && tracker.qualifiesForBadge){
+			Badges.validateGrimWeapon();
 			tracker.detach();
 		}
 
-		return extraDmg;
+		return exe;
 	}
 	
 	@Override

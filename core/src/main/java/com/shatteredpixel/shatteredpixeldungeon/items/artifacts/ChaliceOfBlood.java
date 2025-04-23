@@ -51,7 +51,7 @@ import java.util.HashSet;
 public class ChaliceOfBlood extends Artifact {
 
 	public static HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
-			DamageProperty.OBEYS_IMMUNITIES, DamageProperty.RESISTED, DamageProperty.PHYSICAL
+			DamageProperty.RESISTED, DamageProperty.PHYSICAL
 	));
 
 	{

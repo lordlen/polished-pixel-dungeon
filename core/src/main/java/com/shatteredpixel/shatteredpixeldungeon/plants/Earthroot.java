@@ -94,19 +94,19 @@ public class Earthroot extends Plant {
 			return (Dungeon.scalingDepth() + 5)/2;
 		}
 		
-		public int absorb( int damage ) {
+		public int absorb( int damage, boolean skeleExplosion ) {
 			if (pos != target.pos){
 				detach();
 				return damage;
 			}
+
 			int block = Math.min( damage, blocking());
 			if (level <= block) {
 				detach();
-				return damage - block;
 			} else {
 				level -= block;
-				return damage - block;
 			}
+			return damage - (skeleExplosion ? 2*block : block);
 		}
 		
 		public void level( int value ) {

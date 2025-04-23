@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Bat;
@@ -63,7 +64,9 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class AscensionChallenge extends Buff {
 
@@ -297,6 +300,10 @@ public class AscensionChallenge extends Buff {
 		justAscended = false;
 	}
 
+	public static HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
+			DamageProperty.IGNORE_SHIELDS, DamageProperty.IGNORE_IMMUNITIES
+	));
+
 	@Override
 	public boolean act() {
 
@@ -306,7 +313,7 @@ public class AscensionChallenge extends Buff {
 		if (stacks >= 8 && !Dungeon.bossLevel()){
 			damageInc += (stacks-4)/4f;
 			if (damageInc >= 1){
-				target.damage((int)damageInc, this);
+				target.damage((int)damageInc, this, properties);
 				damageInc -= (int)damageInc;
 
 				if (target == Dungeon.hero && !target.isAlive()){

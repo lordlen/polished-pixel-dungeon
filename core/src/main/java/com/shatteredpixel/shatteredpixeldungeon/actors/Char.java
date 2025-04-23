@@ -95,6 +95,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollGeomancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Skeleton;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
@@ -576,7 +577,7 @@ public abstract class Char extends Actor {
 			return 0;
 		}
 
-		if(properties.contains(DamageProperty.OBEYS_IMMUNITIES)) {
+		if(!properties.contains(DamageProperty.IGNORE_IMMUNITIES)) {
 			Class<?> srcClass = src.getClass();
 			if (isImmune( srcClass )) {
 				dmg = 0;
@@ -643,17 +644,21 @@ public abstract class Char extends Actor {
 
 
 		if(properties.contains(DamageProperty.PHYSICAL)) {
+			boolean explosion = src instanceof Skeleton && properties.contains(DamageProperty.SPECIAL);
 
 			WandOfLivingEarth.RockArmor rockArmor = buff(WandOfLivingEarth.RockArmor.class);
 			if (rockArmor != null) {
-				procDamage = rockArmor.absorb(procDamage);
+				procDamage = rockArmor.absorb(procDamage, explosion);
 			}
 			Earthroot.Armor armor = buff( Earthroot.Armor.class );
 			if (armor != null) {
-				procDamage = armor.absorb( procDamage );
+				procDamage = armor.absorb( procDamage, explosion );
 			}
 
-			int defRoll = Math.round(drRoll() * AscensionChallenge.statModifier(this));
+			int defRoll = drRoll();
+			if(explosion) defRoll += drRoll();
+			defRoll = Math.round(defRoll * AscensionChallenge.statModifier(this));
+
 			if (src instanceof Hero){
 				Hero hero = (Hero)src;
 
@@ -668,14 +673,16 @@ public abstract class Char extends Actor {
 					defRoll = 0;
 				}
 			}
-
 			dmg = Math.max(procDamage - defRoll, 0);
+
 			//vulnerable specifically applies after armor reductions
 			//POLISHED: do we let them stack?
 			if (buff(Vulnerable.class) != null) {
 				dmg *= 1.33f;
+				if(explosion) dmg *= 1.33f;
 			} else if(buff(Brittle.class) != null) {
 				dmg *= 1.25f;
+				if(explosion) dmg *= 1.25f;
 			}
 		}
 
@@ -785,7 +792,7 @@ public abstract class Char extends Actor {
 		effectiveDamage = hurt(effectiveDamage, src, properties);
 
 		if (buff(Grim.GrimTracker.class) != null){
-			Grim.execute(this, effectiveDamage);
+			Grim.attemptExecute(this, effectiveDamage);
 		}
 
 
@@ -1359,7 +1366,7 @@ public abstract class Char extends Actor {
 	}
 
 	public HashSet<DamageProperty> damageProperties(Char target) {
-		HashSet<DamageProperty> props = DamageProperty.DEFAULT_ATTACK;
+		HashSet<DamageProperty> props = new HashSet<>(DamageProperty.DEFAULT_ATTACK);
 		if(target.buff(Sickle.HarvestBleedTracker.class) != null) props.remove(DamageProperty.RESISTED);
 
 		return props;

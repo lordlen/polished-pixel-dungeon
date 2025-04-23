@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Electricity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
@@ -629,10 +630,9 @@ public class Tengu extends Mob {
 						Char ch = Actor.findChar(cell);
 						if (ch != null && !(ch instanceof Tengu)) {
 							int dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth() * 2);
-							dmg -= ch.drRoll();
 
 							if (dmg > 0) {
-								ch.damage(dmg, Bomb.class);
+								ch.damage(dmg, Bomb.class, DamageProperty.DEFAULT_ATTACK);
 							}
 
 							if (ch == Dungeon.hero){

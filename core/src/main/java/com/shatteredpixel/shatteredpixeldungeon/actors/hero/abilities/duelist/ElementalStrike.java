@@ -472,9 +472,10 @@ public class ElementalStrike extends ArmorAbility {
 				if (ch != primaryTarget) {
 					float hpMissing = 1f - (ch.HP / (float)ch.HT);
 					float chance = 0.06f + 0.24f*hpMissing; //6-30%
+
 					if (Random.Float() < chance*powerMulti){
-						ch.damage( ch.HP, Grim.class );
-						ch.sprite.emitter().burst( ShadowParticle.UP, 5 );
+						Buff.affect(ch, Grim.GrimTracker.class).qualifiesForBadge=true;
+						Grim.execute(ch, ch.HT/12);
 					}
 				}
 			}

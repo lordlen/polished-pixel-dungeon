@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -36,6 +37,8 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
+
+import java.util.HashSet;
 
 public class Skeleton extends Mob {
 	
@@ -59,7 +62,14 @@ public class Skeleton extends Mob {
 	public int damageRoll() {
 		return Random.NormalIntRange( 2, 10 );
 	}
-	
+
+	HashSet<DamageProperty> explosionType() {
+		HashSet<DamageProperty> explosion = new HashSet<>(DamageProperty.DEFAULT_ATTACK);
+		explosion.add(DamageProperty.SPECIAL);
+
+		return explosion;
+	}
+
 	@Override
 	public void die( Object cause ) {
 		
@@ -71,29 +81,12 @@ public class Skeleton extends Mob {
 		for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
 			Char ch = findChar( pos + PathFinder.NEIGHBOURS8[i] );
 			if (ch != null && ch.isAlive()) {
-				int damage = Math.round(Random.NormalIntRange(6, 12));
+				int damage = Random.NormalIntRange(6, 12);
 				damage = Math.round( damage * AscensionChallenge.statModifier(this));
 
 				//all sources of DR are 2x effective vs. bone explosion
 				//this does not consume extra uses of rock armor and earthroot armor
-
-				WandOfLivingEarth.RockArmor rockArmor = ch.buff(WandOfLivingEarth.RockArmor.class);
-				if (rockArmor != null) {
-					int preDmg = damage;
-					damage = rockArmor.absorb(damage);
-					damage *= Math.round(damage/(float)preDmg); //apply the % reduction twice
-				}
-
-				Earthroot.Armor armor = ch.buff( Earthroot.Armor.class );
-				if (damage > 0 && armor != null) {
-					int preDmg = damage;
-					damage = armor.absorb( damage );
-					damage -= (preDmg - damage); //apply the flat reduction twice
-				}
-
-				//apply DR twice (with 2 rolls for more consistency)
-				damage = Math.max( 0,  damage - (ch.drRoll() + ch.drRoll()) );
-				ch.damage( damage, this );
+				ch.damage( damage, this, explosionType());
 				if (ch == Dungeon.hero && !ch.isAlive()) {
 					heroKilled = true;
 				}

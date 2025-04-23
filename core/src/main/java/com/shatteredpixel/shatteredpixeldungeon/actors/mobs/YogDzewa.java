@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
@@ -221,9 +222,9 @@ public class YogDzewa extends Mob {
 
 					if (hit( this, ch, true )) {
 						if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES)) {
-							ch.damage(Random.NormalIntRange(30, 50), new Eye.DeathGaze());
+							ch.damage(Random.NormalIntRange(30, 50), this, DamageProperty.DEFAULT_ZAP);
 						} else {
-							ch.damage(Random.NormalIntRange(20, 30), new Eye.DeathGaze());
+							ch.damage(Random.NormalIntRange(20, 30), this, DamageProperty.DEFAULT_ZAP);
 						}
 						if (Dungeon.level.heroFOV[pos]) {
 							ch.sprite.flash();

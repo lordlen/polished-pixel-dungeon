@@ -46,7 +46,7 @@ public class Viscosity extends Glyph {
 	private static ItemSprite.Glowing PURPLE = new ItemSprite.Glowing( 0x8844CC );
 
 	public static final HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
-			DamageProperty.OBEYS_IMMUNITIES, DamageProperty.RESISTED
+			DamageProperty.RESISTED
 	));
 	
 	@Override
