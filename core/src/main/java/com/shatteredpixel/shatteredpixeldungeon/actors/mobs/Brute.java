@@ -94,7 +94,7 @@ public class Brute extends Mob {
 		else if (enemy != null) attacker = enemy;
 
 		int separation = attacker != null ? Dungeon.level.distance(pos, attacker.pos)-1 : 10;
-		float percent = GameMath.gate(0f, 0.2f * separation, 1f);
+		float percent = GameMath.gate(0f, 0.15f * separation, 1f);
 
 		int deferred = Math.round(percent * dmg);
 		dmg -= deferred;
