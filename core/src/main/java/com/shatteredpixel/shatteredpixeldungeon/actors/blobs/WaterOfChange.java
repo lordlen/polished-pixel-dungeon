@@ -78,34 +78,23 @@ public class WaterOfChange extends WellWater {
         Sample.INSTANCE.play( Assets.Sounds.DRINK );
         CellEmitter.get( hero.pos ).start( Speck.factory( Speck.CHANGE ), 0.2f, 8 );
 
-        Callback callback = new Callback() {
+        Callback callback_2 = new Callback() {
             @Override
             public void call() {
                 Transmuting.show(Dungeon.hero, replace_2, newTalent_2);
             }
         };
-
-        Transmuting animation = Transmuting.show(Dungeon.hero, replace_1, newTalent_1);
-        if(animation != null) animation.callback=callback;
-
-        /*Actor.addDelayed(new Actor() {
-            {
-                actPriority=VFX_PRIO;
-            }
+        Callback callback_1 = new Callback() {
             @Override
-            protected boolean act() {
+            public void call() {
                 Transmuting animation = Transmuting.show(Dungeon.hero, replace_1, newTalent_1);
-                if(animation != null) animation.callback=callback;
-
-                Actor.remove(this);
-                return true;
+                if(animation != null) animation.callback=callback_2;
             }
-        }, TICK);*/
+        };
+        Dungeon.hero.sprite.doAfterAnim(callback_1);
 
         Dungeon.hero.interrupt();
-
         GLog.p( Messages.get(this, "procced") );
-
         return true;
     }
 
