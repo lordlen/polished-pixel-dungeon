@@ -322,9 +322,10 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 100); }
 	};
 	public static class SwiftEquipCooldown extends FlavourBuff{
+		//REMOVED
 		public boolean secondUse;
 		public boolean hasSecondUse(){
-			return secondUse;
+			return false;
 		}
 
 		public int icon() { return BuffIndicator.TIME; }
