@@ -252,7 +252,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		}
 	}
 
-	public void doAfterAnim(Callback callback) {
+	public synchronized void doAfterAnim(Callback callback) {
 		Callback current = isJumping ? jumpCallback : (isMoving ? motionCallback : animCallback);
 
 		Callback updated = callback;
