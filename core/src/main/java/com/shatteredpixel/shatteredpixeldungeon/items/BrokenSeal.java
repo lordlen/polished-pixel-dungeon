@@ -244,6 +244,10 @@ public class BrokenSeal extends Item {
 			}
 		}
 
+		public synchronized void clearShield(){
+			decShield(shielding());
+		}
+
 		public synchronized void setArmor(Armor arm){
 			armor = arm;
 		}

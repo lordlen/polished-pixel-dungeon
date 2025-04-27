@@ -27,7 +27,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Debug;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
-import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
@@ -168,7 +167,6 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -2078,8 +2076,8 @@ public class Hero extends Char {
 		MasterThievesArmband.Thievery armband = buff(MasterThievesArmband.Thievery.class);
 		if (armband != null) armband.gainCharge(percent);
 
-		Berserk berserk = buff(Berserk.class);
-		if (berserk != null) berserk.recover(percent);
+		Berserk.UndyingRecovery recovery = buff(Berserk.UndyingRecovery.class);
+		if (recovery != null) recovery.recover(percent);
 		
 		if (source != PotionOfExperience.class) {
 			for (Item i : belongings) {
@@ -2360,7 +2358,7 @@ public class Hero extends Char {
 		
 		if (HP <= 0){
 			if (berserk == null) berserk = buff(Berserk.class);
-			return berserk != null && berserk.berserking();
+			return berserk != null && berserk.raging();
 		} else {
 			berserk = null;
 			return super.isAlive();
