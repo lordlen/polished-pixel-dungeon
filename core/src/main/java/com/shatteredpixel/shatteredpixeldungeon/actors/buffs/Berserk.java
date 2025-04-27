@@ -54,11 +54,12 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	private enum State{
-		RECOVERING, READY, ANGRY, RAMPAGING, UNDYING
+		RECOVERING, READY, ANGRY, PREPARING, RAMPAGING, UNDYING
 	}
 	private State state = State.READY;
 
 	private static final int ANGER_START = 5;
+	private static final int PREPARATION_START = 3;
 	private static final int RAMPAGE_START = 10;
 	private int ticksLeft;
 
@@ -113,6 +114,12 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				ActionIndicator.clearAction(this);
 			}
 		}
+		else if(state == State.PREPARING) {
+			ticksLeft--;
+
+			if(ticksLeft <= 0)
+				startRampage();
+		}
 		else if(state == State.RAMPAGING || state == State.UNDYING) {
 			ticksLeft--;
 
@@ -123,63 +130,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		BuffIndicator.refreshHero();
 		spend(TICK);
 		return true;
-
-
-		/*
-		if (state == State.RAMPAGE){
-			ShieldBuff buff = target.buff(WarriorShield.class);
-			if (target.shielding() > 0) {
-				//lose 2.5% of shielding per turn, but no less than 1
-				int dmg = (int)Math.ceil(target.shielding() * 0.025f);
-				if (buff != null && buff.shielding() > 0) {
-					dmg = buff.absorbDamage(dmg);
-				}
-
-				if (target.shielding() <= 0){
-					state = State.RECOVERING;
-					power = 0f;
-					BuffIndicator.refreshHero();
-					if (!target.isAlive()){
-						target.die(this);
-						if (!target.isAlive()) Dungeon.fail(this);
-					}
-				}
-
-			} else {
-				state = State.RECOVERING;
-				power = 0f;
-				if (!target.isAlive()){
-					target.die(this);
-					if (!target.isAlive()) Dungeon.fail(this);
-				}
-
-			}
-		} else if (state == State.NORMAL) {
-			if (powerLossBuffer > 0){
-				powerLossBuffer--;
-			} else {
-				power -= GameMath.gate(0.1f, power, 1f) * 0.067f * Math.pow((target.HP / (float) target.HT), 2);
-
-				if (power < 1f){
-					ActionIndicator.clearAction(this);
-				} else {
-					ActionIndicator.refresh();
-				}
-
-				if (power <= 0) {
-					detach();
-				}
-			}
-		} else if (state == State.RECOVERING && rampageRecovery == 0 && Regeneration.regenOn()){
-			cooldown--;
-			if (cooldown <= 0){
-				cooldown = 0;
-				state = State.NORMAL;
-			}
-		}
-		spend(TICK);
-		return true;
-		 */
 	}
 
 	@Override
@@ -197,7 +147,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return (state == State.RAMPAGING || state == State.UNDYING) ? 1.4f : 1f;
 	}
 	public float accuracyFactor(){
-		return (state == State.RAMPAGING || state == State.UNDYING) ? 2f : 1f;
+		//Hero gets +acc while preparing, but NOT the +dmg
+		return (state == State.RAMPAGING || state == State.UNDYING || state == State.PREPARING) ? 2f : 1f;
 	}
 
 	public boolean raging(){
@@ -214,6 +165,11 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return state == State.UNDYING;
 	}
 
+	public void onHit() {
+		if(state == State.PREPARING)
+			startRampage();
+	}
+
 	private float shieldFactor() {
 		float min = .15f;
 		float missingHP = (float)(target.HT - target.HP) / target.HT;
@@ -226,20 +182,15 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		spend(target.cooldown()-cooldown()+TICK);
 	}
 
-	private void startRampage(){
-		state = State.RAMPAGING;
-
-		ticksLeft = RAMPAGE_START;
+	private void prepareRampage() {
+		state = State.PREPARING;
+		ticksLeft = PREPARATION_START;
 		alignWithHero();
-
-		WarriorShield shield = target.buff(WarriorShield.class);
-		int shieldAmount = Math.round(3*shield.maxShield() * shieldFactor());
-		shield.supercharge(shieldAmount);
 
 		for (Mob mob : Dungeon.level.mobs) {
 			if (mob.paralysed <= 0
-				&& Dungeon.level.distance(target.pos, mob.pos) <= 8
-				&& mob.alignment != target.alignment
+					&& Dungeon.level.distance(target.pos, mob.pos) <= 8
+					&& mob.alignment != target.alignment
 			) {
 				mob.beckon(target.pos);
 			}
@@ -248,6 +199,20 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		target.sprite.centerEmitter().start( Speck.factory( Speck.SCREAM ), 0.3f, 3 );
 		Sample.INSTANCE.play( Assets.Sounds.CHALLENGE );
 
+		ActionIndicator.clearAction(this);
+		BuffIndicator.refreshHero();
+	}
+
+	private void startRampage(){
+		state = State.RAMPAGING;
+		ticksLeft = RAMPAGE_START;
+		alignWithHero();
+
+		WarriorShield shield = target.buff(WarriorShield.class);
+		int shieldAmount = Math.round(3*shield.maxShield() * shieldFactor());
+		shield.supercharge(shieldAmount);
+
+		Sample.INSTANCE.play(Assets.Sounds.BURNING, 2f, 0.75f);
 		GameScene.flash(0xFF0000);
 		SpellSprite.show(target, SpellSprite.BERSERK);
 		target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shieldAmount), FloatingText.SHIELDING );
@@ -261,6 +226,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			ticksLeft += 2;
 		}
 		else if(state == State.UNDYING) {
+			ticksLeft++;
 			rageKills++;
 		}
 	}
@@ -363,7 +329,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public void doAction() {
 		WarriorShield shield = target.buff(WarriorShield.class);
 		if (shield != null && shield.maxShield() > 0) {
-			startRampage();
+			prepareRampage();
 		} else {
 			GLog.w(Messages.get(this, "no_seal"));
 		}
@@ -386,6 +352,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			case ANGRY:
 				icon.hardlight(1f, 1.0f, 0f);
 				break;
+			case PREPARING:
+				icon.hardlight(1f, 0.75f, 0f);
+				break;
 			case RAMPAGING:
 				icon.hardlight(1f, 0.5f, 0f);
 				break;
@@ -397,18 +366,20 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	
 	@Override
 	public float iconFadePercent() {
-		if(state == State.RECOVERING)
-			return (float)cooldown / COOLDOWN_START;
-		if(state == State.READY)
-			return 0f;
-		else if(state == State.ANGRY)
-			return 1f - durationLeft() / ANGER_START;
-		else if(state == State.RAMPAGING)
-			return 1f - durationLeft() / RAMPAGE_START;
-		else if(state == State.UNDYING)
-			return 1f - durationLeft() / rageDuration();
-
-		else return 0f;
+		switch (state) {
+			case RECOVERING:
+				return (float)cooldown / COOLDOWN_START;
+			case READY: default:
+				return 0f;
+			case ANGRY:
+				return 1f - durationLeft() / ANGER_START;
+			case PREPARING:
+				return 1f - durationLeft() / PREPARATION_START;
+			case RAMPAGING:
+				return 1f - durationLeft() / RAMPAGE_START;
+			case UNDYING:
+				return 1f - durationLeft() / rageDuration();
+		}
 	}
 
 	public String iconTextDisplay(){
@@ -429,6 +400,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				return Messages.get(this, "ready");
 			case ANGRY:
 				return Messages.get(this, "angry");
+			case PREPARING:
+				return Messages.get(this, "preparing");
 			case RAMPAGING:
 				return Messages.get(this, "rampaging");
 			case UNDYING:
@@ -449,6 +422,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				return Messages.get(this, "ready_desc");
 			case ANGRY:
 				return Messages.get(this, "angry_desc", Messages.decimalFormat("#.##", durationLeft()));
+			case PREPARING:
+				return Messages.get(this, "preparing_desc", Messages.decimalFormat("#.##", durationLeft()));
 			case RAMPAGING:
 				return Messages.get(this, "rampaging_desc", Messages.decimalFormat("#.##", durationLeft()));
 			case UNDYING:

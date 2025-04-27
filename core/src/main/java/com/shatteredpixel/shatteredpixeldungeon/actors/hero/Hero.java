@@ -2416,6 +2416,11 @@ public class Hero extends Char {
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
 		}
 
+		if (hit && subClass == HeroSubClass.BERSERKER && wasEnemy) {
+			Berserk berserk = buff(Berserk.class);
+			if(berserk != null) berserk.onHit();
+		}
+
 		curAction = null;
 
 		super.onAttackComplete();
