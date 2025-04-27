@@ -98,7 +98,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	@Override
 	public boolean act() {
 		if(state == State.RECOVERING) {
-			cooldown--;
+			if(Regeneration.regenOn()) cooldown--;
 
 			if(cooldown <= 0) state = State.READY;
 		}
