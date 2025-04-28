@@ -108,6 +108,7 @@ public class TengusMask extends Item {
 		}
 		if (way == HeroSubClass.BERSERKER) {
 			Buff.affect(curUser, Berserk.class);
+			Buff.affect(curUser, Berserk.LastStandIndicator.class);
 		}
 		
 		curUser.sprite.operate( curUser.pos );

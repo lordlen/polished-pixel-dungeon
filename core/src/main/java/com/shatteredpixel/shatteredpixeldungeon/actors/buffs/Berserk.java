@@ -58,6 +58,16 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 	private State state = State.READY;
 
+	private void switchState(State state) {
+		this.state = state;
+		BuffIndicator.refreshHero();
+
+		if(state == State.ANGRY)
+			ActionIndicator.setAction(this);
+		else
+			ActionIndicator.clearAction(this);
+	}
+
 	private static final int ANGER_START = 5;
 	private static final int PREPARATION_START = 3;
 	private static final int RAMPAGE_START = 10;
@@ -85,14 +95,10 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 
-		state = bundle.getEnum(STATE, State.class);
+		switchState(bundle.getEnum(STATE, State.class));
 		ticksLeft = bundle.getInt(TICKS_LEFT);
 		cooldown = bundle.getInt(COOLDOWN);
 		rageKills = bundle.getInt(RAGE_KILLS);
-
-		if (state == State.ANGRY) {
-			ActionIndicator.setAction(this);
-		}
 	}
 
 
@@ -103,7 +109,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		if(state == State.RECOVERING) {
 			if(Regeneration.regenOn()) cooldown--;
 
-			if(cooldown <= 0) state = State.READY;
+			if(cooldown <= 0) switchState(State.READY);
 		}
 		else if(state == State.READY) {
 			//do nothing
@@ -111,10 +117,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		else if(state == State.ANGRY) {
 			ticksLeft--;
 
-			if(ticksLeft <= 0) {
-				state = State.READY;
-				ActionIndicator.clearAction(this);
-			}
+			if(ticksLeft <= 0)
+				switchState(State.READY);
 		}
 		else if(state == State.PREPARING) {
 			ticksLeft--;
@@ -129,7 +133,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				stopRampage();
 		}
 
-		BuffIndicator.refreshHero();
 		return true;
 	}
 
@@ -202,16 +205,14 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	public void damage(int damage){
 		if(state == State.READY || state == State.ANGRY) {
-			state = State.ANGRY;
+			switchState(State.ANGRY);
 			ticksLeft = ANGER_START;
 			alignWithHero();
-
-			ActionIndicator.setAction(this);
 		}
 	}
 
 	private void prepareRampage() {
-		state = State.PREPARING;
+		switchState(State.PREPARING);
 		ticksLeft = PREPARATION_START;
 		alignWithHero();
 
@@ -226,9 +227,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		target.sprite.centerEmitter().start( Speck.factory( Speck.SCREAM ), 0.3f, 3 );
 		Sample.INSTANCE.play( Assets.Sounds.CHALLENGE );
-
-		ActionIndicator.clearAction(this);
-		BuffIndicator.refreshHero();
 	}
 
 	public void onHit() {
@@ -237,7 +235,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	private void startRampage(){
-		state = State.RAMPAGING;
+		switchState(State.RAMPAGING);
 		ticksLeft = RAMPAGE_START;
 		alignWithHero();
 
@@ -249,8 +247,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		GameScene.flash(0xFF8000);
 		SpellSprite.show(target, SpellSprite.BERSERK);
 		target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shieldAmount), FloatingText.SHIELDING );
-
-		ActionIndicator.clearAction(this);
 	}
 
 	public void continueRampage(){
@@ -279,7 +275,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		if(shield != null)
 			shield.clearShield();
 
-		state = State.RECOVERING;
+		switchState(State.RECOVERING);
 		cooldown = COOLDOWN_START;
 
 		GameScene.flash(0x80FFFFFF);
@@ -303,7 +299,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	private void startRage(){
-		state = State.UNDYING;
+		switchState(State.UNDYING);
 		ticksLeft = rageDuration();
 		alignWithHero();
 
@@ -321,8 +317,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		GameScene.flash(0xFF0000);
 		SpellSprite.show(target, SpellSprite.BERSERK);
-
-		ActionIndicator.clearAction(this);
 		Dungeon.hero.interrupt();
 	}
 
@@ -458,13 +452,13 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			case READY: default:
 				return Messages.get(this, "ready_desc");
 			case ANGRY:
-				return Messages.get(this, "angry_desc", Messages.decimalFormat("#.##", durationLeft()));
+				return Messages.get(this, "angry_desc", dispTurns(durationLeft()));
 			case PREPARING:
-				return Messages.get(this, "preparing_desc", Messages.decimalFormat("#.##", durationLeft()));
+				return Messages.get(this, "preparing_desc", dispTurns(durationLeft()));
 			case RAMPAGING:
-				return Messages.get(this, "rampaging_desc", Messages.decimalFormat("#.##", durationLeft()));
+				return Messages.get(this, "rampaging_desc", dispTurns(durationLeft()));
 			case UNDYING:
-				return Messages.get(this, "undying_desc", Messages.decimalFormat("#.##", durationLeft()));
+				return Messages.get(this, "undying_desc", dispTurns(durationLeft()));
 		}
 	}
 
@@ -529,6 +523,48 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		@Override
 		public String desc() {
 			return Messages.get(this, "desc", levelRecovery);
+		}
+	}
+
+	public static class LastStandIndicator extends FlavourBuff {
+		{
+			type = buffType.POSITIVE;
+			actPriority = HERO_PRIO-1;
+		}
+
+		boolean active = false;
+
+		@Override
+		public boolean act() {
+			Berserk berserk = target.buff(Berserk.class);
+			if(berserk != null) active = berserk.facingEnemies() >= 3 && ((Hero)target).hasTalent(Talent.LAST_STAND);
+
+			spend(target.cooldown());
+			return true;
+		}
+
+		@Override
+		public int icon() {
+			return active ? BuffIndicator.LAST_STAND : BuffIndicator.NONE;
+		}
+
+		@Override
+		public String iconTextDisplay() {
+			return "";
+		}
+
+
+		private static final String ACTIVE = "active";
+
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(ACTIVE, active);
+		}
+
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			active = bundle.getBoolean(ACTIVE);
 		}
 	}
 }
