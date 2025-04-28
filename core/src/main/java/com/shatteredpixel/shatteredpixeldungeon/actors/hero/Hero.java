@@ -1705,12 +1705,11 @@ public class Hero extends Char {
 	@Override
 	public int resistDamage(float dmg, Object src, HashSet<DamageProperty> properties) {
 
-		if(properties.contains(DamageProperty.RESISTED)) {
-			Talent.WarriorFoodImmunity immu = buff(Talent.WarriorFoodImmunity.class);
-			if (immu != null){
-				if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg /= (immu.snack ? 2f : 4f);
-				else if (pointsInTalent(Talent.IRON_STOMACH) >= 2)  dmg = 0;
-			}
+		//Always resist
+		Talent.WarriorFoodImmunity immu = buff(Talent.WarriorFoodImmunity.class);
+		if (immu != null){
+			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg /= (immu.snack ? 2f : 4f);
+			else if (pointsInTalent(Talent.IRON_STOMACH) >= 2)  dmg = 0;
 		}
 
 		dmg = super.resistDamage(dmg, src, properties);
