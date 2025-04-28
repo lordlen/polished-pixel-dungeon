@@ -163,9 +163,11 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return (state == State.RAMPAGING || state == State.UNDYING || state == State.PREPARING) ? 2f : 1f;
 	}
 
-	public float enchantBoost(boolean Glyph){
+	public float enchantBoost(boolean glyph){
 		int points = ((Hero)target).pointsInTalent(Talent.ENRAGED_CATALYST);
-		float boost = points * (Glyph ? 0.4f : 0.2f);
+		float boost = points * (glyph ? 0.5f : 0.2f);
+		//0-100% based on missing HP
+		boost *= shieldFactor()-1;
 
 		return (state == State.RAMPAGING || state == State.UNDYING) ? boost : 1f;
 	}
