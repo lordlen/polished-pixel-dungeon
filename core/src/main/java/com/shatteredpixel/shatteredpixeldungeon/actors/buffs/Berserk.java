@@ -154,8 +154,21 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return 1f + missingHP;
 	}
 
+	public float resistanceFactor(){
+		int points = ((Hero)target).pointsInTalent(Talent.LAST_STAND);
+
+		if(facingEnemies() >= 3 && points > 0)
+			//84%/75%/66%
+			return 0.93f - points * 0.09f;
+
+		else return 1f;
+	}
+
 	public float damageFactor(){
-		return (state == State.RAMPAGING || state == State.UNDYING) ? 1.4f : 1f;
+		int points = ((Hero)target).pointsInTalent(Talent.LAST_STAND);
+		float lastStand = -1*(resistanceFactor()-1);
+
+		return (state == State.RAMPAGING || state == State.UNDYING) ? 1.4f+lastStand : 1f;
 	}
 
 	public float accuracyFactor(){
@@ -170,6 +183,18 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		boost *= 0.2f + 0.8f * (shieldFactor()-1);
 
 		return (state == State.RAMPAGING || state == State.UNDYING) ? boost : 1f;
+	}
+
+	private int facingEnemies() {
+		Hero hero = (Hero)target;
+
+		int enemies = 0;
+		for(Mob mob : hero.getVisibleEnemies()) {
+			if(mob.distance(target) <= 8 && mob.isTargeting(target))
+				enemies++;
+		}
+
+		return enemies;
 	}
 
 

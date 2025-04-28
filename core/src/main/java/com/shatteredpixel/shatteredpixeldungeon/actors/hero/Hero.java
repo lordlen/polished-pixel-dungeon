@@ -1690,6 +1690,9 @@ public class Hero extends Char {
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  damage = 0;
 		}
 
+		Berserk berserk = buff(Berserk.class);
+		if(berserk != null) damage *= berserk.resistanceFactor();
+
 		dmg = Math.round(damage);
 
 		//we ceil this one to avoid letting the player easily take 0 dmg from tenacity early
