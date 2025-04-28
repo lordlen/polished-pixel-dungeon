@@ -70,7 +70,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	private static final int ANGER_START = 5;
 	private static final int PREPARATION_START = 3;
-	private static final int RAMPAGE_START = 10;
+	private static final int RAMPAGE_START = 8;
 	private static final int COOLDOWN_START = 100;
 
 	private int ticksLeft;
