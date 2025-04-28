@@ -61,11 +61,10 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	private static final int ANGER_START = 5;
 	private static final int PREPARATION_START = 3;
 	private static final int RAMPAGE_START = 10;
-	private int ticksLeft;
-
 	private static final int COOLDOWN_START = 100;
-	private int cooldown;
 
+	private int ticksLeft;
+	private int cooldown;
 	private int rageKills = 0;
 
 	private static final String STATE = "state";
@@ -95,6 +94,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			ActionIndicator.setAction(this);
 		}
 	}
+
 
 	@Override
 	public boolean act() {
@@ -132,43 +132,19 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return true;
 	}
 
-	@Override
-	public void detach() {
-		super.detach();
-		ActionIndicator.clearAction(this);
+	private float durationLeft() {
+		return ticksLeft -1 + cooldown();
 	}
 
-	public float enchantFactor(){
-		int points = ((Hero)target).pointsInTalent(Talent.ENRAGED_CATALYST);
-		return (state == State.RAMPAGING || state == State.UNDYING) ? 1f + .25f*points : 1f;
+	private void alignWithHero() {
+		spend(target.cooldown()-cooldown()+TICK);
 	}
 
-	public float damageFactor(){
-		return (state == State.RAMPAGING || state == State.UNDYING) ? 1.4f : 1f;
-	}
-	public float accuracyFactor(){
-		//Hero gets +acc while preparing, but NOT the +dmg
-		return (state == State.RAMPAGING || state == State.UNDYING || state == State.PREPARING) ? 2f : 1f;
+	private int rageDuration() {
+		int points = ((Hero) target).pointsInTalent(Talent.DEATHLESS_FURY);
+		return points*5;
 	}
 
-	public boolean raging(){
-		if (target.HP <= 0
-			&& target.buff(UndyingRecovery.class) == null
-			&& target.buff(WarriorShield.class) != null
-			&& ((Hero)target).hasTalent(Talent.DEATHLESS_FURY)){
-
-			target.HP = 1;
-			if(state != State.UNDYING)
-				startRage();
-		}
-
-		return state == State.UNDYING;
-	}
-
-	public void onHit() {
-		if(state == State.PREPARING)
-			startRampage();
-	}
 
 	private float shieldFactor() {
 		float min = .15f;
@@ -178,8 +154,32 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return 1f + missingHP;
 	}
 
-	private void alignWithHero() {
-		spend(target.cooldown()-cooldown()+TICK);
+	public float damageFactor(){
+		return (state == State.RAMPAGING || state == State.UNDYING) ? 1.4f : 1f;
+	}
+
+	public float accuracyFactor(){
+		//Hero gets +acc while preparing, but NOT the +dmg
+		return (state == State.RAMPAGING || state == State.UNDYING || state == State.PREPARING) ? 2f : 1f;
+	}
+
+	public float enchantBoost(boolean Glyph){
+		int points = ((Hero)target).pointsInTalent(Talent.ENRAGED_CATALYST);
+		float boost = points * (Glyph ? .25f : 15f);
+
+		return (state == State.RAMPAGING || state == State.UNDYING) ? boost : 1f;
+	}
+
+
+	public void damage(int damage){
+		if(state == State.READY || state == State.ANGRY) {
+			state = State.ANGRY;
+			ticksLeft = ANGER_START;
+			alignWithHero();
+
+			ActionIndicator.setAction(this);
+			BuffIndicator.refreshHero();
+		}
 	}
 
 	private void prepareRampage() {
@@ -201,6 +201,11 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		ActionIndicator.clearAction(this);
 		BuffIndicator.refreshHero();
+	}
+
+	public void onHit() {
+		if(state == State.PREPARING)
+			startRampage();
 	}
 
 	private void startRampage(){
@@ -231,10 +236,45 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		}
 	}
 
-	private int rageDuration() {
-		int points = ((Hero) target).pointsInTalent(Talent.DEATHLESS_FURY);
-		return points*5;
+	private void stopRampage() {
+		if(state == State.UNDYING) {
+			Buff.affect(target, Berserk.UndyingRecovery.class);
+
+			int healing = Math.min(Math.round(rageHeal() * target.HT), target.HT - target.HP);
+			target.HP += healing;
+			rageKills = 0;
+
+			target.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healing), FloatingText.HEALING);
+			Sample.INSTANCE.play(Assets.Sounds.DRINK);
+		}
+
+		WarriorShield shield = target.buff(WarriorShield.class);
+		if(shield != null)
+			shield.clearShield();
+
+		state = State.RECOVERING;
+		cooldown = COOLDOWN_START;
+
+		GameScene.flash(0x80FFFFFF);
+		Sample.INSTANCE.play(Assets.Sounds.DEGRADE);
+		Dungeon.hero.interrupt();
 	}
+
+
+	public boolean raging(){
+		if (target.HP <= 0
+				&& target.buff(UndyingRecovery.class) == null
+				&& target.buff(WarriorShield.class) != null
+				&& ((Hero)target).hasTalent(Talent.DEATHLESS_FURY)){
+
+			target.HP = 1;
+			if(state != State.UNDYING)
+				startRage();
+		}
+
+		return state == State.UNDYING;
+	}
+
 	private void startRage(){
 		state = State.UNDYING;
 		ticksLeft = rageDuration();
@@ -266,40 +306,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		return mult * Math.max(.025f + .015f*rageKills, .1f);
 	}
-	private void stopRampage() {
-		if(state == State.UNDYING) {
-			Buff.affect(target, Berserk.UndyingRecovery.class);
 
-			int healing = Math.min(Math.round(rageHeal() * target.HT), target.HT - target.HP);
-			target.HP += healing;
-			rageKills = 0;
-
-			target.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healing), FloatingText.HEALING);
-			Sample.INSTANCE.play(Assets.Sounds.DRINK);
-		}
-
-		WarriorShield shield = target.buff(WarriorShield.class);
-		if(shield != null)
-			shield.clearShield();
-
-		state = State.RECOVERING;
-		cooldown = COOLDOWN_START;
-
-		GameScene.flash(0x80FFFFFF);
-		Sample.INSTANCE.play(Assets.Sounds.DEGRADE);
-		Dungeon.hero.interrupt();
-	}
-	
-	public void damage(int damage){
-		if(state == State.READY || state == State.ANGRY) {
-			state = State.ANGRY;
-			ticksLeft = ANGER_START;
-			alignWithHero();
-
-			ActionIndicator.setAction(this);
-			BuffIndicator.refreshHero();
-		}
-	}
 
 	@Override
 	public String actionName() {
@@ -334,6 +341,13 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			GLog.w(Messages.get(this, "no_seal"));
 		}
 	}
+
+	@Override
+	public void detach() {
+		super.detach();
+		ActionIndicator.clearAction(this);
+	}
+
 
 	@Override
 	public int icon() {
@@ -409,10 +423,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		}
 	}
 
-	private float durationLeft() {
-		return ticksLeft -1 + cooldown();
-	}
-
 	@Override
 	public String desc() {
 		switch (state){
@@ -431,6 +441,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		}
 	}
 
+
 	public static class UndyingRecovery extends FlavourBuff {
 		{
 			type = buffType.NEUTRAL;
@@ -444,6 +455,12 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			if(levelRecovery >= LEVEL_RECOVER) {
 				detach();
 			}
+		}
+
+		@Override
+		public boolean act() {
+			spend( TICK );
+			return true;
 		}
 
 
@@ -462,11 +479,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			levelRecovery = bundle.getFloat(LEVEL_RECOVERY);
 		}
 
-		@Override
-		public boolean act() {
-			spend( TICK );
-			return true;
-		}
 
 		@Override
 		public int icon() {
