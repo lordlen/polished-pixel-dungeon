@@ -98,6 +98,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	@Override
 	public boolean act() {
+		spend(TICK);
+
 		if(state == State.RECOVERING) {
 			if(Regeneration.regenOn()) cooldown--;
 
@@ -128,16 +130,16 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		}
 
 		BuffIndicator.refreshHero();
-		spend(TICK);
 		return true;
 	}
 
 	private float durationLeft() {
-		return ticksLeft -1 + cooldown();
+		return ticksLeft-1 + cooldown();
 	}
 
 	private void alignWithHero() {
-		spend(target.cooldown()-cooldown()+TICK);
+		timeToNow();
+		spend(target.cooldown()+TICK);
 	}
 
 	private int rageDuration() {
@@ -205,7 +207,6 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			alignWithHero();
 
 			ActionIndicator.setAction(this);
-			BuffIndicator.refreshHero();
 		}
 	}
 
@@ -245,12 +246,11 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		shield.supercharge(shieldAmount);
 
 		Sample.INSTANCE.play(Assets.Sounds.BURNING, 2f, 0.75f);
-		GameScene.flash(0xFF0000);
+		GameScene.flash(0xFF8000);
 		SpellSprite.show(target, SpellSprite.BERSERK);
 		target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shieldAmount), FloatingText.SHIELDING );
 
 		ActionIndicator.clearAction(this);
-		BuffIndicator.refreshHero();
 	}
 
 	public void continueRampage(){
@@ -316,14 +316,13 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			}
 		}
 
-		target.sprite.centerEmitter().start( Speck.factory( Speck.SCREAM ), 0.2f, 5 );
+		target.sprite.centerEmitter().start( Speck.factory( Speck.SCREAM ), 0.3f, 3 );
 		Sample.INSTANCE.play( Assets.Sounds.CHALLENGE );
 
 		GameScene.flash(0xFF0000);
 		SpellSprite.show(target, SpellSprite.BERSERK);
 
 		ActionIndicator.clearAction(this);
-		BuffIndicator.refreshHero();
 		Dungeon.hero.interrupt();
 	}
 
