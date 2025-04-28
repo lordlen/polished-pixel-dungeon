@@ -147,7 +147,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	private int rageDuration() {
 		int points = ((Hero) target).pointsInTalent(Talent.UNDYING_RAGE);
-		return points*5;
+		if (points == 0) return 0;
+
+		else return 1 + 3 * points;
 	}
 
 
