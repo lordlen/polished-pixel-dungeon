@@ -242,7 +242,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		alignWithHero();
 
 		WarriorShield shield = target.buff(WarriorShield.class);
-		int shieldAmount = Math.round(3*shield.maxShield() * shieldFactor());
+		//WILL CHANGE THIS AFTER WARRIOR REWORK MERGE
+		int shieldAmount = Math.round(3*shield.Polished_reworkShield() * shieldFactor());
 		shield.supercharge(shieldAmount);
 
 		Sample.INSTANCE.play(Assets.Sounds.BURNING, 2f, 0.75f);
