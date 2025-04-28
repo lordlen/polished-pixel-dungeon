@@ -141,7 +141,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	private int rageDuration() {
-		int points = ((Hero) target).pointsInTalent(Talent.DEATHLESS_FURY);
+		int points = ((Hero) target).pointsInTalent(Talent.UNDYING_RAGE);
 		return points*5;
 	}
 
@@ -165,7 +165,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	public float enchantBoost(boolean Glyph){
 		int points = ((Hero)target).pointsInTalent(Talent.ENRAGED_CATALYST);
-		float boost = points * (Glyph ? .25f : 15f);
+		float boost = points * (Glyph ? 0.4f : 0.2f);
 
 		return (state == State.RAMPAGING || state == State.UNDYING) ? boost : 1f;
 	}
@@ -265,7 +265,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		if (target.HP <= 0
 				&& target.buff(UndyingRecovery.class) == null
 				&& target.buff(WarriorShield.class) != null
-				&& ((Hero)target).hasTalent(Talent.DEATHLESS_FURY)){
+				&& ((Hero)target).hasTalent(Talent.UNDYING_RAGE)){
 
 			target.HP = 1;
 			if(state != State.UNDYING)
@@ -301,10 +301,11 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	private float rageHeal() {
-		int points = ((Hero) target).pointsInTalent(Talent.DEATHLESS_FURY);
-		float mult = 1f * points;
+		int points = ((Hero) target).pointsInTalent(Talent.UNDYING_RAGE);
 
-		return mult * Math.max(.025f + .015f*rageKills, .1f);
+		//capped at 7 kills
+		float max = points * .13f;
+		return points * Math.max(.025f + .015f*rageKills, max);
 	}
 
 
