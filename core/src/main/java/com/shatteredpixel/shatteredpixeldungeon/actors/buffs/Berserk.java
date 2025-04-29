@@ -328,7 +328,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		//capped at 7 kills
 		float max = points * .13f;
-		return points * Math.max(.025f + .015f*rageKills, max);
+		return Math.min(points * (0.025f + 0.015f*rageKills), max);
 	}
 
 
