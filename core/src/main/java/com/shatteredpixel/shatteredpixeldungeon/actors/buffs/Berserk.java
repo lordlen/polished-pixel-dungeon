@@ -327,8 +327,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		int points = ((Hero) target).pointsInTalent(Talent.UNDYING_RAGE);
 
 		//capped at 7 kills
-		float max = points * .13f;
-		return Math.min(points * (0.025f + 0.015f*rageKills), max);
+		float max = points * .125f;
+		return Math.min(points * (0.025f + 0.0125f*rageKills), max);
 	}
 
 
