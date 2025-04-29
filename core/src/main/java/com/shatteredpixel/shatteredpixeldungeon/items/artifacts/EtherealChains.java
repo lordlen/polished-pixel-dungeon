@@ -59,7 +59,7 @@ import java.util.ArrayList;
 
 public class EtherealChains extends Artifact {
 
-	protected static final float baseCripple = 0f;
+	protected static final float baseCripple = 1f;
 
 	public static final String AC_CAST       = "CAST";
 
@@ -199,7 +199,8 @@ public class EtherealChains extends Artifact {
 				Actor.add(new Pushing(enemy, enemy.pos, pulledPos, new Callback() {
 					public void call() {
 						enemy.pos = pulledPos;
-						Buff.Polished.affectAligned(enemy, Cripple.class, baseCripple + 3*chargeUse);
+						Buff.affect(enemy, Cripple.class, baseCripple + (enemy.cooldown() % TICK) + 3*chargeUse);
+						//Buff.Polished.affectAligned(enemy, Cripple.class, baseCripple + 3*chargeUse);
 
 						charge -= chargeUse;
 						Invisibility.dispel(hero);
@@ -241,7 +242,7 @@ public class EtherealChains extends Artifact {
 		for (int i : PathFinder.NEIGHBOURS8){
 			Mob mob = Dungeon.level.findMob(chain.collisionPos+i);
 			if (mob != null && mob.alignment == Char.Alignment.ENEMY &&
-					Dungeon.hero.fieldOfView[chain.collisionPos+i] && Dungeon.hero.fieldOfView[chain.collisionPos]) {
+					Dungeon.hero.fieldOfView[chain.collisionPos+i]) {
 				enemyFound = true;
 				break;
 			}
@@ -277,7 +278,7 @@ public class EtherealChains extends Artifact {
 						updateQuickslot();
 
 						Dungeon.level.occupyCell(hero);
-						hero.spendAndNext(1f);
+						//hero.spendAndNext(1f);
 						Dungeon.observe();
 						GameScene.updateFog();
 					}
