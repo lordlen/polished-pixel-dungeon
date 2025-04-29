@@ -139,7 +139,7 @@ public class Warlock extends Mob implements Callback {
 		}
 
 		if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-			sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()));
+			sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
 		}
 	}
 	

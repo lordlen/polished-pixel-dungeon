@@ -137,7 +137,7 @@ public abstract class Shaman extends Mob {
 		}
 
 		if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-			sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()));
+			sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
 		}
 	}
 	
