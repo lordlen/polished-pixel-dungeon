@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.effects;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.watabou.noosa.Game;
@@ -29,8 +31,12 @@ import com.watabou.noosa.Image;
 public class TargetedCell extends Image {
 
 	private float alpha;
+	float time;
 
 	public TargetedCell( int pos, int color ) {
+		this(pos, color, -1f);
+	}
+	public TargetedCell( int pos, int color, float time ) {
 		super(Icons.get(Icons.TARGET));
 		hardlight(color);
 
@@ -39,15 +45,17 @@ public class TargetedCell extends Image {
 		point( DungeonTilemap.tileToWorld( pos ) );
 
 		alpha = 1f;
+		scale.set(alpha);
+		this.time = time;
 	}
 
 	@Override
 	public void update() {
-		if ((alpha -= Game.elapsed/2f) > 0) {
-			alpha( alpha );
-			scale.set( alpha );
-		} else {
-			killAndErase();
-		}
+		alpha -= Game.elapsed/2f;
+		if(Actor.now() + Dungeon.hero.cooldown() <= time) alpha = Math.max(alpha, 0.75f);
+
+		alpha( alpha );
+		scale.set( alpha );
+		if (alpha <= 0) killAndErase();
 	}
 }

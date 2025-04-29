@@ -957,13 +957,6 @@ public class Dungeon {
 		int height_e = b_e - t_e + 1;
 
 		boolean[] extension = level.heroFOV.clone();
-		/*for (int i = 0; i < level.length(); i++ ) {
-			if (level.passable[i] && level.heroFOV[i]) {
-				for(int offset : PathFinder.NEIGHBOURS9) {
-					extension[i + offset] = true;
-				}
-			}
-		}*/
 
 		boolean reveal = Dungeon.hero.pointsInTalent(Talent.ROGUES_EXPERTISE) >= 2;
 		for (int i = l; i < r; i++) {
@@ -1061,6 +1054,14 @@ public class Dungeon {
 
 				width = r - l + 1;
 				height = b - t + 1;
+
+				l_e = Math.max( 0, x - dist-1 );
+				r_e = Math.min( x + dist+1, level.width() - 1 );
+				t_e = Math.max( 0, y - dist-1 );
+				b_e = Math.min( y + dist+1, level.height() - 1 );
+
+				width_e = r_e - l_e + 1;
+				height_e = b_e - t_e + 1;
 
 				pos = l + t * level.width();
 				for (int i = t; i <= b; i++) {
