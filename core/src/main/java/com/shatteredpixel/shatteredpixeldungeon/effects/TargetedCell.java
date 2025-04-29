@@ -59,7 +59,11 @@ public class TargetedCell extends Image {
 	@Override
 	public void update() {
 		alpha -= Game.elapsed/2f;
-		if(Actor.now() + Dungeon.hero.cooldown() <= time || !assigned.isAlive()) alpha = Math.max(alpha, 0.75f);
+		if (Actor.now() + Dungeon.hero.cooldown() <= time
+			&& ( assigned == null || assigned.isAlive()) )
+		{
+			alpha = Math.max(alpha, 0.75f);
+		}
 
 		alpha( alpha );
 		scale.set( alpha );
