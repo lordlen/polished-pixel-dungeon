@@ -380,6 +380,8 @@ public class Hero extends Char {
 	private static final String LEVEL		= "lvl";
 	private static final String EXPERIENCE	= "exp";
 	private static final String HTBOOST     = "htboost";
+
+	private static final String JUST_MOVED  = "just_moved";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -400,6 +402,8 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
+
+		bundle.put( JUST_MOVED, justMoved );
 
 		belongings.storeInBundle( bundle );
 	}
@@ -423,6 +427,8 @@ public class Hero extends Char {
 		defenseSkill = bundle.getInt( DEFENSE );
 		
 		STR = bundle.getInt( STRENGTH );
+
+		justMoved = bundle.getBoolean( JUST_MOVED );
 
 		belongings.restoreFromBundle( bundle );
 	}

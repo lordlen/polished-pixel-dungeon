@@ -102,7 +102,7 @@ public abstract class Trap implements Bundlable {
 					Buff.affect(Dungeon.hero, Haste.class, duration);
 				}
 			}
-			if(Dungeon.hero.pos == pos) {
+			if(Dungeon.hero.pos == pos && !visible) {
 				GameScene.Polished.blockInput();
 			}
 			if (disarmedByActivation) disarm();
