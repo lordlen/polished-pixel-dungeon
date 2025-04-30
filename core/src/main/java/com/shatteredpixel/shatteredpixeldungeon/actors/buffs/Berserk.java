@@ -49,6 +49,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	{
 		type = buffType.POSITIVE;
+		revivePersists = true;
 
 		actPriority=HERO_PRIO+1;
 	}
@@ -474,6 +475,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public static class UndyingRecovery extends FlavourBuff {
 		{
 			type = buffType.NEUTRAL;
+			revivePersists = true;
 		}
 		private static final float LEVEL_RECOVER = 1f;
 		private float levelRecovery = 0;
@@ -537,6 +539,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public static class LastStandIndicator extends FlavourBuff {
 		{
 			type = buffType.POSITIVE;
+			revivePersists = true;
+
 			actPriority = HERO_PRIO-1;
 		}
 
