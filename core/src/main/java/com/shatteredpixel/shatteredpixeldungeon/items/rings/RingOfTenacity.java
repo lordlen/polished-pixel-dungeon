@@ -71,7 +71,7 @@ public class RingOfTenacity extends Ring {
 	public static float damageMultiplier( Char t ){
 		float min = .15f;
 
-		//scales 15%-100%, caps at 15% hp
+		//scales at 15%-100%, caps at 15% hp
 		float missingHP = (float)(t.HT - t.HP) / t.HT;
 		missingHP *= 1f-min;
 		missingHP += min;
