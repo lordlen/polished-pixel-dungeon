@@ -150,7 +150,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		int points = ((Hero) target).pointsInTalent(Talent.UNDYING_RAGE);
 		if (points == 0) return 0;
 
-		else return 1 + 3 * points;
+		else return 1 + 2 * points;
 	}
 
 
@@ -192,8 +192,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public float enchantBoost(boolean glyph){
 		int points = ((Hero)target).pointsInTalent(Talent.ENRAGED_CATALYST);
 		float boost = points * (glyph ? 0.5f : 0.2f);
-		//20-100% based on missing HP
-		boost *= 0.2f + 0.8f * (shieldFactor()-1);
+		//15-100% based on missing HP
+		boost *= 0.15f + 0.85f * (shieldFactor()-1);
 
 		return (state == State.RAMPAGING || state == State.UNDYING) ? boost : 1f;
 	}
@@ -332,8 +332,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	private float rageHeal() {
 		int points = ((Hero) target).pointsInTalent(Talent.UNDYING_RAGE);
 
-		//capped at 8 kills
-		float max = points * .125f;
+		//caps at 7 kills
+		float max = points * 0.1f;
 		return Math.min(points * (0.025f + 0.0125f*rageKills), max);
 	}
 
@@ -477,7 +477,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			type = buffType.NEUTRAL;
 			revivePersists = true;
 		}
-		private static final float LEVEL_RECOVER = 1f;
+		private static final float LEVEL_RECOVER = 1.5f;
 		private float levelRecovery = 0;
 
 		public void recover(float percent){
