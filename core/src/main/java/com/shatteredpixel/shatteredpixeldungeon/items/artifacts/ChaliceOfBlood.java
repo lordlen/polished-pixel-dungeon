@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -73,6 +74,11 @@ public class ChaliceOfBlood extends Artifact {
 		super.execute(hero, action);
 
 		if (action.equals(AC_PRICK)){
+
+			if(hero.buff(Berserk.class) != null && hero.buff(Berserk.class).raging()) {
+				GLog.w(Messages.get(this, "undying"));
+				return;
+			}
 
 			int damage = 5 + 3*(level()*level());
 
