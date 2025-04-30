@@ -35,7 +35,7 @@ public class Brimstone extends Armor.Glyph {
 		float multi = RingOfArcana.enchantPowerMultiplier(target);
 		float basePower = 0.4f + 0.5f * brimstoneLevel;
 
-		float shieldPerTurn = basePower * multi + 0.5f * multi;
+		float shieldPerTurn = basePower * multi + 0.5f * (multi-1);
 		int shieldCap = (int)Math.ceil(4 * basePower);
 
 		int shieldGain = (int)shieldPerTurn;
