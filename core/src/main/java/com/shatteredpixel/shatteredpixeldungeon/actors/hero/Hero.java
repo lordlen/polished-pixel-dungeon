@@ -2080,7 +2080,7 @@ public class Hero extends Char {
 		if (armband != null) armband.gainCharge(percent);
 
 		Berserk.UndyingRecovery recovery = buff(Berserk.UndyingRecovery.class);
-		if (recovery != null) recovery.recover(source != PotionOfExperience.class ? percent : percent/2f);
+		if (recovery != null) recovery.recover(source != PotionOfExperience.class ? percent : 0.75f * percent);
 		
 		if (source != PotionOfExperience.class) {
 			for (Item i : belongings) {
