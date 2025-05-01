@@ -61,6 +61,8 @@ public class TalentsPane extends ScrollPane {
 		else
 			tiersAvailable = Hero.Polished.tiersUnlocked();
 
+		tiersAvailable = Math.min(tiersAvailable, talents.size());
+
 		for (int i = 0; i < tiersAvailable; i++){
 			if (talents.get(i).isEmpty()) continue;
 
