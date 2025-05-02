@@ -73,7 +73,7 @@ public class RingOfTenacity extends Ring {
 
 		//scales at 15%-100%, caps at 15% hp
 		float missingHP = (float)(t.HT - t.HP) / t.HT;
-		missingHP *= 1f-min;
+		missingHP = Math.min(missingHP, 0.85f);
 		missingHP += min;
 
 		return (float)Math.pow(0.85, getBuffedBonus( t, Tenacity.class)*missingHP );
