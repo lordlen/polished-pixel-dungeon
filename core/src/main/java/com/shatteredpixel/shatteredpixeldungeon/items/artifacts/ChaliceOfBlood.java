@@ -63,6 +63,7 @@ public class ChaliceOfBlood extends Artifact {
 				&& level() < levelCap
 				&& !cursed
 				&& !hero.isInvulnerable(getClass())
+				&& (hero.buff(Berserk.class) == null || !hero.buff(Berserk.class).raging())
 				&& hero.buff(MagicImmune.class) == null)
 			actions.add(AC_PRICK);
 		return actions;
@@ -73,12 +74,6 @@ public class ChaliceOfBlood extends Artifact {
 		super.execute(hero, action);
 
 		if (action.equals(AC_PRICK)){
-
-			if(hero.buff(Berserk.class) != null && hero.buff(Berserk.class).raging()) {
-				GLog.w(Messages.get(this, "undying"));
-				return;
-			}
-
 			int damage = 5 + 3*(level()*level());
 
 			if (damage > hero.HP*0.75) {
