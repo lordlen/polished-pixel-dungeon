@@ -1270,7 +1270,7 @@ public abstract class Level implements Bundlable {
 
 			if(Dungeon.level.heroFOV[cell]) {
 				GameScene.discoverTile( cell, oldValue );
-				//ScrollOfMagicMapping.discover( cell );
+				ScrollOfMagicMapping.discover( cell );
 				GLog.w( Messages.get(Hero.class, "noticed_smth") );
 				Sample.INSTANCE.play( Assets.Sounds.SECRET );
 				Dungeon.hero.interrupt();
