@@ -86,6 +86,8 @@ public class Brute extends Mob {
 			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
 			return;
 		}
+		if (src instanceof Viscosity.DeferedDamage) super.damage(dmg, src);
+
 
 		Char attacker = null;
 		if(src instanceof Char) attacker = (Char)src;
