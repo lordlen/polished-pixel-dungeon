@@ -1055,10 +1055,10 @@ public class Dungeon {
 				width = r - l + 1;
 				height = b - t + 1;
 
-				l_e = Math.max( 0, x - dist-1 );
-				r_e = Math.min( x + dist+1, level.width() - 1 );
-				t_e = Math.max( 0, y - dist-1 );
-				b_e = Math.min( y + dist+1, level.height() - 1 );
+				l_e = Math.max( 0, l-1 );
+				r_e = Math.min( r+1, level.width() - 1 );
+				t_e = Math.max( 0, t-1 );
+				b_e = Math.min( b+1, level.height() - 1 );
 
 				width_e = r_e - l_e + 1;
 				height_e = b_e - t_e + 1;
