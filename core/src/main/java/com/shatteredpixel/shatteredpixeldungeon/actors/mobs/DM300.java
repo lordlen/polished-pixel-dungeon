@@ -320,7 +320,23 @@ public class DM300 extends Mob {
 
 	@Override
 	public void move(int step, boolean travelling) {
-		if(!Dungeon.level.openSpace[step] && travelling && POLISHED_cooldown > 0) return;
+		if(!Dungeon.level.openSpace[step] && travelling) {
+			if(POLISHED_cooldown > 0) return;
+
+			//try to find an equivalent open tile
+			if(target != -1 && !path.isEmpty()) {
+				for (int i : PathFinder.NEIGHBOURS8) {
+					int candidate = step+i;
+
+					if (Dungeon.level.adjacent(pos, candidate) && Dungeon.level.adjacent(candidate, path.getFirst())
+						&& cellIsPathable(candidate) && Dungeon.level.openSpace[candidate]) {
+
+						step = candidate;
+						break;
+					}
+				}
+			}
+		}
 
 		int oldpos = pos;
 		super.move(step, travelling);
@@ -650,6 +666,7 @@ public class DM300 extends Mob {
 			POLISHED_cooldown=cd;
 
 			properties.add(Property.LARGE);
+			path = null;
 
 			//Make sure DM isn't too aggressive on spawn
 			if(!fightStarted()) {
