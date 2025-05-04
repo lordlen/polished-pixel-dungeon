@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ScorpioSprite;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
@@ -83,8 +84,8 @@ public class Scorpio extends Mob {
 			Buff.prolong( enemy, Cripple.class, Cripple.DURATION );
 		}
 
-		if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-			sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
+		if(enemy == Dungeon.hero) {
+			GameScene.Polished.queueIndicator(this);
 		}
 		
 		return damage;

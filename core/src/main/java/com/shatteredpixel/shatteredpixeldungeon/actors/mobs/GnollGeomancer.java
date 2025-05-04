@@ -601,7 +601,7 @@ public class GnollGeomancer extends Mob {
 
 							Ballistica warnPath = new Ballistica(aim.sourcePos, aim.collisionPos, Ballistica.STOP_SOLID);
 							for (int j : warnPath.subPath(0, warnPath.dist)){
-								sprite.parent.add(new TargetedCell(j, 0xFF0000, now()+cooldown));
+								sprite.parent.add(new TargetedCell(j, 0xFF0000, now()+cooldown, GnollGeomancer.this));
 							}
 
 							aim = GnollGeomancer.prepRockThrowAttack(enemy, GnollGeomancer.this);
@@ -812,14 +812,12 @@ public class GnollGeomancer extends Mob {
 
 		@Override
 		public void affectChar(Char ch) {
-			if(!ch.isImmune(this.getClass())) {
-				ch.damage(Random.NormalIntRange(6, 12), this);
-				if (ch.isAlive()) {
-					Buff.prolong(ch, Paralysis.class, ch instanceof GnollGuard ? 10 : 3);
-				} else if (ch == Dungeon.hero){
-					Dungeon.fail( target );
-					GLog.n( Messages.get( GnollGeomancer.class, "rockfall_kill") );
-				}
+			ch.damage(Random.NormalIntRange(6, 12), this);
+			if (ch.isAlive()) {
+				Buff.prolong(ch, Paralysis.class, ch instanceof GnollGuard ? 10 : 3);
+			} else if (ch == Dungeon.hero){
+				Dungeon.fail( target );
+				GLog.n( Messages.get( GnollGeomancer.class, "rockfall_kill") );
 			}
 		}
 

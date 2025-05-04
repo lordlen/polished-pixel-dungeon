@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.WarlockSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -138,8 +139,8 @@ public class Warlock extends Mob implements Callback {
 			enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
 		}
 
-		if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-			sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
+		if(enemy == Dungeon.hero) {
+			GameScene.Polished.queueIndicator(this);
 		}
 	}
 	

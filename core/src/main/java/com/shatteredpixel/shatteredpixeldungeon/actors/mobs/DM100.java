@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DM100Sprite;
@@ -119,8 +120,8 @@ public class DM100 extends Mob implements Callback {
 				enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
 			}
 
-			if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-				sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
+			if(enemy == Dungeon.hero) {
+				GameScene.Polished.queueIndicator(this);
 			}
 
 			if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
