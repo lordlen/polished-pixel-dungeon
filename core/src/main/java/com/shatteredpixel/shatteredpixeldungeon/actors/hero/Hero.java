@@ -618,7 +618,9 @@ public class Hero extends Char {
 			return INFINITE_EVASION;
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.blockLeft--;
 			return INFINITE_EVASION;
 		}
 		
@@ -660,8 +662,12 @@ public class Hero extends Char {
 			return Messages.get(Monk.class, "parried");
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
-			buff(RoundShield.GuardTracker.class).hasBlocked = true;
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.hasBlocked = true;
+			if(guardTracker.blockLeft == 0) {
+				guardTracker.detach();
+			}
 			BuffIndicator.refreshHero();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			return Messages.get(RoundShield.GuardTracker.class, "guarded");

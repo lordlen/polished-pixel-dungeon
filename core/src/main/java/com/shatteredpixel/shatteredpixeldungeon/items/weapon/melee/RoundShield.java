@@ -73,7 +73,7 @@ public class RoundShield extends MeleeWeapon {
 
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
-		RoundShield.guardAbility(hero, 5+buffedLvl(), this);
+		RoundShield.guardAbility(hero, 2 * (5+buffedLvl()),3 + buffedLvl(), this);
 	}
 
 	@Override
@@ -90,15 +90,17 @@ public class RoundShield extends MeleeWeapon {
 		return Integer.toString(5 + level);
 	}
 
-	public static void guardAbility(Hero hero, int duration, MeleeWeapon wep){
+	public static void guardAbility(Hero hero, int duration, int totalBlock, MeleeWeapon wep){
 		wep.beforeAbilityUsed(hero, null);
-		Buff.prolong(hero, GuardTracker.class, duration).hasBlocked = false;
+		GuardTracker guardTracker = Buff.affect(hero, GuardTracker.class);
+		guardTracker.duration = duration;
+		guardTracker.blockLeft = totalBlock;
 		hero.sprite.operate(hero.pos);
 		hero.spendAndNext(Actor.TICK);
 		wep.afterAbilityUsed(hero);
 	}
 
-	public static class GuardTracker extends FlavourBuff {
+	public static class GuardTracker extends Buff {
 
 		{
 			announced = true;
@@ -106,6 +108,23 @@ public class RoundShield extends MeleeWeapon {
 		}
 
 		public boolean hasBlocked = false;
+		public float duration = 0;
+		public int blockLeft = 0;
+
+		@Override
+		public boolean act() {
+			duration-=TICK;
+			spend(TICK);
+			if (duration <= 0) {
+				detach();
+			}
+			return true;
+		}
+
+		@Override
+		public String desc() {
+			return Messages.get(this, "desc", duration, blockLeft);
+		}
 
 		@Override
 		public int icon() {
@@ -123,21 +142,32 @@ public class RoundShield extends MeleeWeapon {
 
 		@Override
 		public float iconFadePercent() {
-			return Math.max(0, (5 - visualcooldown()) / 5);
+			return Math.max(0, (15 - duration) / 15);
+		}
+
+		@Override
+		public String iconTextDisplay(){
+			return Integer.toString(blockLeft);
 		}
 
 		private static final String BLOCKED = "blocked";
+		private static final String DURATION = "duration";
+		private static final String BLOCK_LEFT = "blockLeft";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
 			bundle.put(BLOCKED, hasBlocked);
+			bundle.put(DURATION, duration);
+			bundle.put(BLOCK_LEFT, blockLeft);
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 			hasBlocked = bundle.getBoolean(BLOCKED);
+			duration = bundle.getFloat(DURATION);
+			blockLeft = bundle.getInt(BLOCK_LEFT);
 		}
 	}
 }
