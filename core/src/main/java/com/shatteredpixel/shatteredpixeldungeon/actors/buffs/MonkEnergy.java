@@ -635,7 +635,7 @@ public class MonkEnergy extends Buff implements ActionIndicator.Action {
 				// effects like time freeze from eating the whole action duration
 				for (int i = 0; i < 5; i++) hero.spendConstant(Actor.TICK);
 
-				if (Buff.affect(hero, MonkEnergy.class).abilitiesEmpowered(hero)){
+				if (Buff.affect(hero, MonkEnergy.class).abilitiesEmpowered(hero) && !hero.isStarving()){
 					int toHeal = Math.round((hero.HT - hero.HP)/5f);
 					if (toHeal > 0) {
 						Buff.affect(hero, Healing.class).setHeal(toHeal, 0, 1);
