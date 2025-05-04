@@ -220,7 +220,7 @@ public class ChaoticCenser extends Trinket {
 				Buff.affect(Dungeon.hero, GasSpewer.class, Dungeon.hero.cooldown()).set(targetCell, gasToSpawn, (int)gasQuantity);
 				GLog.w(Messages.get(ChaoticCenser.class, "spew", Messages.titleCase(Messages.get(gasToSpawn, "name")) ));
 				if (target.sprite != null && target.sprite.parent != null) {
-					target.sprite.parent.addToFront(new TargetedCell(targetCell, 0xFF0000, Actor.now()+Dungeon.hero.cooldown()));
+					target.sprite.parent.addToFront(new TargetedCell(targetCell, 0xFF0000, Actor.now()+Dungeon.hero.cooldown(), target));
 				}
 				return true;
 			}

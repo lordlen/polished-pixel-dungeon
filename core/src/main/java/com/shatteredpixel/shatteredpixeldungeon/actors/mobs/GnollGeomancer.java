@@ -601,7 +601,7 @@ public class GnollGeomancer extends Mob {
 
 							Ballistica warnPath = new Ballistica(aim.sourcePos, aim.collisionPos, Ballistica.STOP_SOLID);
 							for (int j : warnPath.subPath(0, warnPath.dist)){
-								sprite.parent.add(new TargetedCell(j, 0xFF0000, now()+cooldown));
+								sprite.parent.add(new TargetedCell(j, 0xFF0000, now()+cooldown, GnollGeomancer.this));
 							}
 
 							aim = GnollGeomancer.prepRockThrowAttack(enemy, GnollGeomancer.this);

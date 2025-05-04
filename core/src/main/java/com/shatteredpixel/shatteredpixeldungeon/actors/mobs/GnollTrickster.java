@@ -93,8 +93,8 @@ public class GnollTrickster extends Gnoll {
 
 		}
 
-		if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-			sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
+		if(enemy == Dungeon.hero) {
+			GameScene.Polished.queueIndicator(this);
 		}
 
 		return damage;

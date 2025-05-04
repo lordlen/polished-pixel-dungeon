@@ -524,8 +524,8 @@ public abstract class YogFist extends Mob {
 				enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
 			}
 
-			if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-				sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
+			if(enemy == Dungeon.hero) {
+				GameScene.Polished.queueIndicator(this);
 			}
 		}
 
@@ -597,8 +597,8 @@ public abstract class YogFist extends Mob {
 				enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
 			}
 
-			if(enemy == Dungeon.hero && !Dungeon.hero.fieldOfView[pos]) {
-				sprite.parent.add(new TargetedCell(pos, 0xFFFF00, now()+Dungeon.hero.cooldown()).assignChar(this));
+			if(enemy == Dungeon.hero) {
+				GameScene.Polished.queueIndicator(this);
 			}
 		}
 

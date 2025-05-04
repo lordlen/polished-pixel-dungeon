@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.effects;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.watabou.noosa.Game;
@@ -33,12 +34,17 @@ public class TargetedCell extends Image {
 
 	private float alpha;
 	float time;
-	Char assigned = null;
+	Char assigned;
+	boolean fadeOnAction;
 
 	public TargetedCell( int pos, int color ) {
-		this(pos, color, -1f);
+		this(pos, color, -1, null);
 	}
-	public TargetedCell( int pos, int color, float time ) {
+	public TargetedCell( int pos, int color, float time, Char assigned ) {
+		this(pos, color, time, assigned, false);
+	}
+
+	public TargetedCell( int pos, int color, float time, Char assigned, boolean fadeOnAction ) {
 		super(Icons.get(Icons.TARGET));
 		hardlight(color);
 
@@ -49,16 +55,18 @@ public class TargetedCell extends Image {
 		alpha = 1f;
 		scale.set(alpha);
 		this.time = time;
-	}
 
-	public TargetedCell assignChar(Char ch) {
-		assigned = ch;
-		return this;
+		this.assigned = assigned;
+		this.fadeOnAction = fadeOnAction;
 	}
 
 	@Override
 	public void update() {
 		alpha -= Game.elapsed/2f;
+
+		if(fadeOnAction && Dungeon.hero.curAction != null)
+			time = -1;
+
 		if (Actor.now() + Dungeon.hero.cooldown() <= time
 			&& ( assigned == null || assigned.isAlive()) )
 		{
