@@ -92,38 +92,29 @@ public class RoundShield extends MeleeWeapon {
 
 	public static void guardAbility(Hero hero, int duration, int totalBlock, MeleeWeapon wep){
 		wep.beforeAbilityUsed(hero, null);
-		GuardTracker guardTracker = Buff.affect(hero, GuardTracker.class);
-		guardTracker.duration = duration;
+		GuardTracker guardTracker = Buff.affect(hero, GuardTracker.class, duration);
+		guardTracker.initialDuration = guardTracker.cooldown();
 		guardTracker.blockLeft = totalBlock;
 		hero.sprite.operate(hero.pos);
 		hero.spendAndNext(Actor.TICK);
 		wep.afterAbilityUsed(hero);
 	}
 
-	public static class GuardTracker extends Buff {
+	public static class GuardTracker extends FlavourBuff {
 
 		{
 			announced = true;
 			type = buffType.POSITIVE;
+			actPriority = HERO_PRIO+1;
 		}
 
 		public boolean hasBlocked = false;
-		public float duration = 0;
 		public int blockLeft = 0;
-
-		@Override
-		public boolean act() {
-			duration-=TICK;
-			spend(TICK);
-			if (duration <= 0) {
-				detach();
-			}
-			return true;
-		}
+		float initialDuration = 0f;
 
 		@Override
 		public String desc() {
-			return Messages.get(this, "desc", duration, blockLeft);
+			return Messages.get(this, "desc", visualcooldown(), blockLeft);
 		}
 
 		@Override
@@ -133,7 +124,9 @@ public class RoundShield extends MeleeWeapon {
 
 		@Override
 		public void tintIcon(Image icon) {
-			if (hasBlocked){
+			if(blockLeft == 1) {
+				icon.hardlight(1f, 0f, 0f);
+			} else if (hasBlocked){
 				icon.tint(0x651f66, 0.5f);
 			} else {
 				icon.resetColor();
@@ -142,23 +135,16 @@ public class RoundShield extends MeleeWeapon {
 
 		@Override
 		public float iconFadePercent() {
-			return Math.max(0, (15 - duration) / 15);
-		}
-
-		@Override
-		public String iconTextDisplay(){
-			return Integer.toString(blockLeft);
+			return Math.max(0, (initialDuration - cooldown()) / initialDuration);
 		}
 
 		private static final String BLOCKED = "blocked";
-		private static final String DURATION = "duration";
 		private static final String BLOCK_LEFT = "blockLeft";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
 			bundle.put(BLOCKED, hasBlocked);
-			bundle.put(DURATION, duration);
 			bundle.put(BLOCK_LEFT, blockLeft);
 		}
 
@@ -166,7 +152,6 @@ public class RoundShield extends MeleeWeapon {
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 			hasBlocked = bundle.getBoolean(BLOCKED);
-			duration = bundle.getFloat(DURATION);
 			blockLeft = bundle.getInt(BLOCK_LEFT);
 		}
 	}
