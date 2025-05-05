@@ -586,23 +586,23 @@ public abstract class Char extends Actor {
 			}
 		}
 
+		//These always get resisted
+		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
+		if (endure != null){
+			dmg = endure.adjustDamageTaken(dmg);
+		}
+		if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
+			dmg *= 0.2f;
+		}
+
 		if(properties.contains(DamageProperty.RESISTED)) {
 			LifeLink link = buff(LifeLink.class);
 			if (link != null) {
 				dmg = link.shareDamage(this, dmg, src);
 			}
 
-			Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-			if (endure != null){
-				dmg = endure.adjustDamageTaken(dmg);
-			}
-
 			if (buff(ScrollOfChallenge.ChallengeArena.class) != null){
 				dmg *= 0.67f;
-			}
-
-			if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				dmg *= 0.2f;
 			}
 
 			if (Dungeon.hero.alignment == alignment
