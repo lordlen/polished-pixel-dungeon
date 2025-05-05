@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -44,7 +45,7 @@ public class ElixirOfHoneyedHealing extends Elixir {
 	@Override
 	public void apply(Hero hero) {
 		PotionOfHealing.cure(hero);
-		PotionOfHealing.heal(hero);
+		if(!Dungeon.isChallenged(Challenges.NO_HEALING)) PotionOfHealing.heal(hero);
 		Buff.affect(hero, Hunger.class).satisfy(Hunger.HUNGRY/2f);
 		Talent.onFoodEaten(hero, Hunger.HUNGRY/2f, this);
 	}
@@ -66,6 +67,11 @@ public class ElixirOfHoneyedHealing extends Elixir {
 			}
 		}
 	}
+
+	@Override
+	public int energyVal() {
+		return 10 * quantity;
+	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
 		
@@ -73,7 +79,7 @@ public class ElixirOfHoneyedHealing extends Elixir {
 			inputs =  new Class[]{PotionOfHealing.class, Honeypot.ShatteredPot.class};
 			inQuantity = new int[]{1, 1};
 			
-			cost = 4;
+			cost = 2;
 			
 			output = ElixirOfHoneyedHealing.class;
 			outQuantity = 1;
