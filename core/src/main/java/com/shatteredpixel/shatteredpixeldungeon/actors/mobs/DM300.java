@@ -324,7 +324,7 @@ public class DM300 extends Mob {
 			if(POLISHED_cooldown > 0) return;
 
 			//try to find an equivalent open tile
-			if(target != -1 && !path.isEmpty()) {
+			if(target != -1 && path != null && !path.isEmpty()) {
 				for (int i : PathFinder.NEIGHBOURS8) {
 					int candidate = step+i;
 
@@ -728,14 +728,15 @@ public class DM300 extends Mob {
 				Dungeon.level.openSpace[pos+i] && Dungeon.level.distance(pos+i, target) == minDist)
 				destroy = false;
 		}
-		*/
+		 */
 
 		PathFinder.Path path_large = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, true));
 		PathFinder.Path path_destroy = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, false));
 
 		boolean destroy = path_destroy != null && (path_large == null || path_large.size() > path_destroy.size());
+		destroy = destroy || (Dungeon.level.adjacent(pos, target) && !Dungeon.level.openSpace[target]);
 
-		if(state == HUNTING && destroy) {
+		if(state == HUNTING && destroy ) {
 			properties.remove(Property.LARGE);
 		}
 
