@@ -106,7 +106,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Bulk;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Flow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Obfuscation;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
@@ -181,6 +180,7 @@ public abstract class Char extends Actor {
 	public boolean rooted		= false;
 	public boolean flying		= false;
 	public int invisible		= 0;
+	public int camouflaged		= 0;
 
 	//these are relative to the hero
 	public enum Alignment{
@@ -195,6 +195,16 @@ public abstract class Char extends Actor {
 	public boolean[] fieldOfView = null;
 	
 	private LinkedHashSet<Buff> buffs = new LinkedHashSet<>();
+
+	public boolean isStealthy() {
+		return invisible > 0 || camouflaged > 0;
+	}
+
+	public boolean isStealthyTo(Char c) {
+		if(invisible > 0) return true;
+		else if (camouflaged > 0) return Dungeon.level.distance(pos, c.pos) > 1;
+		return false;
+	}
 	
 	@Override
 	protected boolean act() {
@@ -630,7 +640,7 @@ public abstract class Char extends Actor {
 		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)
-		if (attacker.invisible > 0 && attacker.canSurpriseAttack() /*&& defender.buff(ChampionEnemy.Blessed.class) == null*/) {
+		if (attacker.isStealthyTo(defender) && attacker.canSurpriseAttack()) {
 			acuStat = INFINITE_ACCURACY;
 		}
 		//if(attacker.buff(ChampionEnemy.Blessed.class) != null) acuStat = INFINITE_ACCURACY;
@@ -1364,9 +1374,6 @@ public abstract class Char extends Actor {
 		}
 		for (Buff b : buffs()){
 			immunes.addAll(b.immunities());
-		}
-		if (glyphLevel(Brimstone.class) >= 0){
-			immunes.add(Burning.class);
 		}
 		
 		for (Class c : immunes){

@@ -139,6 +139,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
@@ -213,7 +214,7 @@ public class Hero extends Char {
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
-	private static final float HUNGER_FOR_SEARCH	= 6f;
+	private static final float HUNGER_FOR_SEARCH	= 5f;
 	
 	public HeroClass heroClass = HeroClass.ROGUE;
 	public HeroSubClass subClass = HeroSubClass.NONE;
@@ -352,6 +353,8 @@ public class Hero extends Char {
 	private static final String LEVEL		= "lvl";
 	private static final String EXPERIENCE	= "exp";
 	private static final String HTBOOST     = "htboost";
+
+	private static final String JUST_MOVED  = "just_moved";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -372,6 +375,8 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
+
+		bundle.put( JUST_MOVED, justMoved );
 
 		belongings.storeInBundle( bundle );
 	}
@@ -395,6 +400,8 @@ public class Hero extends Char {
 		defenseSkill = bundle.getInt( DEFENSE );
 		
 		STR = bundle.getInt( STRENGTH );
+
+		justMoved = bundle.getBoolean( JUST_MOVED );
 
 		belongings.restoreFromBundle( bundle );
 	}
@@ -926,7 +933,7 @@ public class Hero extends Char {
 			
 			curAction = null;
 			
-			spendAndNext( TICK );
+			spendAndNextConstant( TICK );
 			return false;
 		}
 		
@@ -1014,19 +1021,6 @@ public class Hero extends Char {
 		AttackIndicator.updateState();
 		
 		GameScene.ready();
-
-		if(GameScene.Polished.movementQueued()) {
-			GameScene.Polished.bufferedAction = null;
-			GameScene.Polished.bufferedCell = -1;
-
-			GameScene.handleCell(pos + Dungeon.level.pointToCell(GameScene.Polished.bufferedMovement));
-			GameScene.Polished.bufferedMovement = null;
-		}
-		if(GameScene.Polished.actionQueued()) {
-			KeyEvent.addKeyEvent(new KeyEvent(KeyBindings.getFirstKeyForAction(GameScene.Polished.bufferedAction, false), true));
-			KeyEvent.addKeyEvent(new KeyEvent(KeyBindings.getFirstKeyForAction(GameScene.Polished.bufferedAction, false), false));
-			GameScene.Polished.bufferedAction = null;
-		}
 	}
 	
 	public void interrupt() {
@@ -1493,7 +1487,7 @@ public class Hero extends Char {
 			return false;
 		}
 
-		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
+		if (enemy.isAlive() && canAttack( enemy ) && !enemy.isStealthyTo(this)) {
 
 			if (heroClass != HeroClass.DUELIST
 					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
@@ -2233,7 +2227,8 @@ public class Hero extends Char {
 			interrupt();
 
 			if (ankh.isBlessed()) {
-				this.HP = HT / 4;
+				this.HP = HT / 3;
+				Buff.affect(Dungeon.hero, Hunger.class).satisfy(Hunger.STARVING);
 
 				PotionOfHealing.cure(this);
 				Buff.prolong(this, Invulnerability.class, Invulnerability.DURATION);
@@ -2501,9 +2496,9 @@ public class Hero extends Char {
 		
 		boolean smthFound = false;
 
-		boolean circular = pointsInTalent(Talent.WIDE_SEARCH) == 1;
+		boolean circular = false;
 		int distance = heroClass == HeroClass.ROGUE ? 2 : 1;
-		if (hasTalent(Talent.WIDE_SEARCH)) distance++;
+		if (hasTalent(Talent.ROGUES_EXPERTISE)) distance++;
 		
 		boolean foresight = buff(Foresight.class) != null;
 		boolean foresightScan = foresight && !Dungeon.level.mapped[pos];
@@ -2618,13 +2613,20 @@ public class Hero extends Char {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
 			sprite.operate( pos );
 			if (!Dungeon.level.locked) {
-				if (cursed) {
-					GLog.n(Messages.get(this, "search_distracted"));
-					Buff.affect(this, Hunger.class).affectHunger(TIME_TO_SEARCH - (2 * HUNGER_FOR_SEARCH));
-				} else {
-					Buff.affect(this, Hunger.class).affectHunger(TIME_TO_SEARCH - HUNGER_FOR_SEARCH);
+				float searchTime = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;
+				float searchHunger = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : HUNGER_FOR_SEARCH;
+
+				if(cursed) {
+					searchTime++;
+					searchHunger *= 2;
 				}
+				searchHunger *= SaltCube.hungerGainMultiplier();
+				searchHunger = Math.min(searchHunger-searchTime, 0);
+
+				Buff.affect(this, Hunger.class).affectHunger(searchHunger);
 			}
+
+			if (cursed) GLog.n(Messages.get(this, "search_distracted"));
 			spendAndNext(TIME_TO_SEARCH);
 			
 		}
