@@ -203,7 +203,7 @@ public class GnollSapper extends Mob {
 						}
 
 						Dungeon.hero.interrupt();
-						GameScene.Polished.blockInput(.5f);
+						GameScene.Polished.blockInput(.75f);
 
 						abilityCooldown = Random.NormalIntRange(4, 6);
 						spend(GameMath.gate(TICK, (int)Math.ceil(enemy.cooldown()), 3*TICK));
@@ -211,7 +211,7 @@ public class GnollSapper extends Mob {
 					} else if (GnollGeomancer.prepRockFallAttack(enemy, GnollSapper.this, 2, true)) {
 						lastAbilityWasRockfall = true;
 						Dungeon.hero.interrupt();
-						GameScene.Polished.blockInput(.5f);
+						GameScene.Polished.blockInput(.75f);
 
 						spend(GameMath.gate(TICK, (int)Math.ceil(enemy.cooldown()), 3*TICK));
 						abilityCooldown = Random.NormalIntRange(4, 6);
