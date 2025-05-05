@@ -76,6 +76,7 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Rect;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DM300 extends Mob {
 
@@ -171,6 +172,8 @@ public class DM300 extends Mob {
 			fieldOfView = new boolean[Dungeon.level.length()];
 		}
 		Dungeon.level.updateFieldOfView( this, fieldOfView );
+
+		if(lastPhase() || supercharged) Arrays.fill(fieldOfView, true);
 
 		if (Dungeon.hero.invisible <= 0) {
 			if(fightStarted()) {
