@@ -51,7 +51,7 @@ public class Pylon extends Mob {
 	{
 		spriteClass = PylonSprite.class;
 
-		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 80 : 50;
+		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 100 : 50;
 
 		maxLvl = -2;
 
