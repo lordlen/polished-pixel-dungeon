@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -45,8 +46,14 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class ChaliceOfBlood extends Artifact {
+
+	public static HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
+			DamageProperty.RESISTED, DamageProperty.PHYSICAL
+	));
 
 	{
 		image = ItemSpriteSheet.ARTIFACT_CHALICE1;
@@ -100,31 +107,15 @@ public class ChaliceOfBlood extends Artifact {
 
 	private void prick(Hero hero){
 		int damage = 5 + 3*(level()*level());
-
-		Earthroot.Armor armor = hero.buff(Earthroot.Armor.class);
-		if (armor != null) {
-			damage = armor.absorb(damage);
-		}
-
-		WandOfLivingEarth.RockArmor rockArmor = hero.buff(WandOfLivingEarth.RockArmor.class);
-		if (rockArmor != null) {
-			damage = rockArmor.absorb(damage);
-		}
-
-		damage -= hero.drRoll();
+		damage = hero.damage(damage, this, properties);
+		damage = Math.max(damage, 1);
 
 		hero.sprite.operate( hero.pos );
 		hero.busy();
 		hero.spend(3f);
 		GLog.w( Messages.get(this, "onprick") );
-		if (damage <= 0){
-			damage = 1;
-		} else {
-			Sample.INSTANCE.play(Assets.Sounds.CURSED);
-			hero.sprite.emitter().burst( ShadowParticle.CURSE, 4+(damage/10) );
-		}
-
-		hero.damage(damage, this);
+		Sample.INSTANCE.play(Assets.Sounds.CURSED);
+		hero.sprite.emitter().burst( ShadowParticle.CURSE, 4+(damage/10) );
 
 		if (!hero.isAlive()) {
 			Badges.validateDeathFromFriendlyMagic();

@@ -25,11 +25,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -122,6 +124,20 @@ public class Sickle extends MeleeWeapon {
 
 	}
 
-	public static class HarvestBleedTracker extends FlavourBuff{};
+	public static class HarvestBleedTracker extends FlavourBuff{
+		public boolean apply(Char target, int dmg) {
+			if (!target.isImmune(Bleeding.class)){
+				Bleeding b = Buff.affect(target, Bleeding.class);
+
+				b.announced = false;
+				b.set(dmg, HarvestBleedTracker.class);
+				b.attachTo(target);
+				target.sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int)b.level());
+
+				return true;
+			}
+			return false;
+		}
+	};
 
 }

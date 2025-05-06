@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.bombs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
@@ -74,8 +75,7 @@ public class ShrapnelBomb extends Bomb {
 		for (Char ch : affected){
 			//regular bomb damage over an FOV up to 8-range
 			int damage = Random.NormalIntRange( 4 + Dungeon.scalingDepth(), 12 + 3*Dungeon.scalingDepth() );
-			damage -= ch.drRoll();
-			ch.damage(damage, this);
+			ch.damage(damage, this, DamageProperty.DEFAULT_ATTACK);
 			if (ch == Dungeon.hero && !ch.isAlive()) {
 				Dungeon.fail(this);
 			}

@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
@@ -116,7 +117,6 @@ public class Shockwave extends ArmorAbility {
 								int scalingStr = hero.STR()-10;
 								int damage = Hero.heroDamageIntRange(5 + scalingStr, 10 + 2*scalingStr);
 								damage = Math.round(damage * (1f + 0.2f*hero.pointsInTalent(Talent.SHOCK_FORCE)));
-								damage -= ch.drRoll();
 
 								if (hero.pointsInTalent(Talent.STRIKING_WAVE) == 4){
 									Buff.affect(hero, Talent.StrikingWaveTracker.class, 0f);
@@ -125,13 +125,13 @@ public class Shockwave extends ArmorAbility {
 								if (Random.Int(10) < 3*hero.pointsInTalent(Talent.STRIKING_WAVE)){
 									boolean wasEnemy = ch.alignment == Char.Alignment.ENEMY
 											|| (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL);
-									damage = hero.attackProc(ch, damage);
-									ch.damage(damage, hero);
+									damage = ch.damage(damage, hero, DamageProperty.DEFAULT_ATTACK);
+									hero.attackProc(ch, damage);
 									if (hero.subClass == HeroSubClass.GLADIATOR && wasEnemy){
 										Buff.affect( hero, Combo.class ).hit( ch );
 									}
 								} else {
-									ch.damage(damage, hero);
+									ch.damage(damage, hero, DamageProperty.DEFAULT_ATTACK);
 								}
 								if (ch.isAlive()){
 									if (Random.Int(4) < hero.pointsInTalent(Talent.SHOCK_FORCE)){

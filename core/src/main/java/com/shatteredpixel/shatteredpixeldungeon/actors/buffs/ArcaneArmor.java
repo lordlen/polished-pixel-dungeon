@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Random;
 
 //A magical version of barkskin, essentially
 public class ArcaneArmor extends Buff {
@@ -54,7 +55,11 @@ public class ArcaneArmor extends Buff {
 		
 		return true;
 	}
-	
+
+	public int drRoll() {
+		return Random.NormalIntRange(0, level());
+	}
+
 	public int level() {
 		return level;
 	}

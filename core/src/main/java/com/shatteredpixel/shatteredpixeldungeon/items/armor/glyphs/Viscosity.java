@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -37,9 +38,16 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 public class Viscosity extends Glyph {
 	
 	private static ItemSprite.Glowing PURPLE = new ItemSprite.Glowing( 0x8844CC );
+
+	public static final HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
+			DamageProperty.RESISTED
+	));
 	
 	@Override
 	public int proc( Armor armor, Char attacker, Char defender, int damage ) {
@@ -65,10 +73,6 @@ public class Viscosity extends Glyph {
 		private int level = 0;
 
 		public int deferDamage(int dmg){
-			//account for icon stomach (just skip the glyph)
-			if (target.buff(Talent.WarriorFoodImmunity.class) != null){
-				return dmg;
-			}
 
 			int level = Math.max( 0, this.level );
 
@@ -146,7 +150,9 @@ public class Viscosity extends Glyph {
 			if (target.isAlive()) {
 
 				int damageThisTick = Math.max(1, (int)(damage*0.1f));
-				target.damage( damageThisTick, this );
+
+				target.damage( damageThisTick, this, properties );
+
 				if (target == Dungeon.hero && !target.isAlive()) {
 
 					Badges.validateDeathFromFriendlyMagic();

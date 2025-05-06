@@ -23,10 +23,12 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HolyTome;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -77,6 +79,17 @@ public class AuraOfProtection extends ClericSpell {
 	}
 
 	public static class AuraBuff extends FlavourBuff {
+
+		public static boolean proc(Char defender) {
+			// hero and pris images skip this as they already benefit from hero's armor glyph proc
+			if(defender instanceof Hero || defender instanceof PrismaticImage) return false;
+
+			return (
+				Dungeon.hero.alignment == defender.alignment
+				&& Dungeon.hero.belongings.armor() != null && Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
+				&& ( Dungeon.level.distance(defender.pos, Dungeon.hero.pos) <= 2 || defender.buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null )
+			);
+		}
 
 		public static float DURATION = 20f;
 

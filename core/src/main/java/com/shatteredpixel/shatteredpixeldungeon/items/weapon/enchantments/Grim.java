@@ -21,18 +21,31 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments;
 
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.DamageProperty;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite.Glowing;
+import com.watabou.utils.Random;
+import com.watabou.utils.Reflection;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class Grim extends Weapon.Enchantment {
 	
 	private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
-	
+
+	public static final HashSet<DamageProperty> properties = new HashSet<>(Arrays.asList(
+			DamageProperty.IGNORE_SHIELDS
+	));
+
+
 	@Override
 	public int proc( Weapon weapon, Char attacker, Char defender, int damage ) {
 
@@ -57,6 +70,33 @@ public class Grim extends Weapon.Enchantment {
 		}
 
 		return damage;
+	}
+
+	public static int attemptExecute(Char enemy, int dmg) {
+		GrimTracker tracker = enemy.buff(GrimTracker.class);
+
+		float finalChance = tracker != null ? tracker.maxChance : 0;
+		finalChance *= (float)Math.pow( (float)((enemy.HT - enemy.HP) / enemy.HT), 2);
+
+		if (Random.Float() < finalChance && enemy.HP > 0) {
+			return execute(enemy, dmg);
+		}
+		return 0;
+	}
+
+	public static int execute(Char enemy, int dmg) {
+		boolean isBoss = enemy.properties().contains(Char.Property.BOSS);
+		int exe = isBoss ? 2*dmg : enemy.HP;
+		enemy.damage(exe, Reflection.newInstance(Grim.class), properties);
+
+		enemy.sprite.emitter().burst( ShadowParticle.UP, 5 );
+		GrimTracker tracker = enemy.buff(GrimTracker.class);
+		if (!enemy.isAlive() && tracker != null && tracker.qualifiesForBadge){
+			Badges.validateGrimWeapon();
+			tracker.detach();
+		}
+
+		return exe;
 	}
 	
 	@Override
