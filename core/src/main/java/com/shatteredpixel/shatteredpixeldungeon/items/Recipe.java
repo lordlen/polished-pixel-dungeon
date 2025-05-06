@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Blandfruit;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.ChargrilledMeat;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.HoneyedMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MeatPie;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.StewedMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -210,7 +211,8 @@ public abstract class Recipe {
 		new CurseInfusion.Recipe(),
 		new ReclaimTrap.Recipe(),
 		new WildEnergy.Recipe(),
-		new ChargrilledMeat.twoMeat()
+		new ChargrilledMeat.twoMeat(),
+		new HoneyedMeat.Recipe()
 	};
 	
 	private static Recipe[] threeIngredientRecipes = new Recipe[]{
