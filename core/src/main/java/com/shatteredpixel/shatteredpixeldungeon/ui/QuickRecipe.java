@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Blandfruit;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.ChargrilledMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MeatPie;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
@@ -289,9 +290,9 @@ public class QuickRecipe extends Component {
 				}
 				return result;
 			case 2:
-				result.add(new QuickRecipe( new StewedMeat.oneMeat() ));
-				result.add(new QuickRecipe( new StewedMeat.twoMeat() ));
-				result.add(new QuickRecipe( new StewedMeat.threeMeat() ));
+				result.add(new QuickRecipe( new ChargrilledMeat.oneMeat() ));
+				result.add(new QuickRecipe( new ChargrilledMeat.twoMeat() ));
+				result.add(new QuickRecipe( new ChargrilledMeat.threeMeat() ));
 				result.add(null);
 				result.add(new QuickRecipe( new MeatPie.Recipe(),
 						new ArrayList<Item>(Arrays.asList(new Pasty(), new Food(), new MysteryMeat.PlaceHolder())),

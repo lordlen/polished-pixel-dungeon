@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Blandfruit;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.ChargrilledMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MeatPie;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.StewedMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -191,7 +192,7 @@ public abstract class Recipe {
 		new Recycle.Recipe(),
 		new TelekineticGrab.Recipe(),
 		new SummonElemental.Recipe(),
-		new StewedMeat.oneMeat(),
+		new ChargrilledMeat.oneMeat(),
 		new TrinketCatalyst.Recipe(),
 		new Trinket.UpgradeTrinket()
 	};
@@ -209,12 +210,12 @@ public abstract class Recipe {
 		new CurseInfusion.Recipe(),
 		new ReclaimTrap.Recipe(),
 		new WildEnergy.Recipe(),
-		new StewedMeat.twoMeat()
+		new ChargrilledMeat.twoMeat()
 	};
 	
 	private static Recipe[] threeIngredientRecipes = new Recipe[]{
 		new Potion.SeedToPotion(),
-		new StewedMeat.threeMeat(),
+		new ChargrilledMeat.threeMeat(),
 		new MeatPie.Recipe()
 	};
 	

@@ -22,10 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.food;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
-import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
-public class StewedMeat extends Food {
+public class HoneyedMeat extends Food {
 	
 	{
 		image = ItemSpriteSheet.STEWED;
