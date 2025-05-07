@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthDrop;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
@@ -193,7 +194,8 @@ public class ItemStatusHandler<T extends Item> {
 	}
 	
 	public void know( T item ) {
-		known.add( (Class<? extends T>)item.getClass() );
+		if(known.add( (Class<? extends T>)item.getClass() ))
+			WealthDrop.onId();
 	}
 	
 	public void know( Class<?extends T> itemCls ){

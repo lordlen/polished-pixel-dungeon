@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.noosa.ColorBlock;
@@ -96,6 +97,10 @@ public class InventorySlot extends ItemSlot {
 					bg.ra = 0.3f;
 					bg.ba = 0.3f;
 				}
+			}
+
+			if(item instanceof WealthDrop) {
+				WealthDrop.backgroundColoring(bg);
 			}
 
 			if (item.name() == null) {

@@ -33,6 +33,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthDrop;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -487,6 +489,10 @@ public class WndRanking extends WndTabbed {
 				bg.ra = 0.1f;
 				bg.ba = 0.1f;
 			}
+
+			if(item instanceof WealthPotion) {
+				WealthDrop.backgroundColoring(bg);
+			}
 		}
 		
 		@Override
@@ -554,6 +560,10 @@ public class WndRanking extends WndTabbed {
 			} else if (!item.isIdentified()) {
 				bg.ra = 0.1f;
 				bg.ba = 0.1f;
+			}
+
+			if(item instanceof WealthPotion) {
+				WealthDrop.backgroundColoring(bg);
 			}
 		}
 
