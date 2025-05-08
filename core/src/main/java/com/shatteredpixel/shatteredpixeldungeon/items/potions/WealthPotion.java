@@ -121,11 +121,11 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 
 	@Override
 	public String name() {
-		return pot.isKnown() ? pot.name() : trueName();
+		return (pot.isKnown() ? pot.name() : trueName()) + Messages.get(WealthDrop.class, "suffix");
 	}
 	@Override
 	public String desc() {
-		String desc = pot.isKnown() ? pot.desc() : Messages.get(this, "desc");;
+		String desc = pot.isKnown() ? pot.desc() : Messages.get(this, "desc");
 		if(decay() != null) desc += "\n\n" + Messages.get(WealthDrop.class, "decay", decay().iconTextDisplay());
 
 		return desc;

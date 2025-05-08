@@ -33,10 +33,30 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLevitation;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfParalyticGas;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfToxicGas;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.AquaBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.BlizzardBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.CausticBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.InfernalBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.ShockingBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.UnstableBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfIcyTouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfMagicalSight;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfStormClouds;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMetamorphosis;
@@ -52,6 +72,7 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RingOfWealth extends Ring {
 
@@ -107,10 +128,37 @@ public class RingOfWealth extends Ring {
 	public static float dropChanceMultiplier( Char target ){
 		return (float)Math.pow(1.20, getBuffedBonus(target, Wealth.class));
 	}
+
+	private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
+	static{
+		potionChances.put(UnstableBrew.class,       	5f);
+
+		potionChances.put(PotionOfToxicGas.class,       4f);
+		potionChances.put(PotionOfStormClouds.class,    4f);
+
+		potionChances.put(CausticBrew.class,    		3f);
+		potionChances.put(PotionOfLevitation.class,     3f);
+		potionChances.put(AquaBrew.class,    			3f);
+
+		potionChances.put(PotionOfPurity.class,         2f);
+		potionChances.put(ShockingBrew.class,    		2f);
+		potionChances.put(PotionOfLiquidFlame.class,    2f);
+		potionChances.put(PotionOfFrost.class,          2f);
+
+		potionChances.put(InfernalBrew.class,    		1f);
+		potionChances.put(BlizzardBrew.class,			1f);
+		potionChances.put(PotionOfMagicalSight.class,   1f);
+		potionChances.put(PotionOfInvisibility.class,   1f);
+	}
+
+	public static WealthPotion randomPot() {
+		WealthPotion drop = Reflection.newInstance(WealthPotion.class);
+		drop.set(Random.chances(potionChances));
+		return drop;
+	}
 	
 	public static ArrayList<Item> tryForBonusDrop(Char target, int tries ){
 		int bonus = getBuffedBonus(target, Wealth.class);
-
 		if (bonus <= 0) return null;
 
 		CounterBuff triesToDrop = target.buff(TriesToDropTracker.class);
@@ -119,6 +167,24 @@ public class RingOfWealth extends Ring {
 			triesToDrop.countUp( Random.NormalIntRange(0, 20) );
 		}
 
+		//now handle reward logic
+		ArrayList<Item> drops = new ArrayList<>();
+
+		triesToDrop.countDown(tries);
+		while ( triesToDrop.count() <= 0 ){
+			Item i;
+			do {
+				i = randomPot();
+			} while (Challenges.isItemBlocked(i));
+
+			drops.add(i);
+			triesToDrop.countUp( Random.NormalIntRange(0, 20) );
+		}
+
+
+
+
+		/*
 		CounterBuff dropsToEquip = target.buff(DropsToEquipTracker.class);
 		if (dropsToEquip == null){
 			dropsToEquip = Buff.affect(target, DropsToEquipTracker.class);
@@ -160,6 +226,7 @@ public class RingOfWealth extends Ring {
 			}
 			triesToDrop.countUp( Random.NormalIntRange(0, 20) );
 		}
+		 */
 		
 		return drops;
 	}
@@ -208,6 +275,10 @@ public class RingOfWealth extends Ring {
 	}
 
 	private static Item genLowValueConsumable(){
+
+
+
+
 		switch (Random.Int(4)){
 			case 0: default:
 				Item i = new Gold().random();
