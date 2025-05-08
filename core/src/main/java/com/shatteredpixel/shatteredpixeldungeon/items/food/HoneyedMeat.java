@@ -33,7 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class HoneyedMeat extends Food {
 	
 	{
-		image = ItemSpriteSheet.STEWED;
+		image = ItemSpriteSheet.HONEYED_MEAT;
 		energy = Hunger.HUNGRY;
 	}
 
