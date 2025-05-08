@@ -33,7 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthDrop;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -58,7 +58,6 @@ import com.watabou.noosa.Group;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.ui.Component;
-import com.watabou.utils.DeviceCompat;
 
 import java.text.NumberFormat;
 import java.util.Locale;

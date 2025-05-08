@@ -27,7 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthDrop;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.noosa.ColorBlock;

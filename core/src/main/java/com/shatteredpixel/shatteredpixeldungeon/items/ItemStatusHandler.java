@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthDrop;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
