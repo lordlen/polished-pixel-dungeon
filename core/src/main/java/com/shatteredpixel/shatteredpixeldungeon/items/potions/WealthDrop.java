@@ -58,6 +58,10 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
 
     void updateStats();
 
+    default boolean onPickUp(boolean picked) {
+        if(picked) Dungeon.hero.spend(-Item.TIME_TO_PICK_UP);
+        return picked;
+    }
     default boolean afterCollect(boolean collected) {
         if(!collected) return false;
 

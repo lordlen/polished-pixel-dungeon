@@ -34,7 +34,7 @@ import com.watabou.utils.Bundle;
 public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPotion> {
 
 	{
-		image = ItemSpriteSheet.POTION_HOLDER;
+		image = ItemSpriteSheet.MYSTERY_POTION;
 	}
 
 	@Override
@@ -93,6 +93,10 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 		return matches(item);
 	}
 
+	@Override
+	public boolean doPickUp(Hero hero, int pos) {
+		return onPickUp(super.doPickUp(hero, pos));
+	}
 	@Override
 	public boolean collect(Bag container) {
 		return afterCollect(super.collect(container));

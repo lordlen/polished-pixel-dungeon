@@ -588,10 +588,12 @@ public class ItemSpriteSheet {
 	public static final int POTION_IVORY    = POTIONS+11;
 
 	public static final int LIQUID_METAL    = POTIONS+13;
+	public static final int MYSTERY_POTION  = POTIONS+14;
 	static {
 		for (int i = POTIONS; i < POTIONS+16; i++)
 			assignItemRect(i, 12, 14);
 		assignItemRect(LIQUID_METAL,    8, 15);
+		assignItemRect(MYSTERY_POTION,  12, 14);
 	}
 	
 	private static final int EXOTIC_POTIONS =                               xy(1, 23);  //16 slots
