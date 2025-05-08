@@ -21,9 +21,11 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.potions;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -48,6 +50,7 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 
 	@Override
 	public void updateStats() {
+		//talents actually dont work at all, since the pot is anonymized, might change in the future though.
 		talentFactor = pot.talentFactor * 0.5f;
 		talentChance = pot.talentChance;
 	}
@@ -60,10 +63,10 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 	public void doThrow(Hero hero) {
 		GameScene.selectCell(thrower);
 	}
-
 	@Override
-	public Item identify( boolean byHero ) {
-		return pot.identify(byHero);
+	protected void onThrow(int cell) {
+		if(Dungeon.level.map[cell] == Terrain.WELL) return;
+		super.onThrow(cell);
 	}
 
 
@@ -78,8 +81,12 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 	}
 
 	@Override
+	public Item identify( boolean byHero ) {
+		return pot.identify(byHero);
+	}
+	@Override
 	public boolean isKnown() {
-		return pot != null && pot.isKnown();
+		return valid() && pot.isKnown();
 	}
 	@Override
 	public boolean isSimilar(Item item) {
@@ -88,26 +95,16 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 
 	@Override
 	public boolean collect(Bag container) {
-		boolean collected = super.collect(container);
-
-		if(collected) afterCollect();
-
-		return collected;
+		return afterCollect(super.collect(container));
+	}
+	@Override
+	public void doDrop( Hero hero ) {
+		onDrop(hero);
 	}
 	@Override
 	protected void onDetach() {
 		super.onDetach();
 		afterDetach();
-	}
-
-	@Override
-	public void doDrop( Hero hero ) {
-		afterDrop(hero);
-	}
-	@Override
-	protected void onThrow(int cell) {
-		super.onThrow(cell);
-		afterThrow(cell);
 	}
 
 	@Override
@@ -121,14 +118,11 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 
 	@Override
 	public String name() {
-		return (pot.isKnown() ? pot.name() : trueName()) + Messages.get(WealthDrop.class, "suffix");
+		return dropName();
 	}
 	@Override
 	public String desc() {
-		String desc = pot.isKnown() ? pot.desc() : Messages.get(this, "desc");
-		if(decay() != null) desc += "\n\n" + Messages.get(WealthDrop.class, "decay", decay().iconTextDisplay());
-
-		return desc;
+		return dropDesc();
 	}
 
 	private static final String POTION = "potion";

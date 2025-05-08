@@ -238,6 +238,10 @@ public class RingOfWealth extends Ring {
 
 	public static void showFlareForBonusDrop( Visual vis ){
 		if (vis == null || vis.parent == null) return;
+
+		new Flare(6, 24).color(0x00AAFF, true).show(vis, 3.33f);
+
+		/*
 		switch (latestDropTier){
 			default:
 				break; //do nothing
@@ -255,6 +259,7 @@ public class RingOfWealth extends Ring {
 				break;
 		}
 		latestDropTier = 0;
+		 */
 	}
 	
 	public static Item genConsumableDrop(int level) {
