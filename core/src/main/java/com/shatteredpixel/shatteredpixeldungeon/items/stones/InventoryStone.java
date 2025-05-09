@@ -109,13 +109,13 @@ public abstract class InventoryStone extends Runestone {
 			
 			//FIXME this safety check shouldn't be necessary
 			//it would be better to eliminate the curItem static variable.
-			if (!(curItem instanceof InventoryStone)){
+			if (!((wealthDrop == null ? curItem : wealthDrop.item()) instanceof InventoryStone)){
 				return;
 			}
 			
 			if (item != null) {
 
-				((InventoryStone)curItem).onItemSelected( item );
+				((InventoryStone)(wealthDrop == null ? curItem : wealthDrop.item())).onItemSelected( item );
 				
 			}
 		}

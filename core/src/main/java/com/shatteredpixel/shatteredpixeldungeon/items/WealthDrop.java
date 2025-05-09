@@ -8,10 +8,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.WealthScroll;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.WealthSpell;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -104,13 +102,12 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
 
     default void vanishVFX(int cell) {
         Sample.INSTANCE.play(Assets.Sounds.PUFF);
-        GameScene.emitter().burst(Speck.factory(Speck.STEAM), 10);
         CellEmitter.get( cell ).burst( Speck.factory( Speck.STEAM ), 10 );
     }
 
-    default void spellDetach(Bag container) {
+    default void wealthDetach(Bag container) {
         //Wealth potions already detach by themselves
-        if(valid() && item().quantity() <= 1 && this instanceof WealthSpell || this instanceof WealthScroll) {
+        if(valid() && item().quantity() <= 1 && !(this instanceof WealthPotion)) {
             th().detach(container);
         }
     }
@@ -133,6 +130,8 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         return desc;
     }
 
+
+    String WEALTH_ITEM = "wealth_item";
 
     static void onId() {
         if(Dungeon.level == null || Dungeon.hero == null) return;

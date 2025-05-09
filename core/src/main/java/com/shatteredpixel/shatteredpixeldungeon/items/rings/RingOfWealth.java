@@ -70,7 +70,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.spells.Spell;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.UnstableSpell;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.WealthSpell;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlink;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.WealthStone;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -183,11 +188,19 @@ public class RingOfWealth extends Ring {
 		spellChances.put(PhaseShift.class,    			1f);
 	}
 
+	private static HashMap<Class<? extends Runestone>, Float> stoneChances = new HashMap<>();
+	static{
+		stoneChances.put(StoneOfFlock.class,    		3f);
+		stoneChances.put(StoneOfFear.class,    			1f);
+		stoneChances.put(StoneOfBlink.class,    		1f);
+	}
+
 	private static HashMap<Class<? extends Item>, Float> typeChances = new HashMap<>();
 	static{
-		typeChances.put(Potion.class,    				55f);
-		typeChances.put(Scroll.class,    				25f);
-		typeChances.put(Spell.class,    				20f);
+		typeChances.put(Potion.class,    				50f);
+		typeChances.put(Scroll.class,    				20f);
+		typeChances.put(Spell.class,    				15f);
+		typeChances.put(Runestone.class,    			15f);
 	}
 
 	public static Item randomItem() {
@@ -201,6 +214,9 @@ public class RingOfWealth extends Ring {
 		}
 		else if(type == Spell.class) {
 			return randomSpell();
+		}
+		else if(type == Runestone.class) {
+			return randomStone();
 		}
 		else return Reflection.newInstance(Gold.class);
 	}
@@ -221,6 +237,12 @@ public class RingOfWealth extends Ring {
 		WealthSpell drop = Reflection.newInstance(WealthSpell.class);
 		drop.set(Random.chances(spellChances));
 		if(drop.item() instanceof TelekineticGrab) drop.quantity(2);
+		return drop;
+	}
+
+	public static WealthStone randomStone() {
+		WealthStone drop = Reflection.newInstance(WealthStone.class);
+		drop.set(Random.chances(stoneChances));
 		return drop;
 	}
 	
@@ -268,6 +290,7 @@ public class RingOfWealth extends Ring {
 			}
 
 			drops.add(i);
+			latestDropTier = 1;
 			triesToDrop.countUp( Random.NormalIntRange(1, 20) );
 		}
 
@@ -329,9 +352,6 @@ public class RingOfWealth extends Ring {
 	public static void showFlareForBonusDrop( Visual vis ){
 		if (vis == null || vis.parent == null) return;
 
-		new Flare(6, 24).color(0x00AAFF, true).show(vis, 3.33f);
-
-		/*
 		switch (latestDropTier){
 			default:
 				break; //do nothing
@@ -349,7 +369,6 @@ public class RingOfWealth extends Ring {
 				break;
 		}
 		latestDropTier = 0;
-		 */
 	}
 	
 	public static Item genConsumableDrop(int level) {
@@ -370,10 +389,6 @@ public class RingOfWealth extends Ring {
 	}
 
 	private static Item genLowValueConsumable(){
-
-
-
-
 		switch (Random.Int(4)){
 			case 0: default:
 				Item i = new Gold().random();

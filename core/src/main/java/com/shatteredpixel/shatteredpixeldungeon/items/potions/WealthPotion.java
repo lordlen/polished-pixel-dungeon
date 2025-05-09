@@ -67,7 +67,9 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 	}
 	@Override
 	public void doThrow(Hero hero) {
-		GameScene.selectCell(thrower);
+		pot.anonymous = true;
+		pot.doThrow(hero);
+		pot.anonymous = false;
 	}
 	@Override
 	protected void onThrow(int cell) {
@@ -138,15 +140,14 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 		return dropDesc();
 	}
 
-	private static final String POTION = "potion";
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle(bundle);
-		if(pot != null) bundle.put( POTION, pot.getClass() );
+		if(pot != null) bundle.put( WEALTH_ITEM, pot.getClass() );
 	}
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle(bundle);
-		set(bundle.getClass( POTION ));
+		set(bundle.getClass( WEALTH_ITEM ));
 	}
 }

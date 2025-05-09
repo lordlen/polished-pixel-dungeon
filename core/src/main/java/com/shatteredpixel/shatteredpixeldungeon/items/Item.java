@@ -319,7 +319,7 @@ public class Item implements Bundlable {
 	public final Item detach( Bag container ) {
 
 		if(wealthDrop != null) {
-			wealthDrop.spellDetach(container);
+			wealthDrop.wealthDetach(container);
 		}
 		
 		if (quantity <= 0) {

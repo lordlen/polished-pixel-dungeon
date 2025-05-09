@@ -114,15 +114,14 @@ public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell>
 		return dropDesc();
 	}
 
-	private static final String SPELL = "spell";
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle(bundle);
-		if(spell != null) bundle.put( SPELL, spell.getClass() );
+		if(spell != null) bundle.put( WEALTH_ITEM, spell.getClass() );
 	}
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle(bundle);
-		set(bundle.getClass( SPELL ));
+		set(bundle.getClass( WEALTH_ITEM ));
 	}
 }

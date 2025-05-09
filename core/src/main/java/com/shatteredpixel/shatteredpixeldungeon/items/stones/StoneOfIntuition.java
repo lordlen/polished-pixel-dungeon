@@ -129,7 +129,10 @@ public class StoneOfIntuition extends InventoryStone {
 					} else {
 						GLog.w( Messages.get(WndGuess.class, "incorrect") );
 					}
-					if (!anonymous) {
+					if(wealthDrop != null) {
+						curItem.detach(curUser.belongings.backpack);
+					}
+					else if (!anonymous) {
 						Catalog.countUse(StoneOfIntuition.class);
 						if (curUser.buff(IntuitionUseTracker.class) == null) {
 							Buff.affect(curUser, IntuitionUseTracker.class);

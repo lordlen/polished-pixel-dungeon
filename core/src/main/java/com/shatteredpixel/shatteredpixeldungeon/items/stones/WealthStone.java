@@ -19,61 +19,87 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
+package com.shatteredpixel.shatteredpixeldungeon.items.stones;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
 
-public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScroll> {
+import java.util.ArrayList;
+
+public class WealthStone extends Runestone implements WealthDrop<Runestone, WealthStone> {
 
 	{
-		image = ItemSpriteSheet.MYSTERY_SCROLL;
+		image = ItemSpriteSheet.STONE_HOLDER;
 	}
 
 	@Override
-	public void doRead() {
-		scroll.anonymize();
-		scroll.doRead();
+	protected void activate(int cell) {
+		stone.anonymize();
+		stone.activate(cell);
 	}
 
 	@Override
 	public void updateStats() {
-		//talents actually dont work at all, since the scroll is anonymized, might change in the future though.
-		talentFactor = scroll.talentFactor * 0.5f;
-		talentChance = scroll.talentChance;
+		//talents actually dont work at all, since the stone is anonymized, might change in the future though.
+		//...
+	}
+
+	@Override
+	public String defaultAction() {
+		return stone.defaultAction();
+	}
+	@Override
+	public ArrayList<String> actions(Hero hero) {
+		return stone.actions(hero);
+	}
+	public String actionName(String action, Hero hero){
+		return stone.actionName(action, hero);
+	}
+	@Override
+	public void execute(Hero hero, String action) {
+		super.execute(hero, action);
+		if (action.equals(InventoryStone.AC_USE) && hero.buff(MagicImmune.class) == null){
+			activate(curUser.pos);
+		}
 	}
 
 	@Override
 	protected void onThrow(int cell) {
-		vanishVFX(cell);
+		if (stone instanceof InventoryStone ||
+			Dungeon.hero.buff(MagicImmune.class) != null ||
+			(Dungeon.level.pit[cell] && Actor.findChar(cell) == null)) {
+
+			vanishVFX(cell);
+			return;
+		}
+		super.onThrow(cell);
 	}
 
 
-	private Scroll scroll = null;
+	private Runestone stone = null;
 	@Override
-	public Scroll item() {
-		return scroll;
+	public Runestone item() {
+		return stone;
 	}
 	@Override
-	public void setItem(Scroll item) {
-		this.scroll = item;
+	public void setItem(Runestone item) {
+		this.stone = item;
 	}
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return scroll.identify(byHero);
-	}
-	@Override
-	public boolean isKnown() {
-		return valid() && scroll.isKnown();
+		return stone.identify(byHero);
 	}
 	@Override
 	public boolean isSimilar(Item item) {
@@ -119,7 +145,7 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle(bundle);
-		if(scroll != null) bundle.put( WEALTH_ITEM, scroll.getClass() );
+		if(stone != null) bundle.put( WEALTH_ITEM, stone.getClass() );
 	}
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
