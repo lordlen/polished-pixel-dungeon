@@ -531,10 +531,12 @@ public class ItemSpriteSheet {
 	public static final int SCROLL_TIWAZ    = SCROLLS+11;
 
 	public static final int ARCANE_RESIN    = SCROLLS+13;
+	public static final int MYSTERY_SCROLL  = SCROLLS+14;
 	static {
 		for (int i = SCROLLS; i < SCROLLS+16; i++)
 			assignItemRect(i, 15, 14);
 		assignItemRect(ARCANE_RESIN   , 12, 11);
+		assignItemRect(MYSTERY_SCROLL , 15, 14);
 	}
 	
 	private static final int EXOTIC_SCROLLS =                               xy(1, 20);  //16 slots
