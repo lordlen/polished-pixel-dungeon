@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
@@ -85,6 +86,9 @@ public class UnstableBrew extends Brew {
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 0f);
 		}
+		if(this instanceof WealthDrop) {
+			potionChances.put(PotionOfExperience.class, 0f);
+		}
 
 		Potion p = Reflection.newInstance(Random.chances(potionChances));
 
@@ -98,6 +102,9 @@ public class UnstableBrew extends Brew {
 
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 3f);
+		}
+		if(this instanceof WealthDrop) {
+			potionChances.put(PotionOfExperience.class, 1f);
 		}
 	}
 	

@@ -19,37 +19,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
+package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
-import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Callback;
 
-public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScroll> {
+public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell> {
 
 	{
-		image = ItemSpriteSheet.MYSTERY_SCROLL;
+		image = ItemSpriteSheet.SPELL_HOLDER;
 	}
 
 	@Override
-	public void doRead() {
-		scroll.anonymize();
-		scroll.doRead();
-		detach(curUser.belongings.backpack);
+	public void onCast(Hero hero) {
+		Callback callback = new Callback() {
+			@Override
+			public void call() {
+				detach(curUser.belongings.backpack);
+			}
+		};
+
+		spell.anonymize();
+		spell.onDetach = callback;
+		spell.onCast(hero);
 	}
 
 	@Override
 	public void updateStats() {
-		//talents actually dont work at all, since the scroll is anonymized, might change in the future though.
-		talentFactor = scroll.talentFactor * 0.5f;
-		talentChance = scroll.talentChance;
+		//talents actually dont work at all, since the spell is anonymized, might change in the future though.
+		talentFactor = spell.talentFactor * 0.5f;
+		talentChance = spell.talentChance;
 	}
 
 	@Override
@@ -58,23 +63,19 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 	}
 
 
-	private Scroll scroll = null;
+	private Spell spell = null;
 	@Override
-	public Scroll item() {
-		return scroll;
+	public Spell item() {
+		return spell;
 	}
 	@Override
-	public void setItem(Scroll item) {
-		this.scroll = item;
+	public void setItem(Spell item) {
+		this.spell = item;
 	}
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return scroll.identify(byHero);
-	}
-	@Override
-	public boolean isKnown() {
-		return valid() && scroll.isKnown();
+		return spell.identify(byHero);
 	}
 	@Override
 	public boolean isSimilar(Item item) {
@@ -117,15 +118,15 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 		return dropDesc();
 	}
 
-	private static final String SCROLL = "scroll";
+	private static final String SPELL = "spell";
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle(bundle);
-		if(scroll != null) bundle.put( SCROLL, scroll.getClass() );
+		if(spell != null) bundle.put( SPELL, spell.getClass() );
 	}
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle(bundle);
-		set(bundle.getClass( SCROLL ));
+		set(bundle.getClass( SPELL ));
 	}
 }

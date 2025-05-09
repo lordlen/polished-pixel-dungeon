@@ -36,13 +36,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLevitation;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfParalyticGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
@@ -52,15 +48,28 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.CausticBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.InfernalBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.ShockingBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.UnstableBrew;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfIcyTouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfMagicalSight;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfStormClouds;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMirrorImage;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTerror;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.WealthScroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfAntiMagic;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMetamorphosis;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.Alchemize;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.BeaconOfReturning;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.PhaseShift;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.ReclaimTrap;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.Spell;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.UnstableSpell;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.WealthSpell;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -151,9 +160,67 @@ public class RingOfWealth extends Ring {
 		potionChances.put(PotionOfInvisibility.class,   1f);
 	}
 
-	public static WealthPotion randomPot() {
+	private static HashMap<Class<? extends Scroll>, Float> scrollChances = new HashMap<>();
+	static{
+		scrollChances.put(ScrollOfMirrorImage.class,    4f);
+		scrollChances.put(ScrollOfChallenge.class,    	3f);
+
+		scrollChances.put(ScrollOfTeleportation.class,  2f);
+
+		scrollChances.put(ScrollOfTerror.class,     	1f);
+		scrollChances.put(ScrollOfAntiMagic.class,   	1f);
+	}
+
+	private static HashMap<Class<? extends Spell>, Float> spellChances = new HashMap<>();
+	static{
+		spellChances.put(UnstableSpell.class,    		4f);
+
+		spellChances.put(TelekineticGrab.class,    		3f);
+		spellChances.put(ReclaimTrap.class,    			3f);
+
+		spellChances.put(BeaconOfReturning.class,    	2f);
+
+		spellChances.put(PhaseShift.class,    			1f);
+	}
+
+	private static HashMap<Class<? extends Item>, Float> typeChances = new HashMap<>();
+	static{
+		typeChances.put(Potion.class,    				55f);
+		typeChances.put(Scroll.class,    				25f);
+		typeChances.put(Spell.class,    				20f);
+	}
+
+	public static Item randomItem() {
+		Class<?> type = Random.chances(typeChances);
+
+		if(type == Potion.class) {
+			return randomPotion();
+		}
+		else if(type == Scroll.class) {
+			return randomScroll();
+		}
+		else if(type == Spell.class) {
+			return randomSpell();
+		}
+		else return Reflection.newInstance(Gold.class);
+	}
+
+	public static WealthPotion randomPotion() {
 		WealthPotion drop = Reflection.newInstance(WealthPotion.class);
 		drop.set(Random.chances(potionChances));
+		return drop;
+	}
+
+	public static WealthScroll randomScroll() {
+		WealthScroll drop = Reflection.newInstance(WealthScroll.class);
+		drop.set(Random.chances(scrollChances));
+		return drop;
+	}
+
+	public static WealthSpell randomSpell() {
+		WealthSpell drop = Reflection.newInstance(WealthSpell.class);
+		drop.set(Random.chances(spellChances));
+		if(drop.item() instanceof TelekineticGrab) drop.quantity(2);
 		return drop;
 	}
 	
@@ -164,7 +231,17 @@ public class RingOfWealth extends Ring {
 		CounterBuff triesToDrop = target.buff(TriesToDropTracker.class);
 		if (triesToDrop == null){
 			triesToDrop = Buff.affect(target, TriesToDropTracker.class);
-			triesToDrop.countUp( Random.NormalIntRange(0, 20) );
+			triesToDrop.countUp( Random.NormalIntRange(1, 20) );
+		}
+		CounterBuff alchemizeLeft = target.buff(AlchemizeLeft.class);
+		if (alchemizeLeft == null){
+			alchemizeLeft = Buff.affect(target, AlchemizeLeft.class);
+			alchemizeLeft.countUp( 2 );
+		}
+		CounterBuff alchemizeCounter = target.buff(AlchemizeCounter.class);
+		if (alchemizeCounter == null){
+			alchemizeCounter = Buff.affect(target, AlchemizeCounter.class);
+			alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
 		}
 
 		//now handle reward logic
@@ -172,13 +249,26 @@ public class RingOfWealth extends Ring {
 
 		triesToDrop.countDown(tries);
 		while ( triesToDrop.count() <= 0 ){
-			Item i;
-			do {
-				i = randomPot();
-			} while (Challenges.isItemBlocked(i));
+			Item i = null;
+
+			if(alchemizeLeft.count() > 0) {
+				if(alchemizeCounter.count() <= 0) {
+					i = Reflection.newInstance(Alchemize.class).quantity(Random.NormalIntRange(3, 4));
+					alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
+					alchemizeLeft.countDown(1);
+				} else {
+					alchemizeCounter.countDown(1);
+				}
+			}
+
+			if(i == null) {
+				do {
+					i = randomItem();
+				} while (Challenges.isItemBlocked(i));
+			}
 
 			drops.add(i);
-			triesToDrop.countUp( Random.NormalIntRange(0, 20) );
+			triesToDrop.countUp( Random.NormalIntRange(1, 20) );
 		}
 
 
@@ -384,7 +474,14 @@ public class RingOfWealth extends Ring {
 		return result;
 	}
 
+	public static void onLevelUp(Char target) {
+		AlchemizeLeft alchemizeLeft = target.buff(AlchemizeLeft.class);
+		if(getBuffedBonus(target, Wealth.class) > 0 && alchemizeLeft != null)
+			alchemizeLeft.countUp(1);
+	}
+
 	public class Wealth extends RingBuff {
+
 	}
 
 	public static class TriesToDropTracker extends CounterBuff {
@@ -392,8 +489,12 @@ public class RingOfWealth extends Ring {
 			revivePersists = true;
 		}
 	}
-
-	public static class DropsToEquipTracker extends CounterBuff {
+	public static class AlchemizeLeft extends CounterBuff {
+		{
+			revivePersists = true;
+		}
+	}
+	public static class AlchemizeCounter extends CounterBuff {
 		{
 			revivePersists = true;
 		}
