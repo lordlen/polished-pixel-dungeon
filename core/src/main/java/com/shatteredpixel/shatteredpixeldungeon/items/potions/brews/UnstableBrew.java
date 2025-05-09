@@ -86,7 +86,7 @@ public class UnstableBrew extends Brew {
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 0f);
 		}
-		if(this instanceof WealthDrop) {
+		if(wealthDrop != null) {
 			potionChances.put(PotionOfExperience.class, 0f);
 		}
 
@@ -103,7 +103,7 @@ public class UnstableBrew extends Brew {
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 3f);
 		}
-		if(this instanceof WealthDrop) {
+		if(wealthDrop != null) {
 			potionChances.put(PotionOfExperience.class, 1f);
 		}
 	}

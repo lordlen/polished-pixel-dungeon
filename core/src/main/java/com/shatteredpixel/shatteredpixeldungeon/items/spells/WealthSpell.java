@@ -25,10 +25,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Callback;
 
 public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell> {
 
@@ -38,15 +37,7 @@ public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell>
 
 	@Override
 	public void onCast(Hero hero) {
-		Callback callback = new Callback() {
-			@Override
-			public void call() {
-				detach(curUser.belongings.backpack);
-			}
-		};
-
 		spell.anonymize();
-		spell.onDetach = callback;
 		spell.onCast(hero);
 	}
 
@@ -59,7 +50,12 @@ public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell>
 
 	@Override
 	protected void onThrow(int cell) {
-		return;
+		vanishVFX(cell);
+	}
+
+	@Override
+	public ItemSprite.Glowing glowing() {
+		return valid() ? spell.glowing() : null;
 	}
 
 

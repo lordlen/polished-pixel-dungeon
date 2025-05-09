@@ -86,10 +86,4 @@ public abstract class Spell extends Item {
 		anonymous = true;
 	}
 
-	public Callback onDetach = null;
-	@Override
-	protected void onDetach() {
-		super.onDetach();
-		if(onDetach != null) onDetach.call();
-	}
 }

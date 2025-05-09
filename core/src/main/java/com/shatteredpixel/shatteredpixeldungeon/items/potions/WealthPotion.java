@@ -57,7 +57,13 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 
 	@Override
 	public String defaultAction() {
-		return AC_CHOOSE;
+		if (mustThrowPots.contains(pot.getClass())) {
+			return AC_THROW;
+		} else if (canThrowPots.contains(pot.getClass())){
+			return AC_CHOOSE;
+		} else {
+			return AC_DRINK;
+		}
 	}
 	@Override
 	public void doThrow(Hero hero) {
@@ -65,7 +71,10 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 	}
 	@Override
 	protected void onThrow(int cell) {
-		if(Dungeon.level.map[cell] == Terrain.WELL) return;
+		if(Dungeon.level.map[cell] == Terrain.WELL) {
+			vanishVFX(cell);
+			return;
+		}
 		super.onThrow(cell);
 	}
 

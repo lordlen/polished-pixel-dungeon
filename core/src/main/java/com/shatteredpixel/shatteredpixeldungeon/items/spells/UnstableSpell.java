@@ -93,7 +93,7 @@ public class UnstableSpell extends Spell {
 	
 	@Override
 	protected void onCast(Hero hero) {
-		if(this instanceof WealthDrop) {
+		if(wealthDrop != null) {
 			scrollChances.put(ScrollOfTransmutation.class, 0f);
 			scrollChances.put(ScrollOfLullaby.class, 0f);
 		}
@@ -125,7 +125,7 @@ public class UnstableSpell extends Spell {
 			}
 		}
 
-		if(this instanceof WealthDrop) {
+		if(wealthDrop != null) {
 			scrollChances.put(ScrollOfTransmutation.class, 0f);
 			scrollChances.put(ScrollOfLullaby.class, 0f);
 		}

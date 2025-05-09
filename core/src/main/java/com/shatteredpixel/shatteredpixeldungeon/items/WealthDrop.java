@@ -1,11 +1,19 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.WealthScroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.WealthSpell;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.noosa.ColorBlock;
+import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.Reflection;
@@ -18,6 +26,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         setItem(Reflection.newInstance(type));
         if(!valid()) return null;
 
+        item().wealthDrop = this;
         updateStats();
         updateVisuals();
 
@@ -89,6 +98,20 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         if(valid()) {
             hero.spendAndNext(Item.TIME_TO_DROP);
             th().detachAll(hero.belongings.backpack);
+            vanishVFX(hero.pos);
+        }
+    }
+
+    default void vanishVFX(int cell) {
+        Sample.INSTANCE.play(Assets.Sounds.PUFF);
+        GameScene.emitter().burst(Speck.factory(Speck.STEAM), 10);
+        CellEmitter.get( cell ).burst( Speck.factory( Speck.STEAM ), 10 );
+    }
+
+    default void spellDetach(Bag container) {
+        //Wealth potions already detach by themselves
+        if(valid() && item().quantity() <= 1 && this instanceof WealthSpell || this instanceof WealthScroll) {
+            th().detach(container);
         }
     }
 

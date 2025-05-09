@@ -96,6 +96,9 @@ public class Item implements Bundlable {
 
 	// whether an item can be included in heroes remains
 	public boolean bones = false;
+
+	// For wrapper behaviour
+	protected WealthDrop<?, ?> wealthDrop = null;
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
@@ -314,11 +317,15 @@ public class Item implements Bundlable {
 	}
 	
 	public final Item detach( Bag container ) {
+
+		if(wealthDrop != null) {
+			wealthDrop.spellDetach(container);
+		}
 		
 		if (quantity <= 0) {
-			
+
 			return null;
-			
+
 		} else
 		if (quantity == 1) {
 

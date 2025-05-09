@@ -42,7 +42,6 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 	public void doRead() {
 		scroll.anonymize();
 		scroll.doRead();
-		detach(curUser.belongings.backpack);
 	}
 
 	@Override
@@ -54,7 +53,7 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 
 	@Override
 	protected void onThrow(int cell) {
-		return;
+		vanishVFX(cell);
 	}
 
 
