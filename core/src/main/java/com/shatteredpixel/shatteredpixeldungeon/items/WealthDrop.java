@@ -97,7 +97,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         }
     }
 
-    default void vanishVFX(int cell) {
+    static void vanishVFX(int cell) {
         Sample.INSTANCE.play(Assets.Sounds.PUFF);
         CellEmitter.get( cell ).burst( Speck.factory( Speck.STEAM ), 10 );
     }
@@ -163,17 +163,24 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         {
             type = buffType.NEUTRAL;
             actPriority = HERO_PRIO+1;
+            revivePersists = true;
         }
         Item item = null;
 
         @Override
         public boolean act() {
+            int slot = Dungeon.quickslot.getSlot(item);
             item.detach(Dungeon.hero.belongings.backpack);
-            if(item.quantity() > 0) {
+            vanishVFX(Dungeon.hero.pos);
+
+            if(Dungeon.hero.belongings.contains(item)) {
                 spend(200f);
                 return true;
             }
-            else return super.act();
+            else {
+                if(slot != -1) Dungeon.quickslot.clearSlot(slot);
+                return super.act();
+            }
         }
 
         private static final String ITEM	= "item";

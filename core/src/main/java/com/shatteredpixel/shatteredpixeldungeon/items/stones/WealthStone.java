@@ -83,7 +83,7 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone, Weal
 			Dungeon.hero.buff(MagicImmune.class) != null ||
 			(Dungeon.level.pit[cell] && Actor.findChar(cell) == null)) {
 
-			vanishVFX(cell);
+			WealthDrop.vanishVFX(cell);
 			return;
 		}
 		super.onThrow(cell);

@@ -55,7 +55,7 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 
 	@Override
 	protected void onThrow(int cell) {
-		vanishVFX(cell);
+		WealthDrop.vanishVFX(cell);
 	}
 
 

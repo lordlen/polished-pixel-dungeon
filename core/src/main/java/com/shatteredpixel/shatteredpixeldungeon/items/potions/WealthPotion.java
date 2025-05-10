@@ -75,7 +75,7 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 	@Override
 	protected void onThrow(int cell) {
 		if(Dungeon.level.map[cell] == Terrain.WELL) {
-			vanishVFX(cell);
+			WealthDrop.vanishVFX(cell);
 			return;
 		}
 		super.onThrow(cell);

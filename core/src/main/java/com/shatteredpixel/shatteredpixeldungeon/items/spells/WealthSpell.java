@@ -50,7 +50,7 @@ public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell>
 
 	@Override
 	protected void onThrow(int cell) {
-		vanishVFX(cell);
+		WealthDrop.vanishVFX(cell);
 	}
 
 	@Override
