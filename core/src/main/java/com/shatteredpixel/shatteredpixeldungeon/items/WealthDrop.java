@@ -74,17 +74,14 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
             if(valid() && Dungeon.hero.belongings.contains(th())) {
                 Buff.append(Dungeon.hero, Decay.class, 100f).item = th();
             }
-        } else {
-//            Callback callback = new Callback() {
-//                @Override
-//                public void call() {
-//                    if(valid() && Dungeon.hero.belongings.contains((Item)WealthDrop.this)) {
-//                        Buff.append(Dungeon.hero, Decay.class, 100f).item = (Item)WealthDrop.this;
-//                    }
-//                }
-//            };
-//            Dungeon.runAfterLoad(callback);
-        }
+        }/* else {
+            Callback callback = () -> {
+                if(valid() && Dungeon.hero.belongings.contains((Item)WealthDrop.this)) {
+                    Buff.append(Dungeon.hero, Decay.class, 100f).item = (Item)WealthDrop.this;
+                }
+            };
+            Dungeon.runAfterLoad(callback);
+        }*/
 
         return true;
     }
@@ -190,17 +187,13 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         @Override
         public void restoreFromBundle( Bundle bundle ) {
             super.restoreFromBundle( bundle );
-            //item = (Item)bundle.get(ITEM);
 
             if(bundle.get(ITEM) != null) {
-                Callback callback = new Callback() {
-                    @Override
-                    public void call() {
-                        for(Item item : Dungeon.hero.belongings) {
-                            if(item.isSimilar((Item)bundle.get(ITEM))) {
-                                Decay.this.item = item;
-                                break;
-                            }
+                Callback callback = () -> {
+                    for(Item item : Dungeon.hero.belongings) {
+                        if(item.isSimilar((Item)bundle.get(ITEM))) {
+                            Decay.this.item = item;
+                            break;
                         }
                     }
                 };

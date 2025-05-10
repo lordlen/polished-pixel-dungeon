@@ -81,9 +81,4 @@ public abstract class Spell extends Item {
 	
 	protected abstract void onCast(Hero hero );
 
-	protected boolean anonymous = false;
-	public void anonymize(){
-		anonymous = true;
-	}
-
 }

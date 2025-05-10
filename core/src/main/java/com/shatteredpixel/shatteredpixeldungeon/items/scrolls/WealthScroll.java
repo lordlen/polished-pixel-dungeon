@@ -40,14 +40,16 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 
 	@Override
 	public void doRead() {
-		scroll.anonymize();
+		scroll.anonymous = true;
 		scroll.doRead();
+		scroll.anonymous = false;
 	}
 
 	@Override
 	public void updateStats() {
-		//talents actually dont work at all, since the scroll is anonymized, might change in the future though.
-		talentFactor = scroll.talentFactor * 0.5f;
+		scroll.talentFactor *= 0.5f;
+
+		talentFactor = scroll.talentFactor;
 		talentChance = scroll.talentChance;
 	}
 

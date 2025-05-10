@@ -175,11 +175,9 @@ public class BeaconOfReturning extends Spell {
 		}
 
 		detach(hero.belongings.backpack);
-		if(!anonymous) {
-			Catalog.countUse(getClass());
-			if (Random.Float() < talentChance){
-				Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
-			}
+		Catalog.countUse(getClass());
+		if (Random.Float() < talentChance){
+			Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
 		}
 	}
 	

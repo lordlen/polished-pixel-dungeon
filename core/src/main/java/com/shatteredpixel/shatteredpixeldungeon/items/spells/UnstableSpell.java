@@ -118,11 +118,9 @@ public class UnstableSpell extends Spell {
 		curItem = s;
 		s.doRead();
 
-		if(!anonymous) {
-			Catalog.countUse(getClass());
-			if (Random.Float() < talentChance){
-				Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
-			}
+		Catalog.countUse(getClass());
+		if (Random.Float() < talentChance){
+			Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
 		}
 
 		if(wealthDrop != null) {

@@ -37,14 +37,14 @@ public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell>
 
 	@Override
 	public void onCast(Hero hero) {
-		spell.anonymize();
 		spell.onCast(hero);
 	}
 
 	@Override
 	public void updateStats() {
-		//talents actually dont work at all, since the spell is anonymized, might change in the future though.
-		talentFactor = spell.talentFactor * 0.5f;
+		spell.talentFactor *= 0.5f;
+
+		talentFactor = spell.talentFactor;
 		talentChance = spell.talentChance;
 	}
 

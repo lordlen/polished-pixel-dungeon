@@ -45,14 +45,17 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone, Weal
 
 	@Override
 	protected void activate(int cell) {
-		stone.anonymize();
+		stone.anonymous = true;
 		stone.activate(cell);
+		stone.anonymous = false;
 	}
 
 	@Override
 	public void updateStats() {
-		//talents actually dont work at all, since the stone is anonymized, might change in the future though.
-		//...
+		//stone.talentFactor *= 0.5f;
+
+		//talentFactor = stone.talentFactor;
+		//talentChance = stone.talentChance;
 	}
 
 	@Override

@@ -39,19 +39,22 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 
 	@Override
 	public void shatter( int cell ) {
-		pot.anonymize();
+		pot.anonymous = true;
 		pot.shatter(cell);
+		pot.anonymous = false;
 	}
 	@Override
 	public void apply(Hero hero) {
-		pot.anonymize();
+		pot.anonymous = true;
 		pot.apply(hero);
+		pot.anonymous = false;
 	}
 
 	@Override
 	public void updateStats() {
-		//talents actually dont work at all, since the pot is anonymized, might change in the future though.
-		talentFactor = pot.talentFactor * 0.5f;
+		pot.talentFactor *= 0.5f;
+
+		talentFactor = pot.talentFactor;
 		talentChance = pot.talentChance;
 	}
 
@@ -67,9 +70,7 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 	}
 	@Override
 	public void doThrow(Hero hero) {
-		pot.anonymous = true;
-		pot.doThrow(hero);
-		pot.anonymous = false;
+		GameScene.selectCell(thrower);
 	}
 	@Override
 	protected void onThrow(int cell) {
