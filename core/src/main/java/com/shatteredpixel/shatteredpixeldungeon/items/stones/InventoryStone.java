@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.InventoryScroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.WealthScroll;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
@@ -106,16 +108,21 @@ public abstract class InventoryStone extends Runestone {
 
 		@Override
 		public void onSelect( Item item ) {
+
+			if(curItem instanceof WealthStone) {
+				WealthStone wealthStone = ((WealthStone)curItem);
+				if(wealthStone.item() instanceof InventoryStone) curItem = wealthStone.item();
+			}
 			
 			//FIXME this safety check shouldn't be necessary
 			//it would be better to eliminate the curItem static variable.
-			if (!((wealthDrop == null ? curItem : wealthDrop.item()) instanceof InventoryStone)){
+			if (!(curItem instanceof InventoryStone)){
 				return;
 			}
 			
 			if (item != null) {
 
-				((InventoryStone)(wealthDrop == null ? curItem : wealthDrop.item())).onItemSelected( item );
+				((InventoryStone) curItem).onItemSelected( item );
 				
 			}
 		}
