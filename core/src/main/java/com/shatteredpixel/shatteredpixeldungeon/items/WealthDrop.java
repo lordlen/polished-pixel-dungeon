@@ -72,12 +72,12 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
 
         if(Dungeon.hero != null) {
             if(valid() && Dungeon.hero.belongings.contains(th())) {
-                Buff.append(Dungeon.hero, Decay.class, 100f).item = th();
+                Buff.append(Dungeon.hero, Decay.class, 200f).item = th();
             }
         }/* else {
             Callback callback = () -> {
                 if(valid() && Dungeon.hero.belongings.contains((Item)WealthDrop.this)) {
-                    Buff.append(Dungeon.hero, Decay.class, 100f).item = (Item)WealthDrop.this;
+                    Buff.append(Dungeon.hero, Decay.class, 200f).item = (Item)WealthDrop.this;
                 }
             };
             Dungeon.runAfterLoad(callback);
@@ -170,7 +170,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         public boolean act() {
             item.detach(Dungeon.hero.belongings.backpack);
             if(item.quantity() > 0) {
-                spend(100f);
+                spend(200f);
                 return true;
             }
             else return super.act();
