@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.utils.Callback;
 
 import java.util.ArrayList;
 
@@ -79,5 +80,5 @@ public abstract class Spell extends Item {
 	}
 	
 	protected abstract void onCast(Hero hero );
-	
+
 }

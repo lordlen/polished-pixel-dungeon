@@ -82,6 +82,7 @@ import com.watabou.noosa.Game;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Callback;
 import com.watabou.utils.FileUtils;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
@@ -638,6 +639,18 @@ public class Dungeon {
 	private static final String CHAPTERS	= "chapters";
 	private static final String QUESTS		= "quests";
 	private static final String BADGES		= "badges";
+
+	static Callback afterLoad = () -> {
+
+    };
+	public static void runAfterLoad(Callback callback) {
+		Callback current = afterLoad;
+
+		afterLoad = () -> {
+			current.call();
+			callback.call();
+		};
+	}
 	
 	public static void saveGame( int save ) {
 		try {
@@ -839,6 +852,9 @@ public class Dungeon {
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
 
+
+		afterLoad.call();
+		afterLoad = () -> {};
 
 		Debug.LoadGame();
 	}

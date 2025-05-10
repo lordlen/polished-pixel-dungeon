@@ -102,6 +102,11 @@ public abstract class InventoryScroll extends Scroll {
 
 		@Override
 		public void onSelect( Item item ) {
+
+			if(curItem instanceof WealthScroll) {
+				WealthScroll wealthScroll = ((WealthScroll)curItem);
+				if(wealthScroll.item() instanceof InventoryScroll) curItem = wealthScroll.item();
+			}
 			
 			//FIXME this safety check shouldn't be necessary
 			//it would be better to eliminate the curItem static variable.

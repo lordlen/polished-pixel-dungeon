@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.InventoryStone;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.WealthStone;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -72,6 +74,11 @@ public abstract class InventorySpell extends Spell {
 
 		@Override
 		public void onSelect( Item item ) {
+
+			if(curItem instanceof WealthSpell) {
+				WealthSpell wealthSpell = ((WealthSpell)curItem);
+				if(wealthSpell.item() instanceof InventorySpell) curItem = wealthSpell.item();
+			}
 			
 			//FIXME this safety check shouldn't be necessary
 			//it would be better to eliminate the curItem static variable.

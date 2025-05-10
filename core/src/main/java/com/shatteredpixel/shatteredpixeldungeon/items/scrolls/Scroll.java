@@ -199,7 +199,7 @@ public abstract class Scroll extends Item {
 		curUser.busy();
 		((HeroSprite)curUser.sprite).read();
 
-		if (!anonymous) {
+		if (!anonymous || wealthDrop != null) {
 			Catalog.countUse(getClass());
 			if (Random.Float() < talentChance) {
 				Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
