@@ -402,11 +402,14 @@ public class RingOfWealth extends Ring {
 	public static ArrayList<Item> tryForBonusDrop(Char target, int tries ){
 		int bonus = getBuffedBonus(target, Wealth.class);
 		if (bonus <= 0) return null;
+		bonus--;
+
+		int max = Math.round(30f / (1 + .2f * bonus));
 
 		CounterBuff triesToDrop = target.buff(TriesToDropTracker.class);
 		if (triesToDrop == null){
 			triesToDrop = Buff.affect(target, TriesToDropTracker.class);
-			triesToDrop.countUp( Random.NormalIntRange(1, 20) );
+			triesToDrop.countUp( Random.NormalIntRange(1, max) );
 		}
 		CounterBuff alchemizeLeft = target.buff(AlchemizeLeft.class);
 		if (alchemizeLeft == null){
@@ -428,7 +431,7 @@ public class RingOfWealth extends Ring {
 
 			if(alchemizeLeft.count() > 0) {
 				if(alchemizeCounter.count() <= 0) {
-					i = Reflection.newInstance(Alchemize.class).quantity(Random.NormalIntRange(3, 4));
+					i = Reflection.newInstance(Alchemize.class).quantity(Random.NormalIntRange(4, 5) + bonus);
 					alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
 					alchemizeLeft.countDown(1);
 				} else {
@@ -446,7 +449,7 @@ public class RingOfWealth extends Ring {
 
 			Integer rarity = itemRarities.get(i.getClass());
 			latestDropTier = Math.max(latestDropTier, rarity != null ? rarity : 0);
-			triesToDrop.countUp( Random.NormalIntRange(1, 20) );
+			triesToDrop.countUp( Random.NormalIntRange(1, max) );
 		}
 
 		return drops;

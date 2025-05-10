@@ -9,6 +9,8 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.audio.Sample;
@@ -72,7 +74,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
 
         if(Dungeon.hero != null) {
             if(valid() && Dungeon.hero.belongings.contains(th())) {
-                Buff.append(Dungeon.hero, Decay.class, 200f).item = th();
+                Buff.append(Dungeon.hero, Decay.class, decayTimer()).item = th();
             }
         }/* else {
             Callback callback = () -> {
@@ -95,11 +97,6 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
             th().detachAll(hero.belongings.backpack);
             vanishVFX(hero.pos);
         }
-    }
-
-    static void vanishVFX(int cell) {
-        Sample.INSTANCE.play(Assets.Sounds.PUFF);
-        CellEmitter.get( cell ).burst( Speck.factory( Speck.STEAM ), 10 );
     }
 
     default void wealthDetach(Bag container) {
@@ -129,6 +126,16 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
 
 
     String WEALTH_ITEM = "wealth_item";
+
+    static void vanishVFX(int cell) {
+        Sample.INSTANCE.play(Assets.Sounds.PUFF);
+        CellEmitter.get( cell ).burst( Speck.factory( Speck.STEAM ), 10 );
+    }
+
+    static int decayTimer() {
+        int lvl = Ring.getBuffedBonus(Dungeon.hero, RingOfWealth.Wealth.class) - 1;
+        return 200 + 40*lvl;
+    }
 
     static void onId() {
         if(Dungeon.level == null || Dungeon.hero == null) return;
@@ -174,7 +181,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
             vanishVFX(Dungeon.hero.pos);
 
             if(Dungeon.hero.belongings.contains(item)) {
-                spend(200f);
+                spend(decayTimer());
                 return true;
             }
             else {
