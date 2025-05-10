@@ -296,6 +296,65 @@ public class RingOfWealth extends Ring {
 		typeChances.put(Spell.class,    				15f);
 	}
 
+	private static HashMap<Class<? extends Item>, Integer> itemRarities = new HashMap<>();
+	static{
+		itemRarities.put(UnstableBrew.class,       		1);
+		itemRarities.put(PotionOfToxicGas.class,       	1);
+		itemRarities.put(PotionOfStormClouds.class,    	1);
+		itemRarities.put(CausticBrew.class,    		   	1);
+		itemRarities.put(PotionOfLevitation.class,		1);
+		itemRarities.put(AquaBrew.class,    			1);
+		itemRarities.put(ShockingBrew.class,    		1);
+		itemRarities.put(PotionOfLiquidFlame.class,    	1);
+		itemRarities.put(PotionOfFrost.class,          	1);
+
+
+
+		itemRarities.put(PotionOfMagicalSight.class,   	2);
+		itemRarities.put(PotionOfSnapFreeze.class,   	2);
+		itemRarities.put(PotionOfDragonsBreath.class,	2);
+		itemRarities.put(PotionOfCorrosiveGas.class,	2);
+		itemRarities.put(PotionOfShroudingFog.class, 	2);
+		itemRarities.put(PotionOfHaste.class,   		2);
+		itemRarities.put(PotionOfPurity.class,         	2);
+
+		itemRarities.put(ScrollOfMirrorImage.class,    	2);
+		itemRarities.put(ScrollOfChallenge.class,		2);
+		itemRarities.put(ScrollOfTeleportation.class,  	2);
+		itemRarities.put(ScrollOfMagicMapping.class,   	2);
+		itemRarities.put(ScrollOfRage.class,  		    2);
+
+		itemRarities.put(StoneOfFlock.class,			2);
+		itemRarities.put(StoneOfClairvoyance.class,		2);
+		itemRarities.put(StoneOfFear.class,    			2);
+
+		itemRarities.put(TelekineticGrab.class,    		2);
+		itemRarities.put(ReclaimTrap.class,    			2);
+		itemRarities.put(BeaconOfReturning.class,    	2);
+		itemRarities.put(PhaseShift.class,    			2);
+		itemRarities.put(UnstableSpell.class,    		2);
+
+
+
+		itemRarities.put(InfernalBrew.class,    		3);
+		itemRarities.put(BlizzardBrew.class,			3);
+		itemRarities.put(PotionOfInvisibility.class,   	3);
+		itemRarities.put(PotionOfStamina.class,   		3);
+		itemRarities.put(PotionOfParalyticGas.class,   	3);
+		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
+		itemRarities.put(ElixirOfIcyTouch.class,   		3);
+
+		itemRarities.put(ScrollOfTerror.class,   		3);
+		itemRarities.put(ScrollOfRetribution.class, 	3);
+		itemRarities.put(ScrollOfSirensSong.class,   	3);
+		itemRarities.put(ScrollOfAntiMagic.class,   	3);
+
+		itemRarities.put(StoneOfShock.class,    		3);
+		itemRarities.put(StoneOfBlink.class,    		3);
+		itemRarities.put(StoneOfDeepSleep.class,    	3);
+		itemRarities.put(StoneOfAggression.class,    	3);
+	}
+
 	public static Item randomItem() {
 		Class<?> type = Random.chances(typeChances);
 
@@ -384,57 +443,12 @@ public class RingOfWealth extends Ring {
 			}
 
 			drops.add(i);
-			latestDropTier = 1;
+
+			Integer rarity = itemRarities.get(i.getClass());
+			latestDropTier = Math.max(latestDropTier, rarity != null ? rarity : 0);
 			triesToDrop.countUp( Random.NormalIntRange(1, 20) );
 		}
 
-
-
-
-		/*
-		CounterBuff dropsToEquip = target.buff(DropsToEquipTracker.class);
-		if (dropsToEquip == null){
-			dropsToEquip = Buff.affect(target, DropsToEquipTracker.class);
-			dropsToEquip.countUp( Random.NormalIntRange(5, 10) );
-		}
-
-		//now handle reward logic
-		ArrayList<Item> drops = new ArrayList<>();
-
-		triesToDrop.countDown(tries);
-		while ( triesToDrop.count() <= 0 ){
-			if (dropsToEquip.count() <= 0){
-				int equipBonus = 0;
-
-				//A second ring of wealth can be at most +1 when calculating wealth bonus for equips
-				//This is to prevent using an upgraded wealth to farm another upgraded wealth and
-				//using the two to get substantially more upgrade value than intended
-				for (Wealth w : target.buffs(Wealth.class)){
-					if (w.buffedLvl() > equipBonus){
-						equipBonus = w.buffedLvl() + Math.min(equipBonus, 2);
-					} else {
-						equipBonus += Math.min(w.buffedLvl(), 2);
-					}
-				}
-
-				Item i;
-				do {
-					i = genEquipmentDrop(equipBonus - 1);
-				} while (Challenges.isItemBlocked(i));
-				drops.add(i);
-				dropsToEquip.countUp(Random.NormalIntRange(5, 10));
-			} else {
-				Item i;
-				do {
-					i = genConsumableDrop(bonus - 1);
-				} while (Challenges.isItemBlocked(i));
-				drops.add(i);
-				dropsToEquip.countDown(1);
-			}
-			triesToDrop.countUp( Random.NormalIntRange(0, 20) );
-		}
-		 */
-		
 		return drops;
 	}
 
@@ -447,18 +461,16 @@ public class RingOfWealth extends Ring {
 		if (vis == null || vis.parent == null) return;
 
 		switch (latestDropTier){
-			default:
-				break; //do nothing
-			case 1:
+			case 0: default:
 				new Flare(6, 20).color(0x00FF00, true).show(vis, 3f);
 				break;
-			case 2:
+			case 1:
 				new Flare(6, 24).color(0x00AAFF, true).show(vis, 3.33f);
 				break;
-			case 3:
+			case 2:
 				new Flare(6, 28).color(0xAA00FF, true).show(vis, 3.67f);
 				break;
-			case 4:
+			case 3:
 				new Flare(6, 32).color(0xFFAA00, true).show(vis, 4f);
 				break;
 		}
@@ -540,47 +552,6 @@ public class RingOfWealth extends Ring {
 			case 3:
 				return Random.Float() < ExoticCrystals.consumableExoticChance() ? new ScrollOfMetamorphosis() : new ScrollOfTransmutation();
 		}
-	}
-
-	private static Item genEquipmentDrop( int level ){
-		Item result;
-		//each upgrade increases depth used for calculating drops by 1
-		int floorset = (Dungeon.depth + level)/5;
-		switch (Random.Int(5)){
-			default: case 0: case 1:
-				Weapon w = Generator.randomWeapon(floorset, true);
-				if (!w.hasGoodEnchant() && Random.Int(10) < level)      w.enchant();
-				else if (w.hasCurseEnchant())                           w.enchant(null);
-				result = w;
-				break;
-			case 2:
-				Armor a = Generator.randomArmor(floorset);
-				if (!a.hasGoodGlyph() && Random.Int(10) < level)        a.inscribe();
-				else if (a.hasCurseGlyph())                             a.inscribe(null);
-				result = a;
-				break;
-			case 3:
-				result = Generator.randomUsingDefaults(Generator.Category.RING);
-				break;
-			case 4:
-				result = Generator.random(Generator.Category.ARTIFACT);
-				break;
-		}
-		//minimum level is 1/2/3/4/5/6 when ring level is 1/3/5/7/9/11
-		if (result.isUpgradable()){
-			int minLevel = (level+1)/2;
-			if (result.level() < minLevel){
-				result.level(minLevel);
-			}
-		}
-		result.cursed = false;
-		result.cursedKnown = true;
-		if (result.level() >= 2) {
-			latestDropTier = 4;
-		} else {
-			latestDropTier = 3;
-		}
-		return result;
 	}
 
 	public static void onLevelUp(Char target) {
