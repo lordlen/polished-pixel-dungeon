@@ -118,20 +118,26 @@ public class RingOfWealth extends Ring {
 	public String statsInfo() {
 		if (isIdentified()){
 			String info = Messages.get(this, "stats",
-					Messages.decimalFormat("#.##", 100f * (Math.pow(1.20f, soloBuffedBonus()) - 1f)));
+					Messages.decimalFormat("#.##", dropGenRate(soloBuffedBonus())));
+
 			if (isEquipped(Dungeon.hero) && soloBuffedBonus() != combinedBuffedBonus(Dungeon.hero)){
 				info += "\n\n" + Messages.get(this, "combined_stats",
-						Messages.decimalFormat("#.##", 100f * (Math.pow(1.20f, combinedBuffedBonus(Dungeon.hero)) - 1f)));
+						Messages.decimalFormat("#.##", dropGenRate(combinedBuffedBonus(Dungeon.hero))));
 			}
 			return info;
 		} else {
-			return Messages.get(this, "typical_stats", Messages.decimalFormat("#.##", 20f));
+			return Messages.get(this, "typical_stats", Messages.decimalFormat("#.##", dropGenRate(1)));
 		}
 	}
 
 	public String upgradeStat1(int level){
 		if (cursed && cursedKnown) level = Math.min(-1, level-3);
-		return Messages.decimalFormat("#.##", 100f * (Math.pow(1.2f, level+1)-1f)) + "%";
+		return Messages.decimalFormat("#.##", dropGenRate(level+1)) + "x";
+	}
+
+	public String upgradeStat2(int level){
+		if (cursed && cursedKnown) level = Math.min(-1, level-3);
+		return Messages.decimalFormat("#.##", dropGenRate(level+1)) + "x";
 	}
 
 	private static final String TRIES_TO_DROP = "tries_to_drop";
@@ -158,6 +164,10 @@ public class RingOfWealth extends Ring {
 	
 	public static float dropChanceMultiplier( Char target ){
 		return (float)Math.pow(1.20, getBuffedBonus(target, Wealth.class));
+	}
+
+	public static float dropGenRate(int buffedLvl) {
+		return 1f + .2f * (buffedLvl-1);
 	}
 
 	/*private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
@@ -402,9 +412,8 @@ public class RingOfWealth extends Ring {
 	public static ArrayList<Item> tryForBonusDrop(Char target, int tries ){
 		int bonus = getBuffedBonus(target, Wealth.class);
 		if (bonus <= 0) return null;
-		bonus--;
 
-		int max = Math.round(30f / (1 + .2f * bonus));
+		int max = Math.round(30f / dropGenRate(bonus));
 
 		CounterBuff triesToDrop = target.buff(TriesToDropTracker.class);
 		if (triesToDrop == null){
@@ -431,7 +440,7 @@ public class RingOfWealth extends Ring {
 
 			if(alchemizeLeft.count() > 0) {
 				if(alchemizeCounter.count() <= 0) {
-					i = Reflection.newInstance(Alchemize.class).quantity(Random.NormalIntRange(4, 5) + bonus);
+					i = Reflection.newInstance(Alchemize.class).quantity(Random.NormalIntRange(3, 4) + bonus);
 					alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
 					alchemizeLeft.countDown(1);
 				} else {
