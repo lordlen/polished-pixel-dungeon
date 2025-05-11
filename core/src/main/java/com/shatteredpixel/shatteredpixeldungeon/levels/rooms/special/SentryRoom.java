@@ -172,6 +172,10 @@ public class SentryRoom extends SpecialRoom {
 		entrance.set( Door.Type.REGULAR );
 	}
 
+	public boolean canPlaceWater(Point p){
+		return false;
+	}
+
 	private static Item prize(Level level ) {
 
 		Item prize;
@@ -252,7 +256,7 @@ public class SentryRoom extends SpecialRoom {
 
 			if (Dungeon.hero != null){
 				if (fieldOfView[Dungeon.hero.pos]
-						&& Dungeon.level.map[Dungeon.hero.pos] == Terrain.EMPTY_SP
+						&& (Dungeon.level.map[Dungeon.hero.pos] == Terrain.EMPTY_SP || Dungeon.level.map[Dungeon.hero.pos] == Terrain.WATER)
 						&& room.inside(Dungeon.level.cellToPoint(Dungeon.hero.pos))
 						&& !Dungeon.hero.belongings.lostInventory()){
 
