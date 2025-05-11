@@ -223,10 +223,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float meleeDamageFactor(boolean adjacent) {
-			if(!adjacent) {
-				polished.initCooldown();
-			}
-
+			polished.initCooldown();
 			return 1.25f;
 		}
 
