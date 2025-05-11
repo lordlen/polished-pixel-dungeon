@@ -44,12 +44,20 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 
 public class BuffIndicator extends Component {
-	
-	//transparent icon
-	public static final int NONE    = 127;
+
+	public static final int POLISHED		= 112;
+	public static final int POLISHED_small	= 144;
+
+	public static final int ELECTRIFIED	= POLISHED + 0;
+	public static final int BRITTLE 	= POLISHED + 1;
+	public static final int LAST_STAND 	= POLISHED + 2;
+
 
 	//FIXME this is becoming a mess, should do a big cleaning pass on all of these
 	//and think about tinting options
+
+	//transparent icon
+	public static final int NONE    	= POLISHED-1;
 	public static final int MIND_VISION = 0;
 	public static final int LEVITATION  = 1;
 	public static final int FIRE        = 2;
@@ -244,8 +252,8 @@ public class BuffIndicator extends Component {
 		if (excessWidth > 0) {
 			float leftAdjust = excessWidth/(buffButtons.size()-1);
 			//can't squish by more than 50% on large and 62% on small
-			if (large && leftAdjust >= size*0.48f) leftAdjust = size*0.5f;
-			if (!large && leftAdjust >= size*0.62f) leftAdjust = size*0.65f;
+			if (large && leftAdjust >= size*0.45f) leftAdjust = size*0.45f;
+			if (!large && leftAdjust >= size*0.32f) leftAdjust = size*0.32f;
 			float cumulativeAdjust = leftAdjust * (buffButtons.size()-1);
 
 			ArrayList<BuffButton> buttons = new ArrayList<>(buffButtons.values());

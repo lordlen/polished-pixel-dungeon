@@ -138,6 +138,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
@@ -179,6 +180,8 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
+import com.watabou.input.KeyBindings;
+import com.watabou.input.KeyEvent;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.Delayer;
@@ -209,7 +212,7 @@ public class Hero extends Char {
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
-	private static final float HUNGER_FOR_SEARCH	= 6f;
+	private static final float HUNGER_FOR_SEARCH	= 5f;
 	
 	public HeroClass heroClass = HeroClass.ROGUE;
 	public HeroSubClass subClass = HeroSubClass.NONE;
@@ -253,6 +256,9 @@ public class Hero extends Char {
 
 			hero.lvl = newLvl;
 			hero.updateHT(true);
+
+			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+			if(bow != null) bow.Polished_resetCharges();
 		}
 
 		public static boolean noEnemiesLast = false;
@@ -283,6 +289,35 @@ public class Hero extends Char {
 			if(!Dungeon.hero.belongings.backpack.Polished_canHoldGlobal(item)) return false;
 
 			return (SPDSettings.Polished.autoPickup() && noEnemiesSeen() && noEnemiesLast);
+		}
+
+
+		public static ArrayList<LinkedHashMap<Talent, Integer>> getTalents() {
+			ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
+			Talent.initClassTalents(Dungeon.hero.heroClass, talents, Dungeon.hero.metamorphedTalents);
+			for (LinkedHashMap<Talent, Integer> tier : talents){
+				for (Talent talent : tier.keySet()){
+					tier.put(talent, Dungeon.hero.pointsInTalent(talent));
+				}
+			}
+
+			return talents;
+		}
+
+		public static int tiersUnlocked() {
+			int tiersAvailable = 1;
+			while ( tiersAvailable < Talent.MAX_TALENT_TIERS
+					&& Dungeon.hero.lvl+1 >= Talent.tierLevelThresholds[tiersAvailable+1] ) {
+				tiersAvailable++;
+			}
+
+			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
+				tiersAvailable = 2;
+			} else if (tiersAvailable > 3 && Dungeon.hero.armorAbility == null){
+				tiersAvailable = 3;
+			}
+
+			return tiersAvailable;
 		}
 	}
 
@@ -345,6 +380,8 @@ public class Hero extends Char {
 	private static final String LEVEL		= "lvl";
 	private static final String EXPERIENCE	= "exp";
 	private static final String HTBOOST     = "htboost";
+
+	private static final String JUST_MOVED  = "just_moved";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -365,6 +402,8 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
+
+		bundle.put( JUST_MOVED, justMoved );
 
 		belongings.storeInBundle( bundle );
 	}
@@ -388,6 +427,8 @@ public class Hero extends Char {
 		defenseSkill = bundle.getInt( DEFENSE );
 		
 		STR = bundle.getInt( STRENGTH );
+
+		justMoved = bundle.getBoolean( JUST_MOVED );
 
 		belongings.restoreFromBundle( bundle );
 	}
@@ -545,8 +586,10 @@ public class Hero extends Char {
 		
 		if (wep instanceof MissileWeapon){
 			if (Dungeon.level.adjacent( pos, target.pos )) {
-				accuracy *= (2f/3f * (1 + 0.2f*pointsInTalent(Talent.POINT_BLANK)));
+				//do nothing, throwies already have lower acc on melee
+				//0.67
 			} else {
+				//1.5*1.5 = 2.25
 				accuracy *= 1.5f;
 			}
 		//precise assault and liquid agility
@@ -609,7 +652,9 @@ public class Hero extends Char {
 			return INFINITE_EVASION;
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.blockLeft--;
 			return INFINITE_EVASION;
 		}
 		
@@ -651,8 +696,12 @@ public class Hero extends Char {
 			return Messages.get(Monk.class, "parried");
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
-			buff(RoundShield.GuardTracker.class).hasBlocked = true;
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.hasBlocked = true;
+			if(guardTracker.blockLeft == 0) {
+				guardTracker.detach();
+			}
 			BuffIndicator.refreshHero();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			return Messages.get(RoundShield.GuardTracker.class, "guarded");
@@ -911,7 +960,7 @@ public class Hero extends Char {
 			
 			curAction = null;
 			
-			spendAndNext( TICK );
+			spendAndNextConstant( TICK );
 			return false;
 		}
 		
@@ -1465,7 +1514,7 @@ public class Hero extends Char {
 			return false;
 		}
 
-		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
+		if (enemy.isAlive() && canAttack( enemy ) && !enemy.isStealthyTo(this)) {
 
 			if (heroClass != HeroClass.DUELIST
 					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
@@ -1654,7 +1703,7 @@ public class Hero extends Char {
 			}
 			//and to monk meditate damage reduction
 			if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				damage *= 0.2f;
+				damage *= 0.0f;
 			}
 		}
 
@@ -1669,6 +1718,9 @@ public class Hero extends Char {
 			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       damage /= (immu.snack ? 2f : 4f);
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  damage = 0;
 		}
+
+		Berserk berserk = buff(Berserk.class);
+		if(berserk != null) damage *= berserk.resistanceFactor();
 
 		dmg = Math.round(damage);
 
@@ -2056,8 +2108,8 @@ public class Hero extends Char {
 		MasterThievesArmband.Thievery armband = buff(MasterThievesArmband.Thievery.class);
 		if (armband != null) armband.gainCharge(percent);
 
-		Berserk berserk = buff(Berserk.class);
-		if (berserk != null) berserk.recover(percent);
+		Berserk.UndyingRecovery recovery = buff(Berserk.UndyingRecovery.class);
+		if (recovery != null) recovery.recover(source != PotionOfExperience.class ? percent : 0.75f * percent);
 		
 		if (source != PotionOfExperience.class) {
 			for (Item i : belongings) {
@@ -2099,6 +2151,9 @@ public class Hero extends Char {
 				if (buff(ElixirOfMight.HTBoost.class) != null){
 					buff(ElixirOfMight.HTBoost.class).onLevelUp();
 				}
+
+				SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+				if(bow != null && lvl % 5 == 0) bow.Polished_resetCharges();
 				
 				updateHT( true );
 				attackSkill++;
@@ -2202,7 +2257,8 @@ public class Hero extends Char {
 			interrupt();
 
 			if (ankh.isBlessed()) {
-				this.HP = HT / 4;
+				this.HP = HT / 3;
+				Buff.affect(Dungeon.hero, Hunger.class).satisfy(Hunger.STARVING);
 
 				PotionOfHealing.cure(this);
 				Buff.prolong(this, Invulnerability.class, Invulnerability.DURATION);
@@ -2335,7 +2391,7 @@ public class Hero extends Char {
 		
 		if (HP <= 0){
 			if (berserk == null) berserk = buff(Berserk.class);
-			return berserk != null && berserk.berserking();
+			return berserk != null && berserk.raging();
 		} else {
 			berserk = null;
 			return super.isAlive();
@@ -2391,6 +2447,11 @@ public class Hero extends Char {
 
 		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+		}
+
+		if (hit && subClass == HeroSubClass.BERSERKER && wasEnemy) {
+			Berserk berserk = buff(Berserk.class);
+			if(berserk != null) berserk.onHit();
 		}
 
 		curAction = null;
@@ -2470,9 +2531,9 @@ public class Hero extends Char {
 		
 		boolean smthFound = false;
 
-		boolean circular = pointsInTalent(Talent.WIDE_SEARCH) == 1;
+		boolean circular = false;
 		int distance = heroClass == HeroClass.ROGUE ? 2 : 1;
-		if (hasTalent(Talent.WIDE_SEARCH)) distance++;
+		if (hasTalent(Talent.ROGUES_EXPERTISE)) distance++;
 		
 		boolean foresight = buff(Foresight.class) != null;
 		boolean foresightScan = foresight && !Dungeon.level.mapped[pos];
@@ -2587,13 +2648,20 @@ public class Hero extends Char {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
 			sprite.operate( pos );
 			if (!Dungeon.level.locked) {
-				if (cursed) {
-					GLog.n(Messages.get(this, "search_distracted"));
-					Buff.affect(this, Hunger.class).affectHunger(TIME_TO_SEARCH - (2 * HUNGER_FOR_SEARCH));
-				} else {
-					Buff.affect(this, Hunger.class).affectHunger(TIME_TO_SEARCH - HUNGER_FOR_SEARCH);
+				float searchTime = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;
+				float searchHunger = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : HUNGER_FOR_SEARCH;
+
+				if(cursed) {
+					searchTime++;
+					searchHunger *= 2;
 				}
+				searchHunger *= SaltCube.hungerGainMultiplier();
+				searchHunger = Math.min(searchHunger-searchTime, 0);
+
+				Buff.affect(this, Hunger.class).affectHunger(searchHunger);
 			}
+
+			if (cursed) GLog.n(Messages.get(this, "search_distracted"));
 			spendAndNext(TIME_TO_SEARCH);
 			
 		}

@@ -43,6 +43,9 @@ public enum Icons {
 	PREFS,
 	SHPX,
 	JOURNAL,
+	BOBY,
+	ZRP200,
+	PPD,
 
 	//grey icons, mainly used for buttons, spacing for 16x16
 	EXIT,
@@ -77,6 +80,8 @@ public enum Icons {
 	SCROLL_COLOR,
 	COPY,
 	PASTE,
+	UNCHECKED_GRAY,
+	CHECKED_GRAY,
 
 	BACKPACK_LRG,
 	TALENT,
@@ -99,6 +104,7 @@ public enum Icons {
 	WELL_AWARENESS,
 	SACRIFICE_ALTAR,
 	DISTANT_WELL,
+	WELL_CHANGE,
 
 	//smaller icons, variable spacing
 	SKULL,
@@ -168,6 +174,15 @@ public enum Icons {
 				break;
 			case JOURNAL:
 				icon.frame( icon.texture.uvRectBySize( 136, 0, 17, 15 ) );
+				break;
+			case BOBY:
+				icon.frame( icon.texture.uvRectBySize( 154, 0, 14, 16 ) );
+				break;
+			case ZRP200:
+				icon.frame( icon.texture.uvRectBySize( 169, 0, 12, 12 ) );
+				break;
+			case PPD:
+				icon.frame( icon.texture.uvRectBySize( 182, 0, 12, 14 ) );
 				break;
 
 			case EXIT:
@@ -264,6 +279,12 @@ public enum Icons {
 			case PASTE:
 				icon.frame( icon.texture.uvRectBySize( 192, 32, 13, 13 ) );
 				break;
+			case UNCHECKED_GRAY:
+				icon.frame( icon.texture.uvRectBySize( 208, 32, 12, 12 ) );
+				break;
+			case CHECKED_GRAY:
+				icon.frame( icon.texture.uvRectBySize( 224, 32, 12, 12 ) );
+				break;
 
 			case BACKPACK_LRG:
 				icon.frame( icon.texture.uvRectBySize( 0, 48, 16, 16 ) );
@@ -325,6 +346,9 @@ public enum Icons {
 				break;
 			case DISTANT_WELL:
 				icon.frame( icon.texture.uvRectBySize( 176, 64, 16, 16 ) );
+				break;
+			case WELL_CHANGE:
+				icon.frame( icon.texture.uvRectBySize( 192, 64, 16, 16 ) );
 				break;
 
 			case SKULL:

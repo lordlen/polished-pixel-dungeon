@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
@@ -256,6 +257,8 @@ public abstract class Mob extends Char {
 	protected boolean act() {
 		
 		super.act();
+
+		Polished_growingHunt();
 		
 		boolean justAlerted = alerted;
 		alerted = false;
@@ -279,7 +282,7 @@ public abstract class Mob extends Char {
 		
 		enemy = chooseEnemy();
 		
-		boolean enemyInFOV = enemy != null && enemy.isAlive() && fieldOfView[enemy.pos] && enemy.invisible <= 0;
+		boolean enemyInFOV = enemy != null && enemy.isAlive() && fieldOfView[enemy.pos] && !enemy.isStealthyTo(this);
 
 		//prevents action, but still updates enemy seen status
 		if (buff(Feint.AfterImage.FeintConfusion.class) != null){
@@ -368,7 +371,7 @@ public abstract class Mob extends Char {
 				//try to find an enemy mob to attack first.
 				for (Mob mob : Dungeon.level.mobs)
 					if (mob.alignment == Alignment.ENEMY && mob != this
-							&& fieldOfView[mob.pos] && mob.invisible <= 0) {
+							&& fieldOfView[mob.pos] && !mob.isStealthyTo(this)) {
 						enemies.add(mob);
 					}
 				
@@ -376,13 +379,13 @@ public abstract class Mob extends Char {
 					//try to find ally mobs to attack second.
 					for (Mob mob : Dungeon.level.mobs)
 						if (mob.alignment == Alignment.ALLY && mob != this
-								&& fieldOfView[mob.pos] && mob.invisible <= 0) {
+								&& fieldOfView[mob.pos] && !mob.isStealthyTo(this)) {
 							enemies.add(mob);
 						}
 					
 					if (enemies.isEmpty()) {
 						//try to find the hero third
-						if (fieldOfView[Dungeon.hero.pos] && Dungeon.hero.invisible <= 0) {
+						if (fieldOfView[Dungeon.hero.pos] && !Dungeon.hero.isStealthyTo(this)) {
 							enemies.add(Dungeon.hero);
 						}
 					}
@@ -393,7 +396,7 @@ public abstract class Mob extends Char {
 				//look for hostile mobs to attack
 				for (Mob mob : Dungeon.level.mobs)
 					if (mob.alignment == Alignment.ENEMY && fieldOfView[mob.pos]
-							&& mob.invisible <= 0 && !mob.isInvulnerable(getClass()))
+							&& !mob.isStealthyTo(this) && !mob.isInvulnerable(getClass()))
 						//do not target passive mobs
 						//intelligent allies also don't target mobs which are wandering or asleep
 						if (mob.state != mob.PASSIVE &&
@@ -405,11 +408,11 @@ public abstract class Mob extends Char {
 			} else if (alignment == Alignment.ENEMY) {
 				//look for ally mobs to attack
 				for (Mob mob : Dungeon.level.mobs)
-					if (mob.alignment == Alignment.ALLY && fieldOfView[mob.pos] && mob.invisible <= 0)
+					if (mob.alignment == Alignment.ALLY && fieldOfView[mob.pos] && !mob.isStealthyTo(this))
 						enemies.add(mob);
 
 				//and look for the hero
-				if (fieldOfView[Dungeon.hero.pos] && Dungeon.hero.invisible <= 0) {
+				if (fieldOfView[Dungeon.hero.pos] && !Dungeon.hero.isStealthyTo(this)) {
 					enemies.add(Dungeon.hero);
 				}
 				
@@ -805,7 +808,7 @@ public abstract class Mob extends Char {
 
 	public boolean surprisedBy( Char enemy, boolean attacking ){
 		return enemy == Dungeon.hero
-				&& (enemy.invisible > 0 || !enemySeen || (fieldOfView != null && fieldOfView.length == Dungeon.level.length() && !fieldOfView[enemy.pos]))
+				&& (enemy.isStealthyTo(this) || !enemySeen || (fieldOfView != null && fieldOfView.length == Dungeon.level.length() && !fieldOfView[enemy.pos]))
 				&& (!attacking || enemy.canSurpriseAttack());
 	}
 
@@ -895,10 +898,6 @@ public abstract class Mob extends Char {
 					Dungeon.hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(exp), FloatingText.EXPERIENCE);
 				}
 				Dungeon.hero.earnExp(exp, getClass());
-
-				if (Dungeon.hero.subClass == HeroSubClass.MONK){
-					Buff.affect(Dungeon.hero, MonkEnergy.class).gainEnergy(this);
-				}
 			}
 		}
 	}
@@ -913,6 +912,10 @@ public abstract class Mob extends Char {
 			//EXP /= 2;
 
 			EXP = 0;
+		} else {
+			if (Dungeon.hero.subClass == HeroSubClass.MONK){
+				Buff.affect(Dungeon.hero, MonkEnergy.class).gainEnergy(this);
+			}
 		}
 
 		if (alignment == Alignment.ENEMY){
@@ -931,6 +934,11 @@ public abstract class Mob extends Char {
 				}
 			}
 
+			if ((cause == Dungeon.hero || cause instanceof Wand || cause instanceof ClericSpell || cause instanceof ArmorAbility)
+				&& Dungeon.hero.subClass == HeroSubClass.BERSERKER) {
+				Berserk berserk = Dungeon.hero.buff(Berserk.class);
+				if(berserk != null) berserk.continueRampage();
+			}
 		}
 
 		if (Dungeon.hero.isAlive() && !Dungeon.level.heroFOV[pos]) {
@@ -1067,13 +1075,17 @@ public abstract class Mob extends Char {
 	}
 
 	private boolean Polished_huntNoti = false;
-	private void Polished_growingHunt() {
+	private boolean Polished_growingThreshold() {
 		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
+		return (grow != null && grow.Polished_huntThreshold());
+	}
+	private void Polished_growingHunt() {
+		if(Polished_growingThreshold()) {
+			aggro(Dungeon.hero);
+			target=enemy.pos;
 
-		if(grow != null && grow.Polished_hunt()) {
-			target=Dungeon.hero.pos;
 			if(!Polished_huntNoti) {
-				GLog.w(Messages.get(grow.getClass(), "hunt"));
+				GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
 				Polished_huntNoti = true;
 			}
 		}
@@ -1131,12 +1143,12 @@ public abstract class Mob extends Char {
 			}
 
 			//can be awoken by the least stealthy hostile present, not necessarily just our target
-			if (enemyInFOV || (enemy != null && enemy.invisible > 0)) {
+			if (enemyInFOV || (enemy != null && enemy.isStealthy())) {
 
 				float closestHostileDist = Float.POSITIVE_INFINITY;
 
 				for (Char ch : Actor.chars()){
-					if (fieldOfView[ch.pos] && ch.invisible == 0 && ch.alignment != alignment && ch.alignment != Alignment.NEUTRAL){
+					if (fieldOfView[ch.pos] && !ch.isStealthy() && ch.alignment != alignment && ch.alignment != Alignment.NEUTRAL){
 						float chDist = ch.stealth() + distance(ch);
 						//silent steps rogue talent, which also applies to rogue's shadow clone
 						if ((ch instanceof Hero || ch instanceof ShadowClone.ShadowAlly)
@@ -1182,8 +1194,10 @@ public abstract class Mob extends Char {
 				state = WANDERING;
 				target = Dungeon.level.randomDestination( Mob.this );
 			}
-
-			if (alignment == Alignment.ENEMY && Dungeon.isChallenged(Challenges.SWARM_INTELLIGENCE) && enemy != null && enemy.buff(Corruption.class) == null) {
+      
+			if (alignment == Alignment.ENEMY && Dungeon.isChallenged(Challenges.SWARM_INTELLIGENCE)
+					&& enemy != null && enemy.buff(Corruption.class) == null) {
+        
 				for (Mob mob : Dungeon.level.mobs) {
 					if (mob.paralysed <= 0
 							&& Dungeon.level.distance(pos, mob.pos) <= 8
@@ -1236,8 +1250,6 @@ public abstract class Mob extends Char {
 		
 		protected boolean continueWandering(){
 			enemySeen = false;
-
-			Polished_growingHunt();
 			
 			int oldPos = pos;
 			if (target != -1 && getCloser( target )) {
@@ -1283,7 +1295,7 @@ public abstract class Mob extends Char {
 				if (!recentlyAttackedBy.isEmpty()){
 					boolean swapped = false;
 					for (Char ch : recentlyAttackedBy){
-						if (ch != null && ch.isActive() && Actor.chars().contains(ch) && alignment != ch.alignment && fieldOfView[ch.pos] && ch.invisible == 0 && !isCharmedBy(ch)) {
+						if (ch != null && ch.isActive() && Actor.chars().contains(ch) && alignment != ch.alignment && fieldOfView[ch.pos] && !ch.isStealthyTo(Mob.this) && !isCharmedBy(ch)) {
 							if (canAttack(ch) || enemy == null || Dungeon.level.distance(pos, ch.pos) < Dungeon.level.distance(pos, enemy.pos)) {
 								enemy = ch;
 								target = ch.pos;

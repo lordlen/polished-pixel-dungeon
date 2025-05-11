@@ -201,10 +201,10 @@ public class DM300 extends Mob {
 
 			if(state == HUNTING && enemy != null && enemy.isAlive() && Dungeon.hero.invisible <= 0 &&
 					(fieldOfView[enemy.pos] || aim.cells.contains(enemy.pos))) {
-
+        
 				//more aggressive ability usage when DM can't reach its target
 				if (!canReach() && turnsSinceLastAbility >= MIN_COOLDOWN) {
-
+          
 					//use a coneAOE to try and account for trickshotting angles
 					if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC)) {
 						lastAbility = GAS;
@@ -425,6 +425,8 @@ public class DM300 extends Mob {
 		}
 
 		Dungeon.hero.interrupt();
+		GameScene.Polished.blockInput(.5f);
+
 		final int rockCenter;
 
 		//knock back if adjacent
