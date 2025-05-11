@@ -263,7 +263,6 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			immunities.addAll(com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic.RESISTS);
-			immunities.add(Corrosion.class);
 
 			immunities.remove(HolyBomb.HolyDamage.class);
 			immunities.remove(HolyDart.class);
