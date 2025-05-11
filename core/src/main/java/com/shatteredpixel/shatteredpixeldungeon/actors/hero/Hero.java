@@ -27,7 +27,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Debug;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
-import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
@@ -139,6 +138,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
@@ -168,7 +168,6 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -213,7 +212,7 @@ public class Hero extends Char {
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
-	private static final float HUNGER_FOR_SEARCH	= 6f;
+	private static final float HUNGER_FOR_SEARCH	= 5f;
 	
 	public HeroClass heroClass = HeroClass.ROGUE;
 	public HeroSubClass subClass = HeroSubClass.NONE;
@@ -290,6 +289,35 @@ public class Hero extends Char {
 			if(!Dungeon.hero.belongings.backpack.Polished_canHoldGlobal(item)) return false;
 
 			return (SPDSettings.Polished.autoPickup() && noEnemiesSeen() && noEnemiesLast);
+		}
+
+
+		public static ArrayList<LinkedHashMap<Talent, Integer>> getTalents() {
+			ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
+			Talent.initClassTalents(Dungeon.hero.heroClass, talents, Dungeon.hero.metamorphedTalents);
+			for (LinkedHashMap<Talent, Integer> tier : talents){
+				for (Talent talent : tier.keySet()){
+					tier.put(talent, Dungeon.hero.pointsInTalent(talent));
+				}
+			}
+
+			return talents;
+		}
+
+		public static int tiersUnlocked() {
+			int tiersAvailable = 1;
+			while ( tiersAvailable < Talent.MAX_TALENT_TIERS
+					&& Dungeon.hero.lvl+1 >= Talent.tierLevelThresholds[tiersAvailable+1] ) {
+				tiersAvailable++;
+			}
+
+			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
+				tiersAvailable = 2;
+			} else if (tiersAvailable > 3 && Dungeon.hero.armorAbility == null){
+				tiersAvailable = 3;
+			}
+
+			return tiersAvailable;
 		}
 	}
 
@@ -624,7 +652,9 @@ public class Hero extends Char {
 			return INFINITE_EVASION;
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.blockLeft--;
 			return INFINITE_EVASION;
 		}
 		
@@ -666,8 +696,12 @@ public class Hero extends Char {
 			return Messages.get(Monk.class, "parried");
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
-			buff(RoundShield.GuardTracker.class).hasBlocked = true;
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.hasBlocked = true;
+			if(guardTracker.blockLeft == 0) {
+				guardTracker.detach();
+			}
 			BuffIndicator.refreshHero();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			return Messages.get(RoundShield.GuardTracker.class, "guarded");
@@ -926,7 +960,7 @@ public class Hero extends Char {
 			
 			curAction = null;
 			
-			spendAndNext( TICK );
+			spendAndNextConstant( TICK );
 			return false;
 		}
 		
@@ -1014,19 +1048,6 @@ public class Hero extends Char {
 		AttackIndicator.updateState();
 		
 		GameScene.ready();
-
-		if(GameScene.Polished.movementQueued()) {
-			GameScene.Polished.bufferedAction = null;
-			GameScene.Polished.bufferedCell = -1;
-
-			GameScene.handleCell(pos + Dungeon.level.pointToCell(GameScene.Polished.bufferedMovement));
-			GameScene.Polished.bufferedMovement = null;
-		}
-		if(GameScene.Polished.actionQueued()) {
-			KeyEvent.addKeyEvent(new KeyEvent(KeyBindings.getFirstKeyForAction(GameScene.Polished.bufferedAction, false), true));
-			KeyEvent.addKeyEvent(new KeyEvent(KeyBindings.getFirstKeyForAction(GameScene.Polished.bufferedAction, false), false));
-			GameScene.Polished.bufferedAction = null;
-		}
 	}
 	
 	public void interrupt() {
@@ -1493,7 +1514,7 @@ public class Hero extends Char {
 			return false;
 		}
 
-		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
+		if (enemy.isAlive() && canAttack( enemy ) && !enemy.isStealthyTo(this)) {
 
 			if (heroClass != HeroClass.DUELIST
 					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
@@ -1682,7 +1703,7 @@ public class Hero extends Char {
 			}
 			//and to monk meditate damage reduction
 			if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				damage *= 0.2f;
+				damage *= 0.0f;
 			}
 		}
 
@@ -1697,6 +1718,9 @@ public class Hero extends Char {
 			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       damage /= (immu.snack ? 2f : 4f);
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  damage = 0;
 		}
+
+		Berserk berserk = buff(Berserk.class);
+		if(berserk != null) damage *= berserk.resistanceFactor();
 
 		dmg = Math.round(damage);
 
@@ -2084,8 +2108,8 @@ public class Hero extends Char {
 		MasterThievesArmband.Thievery armband = buff(MasterThievesArmband.Thievery.class);
 		if (armband != null) armband.gainCharge(percent);
 
-		Berserk berserk = buff(Berserk.class);
-		if (berserk != null) berserk.recover(percent);
+		Berserk.UndyingRecovery recovery = buff(Berserk.UndyingRecovery.class);
+		if (recovery != null) recovery.recover(source != PotionOfExperience.class ? percent : 0.75f * percent);
 		
 		if (source != PotionOfExperience.class) {
 			for (Item i : belongings) {
@@ -2367,7 +2391,7 @@ public class Hero extends Char {
 		
 		if (HP <= 0){
 			if (berserk == null) berserk = buff(Berserk.class);
-			return berserk != null && berserk.berserking();
+			return berserk != null && berserk.raging();
 		} else {
 			berserk = null;
 			return super.isAlive();
@@ -2423,6 +2447,11 @@ public class Hero extends Char {
 
 		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+		}
+
+		if (hit && subClass == HeroSubClass.BERSERKER && wasEnemy) {
+			Berserk berserk = buff(Berserk.class);
+			if(berserk != null) berserk.onHit();
 		}
 
 		curAction = null;
@@ -2502,9 +2531,9 @@ public class Hero extends Char {
 		
 		boolean smthFound = false;
 
-		boolean circular = pointsInTalent(Talent.WIDE_SEARCH) == 1;
+		boolean circular = false;
 		int distance = heroClass == HeroClass.ROGUE ? 2 : 1;
-		if (hasTalent(Talent.WIDE_SEARCH)) distance++;
+		if (hasTalent(Talent.ROGUES_EXPERTISE)) distance++;
 		
 		boolean foresight = buff(Foresight.class) != null;
 		boolean foresightScan = foresight && !Dungeon.level.mapped[pos];
@@ -2619,13 +2648,20 @@ public class Hero extends Char {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
 			sprite.operate( pos );
 			if (!Dungeon.level.locked) {
-				if (cursed) {
-					GLog.n(Messages.get(this, "search_distracted"));
-					Buff.affect(this, Hunger.class).affectHunger(TIME_TO_SEARCH - (2 * HUNGER_FOR_SEARCH));
-				} else {
-					Buff.affect(this, Hunger.class).affectHunger(TIME_TO_SEARCH - HUNGER_FOR_SEARCH);
+				float searchTime = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;
+				float searchHunger = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : HUNGER_FOR_SEARCH;
+
+				if(cursed) {
+					searchTime++;
+					searchHunger *= 2;
 				}
+				searchHunger *= SaltCube.hungerGainMultiplier();
+				searchHunger = Math.min(searchHunger-searchTime, 0);
+
+				Buff.affect(this, Hunger.class).affectHunger(searchHunger);
 			}
+
+			if (cursed) GLog.n(Messages.get(this, "search_distracted"));
 			spendAndNext(TIME_TO_SEARCH);
 			
 		}

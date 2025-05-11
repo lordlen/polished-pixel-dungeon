@@ -180,6 +180,7 @@ public abstract class Char extends Actor {
 	public boolean rooted		= false;
 	public boolean flying		= false;
 	public int invisible		= 0;
+	public int camouflaged		= 0;
 
 	//these are relative to the hero
 	public enum Alignment{
@@ -194,6 +195,16 @@ public abstract class Char extends Actor {
 	public boolean[] fieldOfView = null;
 	
 	private LinkedHashSet<Buff> buffs = new LinkedHashSet<>();
+
+	public boolean isStealthy() {
+		return invisible > 0 || camouflaged > 0;
+	}
+
+	public boolean isStealthyTo(Char c) {
+		if(invisible > 0) return true;
+		else if (camouflaged > 0) return Dungeon.level.distance(pos, c.pos) > 1;
+		return false;
+	}
 	
 	@Override
 	protected boolean act() {
@@ -421,7 +432,7 @@ public abstract class Char extends Actor {
 			if (enemy.buff(GuidingLight.Illuminated.class) != null){
 				enemy.buff(GuidingLight.Illuminated.class).detach();
 				if (this == Dungeon.hero && Dungeon.hero.hasTalent(Talent.SEARING_LIGHT)){
-					dmg += 2 + 2*Dungeon.hero.pointsInTalent(Talent.SEARING_LIGHT);
+					dmg += 1 + Dungeon.hero.pointsInTalent(Talent.SEARING_LIGHT);
 				}
 				if (this != Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.PRIEST){
 					enemy.damage(Dungeon.hero.lvl, GuidingLight.INSTANCE);
@@ -429,7 +440,7 @@ public abstract class Char extends Actor {
 			}
 
 			Berserk berserk = buff(Berserk.class);
-			if (berserk != null) dmg = berserk.damageFactor(dmg);
+			if (berserk != null) dmg *= berserk.damageFactor();
 
 			if (buff( Fury.class ) != null) {
 				dmg *= 1.5f;
@@ -471,7 +482,7 @@ public abstract class Char extends Actor {
 			}
 
 			if (enemy.buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				dmg *= 0.2f;
+				dmg *= 0.0f;
 			}
 
 			//POLISHED: do we let them stack?
@@ -629,7 +640,7 @@ public abstract class Char extends Actor {
 		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)
-		if (attacker.invisible > 0 && attacker.canSurpriseAttack() /*&& defender.buff(ChampionEnemy.Blessed.class) == null*/) {
+		if (attacker.isStealthyTo(defender) && attacker.canSurpriseAttack()) {
 			acuStat = INFINITE_ACCURACY;
 		}
 		//if(attacker.buff(ChampionEnemy.Blessed.class) != null) acuStat = INFINITE_ACCURACY;
@@ -660,6 +671,9 @@ public abstract class Char extends Actor {
 			// + 3%/5%
 			acuRoll *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 		}
+
+		Berserk berserk = attacker.buff(Berserk.class);
+		if(berserk != null) acuRoll *= berserk.accuracyFactor();
 		
 		float defRoll = Random.Float( defStat );
 		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
