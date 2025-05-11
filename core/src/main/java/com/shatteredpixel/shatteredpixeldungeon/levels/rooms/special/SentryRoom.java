@@ -241,6 +241,8 @@ public class SentryRoom extends SpecialRoom {
 
 		@Override
 		protected boolean act() {
+			if(paralysed > 0) return super.act();
+
 			if (Dungeon.level.heroFOV[pos]){
 				Bestiary.setSeen(getClass());
 			}
@@ -320,10 +322,10 @@ public class SentryRoom extends SpecialRoom {
 			//do nothing
 		}
 
-		@Override
+		/*@Override
 		public boolean add( Buff buff ) {
 			return false;
-		}
+		}*/
 
 		@Override
 		public boolean reset() {
