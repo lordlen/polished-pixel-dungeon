@@ -172,6 +172,10 @@ public class SentryRoom extends SpecialRoom {
 		entrance.set( Door.Type.REGULAR );
 	}
 
+	public boolean canPlaceWater(Point p){
+		return false;
+	}
+
 	private static Item prize(Level level ) {
 
 		Item prize;
@@ -237,6 +241,8 @@ public class SentryRoom extends SpecialRoom {
 
 		@Override
 		protected boolean act() {
+			if(paralysed > 0) return super.act();
+
 			if (Dungeon.level.heroFOV[pos]){
 				Bestiary.setSeen(getClass());
 			}
@@ -252,7 +258,7 @@ public class SentryRoom extends SpecialRoom {
 
 			if (Dungeon.hero != null){
 				if (fieldOfView[Dungeon.hero.pos]
-						&& Dungeon.level.map[Dungeon.hero.pos] == Terrain.EMPTY_SP
+						&& (Dungeon.level.map[Dungeon.hero.pos] == Terrain.EMPTY_SP || Dungeon.level.map[Dungeon.hero.pos] == Terrain.WATER)
 						&& room.inside(Dungeon.level.cellToPoint(Dungeon.hero.pos))
 						&& !Dungeon.hero.belongings.lostInventory()){
 
@@ -316,10 +322,10 @@ public class SentryRoom extends SpecialRoom {
 			//do nothing
 		}
 
-		@Override
+		/*@Override
 		public boolean add( Buff buff ) {
 			return false;
-		}
+		}*/
 
 		@Override
 		public boolean reset() {
