@@ -7,6 +7,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
@@ -106,16 +108,16 @@ public class Debug {
     }
 
 
-    public static Item DebugCollect(Class<?extends Item> itemType) {
+    public static<T extends Item> T DebugCollect(Class<T> itemType) {
         return DebugCollect(itemType, 0, 99, null);
     }
-    public static Item DebugCollect(Class<?extends Item> itemType, int level) {
-        return DebugCollect(itemType, level, 1, null);
+    public static<T extends Item> T DebugCollect(Class<T> itemType, int level) {
+        return DebugCollect(itemType, level, 99, null);
     }
-    public static Item DebugCollect(Class<?extends Item> itemType, int level, int quantity) {
+    public static<T extends Item> T DebugCollect(Class<T> itemType, int level, int quantity) {
         return DebugCollect(itemType, level, quantity, null);
     }
-    public static<T> Item DebugCollect(Class<?extends Item> itemType, int level, int quantity, Class<T> enchant) {
+    public static<T extends Item, E> T DebugCollect(Class<T> itemType, int level, int quantity, Class<E> enchant) {
         if(!DEBUG_MODE) return null;
         Item i = Reflection.newInstance(itemType);
         if(i == null) return null;
@@ -146,7 +148,7 @@ public class Debug {
         }
 
         i.collect();
-        return i;
+        return (T)i;
     }
 
 
