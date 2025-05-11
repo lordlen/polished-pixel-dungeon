@@ -106,14 +106,14 @@ public class Debug {
     }
 
 
-    public static void DebugCollect(Class<?extends Item> itemType) {
-        DebugCollect(itemType, 0, 99, null);
+    public static Item DebugCollect(Class<?extends Item> itemType) {
+        return DebugCollect(itemType, 0, 99, null);
     }
-    public static void DebugCollect(Class<?extends Item> itemType, int level) {
-        DebugCollect(itemType, level, 1, null);
+    public static Item DebugCollect(Class<?extends Item> itemType, int level) {
+        return DebugCollect(itemType, level, 1, null);
     }
-    public static void DebugCollect(Class<?extends Item> itemType, int level, int quantity) {
-        DebugCollect(itemType, level, quantity, null);
+    public static Item DebugCollect(Class<?extends Item> itemType, int level, int quantity) {
+        return DebugCollect(itemType, level, quantity, null);
     }
     public static<T> Item DebugCollect(Class<?extends Item> itemType, int level, int quantity, Class<T> enchant) {
         if(!DEBUG_MODE) return null;
