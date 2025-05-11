@@ -161,10 +161,9 @@ public class TrapsRoom extends SpecialRoom {
 	@SuppressWarnings("unchecked")
 	private static Class<?extends Trap>[][] levelTraps = new Class[][]{
 			//sewers
-			//{WornDartTrap.class, GrippingTrap.class, WarpingTrap.class},
+			{WornDartTrap.class, GrippingTrap.class, WarpingTrap.class},
 			//prison
 			{PoisonDartTrap.class, GrippingTrap.class, ExplosiveTrap.class},
-			{GrippingTrap.class, ExplosiveTrap.class, WarpingTrap.class},
 			//caves
 			{DisintegrationTrap.class, FlashingTrap.class, WarpingTrap.class},
 			//city
