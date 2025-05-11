@@ -22,8 +22,15 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.BArray;
+import com.watabou.utils.Bundle;
 
 public class WarpingTrap extends TeleportationTrap {
 
@@ -33,10 +40,14 @@ public class WarpingTrap extends TeleportationTrap {
 	}
 
 	@Override
+	public void disarm() {
+		if(Actor.findChar(pos) != null) super.disarm();
+	}
+
+	@Override
 	public void activate() {
-		if (Dungeon.level.distance(Dungeon.hero.pos, pos) <= 1){
-			BArray.setFalse(Dungeon.level.visited);
-			BArray.setFalse(Dungeon.level.mapped);
+		if (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2){
+			Buff.affect(Dungeon.hero, Disoriented.class, Disoriented.DURATION);
 		}
 
 		super.activate();
@@ -44,5 +55,91 @@ public class WarpingTrap extends TeleportationTrap {
 		GameScene.updateFog(); //just in case hero wasn't moved
 		Dungeon.observe();
 
+	}
+
+	public static class Disoriented extends FlavourBuff {
+
+		{
+			type=buffType.NEGATIVE;
+		}
+		public static final float DURATION = 25f;
+
+		@Override
+		public int icon() {
+			return BuffIndicator.DISORIENTED;
+		}
+
+		@Override
+		public float iconFadePercent() {
+			return (DURATION - cooldown()) / DURATION;
+		}
+
+		public int depth = Dungeon.depth;
+		public int branch = Dungeon.branch;
+
+		boolean[] visited = null;
+		boolean[] mapped = null;
+
+		@Override
+		public boolean attachTo(Char target) {
+			if(target == Dungeon.hero) {
+				Level level = Dungeon.level;
+				visited = level.visited.clone();
+				mapped = level.mapped.clone();
+
+				BArray.setFalse(level.visited);
+				BArray.setFalse(level.mapped);
+			}
+
+			return super.attachTo(target);
+		}
+
+		@Override
+		public void detach() {
+			if (target == Dungeon.hero && visited != null && mapped != null) {
+				boolean thisLevel = Dungeon.depth == depth && Dungeon.branch == branch;
+
+				Level level = thisLevel ? Dungeon.level : Dungeon.getLevel(depth, branch);
+
+				if(level != null && level.length() == visited.length) {
+					BArray.or(level.visited, visited, level.visited);
+					BArray.or(level.mapped, mapped, level.mapped);
+
+					if(thisLevel) {
+						GameScene.updateFog();
+						Dungeon.observe();
+					} else {
+						Dungeon.replaceLevel(depth, branch, level);
+					}
+				}
+			}
+
+			super.detach();
+		}
+
+		private static final String VISITED = "visited";
+		private static final String MAPPED = "mapped";
+		private static final String DEPTH = "depth";
+		private static final String BRANCH = "branch";
+
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(VISITED, visited);
+			bundle.put(MAPPED, mapped);
+
+			bundle.put(DEPTH, depth);
+			bundle.put(BRANCH, branch);
+		}
+
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			visited = bundle.getBooleanArray(VISITED);
+			mapped = bundle.getBooleanArray(MAPPED);
+
+			depth = bundle.getInt(DEPTH);
+			branch = bundle.getInt(BRANCH);
+		}
 	}
 }

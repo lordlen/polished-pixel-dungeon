@@ -94,6 +94,10 @@ public class Bomb extends Item {
 		return 1;
 	}
 
+	protected int explosionDamage(){
+		return Random.NormalIntRange(4 + Dungeon.scalingDepth(), 12 + 3*Dungeon.scalingDepth());
+	}
+
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions( hero );
@@ -189,7 +193,7 @@ public class Bomb extends Item {
 					continue;
 				}
 
-				int dmg = Random.NormalIntRange(4 + Dungeon.scalingDepth(), 12 + 3*Dungeon.scalingDepth());
+				int dmg = explosionDamage();
 				dmg -= ch.drRoll();
 
 				if (dmg > 0) {
