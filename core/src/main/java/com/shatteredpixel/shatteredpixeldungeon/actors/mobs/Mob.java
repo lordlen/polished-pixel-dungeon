@@ -1198,7 +1198,7 @@ public abstract class Mob extends Char {
 			} else {
 				notice();
 				state = WANDERING;
-				target = Dungeon.level.randomDestination( Mob.this );
+				target = ((Mob.Wandering)WANDERING).randomDestination();
 			}
       
 			if (alignment == Alignment.ENEMY && Dungeon.isChallenged(Challenges.SWARM_INTELLIGENCE)
