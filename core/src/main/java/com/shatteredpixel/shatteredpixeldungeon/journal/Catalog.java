@@ -323,6 +323,16 @@ public enum Catalog {
 		Badges.validateCatalogBadges();
 	}
 
+	public static void setSeenAll(){
+		for (Catalog cat : values()) {
+			for(Class<?> cls : cat.seen.keySet()) {
+				cat.seen.put(cls, true);
+				Journal.saveNeeded = true;
+			}
+		}
+		Badges.validateCatalogBadges();
+	}
+
 	public static int useCount(Class<?> cls){
 		for (Catalog cat : values()) {
 			if (cat.useCount.containsKey(cls)) {
