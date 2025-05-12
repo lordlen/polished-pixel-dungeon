@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.FoundItems;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
@@ -99,6 +100,18 @@ public abstract class Scroll extends Item {
 	{
 		stackable = true;
 		defaultAction = AC_READ;
+	}
+
+	@Override
+	public boolean doPickUp(Hero hero, int pos) {
+		boolean picked = super.doPickUp(hero, pos);
+
+		if(picked && toFind) {
+			FoundItems.add(getClass(), Dungeon.depth);
+			toFind = false;
+		}
+
+		return picked;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -249,7 +262,9 @@ public abstract class Scroll extends Item {
 
 	@Override
 	public String desc() {
-		return isKnown() ? super.desc() : Messages.get(this, "unknown_desc");
+		String desc = isKnown() ? super.desc() : Messages.get(this, "unknown_desc");
+		if(!anonymous && !handler.isKnown(ScrollOfUpgrade.class)) desc += FoundItems.getDesc(getClass());
+		return desc;
 	}
 	
 	@Override

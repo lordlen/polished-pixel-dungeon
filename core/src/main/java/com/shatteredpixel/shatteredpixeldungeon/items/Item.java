@@ -96,6 +96,9 @@ public class Item implements Bundlable {
 
 	// whether an item can be included in heroes remains
 	public boolean bones = false;
+
+	// for keeping track of floor records
+	public boolean toFind = false;
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override

@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.potions;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.FoundItems;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -145,7 +146,19 @@ public class Potion extends Item {
 		stackable = true;
 		defaultAction = AC_DRINK;
 	}
-	
+
+	@Override
+	public boolean doPickUp(Hero hero, int pos) {
+		boolean picked = super.doPickUp(hero, pos);
+
+		if(picked && toFind) {
+			FoundItems.add(getClass(), Dungeon.depth);
+			toFind = false;
+		}
+
+		return picked;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static void initColors() {
 		handler = new ItemStatusHandler<>( (Class<? extends Potion>[])Generator.Category.POTION.classes, colors );
@@ -386,7 +399,9 @@ public class Potion extends Item {
 
 	@Override
 	public String desc() {
-		return isKnown() ? super.desc() : Messages.get(this, "unknown_desc");
+		String desc = isKnown() ? super.desc() : Messages.get(this, "unknown_desc");
+		if(!anonymous) desc += FoundItems.getDesc(getClass());
+		return desc;
 	}
 	
 	@Override

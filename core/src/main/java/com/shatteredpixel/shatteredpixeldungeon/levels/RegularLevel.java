@@ -372,6 +372,7 @@ public abstract class RegularLevel extends Level {
 
 			Item toDrop = Generator.random();
 			if (toDrop == null) continue;
+			toDrop.toFind = true;
 
 			int cell = randomDropCell();
 			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
