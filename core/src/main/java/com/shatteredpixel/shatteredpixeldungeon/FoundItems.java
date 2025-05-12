@@ -1,6 +1,9 @@
 package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 
@@ -44,6 +47,10 @@ public class FoundItems {
     public static String getDesc(Class<?> cls) {
         Pair pair = floors.get(cls);
         if(pair == null) return "";
+
+        if (Scroll.class.isAssignableFrom(cls)
+            && Scroll.getKnown().contains(ScrollOfUpgrade.class))
+            return "";
 
         if(pair.first != 0 && pair.second != 0) {
             return "\n\nThis item was last found on _floors " + pair.first + " and " + pair.second + "_.";

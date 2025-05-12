@@ -262,9 +262,7 @@ public abstract class Scroll extends Item {
 
 	@Override
 	public String desc() {
-		String desc = isKnown() ? super.desc() : Messages.get(this, "unknown_desc");
-		if(!anonymous && !handler.isKnown(ScrollOfUpgrade.class)) desc += FoundItems.getDesc(getClass());
-		return desc;
+		return isKnown() ? super.desc() : Messages.get(this, "unknown_desc");
 	}
 	
 	@Override
