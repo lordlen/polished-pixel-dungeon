@@ -72,6 +72,7 @@ import com.watabou.noosa.Image;
 import com.watabou.noosa.Visual;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
@@ -270,9 +271,14 @@ public class Notes {
 
 		public static void updateOnBarricade(int pos) {
 			if(!(Dungeon.level instanceof RegularLevel)) return;
-			Room room = ((RegularLevel)Dungeon.level).room(pos);
 
-			if(room instanceof StorageRoom || room instanceof MassGraveRoom) Notes.remove(Landmark.BARRICADE);
+			for (int i : PathFinder.NEIGHBOURS9) {
+				Room room = ((RegularLevel)Dungeon.level).room(pos+i);
+				if(room instanceof StorageRoom || room instanceof MassGraveRoom) {
+					Notes.remove(Landmark.BARRICADE);
+					return;
+				}
+			}
 		}
 
 		@Override

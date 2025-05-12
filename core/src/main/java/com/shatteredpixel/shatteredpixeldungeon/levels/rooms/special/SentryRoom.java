@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Eye;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
@@ -167,6 +169,7 @@ public class SentryRoom extends SpecialRoom {
 
 		Painter.set(level, treasurePos, Terrain.PEDESTAL);
 		level.drop( prize( level ), level.pointToCell(treasurePos) ).type = Heap.Type.CHEST;
+		Blob.seed(level.pointToCell(treasurePos), 1, SentryID.class, level);
 
 		level.addItemToSpawn(new PotionOfHaste());
 
@@ -229,11 +232,6 @@ public class SentryRoom extends SpecialRoom {
 			spriteClass = SentrySprite.class;
 
 			properties.add(Property.IMMOVABLE);
-		}
-
-		@Override
-		public Notes.Landmark landmark() {
-			return Notes.Landmark.RED_SENTRY;
 		}
 
 		private float initialChargeDelay;
@@ -460,6 +458,13 @@ public class SentryRoom extends SpecialRoom {
 			}
 		}
 
+	}
+
+	public static class SentryID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.RED_SENTRY;
+		}
 	}
 
 }
