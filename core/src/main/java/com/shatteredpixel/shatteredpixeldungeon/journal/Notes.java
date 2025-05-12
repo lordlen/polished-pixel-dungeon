@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfAwareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfChange;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfHealth;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DemonSpawner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
@@ -41,6 +42,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicalFireRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SentryRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.ToxicGasRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.WeakFloorRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -119,6 +123,15 @@ public class Notes {
 		TRAPS_FLOOR,
 		SECRETS_FLOOR,
 
+		RED_SENTRY,
+		TRAPS_ROOM,
+		CHASM_ROOM,
+		MAGICAL_FIRE,
+		POOL_ROOM,
+		BARRICADE,
+		TOXIC_GAS_ROOM,
+		CHASM_ROOM_SECRET,
+
 		SHOP,
 		ALCHEMY,
 		GARDEN,
@@ -168,6 +181,23 @@ public class Notes {
 					return Icons.STAIRS_TRAPS.get();
 				case SECRETS_FLOOR:
 					return Icons.STAIRS_SECRETS.get();
+
+				case RED_SENTRY:
+					return Icons.RED_SENTRY.get();
+				case TRAPS_ROOM:
+					return Icons.TRAPS_ROOM.get();
+				case CHASM_ROOM:
+					return Icons.CHASM_ROOM.get();
+				case MAGICAL_FIRE:
+					return Icons.MAGICAL_FIRE.get();
+				case POOL_ROOM:
+					return Icons.POOL_ROOM.get();
+				case BARRICADE:
+					return Icons.BARRICADE.get();
+				case TOXIC_GAS_ROOM:
+					return Icons.TOXIC_GAS_ROOM.get();
+				case CHASM_ROOM_SECRET:
+					return Icons.CHASM_ROOM_SECRET.get();
 
 				case SHOP:
 					if (depth == 20)    return new Image(new ImpSprite());
@@ -231,6 +261,15 @@ public class Notes {
 				case LARGE_FLOOR:   return Messages.get(Level.Feeling.class, "large_desc");
 				case TRAPS_FLOOR:   return Messages.get(Level.Feeling.class, "traps_desc");
 				case SECRETS_FLOOR: return Messages.get(Level.Feeling.class, "secrets_desc");
+
+				case RED_SENTRY: return Messages.get(SentryRoom.Sentry.class, "desc");
+				case TRAPS_ROOM: return Messages.get(Landmark.class, "traps_room_desc");
+				case CHASM_ROOM: return Messages.get(Level.class, "chasm_desc");
+				case MAGICAL_FIRE: return Messages.get(MagicalFireRoom.EternalFire.class, "desc");
+				case POOL_ROOM: return Messages.get(Piranha.class, "desc");
+				case BARRICADE: return Messages.get(Level.class, "barricade_desc");
+				case TOXIC_GAS_ROOM: return Messages.get(ToxicGasRoom.ToxicVent.class, "desc");
+				case CHASM_ROOM_SECRET: return Messages.get(Level.class, "chasm_desc");
 
 				case SHOP:
 					if (depth == 20)    return Messages.get(ImpShopkeeper.class, "desc");

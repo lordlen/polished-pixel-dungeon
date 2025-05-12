@@ -142,13 +142,13 @@ public enum Icons {
 
 	//puzzle room landmarks
 	RED_SENTRY,
-	POISON_DART,
-	CHASM,
+	TRAPS_ROOM,
+	CHASM_ROOM,
 	MAGICAL_FIRE,
-	POOL,
+	POOL_ROOM,
 	BARRICADE,
 	TOXIC_GAS_ROOM,
-	CHASM_SECRET,
+	CHASM_ROOM_SECRET,
 
 	WELL_CHANGE,
 
@@ -471,16 +471,16 @@ public enum Icons {
 			case RED_SENTRY:
 				icon.frame( icon.texture.uvRectBySize( 0, 144, 16, 16 ) );
 				break;
-			case POISON_DART:
+			case TRAPS_ROOM:
 				icon.frame( icon.texture.uvRectBySize( 16, 144, 16, 16 ) );
 				break;
-			case CHASM:
+			case CHASM_ROOM:
 				icon.frame( icon.texture.uvRectBySize( 32, 144, 16, 16 ) );
 				break;
 			case MAGICAL_FIRE:
 				icon.frame( icon.texture.uvRectBySize( 48, 144, 16, 16 ) );
 				break;
-			case POOL:
+			case POOL_ROOM:
 				icon.frame( icon.texture.uvRectBySize( 64, 144, 16, 16 ) );
 				break;
 			case BARRICADE:
@@ -489,7 +489,7 @@ public enum Icons {
 			case TOXIC_GAS_ROOM:
 				icon.frame( icon.texture.uvRectBySize( 96, 144, 16, 16 ) );
 				break;
-			case CHASM_SECRET:
+			case CHASM_ROOM_SECRET:
 				icon.frame( icon.texture.uvRectBySize( 112, 144, 16, 16 ) );
 				break;
 

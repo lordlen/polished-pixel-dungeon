@@ -39,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -228,6 +229,11 @@ public class SentryRoom extends SpecialRoom {
 			spriteClass = SentrySprite.class;
 
 			properties.add(Property.IMMOVABLE);
+		}
+
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.RED_SENTRY;
 		}
 
 		private float initialChargeDelay;
