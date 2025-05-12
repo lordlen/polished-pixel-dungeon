@@ -153,7 +153,7 @@ public class WndGameInProgress extends Window {
 		cont.setRect(0, pos, WIDTH/2 -1, 20);
 		add(cont);
 
-		erase.icon(Icons.get(Icons.CLOSE));
+		erase.icon(Icons.get(Icons.CLOSE_POLISHED));
 		erase.setRect(WIDTH/2 + 1, pos, WIDTH/2 - 1, 20);
 		add(erase);
 		

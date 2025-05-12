@@ -48,7 +48,7 @@ import java.util.Comparator;
 public class CustomNoteButton extends IconButton {
 
 	public CustomNoteButton () {
-		super(Icons.PLUS.get());
+		super(Icons.PLUS_POLISHED.get());
 
 		width = 11;
 		height = 11;
