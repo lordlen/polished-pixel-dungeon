@@ -39,12 +39,20 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.RatKing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.MassGraveRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretChestChasmRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicalFireRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.PoolRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SentryRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.StorageRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.ToxicGasRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.TrapsRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.WeakFloorRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -233,6 +241,38 @@ public class Notes {
 				case DEMON_SPAWNER:
 					return new Image(new SpawnerSprite());
 			}
+		}
+
+		public static void updateOnContainerOpen(int pos, Heap.Type type) {
+			if(!(Dungeon.level instanceof RegularLevel)) return;
+			Room room = ((RegularLevel)Dungeon.level).room(pos);
+
+            switch (type) {
+                case CHEST:
+                    if (room instanceof SentryRoom) Notes.remove(Landmark.RED_SENTRY);
+                    else if (room instanceof TrapsRoom) {
+                        Notes.remove(Landmark.TRAPS_ROOM);
+                        Notes.remove(Landmark.CHASM_ROOM);
+                    } else if (room instanceof PoolRoom) Notes.remove(Landmark.POOL_ROOM);
+                    else if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
+                    break;
+
+                case SKELETON:
+                    if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
+                    break;
+
+                case LOCKED_CHEST:
+                    if (room instanceof SecretChestChasmRoom)
+                        Notes.remove(Landmark.CHASM_ROOM_SECRET);
+                    break;
+            }
+		}
+
+		public static void updateOnBarricade(int pos) {
+			if(!(Dungeon.level instanceof RegularLevel)) return;
+			Room room = ((RegularLevel)Dungeon.level).room(pos);
+
+			if(room instanceof StorageRoom || room instanceof MassGraveRoom) Notes.remove(Landmark.BARRICADE);
 		}
 
 		@Override

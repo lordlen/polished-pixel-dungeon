@@ -263,6 +263,7 @@ public class MagicalFireRoom extends SpecialRoom {
 		public void fullyClear() {
 			super.fullyClear();
 			Dungeon.level.buildFlagMaps();
+			Notes.remove(Notes.Landmark.MAGICAL_FIRE);
 		}
 
 		@Override
