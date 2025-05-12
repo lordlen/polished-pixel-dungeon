@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -154,6 +155,11 @@ public class MagicalFireRoom extends SpecialRoom {
 	}
 
 	public static class EternalFire extends Blob {
+
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.MAGICAL_FIRE;
+		}
 
 		@Override
 		protected void evolve() {

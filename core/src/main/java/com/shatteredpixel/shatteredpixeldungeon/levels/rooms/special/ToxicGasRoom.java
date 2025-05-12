@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -124,6 +125,11 @@ public class ToxicGasRoom extends SpecialRoom {
 		{
 			//set to act right before t gas
 			actPriority=BLOB_PRIO+1;
+		}
+
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.TOXIC_GAS_ROOM;
 		}
 
 		@Override
