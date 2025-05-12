@@ -168,6 +168,7 @@ public enum Icons {
 
 	//unused
 	WELL_EMPTY,
+	TRAPS_ROOM_POISON,
 	PIRANHA,
 	TOXIC_GAS_ROOM_SIMPLIFIED
 	;
@@ -532,6 +533,9 @@ public enum Icons {
 
 			//unusued
 			case WELL_EMPTY:
+				icon.frame( icon.texture.uvRectBySize( 192, 176, 16, 16 ) );
+				break;
+			case TRAPS_ROOM_POISON:
 				icon.frame( icon.texture.uvRectBySize( 208, 176, 16, 16 ) );
 				break;
 			case PIRANHA:
