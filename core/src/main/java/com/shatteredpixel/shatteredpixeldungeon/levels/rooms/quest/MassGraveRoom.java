@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Skeleton;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
@@ -30,12 +31,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.CorpseDust;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.StorageRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.CustomTilemap;
 import com.watabou.noosa.Image;
@@ -58,7 +59,7 @@ public class MassGraveRoom extends SpecialRoom {
 		entrance.set(Door.Type.BARRICADE);
 		level.addItemToSpawn(new PotionOfLiquidFlame());
 
-		Blob.seed( entrance().x + level.width() * entrance().y, 1, StorageRoom.BarricadeID.class, level );
+		Blob.seed( entrance().x + level.width() * entrance().y, 1, BarricadeID.class, level );
 
 		Painter.fill(level, this, Terrain.WALL);
 		Painter.fill(level, this, 1, Terrain.CUSTOM_DECO_EMPTY);
@@ -162,6 +163,13 @@ public class MassGraveRoom extends SpecialRoom {
 		@Override
 		public String desc(int tileX, int tileY) {
 			return Messages.get(this, "desc");
+		}
+	}
+
+	public static class BarricadeID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.BARRICADE_QUEST;
 		}
 	}
 }

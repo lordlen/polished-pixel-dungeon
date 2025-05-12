@@ -138,6 +138,7 @@ public class Notes {
 		MAGICAL_FIRE,
 		POOL_ROOM,
 		BARRICADE,
+		BARRICADE_QUEST,
 		TOXIC_GAS_ROOM,
 		CHASM_ROOM_SECRET,
 
@@ -202,6 +203,7 @@ public class Notes {
 				case POOL_ROOM:
 					return Icons.POOL_ROOM.get();
 				case BARRICADE:
+				case BARRICADE_QUEST:
 					return Icons.BARRICADE.get();
 				case TOXIC_GAS_ROOM:
 					return Icons.TOXIC_GAS_ROOM.get();
@@ -274,8 +276,12 @@ public class Notes {
 
 			for (int i : PathFinder.NEIGHBOURS9) {
 				Room room = ((RegularLevel)Dungeon.level).room(pos+i);
-				if(room instanceof StorageRoom || room instanceof MassGraveRoom) {
+				if(room instanceof StorageRoom) {
 					Notes.remove(Landmark.BARRICADE);
+					return;
+				}
+				else if(room instanceof MassGraveRoom) {
+					Notes.remove(Landmark.BARRICADE_QUEST);
 					return;
 				}
 			}
@@ -313,7 +319,7 @@ public class Notes {
 				case CHASM_ROOM: return Messages.get(Level.class, "chasm_desc");
 				case MAGICAL_FIRE: return Messages.get(MagicalFireRoom.EternalFire.class, "desc");
 				case POOL_ROOM: return Messages.get(Piranha.class, "desc");
-				case BARRICADE: return Messages.get(Level.class, "barricade_desc");
+				case BARRICADE: case BARRICADE_QUEST: return Messages.get(Level.class, "barricade_desc");
 				case TOXIC_GAS_ROOM: return Messages.get(ToxicGasRoom.ToxicVent.class, "desc");
 				case CHASM_ROOM_SECRET: return Messages.get(Level.class, "chasm_desc");
 
