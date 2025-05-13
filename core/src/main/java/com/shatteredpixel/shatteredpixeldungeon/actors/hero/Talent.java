@@ -326,10 +326,9 @@ public enum Talent {
 			actPriority = VFX_PRIO;
 		}
 
-		//REMOVED
 		public boolean secondUse;
 		public boolean hasSecondUse(){
-			return false;
+			return secondUse;
 		}
 
 		public int icon() { return BuffIndicator.TIME; }
@@ -338,6 +337,11 @@ public enum Talent {
 			else                icon.hardlight(0.35f, 0f, 0.7f);
 		}
 		public float iconFadePercent() { return GameMath.gate(0, visualcooldown() / 20f, 1); }
+
+		@Override
+		public String desc() {
+			return hasSecondUse() ? Messages.get(this, "desc_second", dispTurns()) : super.desc();
+		}
 
 		private static final String SECOND_USE = "second_use";
 		@Override
