@@ -728,6 +728,17 @@ public class Dungeon {
 		
 		FileUtils.bundleToFile(GamesInProgress.depthFile( save, depth, branch ), bundle);
 	}
+
+	public static void replaceLevel( int depth, int branch, Level replacement ) {
+		try {
+			Bundle bundle = new Bundle();
+			bundle.put( LEVEL, replacement );
+
+			FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
+		} catch (IOException e) {
+			return;
+		}
+	}
 	
 	public static void saveAll() throws IOException {
 		if (hero != null && (hero.isAlive() || WndResurrect.instance != null)) {
@@ -865,6 +876,18 @@ public class Dungeon {
 		} else {
 			return level;
 		}
+	}
+
+	public static Level getLevel(int depth, int branch) {
+		Level level;
+		try {
+			Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ));
+			level = (Level)bundle.get( LEVEL );
+		} catch (Exception e) {
+			return null;
+		}
+
+		return level;
 	}
 	
 	public static void deleteGame( int save, boolean deleteLevels ) {
