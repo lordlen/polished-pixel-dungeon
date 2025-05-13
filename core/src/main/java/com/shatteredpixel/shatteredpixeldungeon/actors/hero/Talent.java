@@ -323,7 +323,7 @@ public enum Talent {
 	};
 	public static class SwiftEquipCooldown extends FlavourBuff{
 		{
-			actPriority = VFX_PRIO;
+			actPriority = HERO_PRIO+1;
 		}
 
 		public boolean secondUse;
@@ -374,10 +374,31 @@ public enum Talent {
 		}
 	}
 	public static class PreciseAssaultTracker extends FlavourBuff{
-		{ type = buffType.POSITIVE; }
+		{
+			actPriority = HERO_PRIO+1;
+		}
+
+		public boolean secondUse;
+
 		public int icon() { return BuffIndicator.INVERT_MARK; }
-		public void tintIcon(Image icon) { icon.hardlight(1f, 1f, 0.0f); }
+		public void tintIcon(Image icon) {
+			icon.hardlight(1f, 1f, 0.0f);
+			if (secondUse) 	icon.hardlight(1f, 0.5f, 0.0f);
+			else           	icon.hardlight(1f, 1f, 0.0f);
+		}
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
+
+		private static final String SECOND_USE = "second_use";
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(SECOND_USE, secondUse);
+		}
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			secondUse = bundle.getBoolean(SECOND_USE);
+		}
 	};
 	public static class VariedChargeTracker extends Buff{
 		public Class weapon;

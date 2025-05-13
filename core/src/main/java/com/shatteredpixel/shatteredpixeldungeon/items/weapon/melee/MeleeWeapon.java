@@ -195,7 +195,7 @@ public class MeleeWeapon extends Weapon {
 		hero.belongings.abilityWeapon = null;
 		hero.buff(PolishedAbilityUseTracker.class).detach();
 		if (hero.hasTalent(Talent.PRECISE_ASSAULT)){
-			Buff.prolong(hero, Talent.PreciseAssaultTracker.class, hero.cooldown()+4f);
+			Buff.prolong(hero, Talent.PreciseAssaultTracker.class, hero.cooldown()+5f);
 		}
 		if (hero.hasTalent(Talent.VARIED_CHARGE)){
 			Talent.VariedChargeTracker tracker = hero.buff(Talent.VariedChargeTracker.class);
