@@ -50,6 +50,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
@@ -106,6 +107,13 @@ public class SpiritBow extends Weapon {
 			return curCharges + "/" + Polished_getMaxCharge();
 		else
 			return super.status();
+	}
+
+	private float colorSlider() {
+		return 2 * ((float)curCharges / Polished_getMaxCharge());
+	}
+	public void statusColor(BitmapText text) {
+		text.hardlight(Math.min(2-colorSlider(), 1), Math.min(colorSlider(), 1), 0);
 	}
 	
 	@Override
