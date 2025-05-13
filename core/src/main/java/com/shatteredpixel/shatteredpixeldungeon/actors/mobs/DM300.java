@@ -175,7 +175,7 @@ public class DM300 extends Mob {
 
 		if(lastPhase() || supercharged) Arrays.fill(fieldOfView, true);
 
-		if (Dungeon.hero.invisible <= 0) {
+		if (!Dungeon.hero.isStealthyTo(this)) {
 			if(fightStarted()) {
 				//pause for 1 turn on vision loss, except on supercharge/last phase
 				if(state != HUNTING || supercharged || lastPhase())
@@ -199,7 +199,7 @@ public class DM300 extends Mob {
 			ConeAOE aim = null;
 			if(enemy != null) aim = new ConeAOE(new Ballistica(pos, enemy.pos, Ballistica.WONT_STOP), viewDistance, 30, Ballistica.STOP_SOLID);
 
-			if(state == HUNTING && enemy != null && enemy.isAlive() && Dungeon.hero.invisible <= 0 &&
+			if(state == HUNTING && enemy != null && enemy.isAlive() && !Dungeon.hero.isStealthyTo(this) &&
 					(fieldOfView[enemy.pos] || aim.cells.contains(enemy.pos))) {
         
 				//more aggressive ability usage when DM can't reach its target
