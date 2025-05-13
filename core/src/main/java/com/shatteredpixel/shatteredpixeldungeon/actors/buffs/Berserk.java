@@ -248,14 +248,16 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		alignWithHero();
 
 		WarriorShield shield = target.buff(WarriorShield.class);
-		//WILL CHANGE THIS AFTER WARRIOR REWORK MERGE
-		int shieldAmount = Math.round(3*shield.Polished_reworkShield() * shieldFactor());
-		shield.supercharge(shieldAmount);
+		if(shield != null) {
+			//WILL CHANGE THIS AFTER WARRIOR REWORK MERGE
+			int shieldAmount = Math.round(3*shield.Polished_reworkShield() * shieldFactor());
+			shield.supercharge(shieldAmount);
+			target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shieldAmount), FloatingText.SHIELDING );
+		}
 
 		Sample.INSTANCE.play(Assets.Sounds.BURNING, 2f, 0.75f);
 		GameScene.flash(0xFF8000);
 		SpellSprite.show(target, SpellSprite.BERSERK);
-		target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shieldAmount), FloatingText.SHIELDING );
 	}
 
 	public void continueRampage(){
