@@ -346,6 +346,7 @@ public class SPDSettings extends GameSettings {
 
 		public static void quickslot(boolean value){
 			put(KEY_QUICKSLOT, value);
+			QuickSlot.SIZE = value ? 7 : 6;
 		}
 
 		public static boolean quickslot(){
