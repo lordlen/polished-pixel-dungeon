@@ -118,9 +118,7 @@ public class TitleScene extends PixelScene {
 		StyledButton btnPlay = new StyledButton(GREY_TR, Messages.get(this, "enter")){
 			Game.SceneChangeCallback callback = new Game.SceneChangeCallback() {
 				@Override
-				public void beforeCreate() {
-
-				}
+				public void beforeCreate() {}
 
 				@Override
 				public void afterCreate() {
