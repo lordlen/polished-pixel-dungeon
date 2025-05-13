@@ -204,7 +204,7 @@ public class EtherealChains extends Artifact {
 				Actor.add(new Pushing(enemy, enemy.pos, pulledPos, new Callback() {
 					public void call() {
 						enemy.pos = pulledPos;
-            Buff.Polished.affectAligned(enemy, Cripple.class, baseCripple + 3*chargeUse);
+						Buff.Polished.affectAligned(enemy, Cripple.class, baseCripple + 3*chargeUse);
 
 						charge -= chargeUse;
 						Invisibility.dispel(hero);
@@ -334,8 +334,8 @@ public class EtherealChains extends Artifact {
 					&& !cursed
 					&& target.buff(MagicImmune.class) == null
 					&& Regeneration.regenOn()) {
-				//gains a charge in 40 - 2*missingCharge turns
-				float chargeGain = (1 / (40f - (chargeTarget - charge)*2f));
+				//gains a charge in 50 - 2*missingCharge turns
+				float chargeGain = (1 / (50f - (chargeTarget - charge)*2f));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 				partialCharge += chargeGain;
 			} else if (cursed && Random.Int(100) == 0){

@@ -40,8 +40,8 @@ public class QuickSlot {
 	 * which can happen for a stackable item that has been 'used up', these are referred to as placeholders.
 	 */
 
-	//note that the current max size is coded at 6, due to UI constraints, but it could be much much bigger with no issue.
-	public static int SIZE = 7;
+	//note that the current max size is coded at 7, due to UI constraints, but it could be much much bigger with no issue.
+	public static int SIZE = SPDSettings.Polished.quickslot() ? 7 : 6;
 	private Item[] slots = new Item[SIZE];
 
 

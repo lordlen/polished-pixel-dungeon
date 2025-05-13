@@ -332,8 +332,7 @@ public enum HeroClass {
 	}
 	
 	public boolean isUnlocked(){
-		//always unlock
-		return true;
+		return this == WARRIOR || !SPDSettings.intro();
 	}
 	
 	public String unlockMsg() {
