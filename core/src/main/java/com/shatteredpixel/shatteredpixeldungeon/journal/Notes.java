@@ -158,7 +158,9 @@ public class Notes {
 		TROLL,
 		IMP,
 
-		DEMON_SPAWNER;
+		DEMON_SPAWNER,
+
+		INVALID
 	}
 	
 	public static class LandmarkRecord extends Record {
@@ -362,7 +364,11 @@ public class Notes {
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
-			landmark = Landmark.valueOf(bundle.getString(LANDMARK));
+			try{
+				landmark = Landmark.valueOf(bundle.getString(LANDMARK));
+			} catch (IllegalArgumentException invalid) {
+				landmark = Landmark.INVALID;
+			}
 		}
 		
 		@Override
