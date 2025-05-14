@@ -149,14 +149,23 @@ public class ItemSlot extends Button {
 			if(item instanceof WealthDrop) {
 				extra.x--;
 				extra.y = margin.top + bottom() - extra.height() - 0;
+
+				PixelScene.align(extra);
+
+				if (extra.width() > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
 			}
+			else {
+				PixelScene.align(extra);
 
-			PixelScene.align(extra);
-
-			if ((status.width() + extra.width()) > width){
-				extra.visible = false;
-			} else if (item != null) {
-				extra.visible = true;
+				if ((status.width() + extra.width()) > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
 			}
 		}
 
@@ -251,15 +260,8 @@ public class ItemSlot extends Button {
 		}
 
 		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
-			if(item instanceof WealthDrop) {
-				extra.text( ((WealthDrop) item).dropExtra() );
-				((WealthDrop) item).dropColor(extra);
-				extra.scale = new PointF(0.9f, 0.9f);
-				extra.measure();
-			} else {
-				extra.text( null );
-				extra.resetColor();
-			}
+
+			extra.text( null );
 
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
 			itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
@@ -291,6 +293,18 @@ public class ItemSlot extends Button {
 			extra.text( null );
 
 		}
+
+		if(item instanceof WealthDrop) {
+			extra.text( ((WealthDrop) item).dropExtra() );
+			((WealthDrop) item).dropColor(extra);
+
+			extra.scale = new PointF(0.9f, 0.9f);
+			extra.measure();
+		} else {
+			extra.resetColor();
+			extra.scale = new PointF(1f, 1f);
+		}
+
 
 		int trueLvl = item.visiblyUpgraded();
 		int buffedLvl = item.buffedVisiblyUpgraded();

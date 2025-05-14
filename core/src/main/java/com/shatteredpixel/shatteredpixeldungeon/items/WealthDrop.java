@@ -12,6 +12,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.audio.Sample;
@@ -179,7 +180,15 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
     }
 
     static void refreshIndicators() {
-        if(Dungeon.hero.buff(Decay.class) != null) Item.updateQuickslot();
+        for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
+            if (decay.cooldown() <= 25 && decay.warning && decay.item != null) {
+
+                decay.warning = false;
+                //disabled for now
+                //GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
+            }
+            Item.updateQuickslot();
+        }
     }
 
     class Decay extends FlavourBuff {
@@ -188,6 +197,9 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
             actPriority = HERO_PRIO+1;
             revivePersists = true;
         }
+
+        public boolean warning = true;
+
         Item item = null;
 
         @Override
