@@ -12,6 +12,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -124,6 +125,17 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         return desc;
     }
 
+    default String dropExtra() {
+        return decay() != null ? decay().iconTextDisplay() : null;
+    }
+
+    default void dropColor(BitmapText text) {
+        if(decay() != null) {
+            float percent = decay().cooldown() / decayTimer();
+            text.hardlight(1f, percent, percent);
+        }
+    }
+
 
     String WEALTH_ITEM = "wealth_item";
 
@@ -133,7 +145,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
     }
 
     static int decayTimer() {
-        int lvl = Ring.getBuffedBonus(Dungeon.hero, RingOfWealth.Wealth.class) - 1;
+        int lvl = Math.max(Ring.getBuffedBonus(Dungeon.hero, RingOfWealth.Wealth.class) - 1, 0);
         return 200 + 40*lvl;
     }
 

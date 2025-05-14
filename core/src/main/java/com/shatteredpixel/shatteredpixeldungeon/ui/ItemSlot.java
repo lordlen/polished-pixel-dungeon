@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Rect;
 
 public class ItemSlot extends Button {
@@ -143,7 +144,13 @@ public class ItemSlot extends Button {
 		
 		if (extra != null) {
 			extra.x = x + (width - extra.width()) - margin.right;
-			extra.y = y + margin.top;
+			extra.y = margin.top + y;
+
+			if(item instanceof WealthDrop) {
+				extra.x--;
+				extra.y = margin.top + bottom() - extra.height() - 0;
+			}
+
 			PixelScene.align(extra);
 
 			if ((status.width() + extra.width()) > width){
@@ -244,7 +251,15 @@ public class ItemSlot extends Button {
 		}
 
 		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
-			extra.text( null );
+			if(item instanceof WealthDrop) {
+				extra.text( ((WealthDrop) item).dropExtra() );
+				((WealthDrop) item).dropColor(extra);
+				extra.scale = new PointF(0.9f, 0.9f);
+				extra.measure();
+			} else {
+				extra.text( null );
+				extra.resetColor();
+			}
 
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
 			itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
