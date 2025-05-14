@@ -69,7 +69,15 @@ public abstract class TargetedSpell extends Spell {
 				final TargetedSpell curSpell;
 				if (curItem instanceof TargetedSpell) {
 					curSpell = (TargetedSpell)curItem;
-				} else {
+				}
+				else if(curItem instanceof WealthSpell) {
+					WealthSpell wealthSpell = (WealthSpell)curItem;
+
+					if(wealthSpell.valid() && wealthSpell.item() instanceof TargetedSpell)
+						curSpell = (TargetedSpell) wealthSpell.item();
+					else return;
+				}
+				else {
 					return;
 				}
 				
@@ -93,6 +101,7 @@ public abstract class TargetedSpell extends Spell {
 						Invisibility.dispel();
 						curSpell.updateQuickslot();
 						curUser.spendAndNext( 1f );
+
 						Catalog.countUse(curSpell.getClass());
 						if (Random.Float() < curSpell.talentChance){
 							Talent.onScrollUsed(curUser, curUser.pos, curSpell.talentFactor, curSpell.getClass());

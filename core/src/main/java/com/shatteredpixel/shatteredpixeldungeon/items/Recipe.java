@@ -257,7 +257,9 @@ public abstract class Recipe {
 	}
 	
 	public static boolean usableInRecipe(Item item){
-		if (item instanceof EquipableItem){
+		if(item instanceof WealthDrop) {
+			return false;
+		} else if (item instanceof EquipableItem){
 			//only thrown weapons and wands allowed among equipment items
 			return item.isIdentified() && !item.cursed && item instanceof MissileWeapon;
 		} else if (item instanceof Wand) {

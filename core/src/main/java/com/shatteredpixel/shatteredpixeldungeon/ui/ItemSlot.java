@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -36,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Rect;
 
 public class ItemSlot extends Button {
@@ -142,13 +144,28 @@ public class ItemSlot extends Button {
 		
 		if (extra != null) {
 			extra.x = x + (width - extra.width()) - margin.right;
-			extra.y = y + margin.top;
-			PixelScene.align(extra);
+			extra.y = margin.top + y;
 
-			if ((status.width() + extra.width()) > width){
-				extra.visible = false;
-			} else if (item != null) {
-				extra.visible = true;
+			if(item instanceof WealthDrop) {
+				extra.x--;
+				extra.y = margin.top + bottom() - extra.height() - 0;
+
+				PixelScene.align(extra);
+
+				if (extra.width() > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
+			}
+			else {
+				PixelScene.align(extra);
+
+				if ((status.width() + extra.width()) > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
 			}
 		}
 
@@ -242,7 +259,8 @@ public class ItemSlot extends Button {
 			status.resetColor();
 		}
 
-		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()))){
+		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
+
 			extra.text( null );
 
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
@@ -275,6 +293,18 @@ public class ItemSlot extends Button {
 			extra.text( null );
 
 		}
+
+		if(item instanceof WealthDrop) {
+			extra.text( ((WealthDrop) item).dropExtra() );
+			((WealthDrop) item).dropColor(extra);
+
+			extra.scale = new PointF(0.9f, 0.9f);
+			extra.measure();
+		} else {
+			extra.resetColor();
+			extra.scale = new PointF(1f, 1f);
+		}
+
 
 		int trueLvl = item.visiblyUpgraded();
 		int buffedLvl = item.buffedVisiblyUpgraded();

@@ -968,6 +968,8 @@ public abstract class Mob extends Char {
 		float lootChance = this.lootChance;
 
 		float dropBonus = RingOfWealth.dropChanceMultiplier( Dungeon.hero );
+		//only alter on cursed rings
+		dropBonus = Math.max(dropBonus, 1f);
 
 		Talent.BountyHunterTracker bhTracker = Dungeon.hero.buff(Talent.BountyHunterTracker.class);
 		if (bhTracker != null){
