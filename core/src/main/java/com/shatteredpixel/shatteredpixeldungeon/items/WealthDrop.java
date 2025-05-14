@@ -178,6 +178,10 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         bg.ba = b * light / 255f;
     }
 
+    static void refreshIndicators() {
+        if(Dungeon.hero.buff(Decay.class) != null) Item.updateQuickslot();
+    }
+
     class Decay extends FlavourBuff {
         {
             type = buffType.NEUTRAL;
