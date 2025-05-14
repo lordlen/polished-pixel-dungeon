@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.BitmapText;
 import com.watabou.utils.Bundle;
 
 public class Hunger extends Buff implements Hero.Doom {
@@ -213,22 +214,8 @@ public class Hunger extends Buff implements Hero.Doom {
 	private float hungerPercentage() {
 		return (STARVING - level) / (STARVING - HUNGRY);
 	}
-	public float textColor_red() {
-		int r = 255;
-
-		return r / 255f;
-	}
-	public float textColor_green() {
-		int g = 255;
-
-		g = (int)(g*hungerPercentage());
-		return g / 255f;
-	}
-	public float textColor_blue() {
-		int b = 255;
-
-		b = (int)(b*hungerPercentage());
-		return b / 255f;
+	public void statusColor(BitmapText text) {
+		text.hardlight(1, hungerPercentage(), hungerPercentage());
 	}
 
 	@Override

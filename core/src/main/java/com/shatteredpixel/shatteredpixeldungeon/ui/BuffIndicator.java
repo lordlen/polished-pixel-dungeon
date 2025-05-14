@@ -325,9 +325,7 @@ public class BuffIndicator extends Component {
 				text.text(buff.iconTextDisplay());
 
 				if(buff instanceof Hunger) {
-					Hunger h = (Hunger)buff;
-
-					text.hardlight(h.textColor_red(), h.textColor_green(), h.textColor_blue());
+					((Hunger) buff).statusColor(text);
 				}
 
 				text.measure();

@@ -48,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 
 import java.util.ArrayList;
 
@@ -104,7 +105,7 @@ public class HornOfPlenty extends Artifact {
 			else if (charge == 0)  GLog.i( Messages.get(this, "no_food") );
 			else {
 				Hunger hunger = Buff.affect(Dungeon.hero, Hunger.class);
-				int chargesToUse = Math.max( 1, hunger.hunger() / getSatietyPerCharge());
+				int chargesToUse = GameMath.gate( 1, hunger.hunger() / getSatietyPerCharge(), 3);
 				if (chargesToUse > charge) chargesToUse = charge;
 
 				//always use 1 charge if snacking
