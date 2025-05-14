@@ -30,7 +30,7 @@ public class CheckBox extends RedButton {
 	public CheckBox( String label ) {
 		super( label );
 		
-		icon( Icons.get( Icons.UNCHECKED ) );
+		icon( Icons.get( Icons.UNCHECKED_POLISHED ) );
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class CheckBox extends RedButton {
 	public void checked( boolean value ) {
 		if (checked != value) {
 			checked = value;
-			icon.copy( Icons.get( checked ? Icons.CHECKED : Icons.UNCHECKED ) );
+			icon.copy( Icons.get( checked ? Icons.CHECKED_POLISHED : Icons.UNCHECKED_POLISHED ) );
 		}
 	}
 	

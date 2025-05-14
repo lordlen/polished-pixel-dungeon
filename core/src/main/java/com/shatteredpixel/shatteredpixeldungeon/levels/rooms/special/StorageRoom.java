@@ -21,10 +21,13 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -55,6 +58,8 @@ public class StorageRoom extends SpecialRoom {
 		
 		entrance().set( Door.Type.BARRICADE );
 		level.addItemToSpawn( new PotionOfLiquidFlame() );
+
+		Blob.seed( entrance().x + level.width() * entrance().y, 1, BarricadeID.class, level );
 	}
 	
 	private static Item prize( Level level ) {
@@ -71,5 +76,12 @@ public class StorageRoom extends SpecialRoom {
 			Generator.Category.FOOD,
 			Generator.Category.GOLD
 		) );
+	}
+
+	public static class BarricadeID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.BARRICADE;
+		}
 	}
 }
