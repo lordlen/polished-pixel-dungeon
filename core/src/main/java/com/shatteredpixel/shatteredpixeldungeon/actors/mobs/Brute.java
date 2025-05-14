@@ -55,7 +55,7 @@ public class Brute extends Mob {
 		maxLvl = 16;
 		
 		loot = Gold.class;
-		lootChance = 0.5f;
+		lootChance = 0.3f;
 	}
 	
 	protected boolean hasRaged = false;
