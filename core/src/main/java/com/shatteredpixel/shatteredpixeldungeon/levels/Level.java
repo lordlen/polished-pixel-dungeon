@@ -758,7 +758,7 @@ public abstract class Level implements Bundlable {
 		do {
 			mob.pos = randomRespawnCell(mob);
 			tries--;
-		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] < disLimit) && tries > 0);
+		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] <= disLimit) && tries > 0);
 
 		if (Dungeon.hero.isAlive() && mob.pos != -1 && PathFinder.distance[mob.pos] >= disLimit) {
 			GameScene.add( mob );
