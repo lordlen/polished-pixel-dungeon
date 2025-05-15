@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoBuff;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.PointerArea;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.AlphaTweener;
 import com.watabou.noosa.ui.Component;
@@ -357,6 +358,7 @@ public class BuffIndicator extends Component {
 				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1);
 				
 				if(mini) {
+					hotArea = new PointerArea( 0, 0, 0, 0 ) {};
 					float result = Buff.genericIconFade(buff);
 					fadeHeight = result != -1 ? result : fadeHeight;
 				}

@@ -143,16 +143,20 @@ public class Buff extends Actor {
 	}
 	
 	static public float genericIconFade(Buff buff) {
+		float fade = -1f;
+		
 		if(buff instanceof FlavourBuff) {
-			return GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
+			fade = GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
 		}
 		else {
 			try {
-				return GameMath.gate(0, (10f - Integer.parseInt(buff.iconTextDisplay())) / 10f, 1);
-			} catch (NumberFormatException e) {
-				return -1;
-			}
+				fade = GameMath.gate(0, (10f - Integer.parseInt(buff.iconTextDisplay())) / 10f, 1);
+			} catch (NumberFormatException e) {}
 		}
+		
+		//to avoid scaling problems
+		if(fade > .995f) fade = 1.05f;
+		return fade;
 	}
 
 	private static final String MNEMONIC_EXTENDED    = "mnemonic_extended";
