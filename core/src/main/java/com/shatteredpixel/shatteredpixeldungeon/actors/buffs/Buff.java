@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.Reflection;
 
 import java.util.HashSet;
@@ -139,6 +140,19 @@ public class Buff extends Actor {
 
 	public float visualcooldown(){
 		return Math.max(cooldown(), 0.01f);
+	}
+	
+	static public float genericIconFade(Buff buff) {
+		if(buff instanceof FlavourBuff) {
+			return GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
+		}
+		else {
+			try {
+				return GameMath.gate(0, (10f - Integer.parseInt(buff.iconTextDisplay())) / 10f, 1);
+			} catch (NumberFormatException e) {
+				return -1;
+			}
+		}
 	}
 
 	private static final String MNEMONIC_EXTENDED    = "mnemonic_extended";

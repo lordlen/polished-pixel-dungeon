@@ -955,6 +955,7 @@ public class Hero extends Char {
 
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshBoss();
+		GameScene.updateMobBuffIndicators();
 
 		if (paralysed > 0) {
 			

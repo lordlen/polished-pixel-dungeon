@@ -38,6 +38,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.AlphaTweener;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.GameMath;
+import com.watabou.utils.PointF;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,7 +143,8 @@ public class BuffIndicator extends Component {
 	public static final int ILLUMINATED = 81;
 	public static final int TRINITY_FORM= 82;
 	public static final int MANY_POWER  = 83;
-
+	
+	public static final int SIZE_MINI  	= 5;
 	public static final int SIZE_SMALL  = 7;
 	public static final int SIZE_LARGE  = 16;
 	
@@ -151,6 +153,7 @@ public class BuffIndicator extends Component {
 	
 	private LinkedHashMap<Buff, BuffButton> buffButtons = new LinkedHashMap<>();
 	private boolean needsRefresh;
+	private boolean followsChar = false;
 	private Char ch;
 
 	private boolean large = false;
@@ -162,6 +165,18 @@ public class BuffIndicator extends Component {
 		this.large = large;
 		if (ch == Dungeon.hero) {
 			heroInstance = this;
+		}
+	}
+
+	public void target( Char ch ) {
+		if (ch != null && ch.isAlive() && ch.isActive()) {
+			this.ch = ch;
+			followsChar = true;
+			GameScene.add(this);
+		} else {
+			this.ch = null;
+			followsChar = false;
+			killAndErase();
 		}
 	}
 	
@@ -177,6 +192,21 @@ public class BuffIndicator extends Component {
 	@Override
 	public synchronized void update() {
 		super.update();
+		
+		if(followsChar) {
+			if (ch != null && ch.isAlive() && ch.isActive() && ch.sprite.visible) {
+				CharSprite sprite = ch.sprite;
+				
+				setSize(Math.min(buffButtons.size(), 3) * SIZE_MINI, SIZE_MINI);
+				
+				x = sprite.x + sprite.width()/2f - width() / 2f - 0.3f * Math.min(buffButtons.size(), 3);
+				y = sprite.y - 5f - height;
+				visible = true;
+			} else {
+				visible = false;
+			}
+		}
+		
 		if (needsRefresh){
 			needsRefresh = false;
 			layout();
@@ -196,6 +226,7 @@ public class BuffIndicator extends Component {
 		}
 
 		int size = large ? SIZE_LARGE : SIZE_SMALL;
+		if(followsChar) size = SIZE_MINI;
 
 		//remove any icons no longer present
 		for (Buff buff : buffButtons.keySet().toArray(new Buff[0])){
@@ -236,9 +267,19 @@ public class BuffIndicator extends Component {
 		int pos = 0;
 		float lastIconLeft = 0;
 		for (BuffButton icon : buffButtons.values()){
+			if(followsChar) {
+				icon.icon.scale = new PointF(0.6f, 0.6f);
+				icon.mini = true;
+			}
+			
 			icon.updateIcon();
-			//button areas are slightly oversized, especially on small buttons
-			icon.setRect(x + pos * (size + 1), y, size + 1, size + (large ? 0 : 5));
+			if(followsChar) {
+				icon.setRect(x + pos * (size + 1), y, size + 1, size + 1);
+			}
+			else {
+				//button areas are slightly oversized, especially on small buttons
+				icon.setRect(x + pos * (size + 1), y, size + 1, size + (large ? 0 : 5));
+			}
 			PixelScene.align(icon);
 			pos++;
 
@@ -254,6 +295,8 @@ public class BuffIndicator extends Component {
 			//can't squish by more than 50% on large and 62% on small
 			if (large && leftAdjust >= size*0.45f) leftAdjust = size*0.45f;
 			if (!large && leftAdjust >= size*0.32f) leftAdjust = size*0.32f;
+
+			if(followsChar) leftAdjust *= 0;
 			float cumulativeAdjust = leftAdjust * (buffButtons.size()-1);
 
 			ArrayList<BuffButton> buttons = new ArrayList<>(buffButtons.values());
@@ -282,6 +325,8 @@ public class BuffIndicator extends Component {
 
 		public Image grey; //only for small
 		public BitmapText text; //only for large
+		
+		public boolean mini = false;
 
 		public BuffButton( Buff buff, boolean large ){
 			super( new BuffIcon(buff, large));
@@ -308,7 +353,16 @@ public class BuffIndicator extends Component {
 			if (!large || buff.iconTextDisplay().isEmpty()) {
 				text.visible = false;
 				grey.visible = true;
-				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1) * icon.height();
+				
+				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1);
+				
+				if(mini) {
+					float result = Buff.genericIconFade(buff);
+					fadeHeight = result != -1 ? result : fadeHeight;
+				}
+				
+				fadeHeight *= icon.height();
+				
 				float zoom = (camera() != null) ? camera().zoom : 1;
 				if (fadeHeight < icon.height() / 2f) {
 					grey.scale.set(icon.width(), (float) Math.ceil(zoom * fadeHeight) / zoom);
@@ -381,6 +435,10 @@ public class BuffIndicator extends Component {
 		if (bossInstance != null) {
 			bossInstance.needsRefresh = true;
 		}
+	}
+	
+	public void refreshMob(){
+		needsRefresh = true;
 	}
 
 	public static void setBossInstance(BuffIndicator boss){

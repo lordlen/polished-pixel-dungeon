@@ -94,6 +94,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Banner;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
@@ -198,6 +199,7 @@ public class GameScene extends PixelScene {
 	private Group emoicons;
 	private Group overFogEffects;
 	private Group healthIndicators;
+	private Group buffIndicators;
 
 	private InventoryPane inventory;
 	private static boolean invVisible = true;
@@ -375,6 +377,7 @@ public class GameScene extends PixelScene {
 		emitters = new Group();
 		effects = new Group();
 		healthIndicators = new Group();
+		buffIndicators = new Group();
 		emoicons = new Group();
 		overFogEffects = new Group();
 		
@@ -433,6 +436,7 @@ public class GameScene extends PixelScene {
 		add( statuses );
 		
 		add( healthIndicators );
+		add( buffIndicators );
 		//always appears ontop of other health indicators
 		add( new TargetHealthIndicator() );
 		
@@ -1133,6 +1137,10 @@ public class GameScene extends PixelScene {
 	public static void add( CharHealthIndicator indicator ){
 		if (scene != null) scene.healthIndicators.add(indicator);
 	}
+
+	public static void add( BuffIndicator indicator ){
+		if (scene != null) scene.buffIndicators.add(indicator);
+	}
 	
 	public static void add( CustomTilemap t, boolean wall ){
 		if (scene == null) return;
@@ -1250,6 +1258,16 @@ public class GameScene extends PixelScene {
 				if (Dungeon.level.map[i] == Terrain.SECRET_DOOR){
 					Dungeon.level.discover(i);
 					discoverTile(i, Terrain.SECRET_DOOR);
+				}
+			}
+		}
+	}
+	
+	public static void updateMobBuffIndicators(){
+		if(scene != null && scene.buffIndicators != null) {
+			for(Gizmo indicator : scene.buffIndicators.all()) {
+				if(indicator instanceof BuffIndicator) {
+					((BuffIndicator) indicator).refreshMob();
 				}
 			}
 		}
