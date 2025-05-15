@@ -106,7 +106,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 	public boolean doEquip( Hero hero ) {
 
 		isSwiftEquipping = false;
-		if (hero.belongings.contains(this) && hero.hasTalent(Talent.SWIFT_EQUIP)){
+		if (hero.belongings.contains(this) && hero.hasTalent(Talent.SWIFT_EQUIP) && hero.belongings.weapon != null){
 			if (hero.buff(Talent.SwiftEquipCooldown.class) == null
 					|| hero.buff(Talent.SwiftEquipCooldown.class).hasSecondUse()){
 				isSwiftEquipping = true;
@@ -163,7 +163,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 	public boolean equipSecondary( Hero hero ){
 
 		isSwiftEquipping = false;
-		if (hero.belongings.contains(this) && hero.hasTalent(Talent.SWIFT_EQUIP)){
+		if (hero.belongings.contains(this) && hero.hasTalent(Talent.SWIFT_EQUIP) && hero.belongings.secondWep != null){
 			if (hero.buff(Talent.SwiftEquipCooldown.class) == null
 					|| hero.buff(Talent.SwiftEquipCooldown.class).hasSecondUse()){
 				isSwiftEquipping = true;
