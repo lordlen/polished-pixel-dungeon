@@ -195,7 +195,10 @@ public class Toolbar extends Component {
 			}
 		});
 		
-		add(btnWait = new Tool(24, 0, 20, 26) {
+		boolean makeSpace = SPDSettings.Polished.extra_quickslots() == 1;
+		int film_y = makeSpace ? 32 : 0;
+		int film_w = makeSpace ? 18 : 20;
+		add(btnWait = new Tool(24, film_y, film_w, 26) {
 			@Override
 			protected void onClick() {
 				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready /*&& !GameScene.cancel()*/ && GameScene.Polished.canInput()) {
@@ -284,7 +287,9 @@ public class Toolbar extends Component {
 			}
 		});
 		
-		add(btnSearch = new Tool(44, 0, 20, 26) {
+		film_y = makeSpace ? 32 : 0;
+		film_w = makeSpace ? 18 : 20;
+		add(btnSearch = new Tool(44, film_y, film_w, 26) {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready) {
@@ -316,7 +321,9 @@ public class Toolbar extends Component {
 		});
 		btnSearch.icon( 192, 0, 16, 16 );
 		
-		add(btnInventory = new Tool(0, 0, 24, 26) {
+		film_y = makeSpace ? 32 : 0;
+		film_w = makeSpace ? 22 : 24;
+		add(btnInventory = new Tool(0, film_y, film_w, 26) {
 			private CurrencyIndicator ind;
 
 			private Image arrow;
@@ -488,21 +495,18 @@ public class Toolbar extends Component {
 		float right = width;
 
 		int quickslotsToShow = 4;
-		if (PixelScene.uiCamera.width > 152) quickslotsToShow ++;
-		if (PixelScene.uiCamera.width > 170) quickslotsToShow ++;
-		if (PixelScene.uiCamera.width > 188 && SPDSettings.Polished.quickslot()) quickslotsToShow ++;
-
-		if(quickslotsToShow == QuickSlot.SIZE - 1) SPDSettings.Polished.quickslot(false);
+		for (int i = 5; i <= QuickSlot.quickslotsEnabled(); i++) {
+			if(PixelScene.uiCamera.width > 62 + i*18) quickslotsToShow++;
+		}
 		
 		int startingSlot;
-		if (SPDSettings.quickSwapper() && quickslotsToShow < QuickSlot.SIZE){
-			//Default to 3 * 2 even if 7th quickslot is enabled
-			quickslotsToShow = 3;
+		if (SPDSettings.quickSwapper() && quickslotsToShow < QuickSlot.quickslotsEnabled()){
+			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1); //might need fixing
 
-			startingSlot = swappedQuickslots ? 3 : 0;
+			startingSlot = swappedQuickslots ? quickslotsToShow : 0;
 			btnSwap.visible = true;
 			btnSwap.active = lastEnabled;
-			QuickSlotButton.lastVisible = QuickSlot.SIZE;
+			QuickSlotButton.lastVisible = quickslotsToShow*2;
 		} else {
 			startingSlot = 0;
 			btnSwap.visible = btnSwap.active = false;

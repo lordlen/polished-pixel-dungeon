@@ -39,10 +39,13 @@ public class QuickSlot {
 	 * Slots contain objects which are also in a player's inventory. The one exception to this is when quantity is 0,
 	 * which can happen for a stackable item that has been 'used up', these are referred to as placeholders.
 	 */
-
-	//note that the current max size is coded at 7, due to UI constraints, but it could be much much bigger with no issue.
-	public static int SIZE = SPDSettings.Polished.quickslot() ? 7 : 6;
+	
+	public static int SIZE = 10;
 	private Item[] slots = new Item[SIZE];
+	
+	public static int quickslotsEnabled() {
+		return 6 + SPDSettings.Polished.extra_quickslots();
+	}
 
 
 	//direct array interaction methods, everything should build from these methods.

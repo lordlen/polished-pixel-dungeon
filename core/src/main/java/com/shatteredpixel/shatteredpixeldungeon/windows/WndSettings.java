@@ -836,13 +836,14 @@ public class WndSettings extends WndTabbed {
 
 		RenderedTextBlock title;
 		ColorBlock sep1;
-		CheckBox chkQuickslot;
 		CheckBox chkQuickTransitions;
 		ColorBlock sep2;
 		CheckBox chkInputBlock;
 		CheckBox chkAutoPickUp;
 		ColorBlock sep3;
 		OptionSlider optBuffers;
+		ColorBlock sep4;
+		OptionSlider optQuickslots;
 
 		@Override
 		protected void createChildren() {
@@ -852,19 +853,6 @@ public class WndSettings extends WndTabbed {
 
 			sep1 = new ColorBlock(1, 1, 0xFF000000);
 			add(sep1);
-
-			if(PixelScene.uiCamera.width > 188) {
-				chkQuickslot = new CheckBox(Messages.get(this, "quickslot")){
-					@Override
-					protected void onClick() {
-						super.onClick();
-						SPDSettings.Polished.quickslot(checked());
-						Toolbar.updateLayout();
-					}
-				};
-				chkQuickslot.checked(SPDSettings.Polished.quickslot());
-				add(chkQuickslot);
-			}
 
 			chkQuickTransitions = new CheckBox(Messages.get(this, "quick_transitions")){
 				@Override
@@ -910,6 +898,18 @@ public class WndSettings extends WndTabbed {
 			};
 			optBuffers.setSelectedValue(SPDSettings.Polished.buffers());
 			add(optBuffers);
+			
+			sep4 = new ColorBlock(1, 1, 0xFF000000);
+			add(sep4);
+			
+			optQuickslots = new OptionSlider(Messages.get(this, "extra_quickslots"), "0", "4", 0, 4) {
+				@Override
+				protected void onChange() {
+					SPDSettings.Polished.extra_quickslots(getSelectedValue());
+				}
+			};
+			optQuickslots.setSelectedValue(SPDSettings.Polished.extra_quickslots());
+			add(optQuickslots);
 		}
 
 		@Override
@@ -917,16 +917,8 @@ public class WndSettings extends WndTabbed {
 			title.setPos((width - title.width())/2, y + GAP);
 			sep1.size(width, 1);
 			sep1.y = title.bottom() + 3*GAP;
-
-			if (width > 200 && chkQuickslot != null) {
-				chkQuickslot.setRect(0, sep1.y + 2*GAP, width/2-1, BTN_HEIGHT);
-				chkQuickTransitions.setRect(width / 2 + 1, sep1.y + 2*GAP, width/2-1, BTN_HEIGHT);
-			} else {
-				if(chkQuickslot != null) {
-					chkQuickslot.setRect(0, sep1.y + 2*GAP, width, BTN_HEIGHT);
-				}
-				chkQuickTransitions.setRect(0, (chkQuickslot != null ? chkQuickslot.bottom() : sep1.y + GAP) + GAP, width, BTN_HEIGHT);
-			}
+			
+			chkQuickTransitions.setRect(0, sep1.y + 2*GAP, width, BTN_HEIGHT);
 			height = chkQuickTransitions.bottom();
 
 			sep2.size(width, 1);
@@ -945,8 +937,13 @@ public class WndSettings extends WndTabbed {
 			sep3.y = height+GAP;
 
 			optBuffers.setRect(0, sep3.y + 2*GAP, width, SLIDER_HEIGHT);
+			
+			sep4.size(width, 1);
+			sep4.y = optBuffers.bottom()+GAP;
+			
+			optQuickslots.setRect(0, sep4.y + 2*GAP, width, SLIDER_HEIGHT);
 
-			height = optBuffers.bottom();
+			height = optQuickslots.bottom();
 		}
 	}
 
