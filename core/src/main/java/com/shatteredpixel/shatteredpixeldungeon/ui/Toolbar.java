@@ -492,7 +492,7 @@ public class Toolbar extends Component {
 		if (PixelScene.uiCamera.width > 170) quickslotsToShow ++;
 		if (PixelScene.uiCamera.width > 188 && SPDSettings.Polished.quickslot()) quickslotsToShow ++;
 
-		if(quickslotsToShow == QuickSlot.SIZE - 1) SPDSettings.Polished.quickslot(false);
+		if(SPDSettings.quickSwapper() && quickslotsToShow == QuickSlot.SIZE - 1) SPDSettings.Polished.quickslot(false);
 		
 		int startingSlot;
 		if (SPDSettings.quickSwapper() && quickslotsToShow < QuickSlot.SIZE){

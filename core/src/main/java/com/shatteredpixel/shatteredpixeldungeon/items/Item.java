@@ -68,6 +68,8 @@ public class Item implements Bundlable {
 	
 	public static final String AC_DROP		= "DROP";
 	public static final String AC_THROW		= "THROW";
+	public static final String AC_NOTE		= "NOTE";
+	public static final String AC_EDIT		= "EDIT";
 	
 	protected String defaultAction;
 	public boolean usesTargeting;
@@ -167,6 +169,14 @@ public class Item implements Bundlable {
 			
 			if (hero.belongings.backpack.contains(this) || isEquipped(hero)) {
 				doThrow(hero);
+			}
+			
+		}
+		
+		else if (action.equals( AC_NOTE ) || action.equals( AC_EDIT )) {
+			
+			if (GameScene.objectNote(this)) {
+				GameScene.addNote(this);
 			}
 			
 		}
