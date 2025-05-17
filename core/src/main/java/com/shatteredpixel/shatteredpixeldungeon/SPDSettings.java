@@ -329,7 +329,7 @@ public class SPDSettings extends GameSettings {
 		public static final String KEY_INPUT_BLOCK		= "input_block";
 		public static final String KEY_AUTO_PICKUP		= "auto_pickup";
 		public static final String KEY_BUFFERS			= "buffers";
-		public static final String KEY_EXTRA_QUICKSLOTS	= "extra_quickslots";
+		public static final String KEY_TOTAL_QUICKSLOTS	= "total_quickslots";
 		public static final String KEY_QUICK_TRANSITIONS= "quick_transitions";
 
 		public static void inputBlock( boolean value ) { put(KEY_INPUT_BLOCK, value); }
@@ -343,11 +343,11 @@ public class SPDSettings extends GameSettings {
 		public static void buffers( int value ) { put(KEY_BUFFERS, value); }
 		public static int buffers() {return getInt(KEY_BUFFERS, 2);}
 		
-		public static void extra_quickslots(int value){
-			put(KEY_EXTRA_QUICKSLOTS, value);
+		public static void total_quickslots(int value){
+			put(KEY_TOTAL_QUICKSLOTS, value);
 		}
-		public static int extra_quickslots(){
-			return getInt(KEY_EXTRA_QUICKSLOTS, 1);
+		public static int total_quickslots(){
+			return getInt(KEY_TOTAL_QUICKSLOTS, 6);
 		}
 
 		public static void quickTransitions(boolean value){

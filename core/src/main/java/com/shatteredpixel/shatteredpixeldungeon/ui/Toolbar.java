@@ -485,7 +485,7 @@ public class Toolbar extends Component {
 	@Override
 	protected void layout() {
 		
-		boolean makeSpace = SPDSettings.Polished.extra_quickslots() == 1;
+		boolean makeSpace = SPDSettings.Polished.total_quickslots() == 7 && SPDSettings.interfaceSize() == 2;
 		int film_y = makeSpace ? 32 : 0;
 		int film_w = makeSpace ? 22 : 24;
 		btnInventory.frame(0, film_y, film_w, 26);

@@ -29,8 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
@@ -52,8 +50,6 @@ import com.watabou.utils.Random;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
-
-import javax.swing.Icon;
 
 public class WndSettings extends WndTabbed {
 
@@ -902,14 +898,14 @@ public class WndSettings extends WndTabbed {
 			sep4 = new ColorBlock(1, 1, 0xFF000000);
 			add(sep4);
 			
-			optQuickslots = new OptionSlider(Messages.get(this, "extra_quickslots"), "0", "4", 0, 4) {
+			optQuickslots = new OptionSlider(Messages.get(this, "total_quickslots"), "4", "10", 4, 10) {
 				@Override
 				protected void onChange() {
-					SPDSettings.Polished.extra_quickslots(getSelectedValue());
+					SPDSettings.Polished.total_quickslots(getSelectedValue());
 					Toolbar.updateLayout();
 				}
 			};
-			optQuickslots.setSelectedValue(SPDSettings.Polished.extra_quickslots());
+			optQuickslots.setSelectedValue(SPDSettings.Polished.total_quickslots());
 			add(optQuickslots);
 		}
 

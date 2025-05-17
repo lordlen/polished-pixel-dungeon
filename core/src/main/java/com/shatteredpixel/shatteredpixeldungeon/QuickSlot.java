@@ -24,11 +24,8 @@ package com.shatteredpixel.shatteredpixeldungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.watabou.input.GameAction;
-import com.watabou.noosa.Game;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -45,7 +42,7 @@ public class QuickSlot {
 	private Item[] slots = new Item[SIZE];
 	
 	public static int quickslotsEnabled() {
-		return 6 + SPDSettings.Polished.extra_quickslots();
+		return SPDSettings.Polished.total_quickslots();
 	}
 	
 	public static int quickslotsActive() {
