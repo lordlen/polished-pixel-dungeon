@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.watabou.input.GameAction;
 import com.watabou.noosa.Game;
 import com.watabou.utils.Bundlable;
@@ -45,6 +46,15 @@ public class QuickSlot {
 	
 	public static int quickslotsEnabled() {
 		return 6 + SPDSettings.Polished.extra_quickslots();
+	}
+	
+	public static int quickslotsActive() {
+		int quickslotsToShow = 4;
+		for (int i = 5; i <= QuickSlot.quickslotsEnabled(); i++) {
+			if(PixelScene.uiCamera.width > 62 + i*18) quickslotsToShow++;
+		}
+		
+		return quickslotsToShow;
 	}
 
 

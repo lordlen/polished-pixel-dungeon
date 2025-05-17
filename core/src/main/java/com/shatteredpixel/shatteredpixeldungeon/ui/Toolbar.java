@@ -494,13 +494,10 @@ public class Toolbar extends Component {
 
 		float right = width;
 
-		int quickslotsToShow = 4;
-		for (int i = 5; i <= QuickSlot.quickslotsEnabled(); i++) {
-			if(PixelScene.uiCamera.width > 62 + i*18) quickslotsToShow++;
-		}
+		int quickslotsToShow = QuickSlot.quickslotsActive();
 		
 		int startingSlot;
-		if (SPDSettings.quickSwapper() && quickslotsToShow < QuickSlot.quickslotsEnabled()){
+		if (SPDSettings.quickSwapper() && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2){
 			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1); //might need fixing
 
 			startingSlot = swappedQuickslots ? quickslotsToShow : 0;
@@ -858,11 +855,12 @@ public class Toolbar extends Component {
 
 			int slot;
 			int slotDir;
+			int last = QuickSlotButton.lastVisible/2;
 			if (SPDSettings.flipToolbar()){
-				slot = swappedQuickslots ? 0 : 3;
+				slot = swappedQuickslots ? 0 : last;
 				slotDir = +1;
 			} else {
-				slot = swappedQuickslots ? 2 : 5;
+				slot = swappedQuickslots ? 2 : last + 2;
 				slotDir = -1;
 			}
 

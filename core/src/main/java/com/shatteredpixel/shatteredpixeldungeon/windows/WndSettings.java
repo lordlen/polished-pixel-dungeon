@@ -906,6 +906,7 @@ public class WndSettings extends WndTabbed {
 				@Override
 				protected void onChange() {
 					SPDSettings.Polished.extra_quickslots(getSelectedValue());
+					Toolbar.updateLayout();
 				}
 			};
 			optQuickslots.setSelectedValue(SPDSettings.Polished.extra_quickslots());
