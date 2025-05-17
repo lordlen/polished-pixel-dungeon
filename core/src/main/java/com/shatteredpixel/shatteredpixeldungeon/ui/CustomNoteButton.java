@@ -347,8 +347,19 @@ public class CustomNoteButton extends IconButton {
 			return false;
 		}
 	}
-
-	private static void addNote(Window parentWindow, Notes.CustomRecord note, String promptTitle, String prompttext){
+	
+	public static Notes.CustomRecord generateRecord(Item item) {
+		Notes.CustomRecord custom = new Notes.CustomRecord(item, "", "");
+		custom.assignID();
+		if (item instanceof EquipableItem){
+			((EquipableItem) item).customNoteID = custom.ID();
+		}
+		
+		return custom;
+	}
+	
+	public static void addNote(Window parentWindow, Notes.CustomRecord note, String promptTitle, String prompttext){ addNote(parentWindow, note, true, promptTitle, prompttext); }
+	public static void addNote(Window parentWindow, Notes.CustomRecord note, boolean fromJournal, String promptTitle, String prompttext){
 		GameScene.show(new WndTextInput(promptTitle,
 				prompttext,
 				"",
@@ -371,8 +382,27 @@ public class CustomNoteButton extends IconButton {
 						NOTE_SELECT_INSTANCE.onBackPressed();
 					}
 					hide();
-					ShatteredPixelDungeon.scene().addToFront(new WndJournal());
+					if(fromJournal) ShatteredPixelDungeon.scene().addToFront(new WndJournal());
 					ShatteredPixelDungeon.scene().addToFront(new CustomNoteWindow(note));
+				}
+			}
+		});
+	}
+	
+	public static void ediNote(Notes.CustomRecord rec, CustomNoteWindow parentWindow) {
+		GameScene.show(new WndTextInput(Messages.get(CustomNoteWindow.class, "edit_title"),
+				"",
+				rec.title(),
+				50,
+				false,
+				Messages.get(CustomNoteWindow.class, "confirm"),
+				Messages.get(CustomNoteWindow.class, "cancel")){
+			@Override
+			public void onSelect(boolean positive, String text) {
+				if (positive && !text.isEmpty()){
+					rec.editText(text, rec.desc());
+					if(parentWindow != null) parentWindow.hide();
+					ShatteredPixelDungeon.scene().addToFront(new CustomNoteWindow(rec));
 				}
 			}
 		});

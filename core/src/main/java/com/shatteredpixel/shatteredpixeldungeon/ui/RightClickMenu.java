@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.input.PointerEvent;
@@ -54,6 +55,14 @@ public class RightClickMenu extends Component {
 		if (actions.remove(item.defaultAction())) {
 			actions.add(0, item.defaultAction());
 		}
+		if (actions.remove(Item.AC_DROP)) {
+			actions.add(actions.size(), Item.AC_DROP);
+		}
+		
+		if(GameScene.objectNote(item)) {
+			actions.add(0, GameScene.newNote(item) ? Item.AC_NOTE : Item.AC_EDIT);
+		}
+		
 		String[] options = actions.toArray(new String[0]);
 		this.item = item;
 		setup(new ItemSprite(item), Messages.titleCase(item.name()), options);
@@ -114,7 +123,7 @@ public class RightClickMenu extends Component {
 				}
 			};
 			if (item != null){
-				if (options[i].equals(item.defaultAction())) {
+				if (options[i].equals(item.defaultAction()) || options[i].equals(Item.AC_NOTE)) {
 					buttons[i].textColor(Window.TITLE_COLOR);
 				}
 				buttons[i].text(item.actionName(options[i], Dungeon.hero));
