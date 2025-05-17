@@ -827,12 +827,10 @@ public class WndSettings extends WndTabbed {
 
 	private static class DataTab extends Component{
 
-		//POLISHED:
-		//Since we're not checking for SPD updates anyway, we can get rid of all this in the future
-
 		RenderedTextBlock title;
 		ColorBlock sep1;
-		CheckBox chkQuickTransitions;
+		CheckBox chkRemoveNotes;
+		CheckBox chkTrapsWarn;
 		ColorBlock sep2;
 		CheckBox chkInputBlock;
 		CheckBox chkAutoPickUp;
@@ -840,6 +838,9 @@ public class WndSettings extends WndTabbed {
 		OptionSlider optBuffers;
 		ColorBlock sep4;
 		OptionSlider optQuickslots;
+		CheckBox chkStackQuickslots;
+		ColorBlock sep5;
+		CheckBox chkQuickTransitions;
 
 		@Override
 		protected void createChildren() {
@@ -850,15 +851,25 @@ public class WndSettings extends WndTabbed {
 			sep1 = new ColorBlock(1, 1, 0xFF000000);
 			add(sep1);
 
-			chkQuickTransitions = new CheckBox(Messages.get(this, "quick_transitions")){
+			chkRemoveNotes = new CheckBox(Messages.get(this, "remove_notes")){
 				@Override
 				protected void onClick() {
 					super.onClick();
-					SPDSettings.Polished.quickTransitions(checked());
+					SPDSettings.Polished.removeNotes(checked());
 				}
 			};
-			chkQuickTransitions.checked(SPDSettings.Polished.quickTransitions());
-			add(chkQuickTransitions);
+			chkRemoveNotes.checked(SPDSettings.Polished.removeNotes());
+			add(chkRemoveNotes);
+			
+			chkTrapsWarn = new CheckBox(Messages.get(this, "traps_warn")){
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.Polished.trapsWarn(checked());
+				}
+			};
+			chkTrapsWarn.checked(SPDSettings.Polished.trapsWarn());
+			add(chkTrapsWarn);
 
 			sep2 = new ColorBlock(1, 1, 0xFF000000);
 			add(sep2);
@@ -907,6 +918,34 @@ public class WndSettings extends WndTabbed {
 			};
 			optQuickslots.setSelectedValue(SPDSettings.Polished.total_quickslots());
 			add(optQuickslots);
+			
+			if(SPDSettings.interfaceSize() == 0) {
+				chkStackQuickslots = new CheckBox(Messages.get(this, "stack_quickslots")){
+					@Override
+					protected void onClick() {
+						super.onClick();
+						SPDSettings.Polished.stackQuickslots(checked());
+					}
+				};
+				chkStackQuickslots.checked(SPDSettings.Polished.stackQuickslots());
+				add(chkStackQuickslots);
+			}
+			else {
+				chkStackQuickslots = null;
+			}
+			
+			sep5 = new ColorBlock(1, 1, 0xFF000000);
+			add(sep5);
+			
+			chkQuickTransitions = new CheckBox(Messages.get(this, "quick_transitions")){
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.Polished.quickTransitions(checked());
+				}
+			};
+			chkQuickTransitions.checked(SPDSettings.Polished.quickTransitions());
+			add(chkQuickTransitions);
 		}
 
 		@Override
@@ -915,8 +954,14 @@ public class WndSettings extends WndTabbed {
 			sep1.size(width, 1);
 			sep1.y = title.bottom() + 3*GAP;
 			
-			chkQuickTransitions.setRect(0, sep1.y + 2*GAP, width, BTN_HEIGHT);
-			height = chkQuickTransitions.bottom();
+			if (width > 200) {
+				chkRemoveNotes.setRect(0, sep1.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
+				chkTrapsWarn.setRect(width / 2 + 1, sep1.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
+			} else {
+				chkRemoveNotes.setRect(0, sep1.y + 2*GAP, width, BTN_HEIGHT);
+				chkTrapsWarn.setRect(0, chkRemoveNotes.bottom() + GAP, width, BTN_HEIGHT);
+			}
+			height = chkTrapsWarn.bottom();
 
 			sep2.size(width, 1);
 			sep2.y = height+ GAP;
@@ -939,8 +984,18 @@ public class WndSettings extends WndTabbed {
 			sep4.y = optBuffers.bottom()+GAP;
 			
 			optQuickslots.setRect(0, sep4.y + 2*GAP, width, SLIDER_HEIGHT);
-
 			height = optQuickslots.bottom();
+			
+			if(chkStackQuickslots != null) {
+				chkStackQuickslots.setRect(0, optQuickslots.bottom() + GAP, width, BTN_HEIGHT);
+				height = chkStackQuickslots.bottom();
+			}
+			
+			sep5.size(width, 1);
+			sep5.y = height+GAP;
+			
+			chkQuickTransitions.setRect(0, sep5.y + 2*GAP, width, BTN_HEIGHT);
+			height = chkQuickTransitions.bottom();
 		}
 	}
 

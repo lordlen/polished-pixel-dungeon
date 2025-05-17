@@ -325,13 +325,30 @@ public class SPDSettings extends GameSettings {
 		public static boolean huntress(){
 			return getBoolean(KEY_HUNTRESS, false);
 		}
-
+		
+		public static final String KEY_REMOVE_NOTES		= "remove_notes";
+		public static final String KEY_TRAPS_WARN		= "traps_warn";
 		public static final String KEY_INPUT_BLOCK		= "input_block";
 		public static final String KEY_AUTO_PICKUP		= "auto_pickup";
 		public static final String KEY_BUFFERS			= "buffers";
 		public static final String KEY_TOTAL_QUICKSLOTS	= "total_quickslots";
+		public static final String KEY_STACK_QUICKSLOTS = "stack_quickslots";
 		public static final String KEY_QUICK_TRANSITIONS= "quick_transitions";
-
+		
+		public static void removeNotes(boolean value){
+			put(KEY_REMOVE_NOTES, value);
+		}
+		public static boolean removeNotes(){
+			return getBoolean(KEY_REMOVE_NOTES, false);
+		}
+		
+		public static void trapsWarn(boolean value){
+			put(KEY_TRAPS_WARN, value);
+		}
+		public static boolean trapsWarn(){
+			return getBoolean(KEY_TRAPS_WARN, false);
+		}
+		
 		public static void inputBlock( boolean value ) { put(KEY_INPUT_BLOCK, value); }
 		public static boolean inputBlock(){
 			return getBoolean(KEY_INPUT_BLOCK, true);
@@ -349,12 +366,19 @@ public class SPDSettings extends GameSettings {
 		public static int total_quickslots(){
 			return getInt(KEY_TOTAL_QUICKSLOTS, 6);
 		}
-
+		
+		public static void stackQuickslots(boolean value){
+			put(KEY_STACK_QUICKSLOTS, value);
+		}
+		public static boolean stackQuickslots(){
+			return getBoolean(KEY_STACK_QUICKSLOTS, false);
+		}
+		
 		public static void quickTransitions(boolean value){
 			put(KEY_QUICK_TRANSITIONS, value);
 		}
 		public static boolean quickTransitions(){
-			return getBoolean(KEY_QUICK_TRANSITIONS, true);
+			return getBoolean(KEY_QUICK_TRANSITIONS, false);
 		}
 	}
 
