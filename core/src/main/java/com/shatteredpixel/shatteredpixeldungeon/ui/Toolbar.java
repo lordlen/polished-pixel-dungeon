@@ -195,10 +195,7 @@ public class Toolbar extends Component {
 			}
 		});
 		
-		boolean makeSpace = SPDSettings.Polished.extra_quickslots() == 1;
-		int film_y = makeSpace ? 32 : 0;
-		int film_w = makeSpace ? 18 : 20;
-		add(btnWait = new Tool(24, film_y, film_w, 26) {
+		add(btnWait = new Tool() {
 			@Override
 			protected void onClick() {
 				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready /*&& !GameScene.cancel()*/ && GameScene.Polished.canInput()) {
@@ -287,9 +284,7 @@ public class Toolbar extends Component {
 			}
 		});
 		
-		film_y = makeSpace ? 32 : 0;
-		film_w = makeSpace ? 18 : 20;
-		add(btnSearch = new Tool(44, film_y, film_w, 26) {
+		add(btnSearch = new Tool() {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero != null && Dungeon.hero.ready) {
@@ -321,9 +316,7 @@ public class Toolbar extends Component {
 		});
 		btnSearch.icon( 192, 0, 16, 16 );
 		
-		film_y = makeSpace ? 32 : 0;
-		film_w = makeSpace ? 22 : 24;
-		add(btnInventory = new Tool(0, film_y, film_w, 26) {
+		add(btnInventory = new Tool(0, 0, 0, 26) {
 			private CurrencyIndicator ind;
 
 			private Image arrow;
@@ -491,6 +484,16 @@ public class Toolbar extends Component {
 	
 	@Override
 	protected void layout() {
+		
+		boolean makeSpace = SPDSettings.Polished.extra_quickslots() == 1;
+		int film_y = makeSpace ? 32 : 0;
+		int film_w = makeSpace ? 22 : 24;
+		btnInventory.frame(0, film_y, film_w, 26);
+		
+		film_y = makeSpace ? 32 : 0;
+		film_w = makeSpace ? 18 : 20;
+		btnWait.frame(24, film_y, film_w, 26);
+		btnSearch.frame(44, film_y, film_w, 26);
 
 		float right = width;
 
@@ -709,6 +712,10 @@ public class Toolbar extends Component {
 		
 		private Image base;
 		private Image icon;
+		
+		public Tool() {
+			this(0, 0, 0, 0);
+		}
 		
 		public Tool( int x, int y, int width, int height ) {
 			super();
