@@ -529,6 +529,18 @@ public class Toolbar extends Component {
 			btnSearch.setPos(btnWait.left() - btnSearch.width(), y);
 
 			right = btnSearch.left();
+			float top = y+2;
+			
+			if (SPDSettings.Polished.total_quickslots() > 7 && SPDSettings.interfaceSize() == 2
+				&& PixelScene.uiCamera.width > 185 * SPDSettings.scale() && GameScene.invPane() != null) {
+				
+				if(GameScene.invPane().active) {
+					right = GameScene.invPane().left();
+					top = GameScene.invPane().bottom() - btnQuick[0].height();
+				}
+				else { /*keep it the same*/ }
+			}
+			
 			for(int i = endingSlot; i >= startingSlot; i--) {
 				if (i == endingSlot){
 					btnQuick[i].border(0, 2);
@@ -540,7 +552,7 @@ public class Toolbar extends Component {
 					btnQuick[i].border(0, 1);
 					btnQuick[i].frame(88, 0, 18, 24);
 				}
-				btnQuick[i].setPos(right-btnQuick[i].width(), y+2);
+				btnQuick[i].setPos(right-btnQuick[i].width(), top);
 				right = btnQuick[i].left();
 			}
 

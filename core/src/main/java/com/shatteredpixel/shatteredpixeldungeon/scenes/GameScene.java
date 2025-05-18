@@ -1372,6 +1372,10 @@ public class GameScene extends PixelScene {
 			layoutTags();
 		}
 	}
+	
+	public static InventoryPane invPane() {
+		return scene != null ? scene.inventory : null;
+	}
 
 	public static void centerNextWndOnInvPane(){
 		if (scene != null && scene.inventory != null && scene.inventory.visible){
