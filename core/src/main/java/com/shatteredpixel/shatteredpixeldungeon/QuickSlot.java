@@ -40,7 +40,7 @@ public class QuickSlot {
 	
 	public static float HEIGHT = 24;
 	
-	public static int SIZE = 12;
+	public static int SIZE = 13;
 	private Item[] slots = new Item[SIZE];
 	
 	public static int quickslotsEnabled() {

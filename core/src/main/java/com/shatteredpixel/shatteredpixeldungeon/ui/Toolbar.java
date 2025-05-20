@@ -490,11 +490,27 @@ public class Toolbar extends Component {
 	
 	@Override
 	protected void layout() {
-		
 		y += height - btnInventory.height();
 		height = btnInventory.height();
 		
-		boolean makeSpace = SPDSettings.Polished.total_quickslots() == 7 && SPDSettings.interfaceSize() == 2;
+		
+		int quickslotsToShow = QuickSlot.quickslotsActive();
+		
+		if(SPDSettings.interfaceSize() > 0) {
+			boolean invPane = GameScene.invPane() != null && GameScene.invPane().active;
+			
+			float space = 	width
+					- (GameScene.statPane() != null ? GameScene.statPane().healthRight() : 0)
+					- (invPane ? GameScene.invPane().width() : 24 + 20 + 20);
+			
+			int quickslotSpace = (int)(space - 18) / 18;
+			
+			if(!invPane || quickslotSpace > 7) 	quickslotsToShow = Math.min(quickslotsToShow, quickslotSpace);
+			else 								quickslotsToShow = Math.min(quickslotsToShow, 7);
+		}
+		
+		
+		boolean makeSpace = quickslotsToShow == 7 && SPDSettings.interfaceSize() == 2;
 		int film_y = makeSpace ? 32 : 0;
 		int film_w = makeSpace ? 22 : 24;
 		btnInventory.frame(0, film_y, film_w, 26);
@@ -503,10 +519,9 @@ public class Toolbar extends Component {
 		film_w = makeSpace ? 18 : 20;
 		btnWait.frame(24, film_y, film_w, 26);
 		btnSearch.frame(44, film_y, film_w, 26);
-
-		int quickslotsToShow = QuickSlot.quickslotsActive();
-		int startingSlot = 0;
 		
+		
+		int startingSlot = 0;
 		int secondLayerFirst = -1, secondLayerLast = -1;
 		
 		Trimming trimming;
@@ -517,7 +532,7 @@ public class Toolbar extends Component {
 			trimming = Trimming.SWAP;
 		}
 		
-		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2){
+		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2) {
 			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1);
 
 			if(swappedQuickslots) startingSlot = quickslotsToShow;
@@ -525,6 +540,7 @@ public class Toolbar extends Component {
 			btnSwap.active = lastEnabled;
 			QuickSlotButton.lastVisible = quickslotsToShow*2;
 		}
+		
 		else if(trimming == Trimming.STACK && quickslotsToShow < QuickSlot.quickslotsEnabled()) {
 			secondLayerLast = Math.min(QuickSlot.quickslotsEnabled(), 2*quickslotsToShow + 3) - 1;
 			secondLayerFirst = quickslotsToShow;
@@ -533,12 +549,14 @@ public class Toolbar extends Component {
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
 			QuickSlotButton.lastVisible = secondLayerLast+1;
 		}
+		
 		else {
 			btnSwap.visible = btnSwap.active = false;
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
 			QuickSlotButton.lastVisible = quickslotsToShow;
 		}
 		int endingSlot = startingSlot+quickslotsToShow-1;
+		
 
 		for (int i = 0; i < btnQuick.length; i++){
 			btnQuick[i].visible = i >= startingSlot && i <= Math.max(endingSlot, secondLayerLast);
@@ -557,14 +575,9 @@ public class Toolbar extends Component {
 			right = btnSearch.left();
 			float top = y+2;
 			
-			if (SPDSettings.Polished.total_quickslots() > 7 && SPDSettings.interfaceSize() == 2
-				&& PixelScene.uiCamera.width > 185 * SPDSettings.scale() && GameScene.invPane() != null) {
-				
-				if(GameScene.invPane().active) {
-					right = GameScene.invPane().left();
-					top = GameScene.invPane().bottom() - btnQuick[0].height();
-				}
-				else { /*keep it the same*/ }
+			if (quickslotsToShow > 7 && GameScene.invPane() != null && GameScene.invPane().active) {
+				right = GameScene.invPane().left();
+				top = GameScene.invPane().bottom() - btnQuick[0].height();
 			}
 			
 			for(int i = endingSlot; i >= startingSlot; i--) {

@@ -948,7 +948,7 @@ public class WndSettings extends WndTabbed {
 			sep4 = new ColorBlock(1, 1, 0xFF000000);
 			add(sep4);
 			
-			optQuickslots = new OptionSlider(Messages.get(this, "total_quickslots"), "4", "12", 4, 12) {
+			optQuickslots = new OptionSlider(Messages.get(this, "total_quickslots"), "4", "13", 4, 13) {
 				@Override
 				protected void onChange() {
 					SPDSettings.Polished.total_quickslots(getSelectedValue());
