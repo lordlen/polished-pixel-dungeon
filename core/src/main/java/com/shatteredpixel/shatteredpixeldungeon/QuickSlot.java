@@ -38,7 +38,9 @@ public class QuickSlot {
 	 * which can happen for a stackable item that has been 'used up', these are referred to as placeholders.
 	 */
 	
-	public static int SIZE = 10;
+	public static float HEIGHT = 24;
+	
+	public static int SIZE = 12;
 	private Item[] slots = new Item[SIZE];
 	
 	public static int quickslotsEnabled() {

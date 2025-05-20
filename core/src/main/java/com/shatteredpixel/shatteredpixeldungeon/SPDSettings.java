@@ -378,7 +378,7 @@ public class SPDSettings extends GameSettings {
 			put(KEY_QUICK_TRANSITIONS, value);
 		}
 		public static boolean quickTransitions(){
-			return getBoolean(KEY_QUICK_TRANSITIONS, false);
+			return getBoolean(KEY_QUICK_TRANSITIONS, true);
 		}
 	}
 

@@ -485,6 +485,9 @@ public class Toolbar extends Component {
 	@Override
 	protected void layout() {
 		
+		y += height - btnInventory.height();
+		height = btnInventory.height();
+		
 		boolean makeSpace = SPDSettings.Polished.total_quickslots() == 7 && SPDSettings.interfaceSize() == 2;
 		int film_y = makeSpace ? 32 : 0;
 		int film_w = makeSpace ? 22 : 24;
@@ -498,16 +501,27 @@ public class Toolbar extends Component {
 		float right = width;
 
 		int quickslotsToShow = QuickSlot.quickslotsActive();
+		int secondLayerFirst = -1, secondLayerLast = -1;
 		
 		int startingSlot;
 		if (SPDSettings.quickSwapper() && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2){
-			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1); //might need fixing
+			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1);
 
 			startingSlot = swappedQuickslots ? quickslotsToShow : 0;
 			btnSwap.visible = true;
 			btnSwap.active = lastEnabled;
 			QuickSlotButton.lastVisible = quickslotsToShow*2;
-		} else {
+		}
+		else if(/*SPDSettings.Polished.stackQuickslots() &&*/ quickslotsToShow < QuickSlot.quickslotsEnabled()) {
+			secondLayerLast = Math.min(QuickSlot.quickslotsEnabled(), 2*quickslotsToShow + 3) - 1;
+			secondLayerFirst = quickslotsToShow;
+			
+			startingSlot = 0;
+			btnSwap.visible = btnSwap.active = false;
+			btnSwap.setPos(0, PixelScene.uiCamera.height);
+			QuickSlotButton.lastVisible = secondLayerLast+1;
+		}
+		else {
 			startingSlot = 0;
 			btnSwap.visible = btnSwap.active = false;
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
@@ -516,7 +530,7 @@ public class Toolbar extends Component {
 		int endingSlot = startingSlot+quickslotsToShow-1;
 
 		for (int i = 0; i < btnQuick.length; i++){
-			btnQuick[i].visible = i >= startingSlot && i <= endingSlot;
+			btnQuick[i].visible = i >= startingSlot && i <= Math.max(endingSlot, secondLayerLast);
 			btnQuick[i].enable(btnQuick[i].visible && lastEnabled);
 			if (i < startingSlot || i > endingSlot){
 				btnQuick[i].setPos(btnQuick[i].left(), PixelScene.uiCamera.height);
@@ -562,17 +576,52 @@ public class Toolbar extends Component {
 		}
 
 		for(int i = startingSlot; i <= endingSlot; i++) {
+			
 			if (i == startingSlot && !SPDSettings.flipToolbar() ||
 				i == endingSlot && SPDSettings.flipToolbar()){
+				
 				btnQuick[i].border(0, 2);
 				btnQuick[i].frame(106, 0, 19, 24);
+				
 			} else if (i == startingSlot && SPDSettings.flipToolbar() ||
 					i == endingSlot && !SPDSettings.flipToolbar()){
+				
 				btnQuick[i].border(2, 1);
 				btnQuick[i].frame(86, 0, 20, 24);
+				
 			} else {
+				
 				btnQuick[i].border(0, 1);
 				btnQuick[i].frame(88, 0, 18, 24);
+				
+			}
+		}
+		
+		if(secondLayerFirst != -1) {
+			for(int i = secondLayerFirst; i <= secondLayerLast; i++) {
+				
+				if(secondLayerFirst == secondLayerLast) {
+					btnQuick[i].frame(64, 0, 22, 24);
+				}
+				else if (i == secondLayerFirst && !SPDSettings.flipToolbar() ||
+						i == secondLayerLast && SPDSettings.flipToolbar()){
+					
+					btnQuick[i].border(0, 2);
+					btnQuick[i].frame(106, 0, 19, 24);
+					
+				} else if (i == secondLayerFirst && SPDSettings.flipToolbar() ||
+						i == secondLayerLast && !SPDSettings.flipToolbar()){
+					
+					btnQuick[i].border(2, 1);
+					btnQuick[i].frame(86, 0, 20, 24);
+					
+				}
+				else {
+					
+					btnQuick[i].border(0, 1);
+					btnQuick[i].frame(88, 0, 18, 24);
+					
+				}
 			}
 		}
 
@@ -591,8 +640,6 @@ public class Toolbar extends Component {
 
 				btnInventory.setPos(right - btnInventory.width(), y);
 
-				float left = 0;
-
 				btnQuick[startingSlot].setPos(btnInventory.left() - btnQuick[startingSlot].width(), y + 2);
 				for (int i = startingSlot+1; i <= endingSlot; i++) {
 					btnQuick[i].setPos(btnQuick[i-1].left() - btnQuick[i].width(), y + 2);
@@ -609,8 +656,8 @@ public class Toolbar extends Component {
 			//center = group but.. well.. centered, so all we need to do is pre-emptively set the right side further in.
 			case CENTER:
 				float toolbarWidth = btnWait.width() + btnSearch.width() + btnInventory.width();
-				for(Button slot : btnQuick){
-					if (slot.visible) toolbarWidth += slot.width();
+				for(int i = startingSlot; i <= endingSlot; i++){
+					toolbarWidth += btnQuick[i].width();
 				}
 				if (btnSwap.visible) toolbarWidth += btnSwap.width()-2;
 				right = (width + toolbarWidth)/2;
@@ -645,7 +692,41 @@ public class Toolbar extends Component {
 		}
 
 		right = width;
+		
+		
+		if(secondLayerFirst != -1) {
+			
+			float top = btnQuick[0].top() - QuickSlot.HEIGHT + 2;
+			right = btnInventory.right();
+			
+			for (int i = secondLayerFirst; i <= secondLayerLast; i++) {
+				btnQuick[i].setPos(right - btnQuick[i].width(), top);
+				right = btnQuick[i].left();
+				
+				sendToBack(btnQuick[i]);
+			}
+			
+			if(mode != Mode.SPLIT) {
+				shift = Math.max(0, btnQuick[endingSlot].left() - btnQuick[secondLayerLast].left());
+			}
+			else { shift = 0; }
+			
+			for (int i = secondLayerFirst; i <= secondLayerLast; i++) {
+				btnQuick[i].setPos(btnQuick[i].left() + shift, top);
+			}
+			
+			if(SPDSettings.flipToolbar()) {
+				right = width;
+				for (int i = secondLayerFirst; i <= secondLayerLast; i++) {
+					btnQuick[i].setPos( right - btnQuick[i].right(), btnQuick[i].top() );
+				}
+			}
+			
+			y -= 2*QuickSlot.HEIGHT - height;
+			height = 2*QuickSlot.HEIGHT;
+		}
 
+		
 		if (SPDSettings.flipToolbar()) {
 
 			btnWait.setPos( (right - btnWait.right()), y);
