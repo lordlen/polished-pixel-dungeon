@@ -233,6 +233,21 @@ public class QuickSlotButton extends Button {
 	}
 	
 	@Override
+	protected void alignTooltip(Tooltip tip) {
+		super.alignTooltip(tip);
+		
+		if(GameScene.invPane() != null && GameScene.invPane().visible && parent.remove(tip) != null) {
+			GameScene.invPane().addToFront(tip);
+		}
+	}
+	
+	@Override
+	public void killTooltip() {
+		if(GameScene.invPane() != null) GameScene.invPane().remove(hoverTip);
+		super.killTooltip();
+	}
+	
+	@Override
 	protected void onClick() {
 		boolean animation = !GameScene.cancel();
 		if (animation && Dungeon.hero.ready) {
