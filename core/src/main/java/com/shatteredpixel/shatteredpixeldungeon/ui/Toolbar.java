@@ -73,10 +73,16 @@ public class Toolbar extends Component {
 
 	private static Toolbar instance;
 
-	public enum Mode {
+	public enum Layout {
 		SPLIT,
 		GROUP,
 		CENTER
+	}
+	
+	public enum Trimming {
+		CROP,
+		SWAP,
+		STACK
 	}
 	
 	public Toolbar() {
@@ -498,31 +504,36 @@ public class Toolbar extends Component {
 		btnWait.frame(24, film_y, film_w, 26);
 		btnSearch.frame(44, film_y, film_w, 26);
 
-		float right = width;
-
 		int quickslotsToShow = QuickSlot.quickslotsActive();
+		int startingSlot = 0;
+		
 		int secondLayerFirst = -1, secondLayerLast = -1;
 		
-		int startingSlot;
-		if (SPDSettings.quickSwapper() && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2){
+		Trimming trimming;
+		try {
+			trimming = Trimming.valueOf(SPDSettings.quickslotTrimming());
+		} catch (Exception e){
+			Game.reportException(e);
+			trimming = Trimming.SWAP;
+		}
+		
+		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2){
 			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1);
 
-			startingSlot = swappedQuickslots ? quickslotsToShow : 0;
+			if(swappedQuickslots) startingSlot = quickslotsToShow;
 			btnSwap.visible = true;
 			btnSwap.active = lastEnabled;
 			QuickSlotButton.lastVisible = quickslotsToShow*2;
 		}
-		else if(/*SPDSettings.Polished.stackQuickslots() &&*/ quickslotsToShow < QuickSlot.quickslotsEnabled()) {
+		else if(trimming == Trimming.STACK && quickslotsToShow < QuickSlot.quickslotsEnabled()) {
 			secondLayerLast = Math.min(QuickSlot.quickslotsEnabled(), 2*quickslotsToShow + 3) - 1;
 			secondLayerFirst = quickslotsToShow;
 			
-			startingSlot = 0;
 			btnSwap.visible = btnSwap.active = false;
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
 			QuickSlotButton.lastVisible = secondLayerLast+1;
 		}
 		else {
-			startingSlot = 0;
 			btnSwap.visible = btnSwap.active = false;
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
 			QuickSlotButton.lastVisible = quickslotsToShow;
@@ -536,7 +547,8 @@ public class Toolbar extends Component {
 				btnQuick[i].setPos(btnQuick[i].left(), PixelScene.uiCamera.height);
 			}
 		}
-
+		
+		float right = width;
 		if (SPDSettings.interfaceSize() > 0){
 			btnInventory.setPos(right - btnInventory.width(), y);
 			btnWait.setPos(btnInventory.left() - btnWait.width(), y);
@@ -626,14 +638,14 @@ public class Toolbar extends Component {
 		}
 
 		float shift = 0;
-		Toolbar.Mode mode;
+		Layout layout;
 		try {
-			mode = Mode.valueOf(SPDSettings.toolbarMode());
+			layout = Layout.valueOf(SPDSettings.toolbarMode());
 		} catch (Exception e){
 			Game.reportException(e);
-			mode = PixelScene.landscape() ? Mode.GROUP : Mode.SPLIT;
+			layout = PixelScene.landscape() ? Layout.GROUP : Layout.SPLIT;
 		}
-		switch(mode){
+		switch(layout){
 			case SPLIT:
 				btnWait.setPos(x, y);
 				btnSearch.setPos(btnWait.right(), y);
@@ -706,7 +718,7 @@ public class Toolbar extends Component {
 				sendToBack(btnQuick[i]);
 			}
 			
-			if(mode != Mode.SPLIT) {
+			if(layout != Layout.SPLIT) {
 				shift = Math.max(0, btnQuick[endingSlot].left() - btnQuick[secondLayerLast].left());
 			}
 			else { shift = 0; }

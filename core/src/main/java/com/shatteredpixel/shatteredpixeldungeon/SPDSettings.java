@@ -138,10 +138,10 @@ public class SPDSettings extends GameSettings {
 
 	public static final String KEY_UI_SIZE 	    = "full_ui";
 	public static final String KEY_SCALE		= "scale";
-	public static final String KEY_QUICK_SWAP	= "quickslot_swapper";
 	public static final String KEY_FLIPTOOLBAR	= "flipped_ui";
 	public static final String KEY_FLIPTAGS 	= "flip_tags";
 	public static final String KEY_BARMODE		= "toolbar_mode";
+	public static final String KEY_TRIMMING		= "quickslot_trimming";
 	public static final String KEY_SLOTWATERSKIN= "quickslot_waterskin";
 	public static final String KEY_SYSTEMFONT	= "system_font";
 	public static final String KEY_VIBRATION    = "vibration";
@@ -174,10 +174,6 @@ public class SPDSettings extends GameSettings {
 		return getInt( KEY_SCALE, 0 );
 	}
 	
-	public static void quickSwapper(boolean value ){ put( KEY_QUICK_SWAP, value ); }
-	
-	public static boolean quickSwapper(){ return getBoolean( KEY_QUICK_SWAP, true); }
-	
 	public static void flipToolbar( boolean value) {
 		put(KEY_FLIPTOOLBAR, value );
 	}
@@ -196,6 +192,14 @@ public class SPDSettings extends GameSettings {
 	
 	public static String toolbarMode() {
 		return getString(KEY_BARMODE, PixelScene.landscape() ? "GROUP" : "SPLIT");
+	}
+	
+	public static void quickslotTrimming( String value ) {
+		put( KEY_TRIMMING, value );
+	}
+	
+	public static String quickslotTrimming() {
+		return getString(KEY_TRIMMING, "SWAP");
 	}
 
 	public static void quickslotWaterskin( boolean value ){
@@ -332,7 +336,6 @@ public class SPDSettings extends GameSettings {
 		public static final String KEY_AUTO_PICKUP		= "auto_pickup";
 		public static final String KEY_BUFFERS			= "buffers";
 		public static final String KEY_TOTAL_QUICKSLOTS	= "total_quickslots";
-		public static final String KEY_STACK_QUICKSLOTS = "stack_quickslots";
 		public static final String KEY_QUICK_TRANSITIONS= "quick_transitions";
 		
 		public static void removeNotes(boolean value){
@@ -365,13 +368,6 @@ public class SPDSettings extends GameSettings {
 		}
 		public static int total_quickslots(){
 			return getInt(KEY_TOTAL_QUICKSLOTS, 6);
-		}
-		
-		public static void stackQuickslots(boolean value){
-			put(KEY_STACK_QUICKSLOTS, value);
-		}
-		public static boolean stackQuickslots(){
-			return getBoolean(KEY_STACK_QUICKSLOTS, false);
 		}
 		
 		public static void quickTransitions(boolean value){
