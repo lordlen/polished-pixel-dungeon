@@ -127,7 +127,7 @@ public class WandOfBlastWave extends DamageWand {
 		if (ch.properties().contains(Char.Property.BOSS)) {
 			power = (power+1)/2;
 		}
-		if(ch.buff(ChampionEnemy.AntiMagic.class) != null) {
+		if(ch.buff(ChampionEnemy.AntiMagic.class) != null && cause instanceof WandOfBlastWave) {
 			power = Math.min(power, 1);
 		}
 
