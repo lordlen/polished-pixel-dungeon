@@ -518,9 +518,6 @@ public class Toolbar extends Component {
 		btnSearch.frame(44, film_y, film_w, 26);
 		
 		
-		int startingSlot = 0;
-		int secondLayerFirst = -1, secondLayerLast = -1;
-		
 		Trimming trimming;
 		try {
 			trimming = SPDSettings.interfaceSize() == 0 ? Trimming.valueOf(SPDSettings.quickslotTrimming()) : Trimming.CROP;
@@ -528,6 +525,17 @@ public class Toolbar extends Component {
 			Game.reportException(e);
 			trimming = Trimming.SWAP;
 		}
+		
+		Layout layout;
+		try {
+			layout = Layout.valueOf(SPDSettings.toolbarMode());
+		} catch (Exception e){
+			Game.reportException(e);
+			layout = PixelScene.landscape() ? Layout.GROUP : Layout.SPLIT;
+		}
+		
+		int startingSlot = 0, endingSlot = -1;
+		int secondLayerFirst = -1, secondLayerLast = -1;
 		
 		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2) {
 			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1);
@@ -551,7 +559,7 @@ public class Toolbar extends Component {
 			QuickSlotButton.lastVisible = quickslotsToShow;
 		}
 		
-		int endingSlot = startingSlot+quickslotsToShow-1;
+		endingSlot = startingSlot+quickslotsToShow-1;
 		
 
 		for (int i = 0; i < btnQuick.length; i++){
@@ -653,13 +661,6 @@ public class Toolbar extends Component {
 
 		
 		float shift = 0;
-		Layout layout;
-		try {
-			layout = Layout.valueOf(SPDSettings.toolbarMode());
-		} catch (Exception e){
-			Game.reportException(e);
-			layout = PixelScene.landscape() ? Layout.GROUP : Layout.SPLIT;
-		}
 		switch(layout){
 			case SPLIT:
 				btnWait.setPos(x, y);

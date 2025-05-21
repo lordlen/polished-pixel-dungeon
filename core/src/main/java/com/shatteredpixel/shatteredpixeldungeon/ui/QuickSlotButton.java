@@ -243,7 +243,7 @@ public class QuickSlotButton extends Button {
 	
 	@Override
 	public void killTooltip() {
-		if(GameScene.invPane() != null) GameScene.invPane().remove(hoverTip);
+		if(GameScene.invPane() != null && hoverTip != null) GameScene.invPane().remove(hoverTip);
 		super.killTooltip();
 	}
 	
