@@ -493,9 +493,7 @@ public class Toolbar extends Component {
 		y += height - btnInventory.height();
 		height = btnInventory.height();
 		
-		
 		int quickslotsToShow = QuickSlot.quickslotsActive();
-		
 		if(SPDSettings.interfaceSize() > 0) {
 			boolean invPane = GameScene.invPane() != null && GameScene.invPane().active;
 			
@@ -508,7 +506,6 @@ public class Toolbar extends Component {
 			if(!invPane || quickslotSpace > 7) 	quickslotsToShow = Math.min(quickslotsToShow, quickslotSpace);
 			else 								quickslotsToShow = Math.min(quickslotsToShow, 7);
 		}
-		
 		
 		boolean makeSpace = quickslotsToShow == 7 && SPDSettings.interfaceSize() == 2;
 		int film_y = makeSpace ? 32 : 0;
@@ -526,7 +523,7 @@ public class Toolbar extends Component {
 		
 		Trimming trimming;
 		try {
-			trimming = Trimming.valueOf(SPDSettings.quickslotTrimming());
+			trimming = SPDSettings.interfaceSize() == 0 ? Trimming.valueOf(SPDSettings.quickslotTrimming()) : Trimming.CROP;
 		} catch (Exception e){
 			Game.reportException(e);
 			trimming = Trimming.SWAP;
@@ -540,7 +537,6 @@ public class Toolbar extends Component {
 			btnSwap.active = lastEnabled;
 			QuickSlotButton.lastVisible = quickslotsToShow*2;
 		}
-		
 		else if(trimming == Trimming.STACK && quickslotsToShow < QuickSlot.quickslotsEnabled()) {
 			secondLayerLast = Math.min(QuickSlot.quickslotsEnabled(), 2*quickslotsToShow + 3) - 1;
 			secondLayerFirst = quickslotsToShow;
@@ -549,12 +545,12 @@ public class Toolbar extends Component {
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
 			QuickSlotButton.lastVisible = secondLayerLast+1;
 		}
-		
 		else {
 			btnSwap.visible = btnSwap.active = false;
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
 			QuickSlotButton.lastVisible = quickslotsToShow;
 		}
+		
 		int endingSlot = startingSlot+quickslotsToShow-1;
 		
 
@@ -599,7 +595,8 @@ public class Toolbar extends Component {
 
 			return;
 		}
-
+		
+		
 		for(int i = startingSlot; i <= endingSlot; i++) {
 			
 			if (i == startingSlot && !SPDSettings.flipToolbar() ||
@@ -623,6 +620,10 @@ public class Toolbar extends Component {
 		}
 		
 		if(secondLayerFirst != -1) {
+			if(SPDSettings.forceAlign()) {
+			
+			}
+			
 			for(int i = secondLayerFirst; i <= secondLayerLast; i++) {
 				
 				if(secondLayerFirst == secondLayerLast) {
@@ -650,6 +651,7 @@ public class Toolbar extends Component {
 			}
 		}
 
+		
 		float shift = 0;
 		Layout layout;
 		try {

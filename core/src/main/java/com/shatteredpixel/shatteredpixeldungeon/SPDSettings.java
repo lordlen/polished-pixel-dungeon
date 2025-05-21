@@ -142,6 +142,7 @@ public class SPDSettings extends GameSettings {
 	public static final String KEY_FLIPTAGS 	= "flip_tags";
 	public static final String KEY_BARMODE		= "toolbar_mode";
 	public static final String KEY_TRIMMING		= "quickslot_trimming";
+	public static final String KEY_FORCE_ALIGN 	= "force_align";
 	public static final String KEY_SLOTWATERSKIN= "quickslot_waterskin";
 	public static final String KEY_SYSTEMFONT	= "system_font";
 	public static final String KEY_VIBRATION    = "vibration";
@@ -200,6 +201,14 @@ public class SPDSettings extends GameSettings {
 	
 	public static String quickslotTrimming() {
 		return getString(KEY_TRIMMING, "SWAP");
+	}
+	
+	public static void forceAlign( boolean value ) {
+		put(KEY_FORCE_ALIGN, value );
+	}
+	
+	public static boolean forceAlign() {
+		return getBoolean(KEY_FORCE_ALIGN, true);
 	}
 
 	public static void quickslotWaterskin( boolean value ){
