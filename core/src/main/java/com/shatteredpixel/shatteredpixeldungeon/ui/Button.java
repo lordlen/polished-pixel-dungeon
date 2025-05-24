@@ -183,7 +183,7 @@ public class Button extends Component {
 	}
 
 	//TODO might be nice for more flexibility here
-	private void alignTooltip( Tooltip tip ){
+	protected void alignTooltip( Tooltip tip ){
 		tip.setPos(x, y-tip.height()-1);
 		Camera cam = camera();
 		//shift left if there's no room on the right
