@@ -297,12 +297,12 @@ public class ItemSlot extends Button {
 		if(item instanceof WealthDrop) {
 			extra.text( ((WealthDrop) item).dropExtra() );
 			((WealthDrop) item).dropColor(extra);
-
-			extra.scale = new PointF(0.9f, 0.9f);
+			
+			extra.scale.set(PixelScene.align(0.9f));
 			extra.measure();
 		} else {
 			extra.resetColor();
-			extra.scale = new PointF(1f, 1f);
+			extra.scale.set(1f);
 		}
 
 
