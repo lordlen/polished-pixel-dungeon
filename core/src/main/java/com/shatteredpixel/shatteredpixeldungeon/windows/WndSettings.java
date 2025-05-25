@@ -953,6 +953,7 @@ public class WndSettings extends WndTabbed {
 				protected void onChange() {
 					SPDSettings.Polished.total_quickslots(getSelectedValue());
 					Toolbar.updateLayout();
+					GameScene.layoutTags();
 				}
 			};
 			optQuickslots.setSelectedValue(SPDSettings.Polished.total_quickslots());
