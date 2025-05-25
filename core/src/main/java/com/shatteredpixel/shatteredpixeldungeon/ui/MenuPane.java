@@ -340,7 +340,7 @@ public class MenuPane extends Component {
 				GameScene.show( new WndJournal() );
 			}
 		}
-
+		
 		@Override
 		protected String hoverText() {
 			return Messages.titleCase(Messages.get(WndKeyBindings.class, "journal"));

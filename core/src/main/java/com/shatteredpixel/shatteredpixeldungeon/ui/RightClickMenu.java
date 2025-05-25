@@ -64,7 +64,7 @@ public class RightClickMenu extends Component {
 		}
 		
 		Notes.CustomRecord rec = Notes.findCustomRecord(item);
-		if(objectNote(item)) {
+		if(notesAction(item)) {
 			actions.add(0, rec == null ? Item.AC_NOTE : Item.AC_EDIT);
 		}
 		
@@ -186,12 +186,15 @@ public class RightClickMenu extends Component {
 
 	}
 	
-	public static boolean objectNote(Item item) {
+	public static boolean notesAction(Item item) {
 		return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
 	}
-	public static boolean objectNote(Heap heap) {
-		return (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE)
-				&& heap.peek() != null && objectNote(heap.peek());
+	public static boolean notesAction(Heap heap) {
+		return (validForNotes(heap) && notesAction(heap.peek()));
+	}
+	public static boolean validForNotes(Heap heap) {
+		return  heap != null && heap.peek() != null
+				&& (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE);
 	}
 	
 }

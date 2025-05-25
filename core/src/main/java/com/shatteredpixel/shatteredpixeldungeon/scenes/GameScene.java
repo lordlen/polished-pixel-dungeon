@@ -52,15 +52,12 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Ripple;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
-import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.Guidebook;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.DimensionalSundial;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
@@ -1661,9 +1658,9 @@ public class GameScene extends PixelScene {
 			else if (obj instanceof Mob)    names.add(Messages.titleCase( ((Mob)obj).name() ));
 			else if (obj instanceof Heap) {
 				Heap heap = (Heap)obj;
-				if(RightClickMenu.objectNote(heap) && Notes.findCustomRecord(heap.peek()) != null) {
+				if (RightClickMenu.validForNotes(heap)
+					&& Notes.findCustomRecord(heap.peek()) != null)
 											names.add(Notes.findCustomRecord(heap.peek()).title());
-				}
 				else 						names.add(Messages.titleCase( heap.title() ));
 			}
 			else if (obj instanceof Plant)  names.add(Messages.titleCase( ((Plant) obj).name() ));
@@ -1780,7 +1777,7 @@ public class GameScene extends PixelScene {
 				textLines.add(0, Messages.get(GameScene.class, "examine"));
 			}
 			
-			if (objects.size() == 1 && objects.get(0) instanceof Heap && RightClickMenu.objectNote((Heap)objects.get(0))) {
+			if (objects.size() == 1 && objects.get(0) instanceof Heap && RightClickMenu.notesAction((Heap)objects.get(0))) {
 				textLines.add(0,
 							( Notes.findCustomRecord( ((Heap)objects.get(0)).peek() ) == null ?
 							Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note") ));
@@ -1797,7 +1794,7 @@ public class GameScene extends PixelScene {
 						if (objects.isEmpty()){
 							GameScene.show(new WndInfoCell(cell));
 						}
-						else if (objects.size() == 1 && objects.get(0) instanceof Heap && objectNote((Heap)objects.get(0))) {
+						else if (objects.size() == 1 && objects.get(0) instanceof Heap && notesAction((Heap)objects.get(0))) {
 							if(index == 0) {
 								CustomNoteButton.addNote(((Heap) objects.get(0)).peek());
 							}
