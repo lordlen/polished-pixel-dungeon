@@ -535,6 +535,7 @@ public class Toolbar extends Component {
 		}
 		
 		int startingSlot = 0, endingSlot = -1;
+		int secondLayer = -1;
 		int secondLayerFirst = -1, secondLayerLast = -1;
 		
 		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2) {
@@ -548,6 +549,7 @@ public class Toolbar extends Component {
 		else if(trimming == Trimming.STACK && quickslotsToShow < QuickSlot.quickslotsEnabled()) {
 			secondLayerLast = Math.min(QuickSlot.quickslotsEnabled(), 2*quickslotsToShow + 3) - 1;
 			secondLayerFirst = quickslotsToShow;
+			secondLayer = secondLayerLast - secondLayerFirst + 1;
 			
 			btnSwap.visible = btnSwap.active = false;
 			btnSwap.setPos(0, PixelScene.uiCamera.height);
@@ -628,23 +630,85 @@ public class Toolbar extends Component {
 		}
 		
 		if(secondLayerFirst != -1) {
-			if(SPDSettings.forceAlign()) {
 			
+			int start = secondLayerFirst;
+			int end = secondLayerLast;
+			boolean flip = SPDSettings.flipToolbar();
+			
+			if(SPDSettings.forceAlign()) {
+				
+				if(layout == Layout.SPLIT) {
+				
+				}
+				
+				if(layout != Layout.SPLIT && secondLayer == quickslotsToShow+3) {
+					//int index = layout == Layout.SPLIT ? end - 1 : start;
+					
+					if(!flip) {
+						btnQuick[start].border(		1, 2);
+						btnQuick[start].frame(		65, 0,  21, 24);
+						
+						btnQuick[start+1].border(	2, 0);
+						btnQuick[start+1].frame(	85, 32, 20, 24);
+						
+						btnQuick[start+2].border(	2, 1);
+						btnQuick[start+2].frame(	64, 32, 21, 24);
+					}
+					else {
+						btnQuick[start].border(		2, 1);
+						btnQuick[start].frame(		64, 32, 21, 24);
+						
+						btnQuick[start+1].border(	0, 2);
+						btnQuick[start+1].frame(	66, 32, 20, 24);
+						
+						btnQuick[start+2].border(	1, 2);
+						btnQuick[start+2].frame(	65, 0, 21, 24);
+					}
+					
+					start += 3;
+				}
+				else if(layout != Layout.SPLIT && secondLayer == quickslotsToShow+2) {
+					
+					if(!flip) {
+						btnQuick[start].border(		1, 2);
+						btnQuick[start].frame(		65, 0, 21, 24);
+						
+						btnQuick[start+1].border(	2, 0);
+						btnQuick[start+1].frame(	64, 0, 20, 24);
+					}
+					else {
+						btnQuick[start].border(		2, 0);
+						btnQuick[start].frame(		64, 0, 20, 24);
+						
+						btnQuick[start+1].border(	1, 2);
+						btnQuick[start+1].frame(	65, 0, 21, 24);
+					}
+					
+					start += 2;
+				}
+				else {
+					
+					btnQuick[start].border(			2, 2);
+					btnQuick[start].frame(			64, 0, 22, 24);
+					
+					start++;
+				}
 			}
 			
-			for(int i = secondLayerFirst; i <= secondLayerLast; i++) {
+			for(int i = start; i <= end; i++) {
 				
-				if(secondLayerFirst == secondLayerLast) {
-					btnQuick[i].frame(64, 0, 22, 24);
+				if(start == end) {
+					btnQuick[i].frame(112, 32, 21, 24);
 				}
-				else if (i == secondLayerFirst && !SPDSettings.flipToolbar() ||
-						i == secondLayerLast && SPDSettings.flipToolbar()){
+				else if (i == start && !flip ||
+						 i == end && flip) {
 					
 					btnQuick[i].border(0, 2);
 					btnQuick[i].frame(106, 0, 19, 24);
 					
-				} else if (i == secondLayerFirst && SPDSettings.flipToolbar() ||
-						i == secondLayerLast && !SPDSettings.flipToolbar()){
+				}
+				else if (i == start && flip ||
+						 i == end && !flip) {
 					
 					btnQuick[i].border(2, 1);
 					btnQuick[i].frame(86, 0, 20, 24);
@@ -657,6 +721,18 @@ public class Toolbar extends Component {
 					
 				}
 			}
+			
+			if (SPDSettings.forceAlign() && layout == Layout.SPLIT && secondLayer == quickslotsToShow+3) {
+				
+				if(!flip) {
+					btnQuick[end-2].border(2, 1);
+					btnQuick[end-2].frame(86, 0, 20, 24);
+				}
+				else {
+					btnQuick[end-1].border(2, 1);
+					btnQuick[end-1].frame(86, 0, 20, 24);
+				}
+			}
 		}
 
 		
@@ -665,22 +741,27 @@ public class Toolbar extends Component {
 			case SPLIT:
 				btnWait.setPos(x, y);
 				btnSearch.setPos(btnWait.right(), y);
-
+				
 				btnInventory.setPos(right - btnInventory.width(), y);
-
+				
 				btnQuick[startingSlot].setPos(btnInventory.left() - btnQuick[startingSlot].width(), y + 2);
 				for (int i = startingSlot+1; i <= endingSlot; i++) {
 					btnQuick[i].setPos(btnQuick[i-1].left() - btnQuick[i].width(), y + 2);
 					shift = btnSearch.right() - btnQuick[i].left();
 				}
-
+				
 				if (btnSwap.visible){
 					btnSwap.setPos(btnQuick[endingSlot].left() - (btnSwap.width()-2), y+3);
 					shift = btnSearch.right() - btnSwap.left();
 				}
-
+				
+				if(SPDSettings.forceAlign() && secondLayer > quickslotsToShow + 1) {
+					btnSearch.setPos(btnQuick[endingSlot].left() - btnSearch.width() + 4, y);
+					btnWait.setPos(btnSearch.left() - btnWait.width(), y);
+				}
+				
 				break;
-
+			
 			//center = group but.. well.. centered, so all we need to do is pre-emptively set the right side further in.
 			case CENTER:
 				float toolbarWidth = btnWait.width() + btnSearch.width() + btnInventory.width();
@@ -689,18 +770,18 @@ public class Toolbar extends Component {
 				}
 				if (btnSwap.visible) toolbarWidth += btnSwap.width()-2;
 				right = (width + toolbarWidth)/2;
-
+			
 			case GROUP:
 				btnWait.setPos(right - btnWait.width(), y);
 				btnSearch.setPos(btnWait.left() - btnSearch.width(), y);
 				btnInventory.setPos(btnSearch.left() - btnInventory.width(), y);
-
+				
 				btnQuick[startingSlot].setPos(btnInventory.left() - btnQuick[startingSlot].width(), y + 2);
 				for (int i = startingSlot+1; i <= endingSlot; i++) {
 					btnQuick[i].setPos(btnQuick[i-1].left() - btnQuick[i].width(), y + 2);
 					shift = -btnQuick[i].left();
 				}
-
+				
 				if (btnSwap.visible){
 					btnSwap.setPos(btnQuick[endingSlot].left() - (btnSwap.width()-2), y+3);
 					shift = -btnSwap.left();
@@ -708,9 +789,15 @@ public class Toolbar extends Component {
 				
 				break;
 		}
-
-		if (shift > 0){
+		
+		if(SPDSettings.forceAlign() && secondLayerFirst != -1) {
+			shift = btnInventory.left() - btnQuick[startingSlot].right() + 2;
+		}
+		else {
 			shift /= 2; //we want to center;
+		}
+
+		if (shift > 0) {
 			for (int i = startingSlot; i <= endingSlot; i++) {
 				btnQuick[i].setPos(btnQuick[i].left()+shift,  btnQuick[i].top());
 			}
@@ -718,8 +805,6 @@ public class Toolbar extends Component {
 				btnSwap.setPos(btnSwap.left()+shift, btnSwap.top());
 			}
 		}
-
-		right = width;
 		
 		
 		if(secondLayerFirst != -1) {
@@ -745,6 +830,7 @@ public class Toolbar extends Component {
 			
 			if(SPDSettings.flipToolbar()) {
 				right = width;
+				
 				for (int i = secondLayerFirst; i <= secondLayerLast; i++) {
 					btnQuick[i].setPos( right - btnQuick[i].right(), btnQuick[i].top() );
 				}
@@ -756,17 +842,18 @@ public class Toolbar extends Component {
 
 		
 		if (SPDSettings.flipToolbar()) {
+			right = width;
 
-			btnWait.setPos( (right - btnWait.right()), y);
-			btnSearch.setPos( (right - btnSearch.right()), y);
-			btnInventory.setPos( (right - btnInventory.right()), y);
+			btnWait.setPos( 		(right - btnWait.right()), 			btnWait.top());
+			btnSearch.setPos( 		(right - btnSearch.right()), 		btnSearch.top());
+			btnInventory.setPos( 	(right - btnInventory.right()), 	btnInventory.top());
 
 			for(int i = startingSlot; i <= endingSlot; i++) {
-				btnQuick[i].setPos( right - btnQuick[i].right(), y+2);
+				btnQuick[i].setPos(	right - btnQuick[i].right(), 	btnQuick[i].top());
 			}
 
 			if (btnSwap.visible){
-				btnSwap.setPos( right - btnSwap.right(), y+3);
+				btnSwap.setPos( 	right - btnSwap.right(), 		btnSwap.top());
 			}
 
 		}

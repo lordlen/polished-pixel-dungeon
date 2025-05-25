@@ -814,7 +814,7 @@ public abstract class Char extends Actor {
 		return cachedShield;
 	}
 
-	boolean isExternal(Char defender, Object src) {
+	boolean isDamageExternal(Object src) {
 
 		if(!(src instanceof Char)) {
 			//dont get def boost against debuffs, traps and such
@@ -847,7 +847,7 @@ public abstract class Char extends Actor {
 					return true;
 				}
 
-				else if(Dungeon.level.distance(attacker.pos, defender.pos) <= Dungeon.Polished.DEFAULT_VIEW_DISTANCE) {
+				else if(Dungeon.level.distance(attacker.pos, pos) <= Dungeon.Polished.DEFAULT_VIEW_DISTANCE) {
 					//if within a reasonable distance, we assume they're in the same room
 					return false;
 				}
@@ -857,6 +857,7 @@ public abstract class Char extends Actor {
 		}
 		else return false;
 	}
+	
 	public void damage( int dmg, Object src ) {
 		
 		if (!isAlive() || dmg < 0) {
@@ -961,7 +962,7 @@ public abstract class Char extends Actor {
 
 		ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
 		if (giant != null){
-			boolean externalAttack = isExternal(this, src);
+			boolean externalAttack = isDamageExternal(src);
 
 			//we ceil these specifically to favor the player vs. champ dmg reduction
 			// most important vs. giant champions in the earlygame
