@@ -123,7 +123,7 @@ public class RightClickMenu extends Component {
 				}
 			};
 			if (item != null){
-				if (options[i].equals(item.defaultAction()) || options[i].equals(Item.AC_NOTE)) {
+				if (options[i].equals(item.defaultAction()) || options[i].equals(Item.AC_NOTE) || options[i].equals(Item.AC_EDIT)) {
 					buttons[i].textColor(Window.TITLE_COLOR);
 				}
 				buttons[i].text(item.actionName(options[i], Dungeon.hero));
