@@ -343,17 +343,22 @@ public class CustomNoteButton extends IconButton {
 	}
 	
 	public static void addNote(Item item) {
-		if (item != null){
-			if(Notes.findCustomRecord(item) == null) {
-				addNote(
-						null, Notes.generateRecord(item), false,
-						Messages.get(CustomNoteButton.class, "new_inv"),
-						Messages.get(CustomNoteButton.class, "new_item_title", Messages.titleCase(item.name())));
-			}
-			else {
-				Notes.CustomRecord rec = item instanceof EquipableItem ? Notes.findCustomRecord(((EquipableItem) item).customNoteID) : Notes.findCustomRecord(item.getClass());
-				editNote(rec, null);
-			}
+		if (Notes.getRecords(Notes.CustomRecord.class).size() >= Notes.customRecordLimit()){
+			GameScene.show(new WndTitledMessage(Icons.INFO.get(),
+					Messages.get(CustomNoteButton.class, "limit_title"),
+					Messages.get(CustomNoteButton.class, "limit_text")));
+			return;
+		}
+		
+		if(Notes.findCustomRecord(item) == null) {
+			addNote(
+					null, Notes.generateRecord(item), false,
+					Messages.get(CustomNoteButton.class, "new_inv"),
+					Messages.get(CustomNoteButton.class, "new_item_title", Messages.titleCase(item.name())));
+		}
+		else {
+			Notes.CustomRecord rec = item instanceof EquipableItem ? Notes.findCustomRecord(((EquipableItem) item).customNoteID) : Notes.findCustomRecord(item.getClass());
+			editNote(rec, null);
 		}
 	}
 	
