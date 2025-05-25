@@ -754,7 +754,7 @@ public class Toolbar extends Component {
 					shift = btnSearch.right() - btnSwap.left();
 				}
 				
-				if(SPDSettings.forceAlign() && secondLayer > quickslotsToShow + 1) {
+				if(secondLayer > quickslotsToShow + 1) {
 					btnSearch.setPos(btnQuick[endingSlot].left() - btnSearch.width() + 4, y);
 					btnWait.setPos(btnSearch.left() - btnWait.width(), y);
 				}
