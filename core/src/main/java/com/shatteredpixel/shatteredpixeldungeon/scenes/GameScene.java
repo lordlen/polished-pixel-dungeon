@@ -1659,7 +1659,13 @@ public class GameScene extends PixelScene {
 		for (Object obj : objects){
 			if (obj instanceof Hero)        names.add(((Hero) obj).className().toUpperCase(Locale.ENGLISH));
 			else if (obj instanceof Mob)    names.add(Messages.titleCase( ((Mob)obj).name() ));
-			else if (obj instanceof Heap)   names.add(Messages.titleCase( ((Heap)obj).title() ));
+			else if (obj instanceof Heap) {
+				Heap heap = (Heap)obj;
+				if(RightClickMenu.objectNote(heap) && Notes.findCustomRecord(heap.peek()) != null) {
+											names.add(Notes.findCustomRecord(heap.peek()).title());
+				}
+				else 						names.add(Messages.titleCase( heap.title() ));
+			}
 			else if (obj instanceof Plant)  names.add(Messages.titleCase( ((Plant) obj).name() ));
 			else if (obj instanceof Trap)   names.add(Messages.titleCase( ((Trap) obj).name() ));
 		}
@@ -1771,13 +1777,13 @@ public class GameScene extends PixelScene {
 				}
 			} else {
 				textLines.add(0, "_" + textLines.remove(0) + "_");
-				textLines.add(0, "_" + Messages.get(GameScene.class, "examine") + "_");
+				textLines.add(0, Messages.get(GameScene.class, "examine"));
 			}
 			
 			if (objects.size() == 1 && objects.get(0) instanceof Heap && RightClickMenu.objectNote((Heap)objects.get(0))) {
-				textLines.add(0, "_" +
-						( Notes.findCustomRecord( ((Heap)objects.get(0)).peek() ) == null ? Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note") )
-						+ "_");
+				textLines.add(0,
+							( Notes.findCustomRecord( ((Heap)objects.get(0)).peek() ) == null ?
+							Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note") ));
 			}
 
 			RightClickMenu menu = new RightClickMenu(image,

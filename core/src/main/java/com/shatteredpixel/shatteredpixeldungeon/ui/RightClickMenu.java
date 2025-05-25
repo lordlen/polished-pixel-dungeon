@@ -63,13 +63,14 @@ public class RightClickMenu extends Component {
 			actions.add(actions.size(), Item.AC_DROP);
 		}
 		
+		Notes.CustomRecord rec = Notes.findCustomRecord(item);
 		if(objectNote(item)) {
-			actions.add(0, Notes.findCustomRecord(item) == null ? Item.AC_NOTE : Item.AC_EDIT);
+			actions.add(0, rec == null ? Item.AC_NOTE : Item.AC_EDIT);
 		}
 		
 		String[] options = actions.toArray(new String[0]);
 		this.item = item;
-		setup(new ItemSprite(item), Messages.titleCase(item.name()), options);
+		setup(new ItemSprite(item), rec == null ? Messages.titleCase(item.name()) : rec.title(), options);
 	}
 
 	public RightClickMenu(Image icon, String title, String... options){
@@ -169,7 +170,7 @@ public class RightClickMenu extends Component {
 		icon.x = x+bg.marginLeft();
 		icon.y = y+bg.marginTop();
 
-		titleText.setPos(icon.x+icon.width()+2, icon.y + (icon.height()- titleText.height())/2);
+		titleText.setPos(icon.x+icon.width()+2, Math.max(icon.y + (icon.height()- titleText.height())/2, y+bg.marginTop()));
 
 		separator.x = x+bg.marginLeft();
 		separator.y = Math.max(icon.y + icon.height(), titleText.bottom()) + 1;
@@ -186,7 +187,7 @@ public class RightClickMenu extends Component {
 	}
 	
 	public static boolean objectNote(Item item) {
-		return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring);
+		return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
 	}
 	public static boolean objectNote(Heap heap) {
 		return (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE)
