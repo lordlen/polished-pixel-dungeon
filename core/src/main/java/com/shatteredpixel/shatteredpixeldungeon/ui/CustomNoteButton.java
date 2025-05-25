@@ -389,7 +389,7 @@ public class CustomNoteButton extends IconButton {
 		});
 	}
 	
-	public static void ediNote(Notes.CustomRecord rec, CustomNoteWindow parentWindow) {
+	public static void editNote(Notes.CustomRecord rec, CustomNoteWindow parentWindow) {
 		GameScene.show(new WndTextInput(Messages.get(CustomNoteWindow.class, "edit_title"),
 				"",
 				rec.title(),
