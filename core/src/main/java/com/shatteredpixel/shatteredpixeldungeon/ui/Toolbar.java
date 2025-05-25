@@ -629,7 +629,7 @@ public class Toolbar extends Component {
 			}
 		}
 		
-		if(secondLayerFirst != -1) {
+		if(secondLayer != -1) {
 			
 			int start = secondLayerFirst;
 			int end = secondLayerLast;
@@ -642,7 +642,6 @@ public class Toolbar extends Component {
 				}
 				
 				if(layout != Layout.SPLIT && secondLayer == quickslotsToShow+3) {
-					//int index = layout == Layout.SPLIT ? end - 1 : start;
 					
 					if(!flip) {
 						btnQuick[start].border(		1, 2);
@@ -790,7 +789,7 @@ public class Toolbar extends Component {
 				break;
 		}
 		
-		if(SPDSettings.forceAlign() && secondLayerFirst != -1) {
+		if(SPDSettings.forceAlign() && secondLayer != -1) {
 			shift = btnInventory.left() - btnQuick[startingSlot].right() + 2;
 		}
 		else {
@@ -807,7 +806,7 @@ public class Toolbar extends Component {
 		}
 		
 		
-		if(secondLayerFirst != -1) {
+		if(secondLayer != -1) {
 			
 			float top = btnQuick[0].top() - QuickSlot.HEIGHT + 2;
 			right = btnInventory.right();
