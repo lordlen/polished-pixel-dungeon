@@ -25,7 +25,9 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
@@ -166,15 +168,7 @@ public class CustomNoteButton extends IconButton {
 
 		@Override
 		public boolean itemSelectable(Item item) {
-			if (item instanceof EquipableItem){
-				if (item instanceof Ring && Notes.findCustomRecord(item.getClass()) != null){
-					return false;
-				}
-				return ((EquipableItem) item).customNoteID == -1
-						|| Notes.findCustomRecord(((EquipableItem) item).customNoteID) == null;
-			} else {
-				return Notes.findCustomRecord(item.getClass()) == null;
-			}
+			return Notes.findCustomRecord(item) == null;
 		}
 
 		@Override
@@ -348,14 +342,19 @@ public class CustomNoteButton extends IconButton {
 		}
 	}
 	
-	public static Notes.CustomRecord generateRecord(Item item) {
-		Notes.CustomRecord custom = new Notes.CustomRecord(item, "", "");
-		custom.assignID();
-		if (item instanceof EquipableItem){
-			((EquipableItem) item).customNoteID = custom.ID();
+	public static void addNote(Item item) {
+		if (item != null){
+			if(Notes.findCustomRecord(item) == null) {
+				addNote(
+						null, Notes.generateRecord(item), false,
+						Messages.get(CustomNoteButton.class, "new_inv"),
+						Messages.get(CustomNoteButton.class, "new_item_title", Messages.titleCase(item.name())));
+			}
+			else {
+				Notes.CustomRecord rec = item instanceof EquipableItem ? Notes.findCustomRecord(((EquipableItem) item).customNoteID) : Notes.findCustomRecord(item.getClass());
+				editNote(rec, null);
+			}
 		}
-		
-		return custom;
 	}
 	
 	public static void addNote(Window parentWindow, Notes.CustomRecord note, String promptTitle, String prompttext){ addNote(parentWindow, note, true, promptTitle, prompttext); }

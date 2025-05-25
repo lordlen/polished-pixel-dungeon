@@ -1689,40 +1689,6 @@ public class GameScene extends PixelScene {
 		}
 	}
 	
-	public static boolean objectNote(Item item) {
-		return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
-	}
-	public static boolean objectNote(Heap heap) {
-		return (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE)
-				&& heap.peek() != null && objectNote(heap.peek());
-	}
-	
-	public static boolean newNote(Item item) {
-		if(item instanceof EquipableItem) {
-			return ((EquipableItem) item).customNoteID == -1
-					|| Notes.findCustomRecord(((EquipableItem) item).customNoteID) == null;
-		}
-		else {
-			return Notes.findCustomRecord(item.getClass()) == null;
-		}
-	}
-	
-	public static void addNote(Item item) {
-		if (item != null){
-			if(newNote(item)) {
-				CustomNoteButton.addNote(
-						null, CustomNoteButton.generateRecord(item), false,
-						Messages.get(CustomNoteButton.class, "new_inv"),
-						Messages.get(CustomNoteButton.class, "new_item_title", Messages.titleCase(item.name())));
-			}
-			else {
-				Notes.CustomRecord rec = item instanceof EquipableItem ? Notes.findCustomRecord(((EquipableItem) item).customNoteID) : Notes.findCustomRecord(item.getClass());
-				CustomNoteButton.editNote(rec, null);
-			}
-		}
-	}
-
-	
 	private static final CellSelector.Listener defaultCellListener = new CellSelector.Listener() {
 		@Override
 		public void onSelect( Integer cell ) {
@@ -1808,9 +1774,9 @@ public class GameScene extends PixelScene {
 				textLines.add(0, "_" + Messages.get(GameScene.class, "examine") + "_");
 			}
 			
-			if (objects.size() == 1 && objects.get(0) instanceof Heap && objectNote((Heap)objects.get(0))) {
+			if (objects.size() == 1 && objects.get(0) instanceof Heap && RightClickMenu.objectNote((Heap)objects.get(0))) {
 				textLines.add(0, "_" +
-						( newNote( ((Heap)objects.get(0)).peek() ) ? Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note") )
+						( Notes.findCustomRecord( ((Heap)objects.get(0)).peek() ) == null ? Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note") )
 						+ "_");
 			}
 
@@ -1827,7 +1793,7 @@ public class GameScene extends PixelScene {
 						}
 						else if (objects.size() == 1 && objects.get(0) instanceof Heap && objectNote((Heap)objects.get(0))) {
 							if(index == 0) {
-								addNote(((Heap) objects.get(0)).peek());
+								CustomNoteButton.addNote(((Heap) objects.get(0)).peek());
 							}
 							else {
 								examineObject(objects.get(0));

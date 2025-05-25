@@ -45,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -175,9 +176,7 @@ public class Item implements Bundlable {
 		
 		else if (action.equals( AC_NOTE ) || action.equals( AC_EDIT )) {
 			
-			if (GameScene.objectNote(this)) {
-				GameScene.addNote(this);
-			}
+			CustomNoteButton.addNote(this);
 			
 		}
 	}

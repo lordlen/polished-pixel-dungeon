@@ -23,9 +23,13 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.input.PointerEvent;
@@ -59,8 +63,8 @@ public class RightClickMenu extends Component {
 			actions.add(actions.size(), Item.AC_DROP);
 		}
 		
-		if(GameScene.objectNote(item)) {
-			actions.add(0, GameScene.newNote(item) ? Item.AC_NOTE : Item.AC_EDIT);
+		if(objectNote(item)) {
+			actions.add(0, Notes.findCustomRecord(item) == null ? Item.AC_NOTE : Item.AC_EDIT);
 		}
 		
 		String[] options = actions.toArray(new String[0]);
@@ -180,4 +184,13 @@ public class RightClickMenu extends Component {
 		bg.size(width, height);
 
 	}
+	
+	public static boolean objectNote(Item item) {
+		return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring);
+	}
+	public static boolean objectNote(Heap heap) {
+		return (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE)
+				&& heap.peek() != null && objectNote(heap.peek());
+	}
+	
 }
