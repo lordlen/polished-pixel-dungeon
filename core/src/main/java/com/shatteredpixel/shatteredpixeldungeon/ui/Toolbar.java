@@ -789,7 +789,7 @@ public class Toolbar extends Component {
 				break;
 		}
 		
-		if(SPDSettings.forceAlign() && secondLayer != -1) {
+		if(SPDSettings.forceAlign() && secondLayer > 1) {
 			shift = btnInventory.left() - btnQuick[startingSlot].right() + 2;
 		}
 		else {
