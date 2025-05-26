@@ -493,13 +493,13 @@ public class Toolbar extends Component {
 		y += height - btnInventory.height();
 		height = btnInventory.height();
 		
-		int quickslotsToShow = QuickSlot.quickslotsActive();
+		int quickslotsToShow = QuickSlot.Polished.quickslotsActive();
 		if(SPDSettings.interfaceSize() > 0) {
-			boolean invPane = GameScene.invPane() != null && GameScene.invPane().active;
+			boolean invPane = GameScene.Polished.invPane() != null && GameScene.Polished.invPane().active;
 			
 			float space = 	width
-					- (GameScene.statPane() != null ? GameScene.statPane().healthRight() : 0)
-					- (invPane ? GameScene.invPane().width() : 24 + 20 + 20);
+					- (GameScene.Polished.statPane() != null ? GameScene.Polished.statPane().Polished_healthRight() : 0)
+					- (invPane ? GameScene.Polished.invPane().width() : 24 + 20 + 20);
 			
 			int quickslotSpace = (int)(space - 18) / 18;
 			
@@ -538,16 +538,16 @@ public class Toolbar extends Component {
 		int secondLayer = -1;
 		int secondLayerFirst = -1, secondLayerLast = -1;
 		
-		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.quickslotsEnabled() / 2) * 2) {
-			quickslotsToShow = Math.min(QuickSlot.quickslotsEnabled() / 2, quickslotsToShow-1);
+		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.Polished.quickslotsEnabled() / 2) * 2) {
+			quickslotsToShow = Math.min(QuickSlot.Polished.quickslotsEnabled() / 2, quickslotsToShow-1);
 
 			if(swappedQuickslots) startingSlot = quickslotsToShow;
 			btnSwap.visible = true;
 			btnSwap.active = lastEnabled;
 			QuickSlotButton.lastVisible = quickslotsToShow*2;
 		}
-		else if(trimming == Trimming.STACK && quickslotsToShow < QuickSlot.quickslotsEnabled()) {
-			secondLayerLast = Math.min(QuickSlot.quickslotsEnabled(), 2*quickslotsToShow + 3) - 1;
+		else if(trimming == Trimming.STACK && quickslotsToShow < QuickSlot.Polished.quickslotsEnabled()) {
+			secondLayerLast = Math.min(QuickSlot.Polished.quickslotsEnabled(), 2*quickslotsToShow + 3) - 1;
 			secondLayerFirst = quickslotsToShow;
 			secondLayer = secondLayerLast - secondLayerFirst + 1;
 			
@@ -581,9 +581,9 @@ public class Toolbar extends Component {
 			right = btnSearch.left();
 			float top = y+2;
 			
-			if (quickslotsToShow > 7 && GameScene.invPane() != null && GameScene.invPane().active) {
-				right = GameScene.invPane().left();
-				top = GameScene.invPane().bottom() - btnQuick[0].height();
+			if (quickslotsToShow > 7 && GameScene.Polished.invPane() != null && GameScene.Polished.invPane().active) {
+				right = GameScene.Polished.invPane().left();
+				top = GameScene.Polished.invPane().bottom() - btnQuick[0].height();
 			}
 			
 			for(int i = endingSlot; i >= startingSlot; i--) {
@@ -635,7 +635,7 @@ public class Toolbar extends Component {
 			int end = secondLayerLast;
 			boolean flip = SPDSettings.flipToolbar();
 			
-			if(SPDSettings.forceAlign()) {
+			if(SPDSettings.Polished.forceAlign()) {
 				
 				if(layout == Layout.SPLIT) {
 				
@@ -721,7 +721,7 @@ public class Toolbar extends Component {
 				}
 			}
 			
-			if (SPDSettings.forceAlign() && layout == Layout.SPLIT && secondLayer == quickslotsToShow+3) {
+			if (SPDSettings.Polished.forceAlign() && layout == Layout.SPLIT && secondLayer == quickslotsToShow+3) {
 				
 				if(!flip) {
 					btnQuick[end-2].border(2, 1);
@@ -789,7 +789,7 @@ public class Toolbar extends Component {
 				break;
 		}
 		
-		if(SPDSettings.forceAlign() && secondLayer > 1) {
+		if(SPDSettings.Polished.forceAlign() && secondLayer > 1) {
 			shift = btnInventory.left() - btnQuick[startingSlot].right() + 2;
 		}
 		else {
@@ -808,7 +808,7 @@ public class Toolbar extends Component {
 		
 		if(secondLayer != -1) {
 			
-			float top = btnQuick[0].top() - QuickSlot.HEIGHT + 2;
+			float top = btnQuick[0].top() - QuickSlotButton.HEIGHT + 2;
 			right = btnInventory.right();
 			
 			for (int i = secondLayerFirst; i <= secondLayerLast; i++) {
@@ -835,8 +835,8 @@ public class Toolbar extends Component {
 				}
 			}
 			
-			y -= 2*QuickSlot.HEIGHT - height;
-			height = 2*QuickSlot.HEIGHT;
+			y -= 2* QuickSlotButton.HEIGHT - height;
+			height = 2* QuickSlotButton.HEIGHT;
 		}
 
 		

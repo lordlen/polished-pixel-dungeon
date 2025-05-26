@@ -814,7 +814,7 @@ public abstract class Char extends Actor {
 		return cachedShield;
 	}
 
-	boolean isDamageExternal(Object src) {
+	boolean Polished_isDamageExternal(Object src) {
 
 		if(!(src instanceof Char)) {
 			//dont get def boost against debuffs, traps and such
@@ -962,7 +962,7 @@ public abstract class Char extends Actor {
 
 		ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
 		if (giant != null){
-			boolean externalAttack = isDamageExternal(src);
+			boolean externalAttack = Polished_isDamageExternal(src);
 
 			//we ceil these specifically to favor the player vs. champ dmg reduction
 			// most important vs. giant champions in the earlygame

@@ -37,14 +37,13 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.watabou.input.GameAction;
-import com.watabou.input.KeyBindings;
-import com.watabou.input.KeyEvent;
-import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 import com.watabou.utils.BArray;
 import com.watabou.utils.PathFinder;
 
 public class QuickSlotButton extends Button {
+	
+	public static final float HEIGHT = 24;
 	
 	private static QuickSlotButton[] instance = new QuickSlotButton[QuickSlot.SIZE];
 	private int slotNum;
@@ -236,14 +235,14 @@ public class QuickSlotButton extends Button {
 	protected void alignTooltip(Tooltip tip) {
 		super.alignTooltip(tip);
 		
-		if(GameScene.invPane() != null && GameScene.invPane().visible && parent.remove(tip) != null) {
-			GameScene.invPane().addToFront(tip);
+		if(GameScene.Polished.invPane() != null && GameScene.Polished.invPane().visible && parent.remove(tip) != null) {
+			GameScene.Polished.invPane().addToFront(tip);
 		}
 	}
 	
 	@Override
 	public void killTooltip() {
-		if(GameScene.invPane() != null && hoverTip != null) GameScene.invPane().remove(hoverTip);
+		if(GameScene.Polished.invPane() != null && hoverTip != null) GameScene.Polished.invPane().remove(hoverTip);
 		super.killTooltip();
 	}
 	
