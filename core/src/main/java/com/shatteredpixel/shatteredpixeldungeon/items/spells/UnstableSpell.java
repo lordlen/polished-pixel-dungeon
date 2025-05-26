@@ -92,6 +92,10 @@ public class UnstableSpell extends Spell {
 	
 	@Override
 	protected void onCast(Hero hero) {
+		if(Polished_wealthDrop != null) {
+			scrollChances.put(ScrollOfTransmutation.class, 0f);
+			scrollChances.put(ScrollOfLullaby.class, 0f);
+		}
 		
 		detach( curUser.belongings.backpack );
 		updateQuickslot();
@@ -116,6 +120,11 @@ public class UnstableSpell extends Spell {
 		Catalog.countUse(getClass());
 		if (Random.Float() < talentChance){
 			Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
+		}
+
+		if(Polished_wealthDrop != null) {
+			scrollChances.put(ScrollOfTransmutation.class, 0f);
+			scrollChances.put(ScrollOfLullaby.class, 0f);
 		}
 	}
 

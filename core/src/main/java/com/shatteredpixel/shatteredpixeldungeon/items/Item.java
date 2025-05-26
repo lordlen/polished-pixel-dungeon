@@ -64,9 +64,9 @@ public class Item implements Bundlable {
 	protected static final String TXT_TO_STRING_LVL		= "%s %+d";
 	protected static final String TXT_TO_STRING_X		= "%s x%d";
 	
-	protected static final float TIME_TO_THROW		= 1.0f;
-	protected static final float TIME_TO_PICK_UP	= 1.0f;
-	protected static final float TIME_TO_DROP		= 1.0f;
+	public static final float TIME_TO_THROW			= 1.0f;
+	public static final float TIME_TO_PICK_UP		= 1.0f;
+	public static final float TIME_TO_DROP			= 1.0f;
 	
 	public static final String AC_DROP		= "DROP";
 	public static final String AC_THROW		= "THROW";
@@ -100,9 +100,13 @@ public class Item implements Bundlable {
 
 	// whether an item can be included in heroes remains
 	public boolean bones = false;
-
-	// for keeping track of floor records
+  
+  // for keeping track of floor records
 	public boolean Polished_toFind = false;
+  
+  // For wrapper behaviour
+	protected WealthDrop<?, ?> Polished_wealthDrop = null;
+  
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
@@ -327,11 +331,15 @@ public class Item implements Bundlable {
 	}
 	
 	public final Item detach( Bag container ) {
+
+		if(Polished_wealthDrop != null) {
+			Polished_wealthDrop.wealthDetach(container);
+		}
 		
 		if (quantity <= 0) {
-			
+
 			return null;
-			
+
 		} else
 		if (quantity == 1) {
 

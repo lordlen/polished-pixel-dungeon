@@ -82,6 +82,7 @@ import com.watabou.noosa.Game;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Callback;
 import com.watabou.utils.FileUtils;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -100,7 +101,8 @@ public class Dungeon {
 
 	public static class Polished {
 		public static final int DEFAULT_VIEW_DISTANCE = 8;
-
+		static Callback afterLoad = () -> {};
+		
 		private static void updateNearbyTiles(boolean[] extendedHeroFOV, int pos) {
 			for (int i = 0; i < 3; i++) {
 				int offset = pos + level.pointToCell(-1, -1+i);
@@ -121,6 +123,15 @@ public class Dungeon {
 			}
 		}
 		
+		public static void runAfterLoad(Callback callback) {
+			Callback current = afterLoad;
+	
+			afterLoad = () -> {
+				current.call();
+				callback.call();
+			};
+    }
+    
 		public static void replaceLevel( int depth, int branch, Level replacement ) {
 			try {
 				Bundle bundle = new Bundle();
@@ -139,6 +150,7 @@ public class Dungeon {
 	
 			return level;
 		}
+    
 	}
 
 	//enum of items which have limited spawns, records how many have spawned
@@ -870,6 +882,9 @@ public class Dungeon {
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
 
+
+		Polished.afterLoad.call();
+		Polished.afterLoad = () -> {};
 
 		Debug.LoadGame();
 	}

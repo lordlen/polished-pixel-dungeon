@@ -85,6 +85,9 @@ public class UnstableBrew extends Brew {
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 0f);
 		}
+		if(Polished_wealthDrop != null) {
+			potionChances.put(PotionOfExperience.class, 0f);
+		}
 
 		Potion p = Reflection.newInstance(Random.chances(potionChances));
 
@@ -98,6 +101,9 @@ public class UnstableBrew extends Brew {
 
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 3f);
+		}
+		if(Polished_wealthDrop != null) {
+			potionChances.put(PotionOfExperience.class, 1f);
 		}
 	}
 	

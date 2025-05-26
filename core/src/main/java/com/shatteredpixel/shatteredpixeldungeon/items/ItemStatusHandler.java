@@ -193,11 +193,12 @@ public class ItemStatusHandler<T extends Item> {
 	}
 	
 	public void know( T item ) {
-		known.add( (Class<? extends T>)item.getClass() );
+		know( (Class<? extends T>)item.getClass() );
 	}
 	
 	public void know( Class<?extends T> itemCls ){
-		known.add( itemCls );
+		if(known.add( itemCls ))
+			WealthDrop.onId();
 	}
 	
 	public HashSet<Class<? extends T>> known() {

@@ -79,5 +79,5 @@ public abstract class Spell extends Item {
 	}
 	
 	protected abstract void onCast(Hero hero );
-	
+
 }

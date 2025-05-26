@@ -33,6 +33,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -56,7 +58,6 @@ import com.watabou.noosa.Group;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.ui.Component;
-import com.watabou.utils.DeviceCompat;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -487,6 +488,10 @@ public class WndRanking extends WndTabbed {
 				bg.ra = 0.1f;
 				bg.ba = 0.1f;
 			}
+
+			if(item instanceof WealthPotion) {
+				WealthDrop.backgroundColoring(bg);
+			}
 		}
 		
 		@Override
@@ -554,6 +559,10 @@ public class WndRanking extends WndTabbed {
 			} else if (!item.isIdentified()) {
 				bg.ra = 0.1f;
 				bg.ba = 0.1f;
+			}
+
+			if(item instanceof WealthPotion) {
+				WealthDrop.backgroundColoring(bg);
 			}
 		}
 
