@@ -25,9 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
-import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
@@ -342,7 +340,7 @@ public class CustomNoteButton extends IconButton {
 		}
 	}
 	
-	public static void addNote(Item item) {
+	public static void Polished_addNote(Item item) {
 		if (Notes.getRecords(Notes.CustomRecord.class).size() >= Notes.customRecordLimit()){
 			GameScene.show(new WndTitledMessage(Icons.INFO.get(),
 					Messages.get(CustomNoteButton.class, "limit_title"),
@@ -351,19 +349,18 @@ public class CustomNoteButton extends IconButton {
 		}
 		
 		if(Notes.findCustomRecord(item) == null) {
-			addNote(
-					null, Notes.generateRecord(item), false,
+			Polished_addNote(
+					null, Notes.Polished_generateRecord(item), false,
 					Messages.get(CustomNoteButton.class, "new_inv"),
 					Messages.get(CustomNoteButton.class, "new_item_title", Messages.titleCase(item.name())));
 		}
 		else {
 			Notes.CustomRecord rec = item instanceof EquipableItem ? Notes.findCustomRecord(((EquipableItem) item).customNoteID) : Notes.findCustomRecord(item.getClass());
-			editNote(rec, null);
+			Polished_editNote(rec, null);
 		}
 	}
 	
-	public static void addNote(Window parentWindow, Notes.CustomRecord note, String promptTitle, String prompttext){ addNote(parentWindow, note, true, promptTitle, prompttext); }
-	public static void addNote(Window parentWindow, Notes.CustomRecord note, boolean fromJournal, String promptTitle, String prompttext){
+	public static void Polished_addNote(Window parentWindow, Notes.CustomRecord note, boolean fromJournal, String promptTitle, String prompttext){
 		GameScene.show(new WndTextInput(promptTitle,
 				prompttext,
 				"",
@@ -393,7 +390,9 @@ public class CustomNoteButton extends IconButton {
 		});
 	}
 	
-	public static void editNote(Notes.CustomRecord rec, CustomNoteWindow parentWindow) {
+	public static void addNote(Window parentWindow, Notes.CustomRecord note, String promptTitle, String prompttext){ Polished_addNote(parentWindow, note, true, promptTitle, prompttext); }
+	
+	public static void Polished_editNote(Notes.CustomRecord rec, CustomNoteWindow parentWindow) {
 		GameScene.show(new WndTextInput(Messages.get(CustomNoteWindow.class, "edit_title"),
 				"",
 				rec.title(),

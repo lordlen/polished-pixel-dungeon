@@ -1796,7 +1796,7 @@ public class GameScene extends PixelScene {
 						}
 						else if (objects.size() == 1 && objects.get(0) instanceof Heap && notesAction((Heap)objects.get(0))) {
 							if(index == 0) {
-								CustomNoteButton.addNote(((Heap) objects.get(0)).peek());
+								CustomNoteButton.Polished_addNote(((Heap) objects.get(0)).peek());
 							}
 							else {
 								examineObject(objects.get(0));

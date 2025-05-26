@@ -292,14 +292,14 @@ public class MenuPane extends Component {
 			}
 		}
 		
-		private CellSelector.Listener notes = new CellSelector.Listener() {
+		private CellSelector.Listener Polished_notes = new CellSelector.Listener() {
 			@Override
 			public void onSelect( Integer target ) {
 				if(target == null) return;
 				Heap heap = Dungeon.level.heaps.get(target);
 				
 				if (RightClickMenu.validForNotes(heap)) {
-					CustomNoteButton.addNote(heap.peek());
+					CustomNoteButton.Polished_addNote(heap.peek());
 				}
 			}
 			@Override
@@ -361,7 +361,7 @@ public class MenuPane extends Component {
 		
 		@Override
 		protected boolean onLongClick() {
-			GameScene.selectCell( notes );
+			GameScene.selectCell(Polished_notes);
 			return true;
 		}
 		

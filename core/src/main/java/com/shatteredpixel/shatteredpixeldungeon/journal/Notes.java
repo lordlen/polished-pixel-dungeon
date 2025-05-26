@@ -659,7 +659,7 @@ public class Notes {
 		return null;
 	}
 	
-	public static CustomRecord generateRecord(Item item) {
+	public static CustomRecord Polished_generateRecord(Item item) {
 		CustomRecord custom = new CustomRecord(item, "", "");
 		custom.assignID();
 		if (item instanceof EquipableItem){

@@ -186,6 +186,9 @@ public class RightClickMenu extends Component {
 
 	}
 	
+	public static class Polished {
+	
+	}
 	public static boolean notesAction(Item item) {
 		return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
 	}

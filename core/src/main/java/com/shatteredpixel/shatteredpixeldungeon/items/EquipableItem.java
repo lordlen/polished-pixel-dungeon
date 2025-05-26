@@ -48,11 +48,11 @@ public abstract class EquipableItem extends Item {
 		bones = true;
 		defaultAction = AC_EQUIP;
 		
-		Callback cb = this::updateDefaultAction;
+		Callback cb = this::Polished_updateDefaultAction;
 		//Dungeon.runafterload()
 	}
 	
-	void updateDefaultAction() {
+	void Polished_updateDefaultAction() {
 		if(isEquipped(Dungeon.hero) && defaultAction.matches(AC_EQUIP)) defaultAction = AC_UNEQUIP;
 		if(!isEquipped(Dungeon.hero) && defaultAction.matches(AC_UNEQUIP)) defaultAction = AC_EQUIP;
 	}
@@ -71,7 +71,7 @@ public abstract class EquipableItem extends Item {
 				GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_IDING);
 			}
 			
-			updateDefaultAction();
+			Polished_updateDefaultAction();
 			return true;
 		} else {
 			return false;
@@ -104,7 +104,7 @@ public abstract class EquipableItem extends Item {
 			doUnequip( hero, true );
 		}
 		
-		updateDefaultAction();
+		Polished_updateDefaultAction();
 	}
 
 	@Override
