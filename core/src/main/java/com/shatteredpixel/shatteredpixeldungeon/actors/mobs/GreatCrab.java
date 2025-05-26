@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -54,6 +55,18 @@ public class GreatCrab extends Crab {
 		lootChance = 1f;
 
 		properties.add(Property.MINIBOSS);
+	}
+	
+	@Override
+	public float lootChance() {
+		return lootChance;
+	}
+	
+	@Override
+	public Item createLoot(){
+		//doesn't affect regular crab drops
+		Dungeon.LimitedDrops.CRAB_MEAT.count--;
+		return super.createLoot();
 	}
 
 	private int moving = 0;
