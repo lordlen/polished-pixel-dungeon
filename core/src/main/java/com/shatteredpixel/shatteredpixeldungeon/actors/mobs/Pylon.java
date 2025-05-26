@@ -198,9 +198,9 @@ public class Pylon extends Mob {
 	@Override
 	public void damage(int dmg, Object src) {
 		if (dmg >= 15){
-			//takes 15/16/17/18/19/20 dmg at 15/17/20/24/29/36 incoming dmg
-			//POLISHED: punishes big damage less (sqrt -> pow 0.575)
-			dmg = 14 + (int)(Math.pow(8*(dmg - 14) + 1, 0.575) - 1)/2;
+			//OLD: takes 15/16/17/18/19/20 dmg at 15/17/20/24/29/36 incoming dmg
+			//POLISHED: punishes big damage less (sqrt -> pow 0.75)
+			dmg = 14 + (int)Math.round((Math.pow( 2.75*(dmg - 14) + 1, 0.75 ) - 1) / 2);
 		}
 
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
