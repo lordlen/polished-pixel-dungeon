@@ -269,10 +269,10 @@ public class HornOfPlenty extends Artifact {
 			
 			if (charge < chargeCap) {
 
-				//generates 0.2x max hunger value every hero level, +0.1x max value per horn level
-				//to a max of 1.2x max hunger value per hero level
+				//generates 0.25x max hunger value every hero level, +0.1x max value per horn level
+				//to a max of 1.25x max hunger value per hero level
 				//This means that a standard ration will be recovered in ~6.66 hero levels
-				float chargeGain = Hunger.STARVING * levelPortion * (0.2f + (0.1f*level()));
+				float chargeGain = Hunger.STARVING * levelPortion * (0.25f + (0.1f*level()));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 
 				//each charge is equal to 1/5 the max hunger value
