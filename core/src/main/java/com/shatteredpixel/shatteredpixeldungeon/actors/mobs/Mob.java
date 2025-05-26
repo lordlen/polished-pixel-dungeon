@@ -960,9 +960,7 @@ public abstract class Mob extends Char {
 	public float lootChance(){
 		float lootChance = this.lootChance;
 
-		float dropBonus = RingOfWealth.dropChanceMultiplier( Dungeon.hero );
-		//only alter on cursed rings
-		dropBonus = Math.max(dropBonus, 1f);
+		float dropPenalty = RingOfWealth.dropChanceMultiplier( Dungeon.hero );
 
 		Talent.BountyHunterTracker bhTracker = Dungeon.hero.buff(Talent.BountyHunterTracker.class);
 		if (bhTracker != null){
@@ -971,13 +969,13 @@ public abstract class Mob extends Char {
 				// 2/4/8/16% per prep level, multiplied by talent points
 				float bhBonus = 0.02f * (float)Math.pow(2, prep.attackLevel()-1);
 				bhBonus *= Dungeon.hero.pointsInTalent(Talent.BOUNTY_HUNTER);
-				dropBonus += bhBonus;
+				dropPenalty += bhBonus;
 			}
 		}
 
-		dropBonus += ShardOfOblivion.lootChanceMultiplier()-1f;
+		dropPenalty += ShardOfOblivion.lootChanceMultiplier()-1f;
 
-		return lootChance * dropBonus;
+		return lootChance * dropPenalty;
 	}
 	
 	public void rollToDropLoot(){

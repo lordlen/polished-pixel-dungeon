@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfLullaby;
@@ -93,7 +92,7 @@ public class UnstableSpell extends Spell {
 	
 	@Override
 	protected void onCast(Hero hero) {
-		if(wealthDrop != null) {
+		if(Polished_wealthDrop != null) {
 			scrollChances.put(ScrollOfTransmutation.class, 0f);
 			scrollChances.put(ScrollOfLullaby.class, 0f);
 		}
@@ -123,7 +122,7 @@ public class UnstableSpell extends Spell {
 			Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
 		}
 
-		if(wealthDrop != null) {
+		if(Polished_wealthDrop != null) {
 			scrollChances.put(ScrollOfTransmutation.class, 0f);
 			scrollChances.put(ScrollOfLullaby.class, 0f);
 		}

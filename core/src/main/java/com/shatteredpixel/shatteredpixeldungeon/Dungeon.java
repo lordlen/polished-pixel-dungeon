@@ -85,7 +85,6 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.FileUtils;
 import com.watabou.utils.PathFinder;
-import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 import com.watabou.utils.SparseArray;
 
@@ -102,7 +101,8 @@ public class Dungeon {
 
 	public static class Polished {
 		public static final int DEFAULT_VIEW_DISTANCE = 8;
-
+		static Callback afterLoad = () -> {};
+		
 		private static void updateNearbyTiles(boolean[] extendedHeroFOV, int pos) {
 			for (int i = 0; i < 3; i++) {
 				int offset = pos + level.pointToCell(-1, -1+i);
@@ -121,6 +121,15 @@ public class Dungeon {
 					level.revealSecretDoor(pos + i);
 				}
 			}
+		}
+		
+		public static void runAfterLoad(Callback callback) {
+			Callback current = afterLoad;
+	
+			afterLoad = () -> {
+				current.call();
+				callback.call();
+			};
 		}
 	}
 
@@ -639,18 +648,6 @@ public class Dungeon {
 	private static final String CHAPTERS	= "chapters";
 	private static final String QUESTS		= "quests";
 	private static final String BADGES		= "badges";
-
-	static Callback afterLoad = () -> {
-
-    };
-	public static void runAfterLoad(Callback callback) {
-		Callback current = afterLoad;
-
-		afterLoad = () -> {
-			current.call();
-			callback.call();
-		};
-	}
 	
 	public static void saveGame( int save ) {
 		try {
@@ -853,8 +850,8 @@ public class Dungeon {
 		Generator.restoreFromBundle( bundle );
 
 
-		afterLoad.call();
-		afterLoad = () -> {};
+		Polished.afterLoad.call();
+		Polished.afterLoad = () -> {};
 
 		Debug.LoadGame();
 	}

@@ -72,14 +72,10 @@ public abstract class TargetedSpell extends Spell {
 				}
 				else if(curItem instanceof WealthSpell) {
 					WealthSpell wealthSpell = (WealthSpell)curItem;
-
-					if(wealthSpell.valid() && wealthSpell.item() instanceof TargetedSpell)
-						curSpell = (TargetedSpell) wealthSpell.item();
+					if(wealthSpell.item() instanceof TargetedSpell) curSpell = (TargetedSpell) wealthSpell.item();
 					else return;
 				}
-				else {
-					return;
-				}
+				else return;
 				
 				final Ballistica shot = new Ballistica( curUser.pos, target, curSpell.collisionProperties);
 				int cell = shot.collisionPos;

@@ -98,7 +98,7 @@ public class Item implements Bundlable {
 	public boolean bones = false;
 
 	// For wrapper behaviour
-	protected WealthDrop<?, ?> wealthDrop = null;
+	protected WealthDrop<?, ?> Polished_wealthDrop = null;
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
@@ -318,8 +318,8 @@ public class Item implements Bundlable {
 	
 	public final Item detach( Bag container ) {
 
-		if(wealthDrop != null) {
-			wealthDrop.wealthDetach(container);
+		if(Polished_wealthDrop != null) {
+			Polished_wealthDrop.wealthDetach(container);
 		}
 		
 		if (quantity <= 0) {

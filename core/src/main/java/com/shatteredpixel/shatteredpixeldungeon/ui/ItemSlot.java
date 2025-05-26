@@ -145,13 +145,11 @@ public class ItemSlot extends Button {
 		if (extra != null) {
 			extra.x = x + (width - extra.width()) - margin.right;
 			extra.y = margin.top + y;
-
+			
 			if(item instanceof WealthDrop) {
 				extra.x--;
 				extra.y = margin.top + bottom() - extra.height() - 0;
-
-				PixelScene.align(extra);
-
+				
 				if (extra.width() > width){
 					extra.visible = false;
 				} else if (item != null) {
@@ -159,14 +157,14 @@ public class ItemSlot extends Button {
 				}
 			}
 			else {
-				PixelScene.align(extra);
-
 				if ((status.width() + extra.width()) > width){
 					extra.visible = false;
 				} else if (item != null) {
 					extra.visible = true;
 				}
 			}
+			
+			PixelScene.align(extra);
 		}
 
 		if (itemIcon != null){

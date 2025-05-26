@@ -12,7 +12,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.audio.Sample;
@@ -28,7 +27,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         setItem(Reflection.newInstance(type));
         if(!valid()) return null;
 
-        item().wealthDrop = this;
+        item().Polished_wealthDrop = this;
         updateStats();
         updateVisuals();
 
@@ -240,7 +239,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
                     }
                 };
 
-                Dungeon.runAfterLoad(callback);
+                Dungeon.Polished.runAfterLoad(callback);
             }
         }
     }

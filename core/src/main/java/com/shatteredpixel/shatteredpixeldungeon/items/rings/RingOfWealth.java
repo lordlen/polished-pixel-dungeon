@@ -163,7 +163,8 @@ public class RingOfWealth extends Ring {
 	}
 	
 	public static float dropChanceMultiplier( Char target ){
-		return (float)Math.pow(1.25, getBuffedBonus(target, Wealth.class));
+		//only alter on cursed rings
+		return (float) Math.min(1, Math.pow(1.25, getBuffedBonus(target, Wealth.class)));
 	}
 
 	public static float dropGenRate(int buffedLvl) {
