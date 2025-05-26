@@ -58,11 +58,6 @@ public class GreatCrab extends Crab {
 	}
 	
 	@Override
-	public float lootChance() {
-		return lootChance;
-	}
-	
-	@Override
 	public Item createLoot(){
 		//doesn't affect regular crab drops
 		Dungeon.LimitedDrops.CRAB_MEAT.count--;
