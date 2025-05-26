@@ -37,9 +37,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.ImpShopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.RatKing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
+import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.WeakFloorRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -625,7 +627,20 @@ public class Notes {
 
 		return filtered;
 	}
-
+	
+	public static CustomRecord findCustomRecord( Item item ){
+		if (item instanceof EquipableItem){
+			EquipableItem equip = ((EquipableItem) item);
+			
+			if (equip instanceof Ring) return findCustomRecord(item.getClass());
+			else if ( equip.customNoteID == -1 ) return null;
+			else return findCustomRecord(equip.customNoteID);
+			
+		} else {
+			return findCustomRecord(item.getClass());
+		}
+	}
+	
 	public static CustomRecord findCustomRecord( int ID ){
 		for (Record rec : records){
 			if (rec instanceof CustomRecord && ((CustomRecord) rec).ID == ID) {
@@ -642,6 +657,16 @@ public class Notes {
 			}
 		}
 		return null;
+	}
+	
+	public static CustomRecord Polished_generateRecord(Item item) {
+		CustomRecord custom = new CustomRecord(item, "", "");
+		custom.assignID();
+		if (item instanceof EquipableItem){
+			((EquipableItem) item).customNoteID = custom.ID();
+		}
+		
+		return custom;
 	}
 
 	public static int customRecordLimit(){

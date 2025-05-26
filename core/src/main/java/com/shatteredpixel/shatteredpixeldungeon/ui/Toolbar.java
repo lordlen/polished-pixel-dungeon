@@ -537,6 +537,7 @@ public class Toolbar extends Component {
 		int startingSlot = 0, endingSlot = -1;
 		int secondLayer = -1;
 		int secondLayerFirst = -1, secondLayerLast = -1;
+    
 		
 		if (trimming == Trimming.SWAP && quickslotsToShow < (QuickSlot.Polished.quickslotsEnabled() / 2) * 2) {
 			quickslotsToShow = Math.min(QuickSlot.Polished.quickslotsEnabled() / 2, quickslotsToShow-1);
