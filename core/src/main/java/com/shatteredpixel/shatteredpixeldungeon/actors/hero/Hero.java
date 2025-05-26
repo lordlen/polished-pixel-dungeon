@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
@@ -1843,8 +1844,7 @@ public class Hero extends Char {
 				}
 
 				//Clear blobs that only exist for landmarks.
-				// Might want to make this a properly if it's used more
-				if (found && b instanceof WeakFloorRoom.WellID){
+				if (found && b instanceof LandmarkBlob){
 					b.fullyClear();
 				}
 			}

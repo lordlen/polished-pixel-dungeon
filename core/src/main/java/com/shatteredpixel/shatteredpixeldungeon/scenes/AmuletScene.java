@@ -116,7 +116,7 @@ public class AmuletScene extends PixelScene {
 				btnStay.enable(false);
 			}
 		};
-		btnStay.icon(Icons.CLOSE.get());
+		btnStay.icon(Icons.CLOSE_POLISHED.get());
 		btnStay.setSize( WIDTH, BTN_HEIGHT );
 		add( btnStay );
 		

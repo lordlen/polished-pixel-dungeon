@@ -22,12 +22,15 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLevitation;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -120,8 +123,11 @@ public class TrapsRoom extends SpecialRoom {
 			Painter.set( level, pos, Terrain.PEDESTAL );
 			level.drop( prize( level ), pos ).type = Heap.Type.CHEST;
 		}
-		
+
 		level.addItemToSpawn( new PotionOfLevitation() );
+
+		if(trapClass == null) 	Blob.seed( pos, 1, ChasmID.class, level );
+		else 					Blob.seed( pos, 1, TrapsID.class, level );
 	}
 	
 	private static Item prize( Level level ) {
@@ -171,4 +177,18 @@ public class TrapsRoom extends SpecialRoom {
 			//halls, muahahahaha
 			{GrimTrap.class}
 	};
+
+	public static class TrapsID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.TRAPS_ROOM;
+		}
+	}
+
+	public static class ChasmID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.CHASM_ROOM;
+		}
+	}
 }

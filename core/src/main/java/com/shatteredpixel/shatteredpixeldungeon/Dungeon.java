@@ -661,6 +661,7 @@ public class Dungeon {
 	private static final String PORTED      = "ported%d";
 	private static final String LEVEL		= "level";
 	private static final String LIMDROPS    = "limited_drops";
+	private static final String FOUND_ITEMS = "found_items";
 	private static final String CHAPTERS	= "chapters";
 	private static final String QUESTS		= "quests";
 	private static final String BADGES		= "badges";
@@ -694,6 +695,10 @@ public class Dungeon {
 			Bundle limDrops = new Bundle();
 			LimitedDrops.store( limDrops );
 			bundle.put ( LIMDROPS, limDrops );
+
+			Bundle foundItems = new Bundle();
+			FoundItems.store( foundItems );
+			bundle.put ( FOUND_ITEMS, foundItems );
 			
 			int count = 0;
 			int ids[] = new int[chapters.size()];

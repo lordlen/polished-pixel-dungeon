@@ -85,6 +85,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.HeavyBoomerang;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.HighGrass;
@@ -900,6 +901,8 @@ public abstract class Level implements Bundlable {
 		if (web != null){
 			web.clear(pos);
 		}
+
+		if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
 	}
 
 	public void cleanWalls() {
