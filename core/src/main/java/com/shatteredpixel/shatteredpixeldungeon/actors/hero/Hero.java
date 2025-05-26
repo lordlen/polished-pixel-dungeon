@@ -956,8 +956,8 @@ public class Hero extends Char {
 
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshBoss();
-    GameScene.Polished.updateMobBuffIndicators();
-    WealthDrop.refreshIndicators();
+		GameScene.Polished.updateMobBuffIndicators();
+		WealthDrop.refreshIndicators();
     
 		if (paralysed > 0) {
 			

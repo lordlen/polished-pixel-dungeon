@@ -130,7 +130,7 @@ public class Dungeon {
 				current.call();
 				callback.call();
 			};
-    }
+		}
     
 		public static void replaceLevel( int depth, int branch, Level replacement ) {
 			try {
@@ -150,7 +150,7 @@ public class Dungeon {
 	
 			return level;
 		}
-    
+  
 	}
 
 	//enum of items which have limited spawns, records how many have spawned
