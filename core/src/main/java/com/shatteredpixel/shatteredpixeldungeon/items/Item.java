@@ -176,7 +176,7 @@ public class Item implements Bundlable {
 		
 		else if (action.equals( AC_NOTE ) || action.equals( AC_EDIT )) {
 			
-			CustomNoteButton.Polished_addNote(this);
+			CustomNoteButton.Polished.addNote(this);
 			
 		}
 	}

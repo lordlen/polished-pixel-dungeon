@@ -298,8 +298,8 @@ public class MenuPane extends Component {
 				if(target == null) return;
 				Heap heap = Dungeon.level.heaps.get(target);
 				
-				if (RightClickMenu.validForNotes(heap)) {
-					CustomNoteButton.Polished_addNote(heap.peek());
+				if (RightClickMenu.Polished.validForNotes(heap)) {
+					CustomNoteButton.Polished.addNote(heap.peek());
 				}
 			}
 			@Override

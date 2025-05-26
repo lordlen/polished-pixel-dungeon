@@ -64,7 +64,7 @@ public class RightClickMenu extends Component {
 		}
 		
 		Notes.CustomRecord rec = Notes.findCustomRecord(item);
-		if(notesAction(item)) {
+		if(Polished.notesAction(item)) {
 			actions.add(0, rec == null ? Item.AC_NOTE : Item.AC_EDIT);
 		}
 		
@@ -187,17 +187,18 @@ public class RightClickMenu extends Component {
 	}
 	
 	public static class Polished {
-	
-	}
-	public static boolean notesAction(Item item) {
-		return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
-	}
-	public static boolean notesAction(Heap heap) {
-		return (validForNotes(heap) && notesAction(heap.peek()));
-	}
-	public static boolean validForNotes(Heap heap) {
-		return  heap != null && heap.peek() != null
-				&& (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE);
+		public static boolean notesAction(Item item) {
+			return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
+		}
+		
+		public static boolean notesAction(Heap heap) {
+			return (validForNotes(heap) && notesAction(heap.peek()));
+		}
+		
+		public static boolean validForNotes(Heap heap) {
+			return  heap != null && heap.peek() != null
+					&& (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE);
+		}
 	}
 	
 }
