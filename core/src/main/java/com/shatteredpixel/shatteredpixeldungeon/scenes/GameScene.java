@@ -296,6 +296,17 @@ public class GameScene extends PixelScene {
 				}
 			}
     	}
+		
+		public static CharHealthIndicator getHealthBar(Char ch) {
+			for(Gizmo giz : scene.healthIndicators.Polished_all()) {
+				if(giz instanceof CharHealthIndicator) {
+					CharHealthIndicator hp = (CharHealthIndicator)giz;
+					if(hp.target() == ch) return hp;
+				}
+			}
+			
+			return null;
+		}
     
 		public static InventoryPane invPane() {
 			return scene != null ? scene.inventory : null;
