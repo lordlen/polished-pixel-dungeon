@@ -90,6 +90,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Banner;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane;
@@ -282,7 +283,6 @@ public class GameScene extends PixelScene {
 			}
 		}
 		
-		
 		public static void add( BuffIndicator indicator ){
 			if (scene != null) scene.buffIndicators.add(indicator);
 		}
@@ -295,8 +295,16 @@ public class GameScene extends PixelScene {
 					}
 				}
 			}
+    }
+    
+		public static InventoryPane invPane() {
+			return scene != null ? scene.inventory : null;
 		}
-	}
+		
+		public static StatusPane statPane() {
+			return scene != null ? scene.status : null;
+		}
+  }
 	
 	@Override
 	public void create() {
@@ -1383,7 +1391,7 @@ public class GameScene extends PixelScene {
 			layoutTags();
 		}
 	}
-
+	
 	public static void centerNextWndOnInvPane(){
 		if (scene != null && scene.inventory != null && scene.inventory.visible){
 			lastOffset = new Point((int)scene.inventory.centerX() - uiCamera.width/2,
@@ -1602,6 +1610,7 @@ public class GameScene extends PixelScene {
 			Polished.bufferedMovement = null;
 		}
 		if(Polished.actionQueued()) {
+			//hold and release
 			KeyEvent.addKeyEvent(new KeyEvent(KeyBindings.getFirstKeyForAction(Polished.bufferedAction, false), true));
 			KeyEvent.addKeyEvent(new KeyEvent(KeyBindings.getFirstKeyForAction(Polished.bufferedAction, false), false));
 			Polished.bufferedAction = null;
@@ -1651,10 +1660,7 @@ public class GameScene extends PixelScene {
 	private static ArrayList<Object> getObjectsAtCell( int cell ){
 		ArrayList<Object> objects = new ArrayList<>();
 
-		if (cell == Dungeon.hero.pos) {
-			objects.add(Dungeon.hero);
-
-		} else if (Dungeon.level.heroFOV[cell]) {
+		if (cell != Dungeon.hero.pos && Dungeon.level.heroFOV[cell]) {
 			Mob mob = (Mob) Actor.findChar(cell);
 			if (mob != null) objects.add(mob);
 		}
@@ -1676,7 +1682,13 @@ public class GameScene extends PixelScene {
 		for (Object obj : objects){
 			if (obj instanceof Hero)        names.add(((Hero) obj).className().toUpperCase(Locale.ENGLISH));
 			else if (obj instanceof Mob)    names.add(Messages.titleCase( ((Mob)obj).name() ));
-			else if (obj instanceof Heap)   names.add(Messages.titleCase( ((Heap)obj).title() ));
+			else if (obj instanceof Heap) {
+				Heap heap = (Heap)obj;
+				if (RightClickMenu.Polished.validForNotes(heap)
+					&& Notes.findCustomRecord(heap.peek()) != null)
+											names.add(Notes.findCustomRecord(heap.peek()).title());
+				else 						names.add(Messages.titleCase( heap.title() ));
+			}
 			else if (obj instanceof Plant)  names.add(Messages.titleCase( ((Plant) obj).name() ));
 			else if (obj instanceof Trap)   names.add(Messages.titleCase( ((Trap) obj).name() ));
 		}
@@ -1705,7 +1717,6 @@ public class GameScene extends PixelScene {
 			GameScene.show( new WndMessage( Messages.get(GameScene.class, "dont_know") ) ) ;
 		}
 	}
-
 	
 	private static final CellSelector.Listener defaultCellListener = new CellSelector.Listener() {
 		@Override
@@ -1753,12 +1764,11 @@ public class GameScene extends PixelScene {
 				image = TerrainFeaturesTilemap.tile(cell, Dungeon.level.map[cell]);
 			}
 
-			//determine first text line
+			//determine action text line
 			if (objects.isEmpty()) {
 				textLines.add(0, Messages.get(GameScene.class, "go_here"));
-			} else if (objects.get(0) instanceof Hero) {
-				textLines.add(0, Messages.get(GameScene.class, "go_here"));
-			} else if (objects.get(0) instanceof Mob) {
+			}
+			else if (objects.get(0) instanceof Mob) {
 				if (((Mob) objects.get(0)).alignment != Char.Alignment.ENEMY) {
 					textLines.add(0, Messages.get(GameScene.class, "interact"));
 				} else {
@@ -1782,15 +1792,21 @@ public class GameScene extends PixelScene {
 				textLines.add(0, Messages.get(GameScene.class, "interact"));
 			}
 
-			//final text formatting
+			//add examines before action, final text formatting
 			if (objects.size() > 1){
 				textLines.add(0, "_" + textLines.remove(0) + ":_ " + textLines.get(0));
-				for (int i = 1; i < textLines.size(); i++){
-					textLines.add(i, "_" + Messages.get(GameScene.class, "examine") + ":_ " + textLines.remove(i));
+				for (int i = 0; i < textLines.size()-1; i++){
+					textLines.add(i, "_" + Messages.get(GameScene.class, "examine") + ":_ " + textLines.remove(i+1));
 				}
 			} else {
 				textLines.add(0, "_" + textLines.remove(0) + "_");
-				textLines.add(1, "_" + Messages.get(GameScene.class, "examine") + "_");
+				textLines.add(0, Messages.get(GameScene.class, "examine"));
+			}
+			
+			if (objects.size() == 1 && objects.get(0) instanceof Heap && RightClickMenu.Polished.notesAction((Heap)objects.get(0))) {
+				textLines.add(0,
+							( Notes.findCustomRecord( ((Heap)objects.get(0)).peek() ) == null ?
+							Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note") ));
 			}
 
 			RightClickMenu menu = new RightClickMenu(image,
@@ -1798,13 +1814,22 @@ public class GameScene extends PixelScene {
 					textLines.toArray(new String[0])){
 				@Override
 				public void onSelect(int index) {
-					if (index == 0){
+					if (index == textLines.size()-1){
 						handleCell(cell);
 					} else {
-						if (objects.size() == 0){
+						if (objects.isEmpty()){
 							GameScene.show(new WndInfoCell(cell));
-						} else {
-							examineObject(objects.get(index-1));
+						}
+						else if (objects.size() == 1 && objects.get(0) instanceof Heap && Polished.notesAction((Heap)objects.get(0))) {
+							if(index == 0) {
+								CustomNoteButton.Polished.addNote(((Heap) objects.get(0)).peek());
+							}
+							else {
+								examineObject(objects.get(0));
+							}
+						}
+						else {
+							examineObject(objects.get(index));
 						}
 					}
 				}

@@ -131,6 +131,7 @@ public class SPDAction extends GameAction {
 		defaultBindings.put( Input.Keys.NUM_7,          SPDAction.QUICKSLOT_7 );
 		defaultBindings.put( Input.Keys.NUM_8,          SPDAction.QUICKSLOT_8 );
 		defaultBindings.put( Input.Keys.NUM_9,          SPDAction.QUICKSLOT_9 );
+		defaultBindings.put( Input.Keys.NUM_0,          SPDAction.QUICKSLOT_10 );
 
 		defaultBindings.put( Input.Keys.F1,             SPDAction.BAG_1 );
 		defaultBindings.put( Input.Keys.F2,             SPDAction.BAG_2 );

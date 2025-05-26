@@ -351,5 +351,9 @@ public class StatusPane extends Component {
 		emitter.pos( avatar.center() );
 		emitter.burst( Speck.factory( Speck.STAR ), 12 );
 	}
+	
+	public float Polished_healthRight() {
+		return bg.innerRight() + bg.marginRight();
+	}
 
 }
