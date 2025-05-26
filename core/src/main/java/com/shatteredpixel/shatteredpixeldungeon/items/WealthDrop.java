@@ -147,7 +147,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
 
     static int decayTimer() {
         int lvl = Math.max(Ring.getBuffedBonus(Dungeon.hero, RingOfWealth.Wealth.class) - 1, 0);
-        return 200 + 40*lvl;
+        return 200 + 50*lvl;
     }
 
     static void onId() {

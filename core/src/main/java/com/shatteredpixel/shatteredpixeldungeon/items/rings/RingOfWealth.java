@@ -163,11 +163,11 @@ public class RingOfWealth extends Ring {
 	}
 	
 	public static float dropChanceMultiplier( Char target ){
-		return (float)Math.pow(1.20, getBuffedBonus(target, Wealth.class));
+		return (float)Math.pow(1.25, getBuffedBonus(target, Wealth.class));
 	}
 
 	public static float dropGenRate(int buffedLvl) {
-		return 1f + .2f * (buffedLvl-1);
+		return 1f + .25f * (buffedLvl-1);
 	}
 
 	/*private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
