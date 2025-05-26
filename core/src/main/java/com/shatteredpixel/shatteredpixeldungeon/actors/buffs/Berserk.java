@@ -191,11 +191,15 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	public float enchantBoost(boolean glyph){
 		int points = ((Hero)target).pointsInTalent(Talent.ENRAGED_CATALYST);
-		float boost = points * (glyph ? 0.5f : 0.2f);
-		//15-100% based on missing HP
-		boost *= 0.15f + 0.85f * (shieldFactor()-1);
+		float maxBoost = points * (glyph ? 0.5f : 0.2f);
+		
+		//scales at 15%-100%, caps at 15% hp
+		float min = .15f;
+		float missingHP = (float)(target.HT - target.HP) / target.HT;
+		missingHP = Math.min(missingHP, 0.85f);
+		missingHP += min;
 
-		return (state == State.RAMPAGING || state == State.UNDYING) ? boost : 1f;
+		return (state == State.RAMPAGING || state == State.UNDYING) ? maxBoost*missingHP : 1f;
 	}
 
 	private int facingEnemies() {

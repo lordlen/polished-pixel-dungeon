@@ -40,10 +40,12 @@ public class Senior extends Monk {
 	public float lootChance() {
 		return Dungeon.LimitedDrops.SENIOR_PASTY.count < 6 ? super.lootChance() : 0;
 	}
-
+	
 	@Override
 	public Item createLoot(){
 		Dungeon.LimitedDrops.SENIOR_PASTY.count++;
+		//doesn't affect regular monk drops
+		Dungeon.LimitedDrops.MONK_RATION.count--;
 		return super.createLoot();
 	}
 	

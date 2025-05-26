@@ -189,7 +189,10 @@ public class BuffIndicator extends Component {
 			heroInstance = null;
 		}
 	}
-
+	
+	//cached for performance
+	CharHealthIndicator healthBar;
+	
 	@Override
 	public synchronized void update() {
 		super.update();
@@ -200,8 +203,17 @@ public class BuffIndicator extends Component {
 				
 				setSize(Math.min(buffButtons.size(), 3) * SIZE_MINI, SIZE_MINI);
 				
-				x = sprite.x + sprite.width()/2f - width() / 2f - 0.3f * Math.min(buffButtons.size(), 3);
-				y = sprite.y - 5f - height;
+				x = sprite.x + sprite.width()/2f - width() / 2f - 0.4f * Math.min(buffButtons.size(), 3);
+				y = sprite.y - 3f - height;
+				
+				if(healthBar == null || healthBar.target() != ch) healthBar = GameScene.Polished.getHealthBar(ch);
+				TargetHealthIndicator targetHP = TargetHealthIndicator.instance;
+				
+				if (healthBar != null && healthBar.visible ||
+					(targetHP != null && targetHP.target() == ch && targetHP.visible)) {
+					y = sprite.y - 5.5f - height;
+				}
+				
 				visible = true;
 			} else {
 				visible = false;

@@ -68,9 +68,10 @@ public class WndInfoMob extends WndTitledMessage {
 			counter = new CircleArc(18, 3.5f);
 			counter.color( mob.cooldown() >= 1f ? 0xFF0000 : 0x808080, true );
 
-			float cd = mob.cooldown();
-			if(Math.abs(cd % 1) < 0.01) cd = Math.round(cd);
-			float partial = (1f-cd%1f)%1f;
+			float cd = Math.max(mob.cooldown(), 0);
+			if(cd % 1 < 0.01) cd = Math.round(cd);
+			float partial = 1f-cd%1f;
+			if(cd == 0) partial = 0;
 
 			counter.setSweep(partial);
 			add(counter);
