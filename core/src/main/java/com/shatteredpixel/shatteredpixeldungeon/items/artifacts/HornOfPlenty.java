@@ -48,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 
 import java.util.ArrayList;
 
@@ -104,7 +105,7 @@ public class HornOfPlenty extends Artifact {
 			else if (charge == 0)  GLog.i( Messages.get(this, "no_food") );
 			else {
 				Hunger hunger = Buff.affect(Dungeon.hero, Hunger.class);
-				int chargesToUse = Math.max( 1, hunger.hunger() / getSatietyPerCharge());
+				int chargesToUse = GameMath.gate( 1, hunger.hunger() / getSatietyPerCharge(), 3);
 				if (chargesToUse > charge) chargesToUse = charge;
 
 				//always use 1 charge if snacking
@@ -268,10 +269,10 @@ public class HornOfPlenty extends Artifact {
 			
 			if (charge < chargeCap) {
 
-				//generates 0.2x max hunger value every hero level, +0.1x max value per horn level
-				//to a max of 1.2x max hunger value per hero level
+				//generates 0.25x max hunger value every hero level, +0.1x max value per horn level
+				//to a max of 1.25x max hunger value per hero level
 				//This means that a standard ration will be recovered in ~6.66 hero levels
-				float chargeGain = Hunger.STARVING * levelPortion * (0.2f + (0.1f*level()));
+				float chargeGain = Hunger.STARVING * levelPortion * (0.25f + (0.1f*level()));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 
 				//each charge is equal to 1/5 the max hunger value
