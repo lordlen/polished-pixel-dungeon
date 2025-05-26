@@ -90,6 +90,11 @@ public class WndTextInput extends Window {
 				onSelect(true, getText());
 				hide();
 			}
+			
+			@Override
+			public void escapePressed() {
+				hide();
+			}
 
 			@Override
 			public void onChanged() {

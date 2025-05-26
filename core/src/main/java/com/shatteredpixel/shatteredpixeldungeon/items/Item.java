@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.FoundItems;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -45,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -68,6 +70,8 @@ public class Item implements Bundlable {
 	
 	public static final String AC_DROP		= "DROP";
 	public static final String AC_THROW		= "THROW";
+	public static final String AC_NOTE		= "NOTE";
+	public static final String AC_EDIT		= "EDIT";
 	
 	protected String defaultAction;
 	public boolean usesTargeting;
@@ -96,9 +100,13 @@ public class Item implements Bundlable {
 
 	// whether an item can be included in heroes remains
 	public boolean bones = false;
-
-	// For wrapper behaviour
+  
+  // for keeping track of floor records
+	public boolean Polished_toFind = false;
+  
+  // For wrapper behaviour
 	protected WealthDrop<?, ?> Polished_wealthDrop = null;
+  
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
@@ -171,6 +179,12 @@ public class Item implements Bundlable {
 			if (hero.belongings.backpack.contains(this) || isEquipped(hero)) {
 				doThrow(hero);
 			}
+			
+		}
+		
+		else if (action.equals( AC_NOTE ) || action.equals( AC_EDIT )) {
+			
+			CustomNoteButton.Polished.addNote(this);
 			
 		}
 	}
@@ -517,6 +531,7 @@ public class Item implements Bundlable {
 	public Emitter emitter() { return null; }
 	
 	public String info() {
+		String info = "";
 
 		if (Dungeon.hero != null) {
 			Notes.CustomRecord note;
@@ -527,11 +542,11 @@ public class Item implements Bundlable {
 			}
 			if (note != null){
 				//we swap underscore(0x5F) with low macron(0x2CD) here to avoid highlighting in the item window
-				return Messages.get(this, "custom_note", note.title().replace('_', 'ˍ')) + "\n\n" + desc();
+				info += Messages.get(this, "custom_note", note.title().replace('_', 'ˍ')) + "\n\n";
 			}
 		}
 
-		return desc();
+		return info + desc() + FoundItems.getDesc(getClass());
 	}
 	
 	public String desc() {
@@ -585,6 +600,7 @@ public class Item implements Bundlable {
 	private static final String CURSED_KNOWN	= "cursedKnown";
 	private static final String QUICKSLOT		= "quickslotpos";
 	private static final String KEPT_LOST       = "kept_lost";
+	private static final String TO_FIND       	= "to_find";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -597,6 +613,7 @@ public class Item implements Bundlable {
 			bundle.put( QUICKSLOT, Dungeon.quickslot.getSlot(this) );
 		}
 		bundle.put( KEPT_LOST, keptThoughLostInvent );
+		bundle.put( TO_FIND, Polished_toFind);
 	}
 	
 	@Override
@@ -622,6 +639,7 @@ public class Item implements Bundlable {
 		}
 
 		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
+		Polished_toFind = bundle.getBoolean(TO_FIND);
 	}
 
 	public int targetingPos( Hero user, int dst ){

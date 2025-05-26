@@ -38,7 +38,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Blandfruit;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MeatPie;
-import com.shatteredpixel.shatteredpixeldungeon.items.food.Pasty;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.PhantomMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
@@ -49,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 
 import java.util.ArrayList;
 
@@ -105,7 +105,7 @@ public class HornOfPlenty extends Artifact {
 			else if (charge == 0)  GLog.i( Messages.get(this, "no_food") );
 			else {
 				Hunger hunger = Buff.affect(Dungeon.hero, Hunger.class);
-				int chargesToUse = Math.max( 1, hunger.hunger() / getSatietyPerCharge());
+				int chargesToUse = GameMath.gate( 1, hunger.hunger() / getSatietyPerCharge(), 3);
 				if (chargesToUse > charge) chargesToUse = charge;
 
 				//always use 1 charge if snacking
@@ -143,7 +143,7 @@ public class HornOfPlenty extends Artifact {
 				|| Dungeon.hero.hasTalent(Talent.INVIGORATING_MEAL)
 				|| Dungeon.hero.hasTalent(Talent.FOCUSED_MEAL)
 				|| Dungeon.hero.hasTalent(Talent.ENLIGHTENING_MEAL)){
-			hero.spend(Food.TIME_TO_EAT - 2);
+			hero.spend(Food.TIME_TO_EAT_MEAL);
 		} else {
 			hero.spend(Food.TIME_TO_EAT);
 		}
@@ -168,7 +168,7 @@ public class HornOfPlenty extends Artifact {
 	@Override
 	public void charge(Hero target, float amount) {
 		if (charge < chargeCap && !cursed && target.buff(MagicImmune.class) == null){
-			partialCharge += 0.25f*amount;
+			partialCharge += 0.2f*amount;
 			while (partialCharge >= 1){
 				partialCharge--;
 				charge++;
@@ -269,10 +269,10 @@ public class HornOfPlenty extends Artifact {
 			
 			if (charge < chargeCap) {
 
-				//generates 0.25x max hunger value every hero level, +0.125x max value per horn level
-				//to a max of 1.5x max hunger value per hero level
-				//This means that a standard ration will be recovered in ~5.333 hero levels
-				float chargeGain = Hunger.STARVING * levelPortion * (0.25f + (0.125f*level()));
+				//generates 0.25x max hunger value every hero level, +0.1x max value per horn level
+				//to a max of 1.25x max hunger value per hero level
+				//This means that a standard ration will be recovered in ~6.66 hero levels
+				float chargeGain = Hunger.STARVING * levelPortion * (0.25f + (0.1f*level()));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 
 				//each charge is equal to 1/5 the max hunger value

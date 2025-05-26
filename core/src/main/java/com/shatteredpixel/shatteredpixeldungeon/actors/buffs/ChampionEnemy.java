@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -34,6 +35,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Holy
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
@@ -223,10 +226,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float meleeDamageFactor(boolean adjacent) {
-			if(!adjacent) {
-				polished.initCooldown();
-			}
-
+			polished.initCooldown();
 			return 1.25f;
 		}
 
@@ -263,7 +263,6 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			immunities.addAll(com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic.RESISTS);
-			immunities.add(Corrosion.class);
 
 			immunities.remove(HolyBomb.HolyDamage.class);
 			immunities.remove(HolyDart.class);
@@ -344,6 +343,40 @@ public abstract class ChampionEnemy extends Buff {
 
 		public boolean Polished_huntThreshold() {
 			return multiplier >= 2f;
+		}
+		
+		private boolean Polished_huntNoti = false;
+		public void Polished_growingHunt() {
+			if(target.buff(MagicalSleep.class) != null) {
+				Polished_huntNoti = false;
+				return;
+			}
+			
+			Mob mob = (Mob) target;
+			if(Polished_huntThreshold() && !Dungeon.hero.isStealthyTo(target) && !(mob.state == mob.FLEEING)) {
+				mob.aggro(Dungeon.hero);
+				mob.target=Dungeon.hero.pos;
+				
+				if(!Polished_huntNoti) {
+					GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
+					Polished_huntNoti = true;
+				}
+			}
+		}
+		
+		private boolean Polished_weakenNoti = false;
+		public void Polished_weaken(Mob src) {
+			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
+				//-10 turns
+				multiplier -= 0.04f;
+				multiplier = Math.max(multiplier, 1.3f + .00001f);
+				
+				Sample.INSTANCE.play(Assets.Sounds.BURNING);
+				if(!Polished_weakenNoti) {
+					GLog.p(Messages.get(ChampionEnemy.Growing.class, "weaken"));
+					Polished_weakenNoti = true;
+				}
+			}
 		}
 
 		@Override

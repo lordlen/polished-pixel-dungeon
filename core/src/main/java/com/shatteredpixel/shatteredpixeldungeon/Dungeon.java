@@ -113,7 +113,7 @@ public class Dungeon {
 			for (int i = 0; i < 5; i++) {
 				int offset = pos + level.pointToCell(-2, -2+i);
 
-				BArray.or( level.traversable, extendedHeroFOV, offset, 5, level.traversable );
+				if(offset <= level.length() - 5) BArray.or( level.traversable, extendedHeroFOV, offset, 5, level.traversable );
 			}
 
 			if(Dungeon.hero.pointsInTalent(Talent.ROGUES_EXPERTISE) >= 2) {
@@ -130,7 +130,27 @@ public class Dungeon {
 				current.call();
 				callback.call();
 			};
+    }
+    
+		public static void replaceLevel( int depth, int branch, Level replacement ) {
+			try {
+				Bundle bundle = new Bundle();
+				bundle.put( LEVEL, replacement );
+	
+				FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
+			} catch (IOException e) { return; }
 		}
+		
+		public static Level getLevel(int depth, int branch) {
+			Level level;
+			try {
+				Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ));
+				level = (Level)bundle.get( LEVEL );
+			} catch (Exception e) { level = null; }
+	
+			return level;
+		}
+    
 	}
 
 	//enum of items which have limited spawns, records how many have spawned
@@ -144,6 +164,14 @@ public class Dungeon {
 		INT_STONE,
 		TRINKET_CATA,
 		LAB_ROOM, //actually a room, but logic is the same
+
+		//Food sources
+		CRAB_MEAT,
+		ALBINO_MEAT,
+		//Piranhas are already limited (except multiplicity, but that's niche anyway)
+		SPINNER_MEAT,
+		MONK_RATION,
+		SENIOR_PASTY,
 
 		//Health potion sources
 		//enemies
@@ -645,6 +673,7 @@ public class Dungeon {
 	private static final String PORTED      = "ported%d";
 	private static final String LEVEL		= "level";
 	private static final String LIMDROPS    = "limited_drops";
+	private static final String FOUND_ITEMS = "found_items";
 	private static final String CHAPTERS	= "chapters";
 	private static final String QUESTS		= "quests";
 	private static final String BADGES		= "badges";
@@ -678,6 +707,10 @@ public class Dungeon {
 			Bundle limDrops = new Bundle();
 			LimitedDrops.store( limDrops );
 			bundle.put ( LIMDROPS, limDrops );
+
+			Bundle foundItems = new Bundle();
+			FoundItems.store( foundItems );
+			bundle.put ( FOUND_ITEMS, foundItems );
 			
 			int count = 0;
 			int ids[] = new int[chapters.size()];
@@ -961,10 +994,10 @@ public class Dungeon {
 		int pos = l + t * level.width();
 
 		//POLISHED
-		int l_e = Math.max( 0, x - dist-1 );
-		int r_e = Math.min( x + dist+1, level.width() - 1 );
-		int t_e = Math.max( 0, y - dist-1 );
-		int b_e = Math.min( y + dist+1, level.height() - 1 );
+		int l_e = Math.max( 0, l-1 );
+		int r_e = Math.min( r+1, level.width() - 1 );
+		int t_e = Math.max( 0, t-1 );
+		int b_e = Math.min( b+1, level.height() - 1 );
 
 		int width_e = r_e - l_e + 1;
 		int height_e = b_e - t_e + 1;

@@ -213,6 +213,7 @@ public class Statistics {
 
 		if (bundle.contains( ITEM_TYPES_DISCOVERED )) {
 			itemTypesDiscovered = new HashSet<>(Arrays.asList(bundle.getClassArray(ITEM_TYPES_DISCOVERED)));
+			itemTypesDiscovered.remove(null);
 		} else {
 			itemTypesDiscovered.clear();
 		}

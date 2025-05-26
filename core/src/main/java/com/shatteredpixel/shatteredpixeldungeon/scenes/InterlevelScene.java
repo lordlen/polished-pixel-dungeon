@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WarpingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
@@ -744,8 +745,6 @@ public class InterlevelScene extends PixelScene {
 		} else {
 			level = Dungeon.level;
 			BArray.setFalse(level.heroFOV);
-			BArray.setFalse(level.visited);
-			BArray.setFalse(level.mapped);
 			int invPos = Dungeon.hero.pos;
 			int tries = 0;
 			do {
@@ -762,6 +761,7 @@ public class InterlevelScene extends PixelScene {
 				level.map[Dungeon.hero.pos] = Terrain.GRASS;
 			}
 			Dungeon.hero.resurrect();
+			Buff.affect(Dungeon.hero, WarpingTrap.Disoriented.class, 4*WarpingTrap.Disoriented.DURATION);
 			level.drop(new LostBackpack(), invPos);
 		}
 

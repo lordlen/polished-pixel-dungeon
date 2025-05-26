@@ -432,7 +432,7 @@ public abstract class Char extends Actor {
 			if (enemy.buff(GuidingLight.Illuminated.class) != null){
 				enemy.buff(GuidingLight.Illuminated.class).detach();
 				if (this == Dungeon.hero && Dungeon.hero.hasTalent(Talent.SEARING_LIGHT)){
-					dmg += 2 + 2*Dungeon.hero.pointsInTalent(Talent.SEARING_LIGHT);
+					dmg += 1 + Dungeon.hero.pointsInTalent(Talent.SEARING_LIGHT);
 				}
 				if (this != Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.PRIEST){
 					enemy.damage(Dungeon.hero.lvl, GuidingLight.INSTANCE);
@@ -440,7 +440,7 @@ public abstract class Char extends Actor {
 			}
 
 			Berserk berserk = buff(Berserk.class);
-			if (berserk != null) dmg = berserk.damageFactor(dmg);
+			if (berserk != null) dmg *= berserk.damageFactor();
 
 			if (buff( Fury.class ) != null) {
 				dmg *= 1.5f;
@@ -482,7 +482,7 @@ public abstract class Char extends Actor {
 			}
 
 			if (enemy.buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				dmg *= 0.2f;
+				dmg *= 0.0f;
 			}
 
 			//POLISHED: do we let them stack?
@@ -671,6 +671,9 @@ public abstract class Char extends Actor {
 			// + 3%/5%
 			acuRoll *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 		}
+
+		Berserk berserk = attacker.buff(Berserk.class);
+		if(berserk != null) acuRoll *= berserk.accuracyFactor();
 		
 		float defRoll = Random.Float( defStat );
 		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
@@ -811,7 +814,7 @@ public abstract class Char extends Actor {
 		return cachedShield;
 	}
 
-	boolean isExternal(Char defender, Object src) {
+	boolean Polished_isDamageExternal(Object src) {
 
 		if(!(src instanceof Char)) {
 			//dont get def boost against debuffs, traps and such
@@ -844,7 +847,7 @@ public abstract class Char extends Actor {
 					return true;
 				}
 
-				else if(Dungeon.level.distance(attacker.pos, defender.pos) <= Dungeon.Polished.DEFAULT_VIEW_DISTANCE) {
+				else if(Dungeon.level.distance(attacker.pos, pos) <= Dungeon.Polished.DEFAULT_VIEW_DISTANCE) {
 					//if within a reasonable distance, we assume they're in the same room
 					return false;
 				}
@@ -854,6 +857,7 @@ public abstract class Char extends Actor {
 		}
 		else return false;
 	}
+	
 	public void damage( int dmg, Object src ) {
 		
 		if (!isAlive() || dmg < 0) {
@@ -958,7 +962,7 @@ public abstract class Char extends Actor {
 
 		ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
 		if (giant != null){
-			boolean externalAttack = isExternal(this, src);
+			boolean externalAttack = Polished_isDamageExternal(src);
 
 			//we ceil these specifically to favor the player vs. champ dmg reduction
 			// most important vs. giant champions in the earlygame

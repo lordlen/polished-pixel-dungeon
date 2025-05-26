@@ -27,13 +27,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Debug;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
-import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
@@ -171,7 +171,6 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -184,8 +183,6 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
-import com.watabou.input.KeyBindings;
-import com.watabou.input.KeyEvent;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.Delayer;
@@ -293,6 +290,35 @@ public class Hero extends Char {
 			if(!Dungeon.hero.belongings.backpack.Polished_canHoldGlobal(item)) return false;
 
 			return (SPDSettings.Polished.autoPickup() && noEnemiesSeen() && noEnemiesLast);
+		}
+
+
+		public static ArrayList<LinkedHashMap<Talent, Integer>> getTalents() {
+			ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
+			Talent.initClassTalents(Dungeon.hero.heroClass, talents, Dungeon.hero.metamorphedTalents);
+			for (LinkedHashMap<Talent, Integer> tier : talents){
+				for (Talent talent : tier.keySet()){
+					tier.put(talent, Dungeon.hero.pointsInTalent(talent));
+				}
+			}
+
+			return talents;
+		}
+
+		public static int tiersUnlocked() {
+			int tiersAvailable = 1;
+			while ( tiersAvailable < Talent.MAX_TALENT_TIERS
+					&& Dungeon.hero.lvl+1 >= Talent.tierLevelThresholds[tiersAvailable+1] ) {
+				tiersAvailable++;
+			}
+
+			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
+				tiersAvailable = 2;
+			} else if (tiersAvailable > 3 && Dungeon.hero.armorAbility == null){
+				tiersAvailable = 3;
+			}
+
+			return tiersAvailable;
 		}
 	}
 
@@ -627,7 +653,9 @@ public class Hero extends Char {
 			return INFINITE_EVASION;
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.blockLeft--;
 			return INFINITE_EVASION;
 		}
 		
@@ -669,8 +697,12 @@ public class Hero extends Char {
 			return Messages.get(Monk.class, "parried");
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
-			buff(RoundShield.GuardTracker.class).hasBlocked = true;
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.hasBlocked = true;
+			if(guardTracker.blockLeft == 0) {
+				guardTracker.detach();
+			}
 			BuffIndicator.refreshHero();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			return Messages.get(RoundShield.GuardTracker.class, "guarded");
@@ -924,8 +956,9 @@ public class Hero extends Char {
 
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshBoss();
-		WealthDrop.refreshIndicators();
-
+    GameScene.Polished.updateMobBuffIndicators();
+    WealthDrop.refreshIndicators();
+    
 		if (paralysed > 0) {
 			
 			curAction = null;
@@ -1673,7 +1706,7 @@ public class Hero extends Char {
 			}
 			//and to monk meditate damage reduction
 			if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				damage *= 0.2f;
+				damage *= 0.0f;
 			}
 		}
 
@@ -1688,6 +1721,9 @@ public class Hero extends Char {
 			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       damage /= (immu.snack ? 2f : 4f);
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  damage = 0;
 		}
+
+		Berserk berserk = buff(Berserk.class);
+		if(berserk != null) damage *= berserk.resistanceFactor();
 
 		dmg = Math.round(damage);
 
@@ -1811,8 +1847,7 @@ public class Hero extends Char {
 				}
 
 				//Clear blobs that only exist for landmarks.
-				// Might want to make this a properly if it's used more
-				if (found && b instanceof WeakFloorRoom.WellID){
+				if (found && b instanceof LandmarkBlob){
 					b.fullyClear();
 				}
 			}
@@ -2075,8 +2110,8 @@ public class Hero extends Char {
 		MasterThievesArmband.Thievery armband = buff(MasterThievesArmband.Thievery.class);
 		if (armband != null) armband.gainCharge(percent);
 
-		Berserk berserk = buff(Berserk.class);
-		if (berserk != null) berserk.recover(percent);
+		Berserk.UndyingRecovery recovery = buff(Berserk.UndyingRecovery.class);
+		if (recovery != null) recovery.recover(source != PotionOfExperience.class ? percent : 0.75f * percent);
 		
 		if (source != PotionOfExperience.class) {
 			for (Item i : belongings) {
@@ -2360,7 +2395,7 @@ public class Hero extends Char {
 		
 		if (HP <= 0){
 			if (berserk == null) berserk = buff(Berserk.class);
-			return berserk != null && berserk.berserking();
+			return berserk != null && berserk.raging();
 		} else {
 			berserk = null;
 			return super.isAlive();
@@ -2416,6 +2451,11 @@ public class Hero extends Char {
 
 		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+		}
+
+		if (hit && subClass == HeroSubClass.BERSERKER && wasEnemy) {
+			Berserk berserk = buff(Berserk.class);
+			if(berserk != null) berserk.onHit();
 		}
 
 		curAction = null;

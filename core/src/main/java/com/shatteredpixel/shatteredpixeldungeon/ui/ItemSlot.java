@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -253,7 +254,11 @@ public class ItemSlot extends Button {
 				&& ((MissileWeapon) item).durabilityLeft() <= 50f
 				&& ((MissileWeapon) item).durabilityLeft() <= ((MissileWeapon) item).durabilityPerUse()){
 			status.hardlight(WARNING);
-		} else {
+		}
+		else if (item instanceof SpiritBow) {
+			((SpiritBow) item).statusColor(status);
+		}
+		else {
 			status.resetColor();
 		}
 

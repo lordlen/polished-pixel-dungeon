@@ -30,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Fireball;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
@@ -116,14 +118,45 @@ public class TitleScene extends PixelScene {
 		final Chrome.Type GREY_TR = Chrome.Type.GREY_BUTTON_TR;
 		
 		StyledButton btnPlay = new StyledButton(GREY_TR, Messages.get(this, "enter")){
+			Game.SceneChangeCallback callback = new Game.SceneChangeCallback() {
+				@Override
+				public void beforeCreate() {}
+
+				@Override
+				public void afterCreate() {
+					if(!SPDSettings.intro()) return;
+
+					ShatteredPixelDungeon.scene().add(new WndOptions(Icons.SHPX.get(),
+							Messages.get(TitleScene.class, "experienced_title"),
+							"",
+							Messages.get(TitleScene.class, "experienced_yes"),
+							Messages.get(TitleScene.class, "experienced_no")){
+
+						@Override
+						protected void onSelect(int index) {
+							SPDSettings.intro(index == 1);
+
+							if(index == 0) {
+								ShatteredPixelDungeon.seamlessResetScene();
+							}
+						}
+
+						@Override
+						public void onBackPressed() {
+							//do nothing
+						}
+					});
+				}
+			};
+
 			@Override
 			protected void onClick() {
 				if (GamesInProgress.checkAll().size() == 0){
 					GamesInProgress.selectedClass = null;
 					GamesInProgress.curSlot = 1;
-					ShatteredPixelDungeon.switchScene(HeroSelectScene.class);
+					ShatteredPixelDungeon.switchScene(HeroSelectScene.class, callback);
 				} else {
-					ShatteredPixelDungeon.switchNoFade( StartScene.class );
+					ShatteredPixelDungeon.switchNoFade( StartScene.class, callback );
 				}
 			}
 			
@@ -230,6 +263,11 @@ public class TitleScene extends PixelScene {
 		if (Badges.isUnlocked(Badges.Badge.VICTORY) && !SPDSettings.victoryNagged()) {
 			SPDSettings.victoryNagged(true);
 			add(new WndVictoryCongrats());
+		}
+
+		if (DeviceCompat.isDebug()) {
+			Catalog.Polished_setSeenAll();
+			Bestiary.Polished_setSeenAll();
 		}
 
 		fadeIn();

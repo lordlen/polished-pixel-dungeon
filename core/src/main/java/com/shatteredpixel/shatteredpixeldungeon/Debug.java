@@ -1,15 +1,21 @@
 package com.shatteredpixel.shatteredpixeldungeon;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.SupplyRation;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfFeatherFall;
@@ -20,7 +26,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlast;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlink;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Reflection;
 
@@ -40,7 +48,7 @@ public class Debug {
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1f;
 
     public static final int Starting_Floor = DebuggingStats ?           6       : 1;
-    public static final int Starting_HeroLevel = DebuggingStats ?       18      : 1;
+    public static final int Starting_HeroLevel = DebuggingStats ?       15      : 1;
     public static final int Starting_Str = DebuggingStats ?             16      : 10;
     public static final int Starting_HP = DebuggingStats ?              2000    : 20;
 
@@ -51,7 +59,7 @@ public class Debug {
     static {
         //Testing items
         Starting_Items = new ArrayList<>(Arrays.asList(
-                
+
         ));
 
 
@@ -83,8 +91,12 @@ public class Debug {
         if(!Debug.DEBUG_MODE || !Debug.ActOnStart) return;
         ClearWaterskin();
 
+        DebugCollect(EnergyCrystal.class);
         Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
         Starting_Bag();
+
+        MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
+        if(charger != null) charger.gainCharge(charger.chargeCap());
     }
     public static void LoadGame() {
         if(!Debug.DEBUG_MODE || !Debug.ActOnLoad) return;
@@ -98,19 +110,24 @@ public class Debug {
     }
 
 
-    public static void DebugCollect(Class<?extends Item> itemType) {
-        DebugCollect(itemType, 0, 99, null);
+    public static<T extends Item> T DebugCollect(Class<T> itemType) {
+        return DebugCollect(itemType, 0, 99, null);
     }
-    public static void DebugCollect(Class<?extends Item> itemType, int level) {
-        DebugCollect(itemType, level, 1, null);
+    public static<T extends Item> T DebugCollect(Class<T> itemType, int level) {
+        return DebugCollect(itemType, level, 99, null);
     }
-    public static void DebugCollect(Class<?extends Item> itemType, int level, int quantity) {
-        DebugCollect(itemType, level, quantity, null);
+    public static<T extends Item> T DebugCollect(Class<T> itemType, int level, int quantity) {
+        return DebugCollect(itemType, level, quantity, null);
     }
-    public static<T> Item DebugCollect(Class<?extends Item> itemType, int level, int quantity, Class<T> enchant) {
+    public static<T extends Item, E> T DebugCollect(Class<T> itemType, int level, int quantity, Class<E> enchant) {
         if(!DEBUG_MODE) return null;
         Item i = Reflection.newInstance(itemType);
         if(i == null) return null;
+
+        if(i instanceof EnergyCrystal) {
+            Dungeon.energy += i.quantity();
+            return null;
+        }
 
         i.quantity(i.stackable ? quantity : 1);
         i.identify();
@@ -133,7 +150,7 @@ public class Debug {
         }
 
         i.collect();
-        return i;
+        return (T)i;
     }
 
 

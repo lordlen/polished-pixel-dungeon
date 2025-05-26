@@ -325,7 +325,7 @@ public class AlchemyScene extends PixelScene {
 		};
 		add(invSelector);
 
-		cancel = new IconButton(Icons.CLOSE.get()){
+		cancel = new IconButton(Icons.CLOSE_POLISHED.get()){
 			@Override
 			protected void onClick() {
 				super.onClick();
@@ -347,7 +347,7 @@ public class AlchemyScene extends PixelScene {
 		cancel.enable(false);
 		add(cancel);
 
-		repeat = new IconButton(Icons.REPEAT.get()){
+		repeat = new IconButton(Icons.REPEAT_POLISHED.get()){
 			@Override
 			protected void onClick() {
 				super.onClick();
@@ -436,7 +436,7 @@ public class AlchemyScene extends PixelScene {
 		align(energyIcon);
 		add(energyIcon);
 
-		energyAdd = new IconButton(Icons.get(Icons.PLUS)){
+		energyAdd = new IconButton(Icons.get(Icons.PLUS_POLISHED)){
 
 			private float time = 0;
 

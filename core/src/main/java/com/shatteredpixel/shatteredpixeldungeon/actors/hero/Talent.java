@@ -102,7 +102,7 @@ public enum Talent {
 	//Warrior T3
 	HOLD_FAST(9, 3), STRONGMAN(10, 3),
 	//Berserker T3
-	ENDLESS_RAGE(11, 3), DEATHLESS_FURY(12, 3), ENRAGED_CATALYST(13, 3),
+	LAST_STAND(224, 3), UNDYING_RAGE(12, 3), ENRAGED_CATALYST(13, 3),
 	//Gladiator T3
 	CLEAVE(14, 3), LETHAL_DEFENSE(15, 3), ENHANCED_COMBO(16, 3),
 	//Heroic Leap T4
@@ -132,7 +132,7 @@ public enum Talent {
 	//Rogue T1
 	CACHED_RATIONS(64), THIEFS_INTUITION(65), SUCKER_PUNCH(66), PROTECTIVE_SHADOWS(67),
 	//Rogue T2
-	MYSTICAL_MEAL(68), INSCRIBED_STEALTH(69), SMART_ESCAPE(70), SILENT_STEPS(71), ROGUES_EXPERTISE(72),
+	MYSTICAL_MEAL(68), INSCRIBED_STEALTH(69), SMART_ESCAPE(225), SILENT_STEPS(71), ROGUES_EXPERTISE(72),
 	//Rogue T3
 	ENHANCED_RINGS(73, 3), LIGHT_CLOAK(74, 3),
 	//Assassin T3
@@ -486,14 +486,13 @@ public enum Talent {
 
 	public String desc(boolean metamorphed){
 		if (this == NATURES_AID && SPDSettings.Polished.huntress()) {
-			String metaDesc = Messages.get(this, name() + ".polished_meta_desc");
 			String desc = Messages.get(this, name() + ".polished_desc");
-
-			if(!metaDesc.equals(Messages.NO_TEXT_FOUND))
+			String metaDesc = Messages.get(this, name() + ".polished_meta_desc");
+			
+			if(metamorphed) {
 				return desc + "\n\n" + metaDesc;
-			else
-				return desc;
-
+			}
+			else return desc;
 		}
 
 		if (metamorphed){
@@ -793,8 +792,8 @@ public enum Talent {
 				}
 				CellEmitter.get(grassCell).burst(LeafParticle.LEVEL_SPECIFIC, 4);
 			}
-			// 4/6 cells total
-			int totalGrassCells = (int) (factor * (2 + 2 * hero.pointsInTalent(LIQUID_NATURE)));
+			// 6/8 cells total
+			int totalGrassCells = (int) (factor * (4 + 2 * hero.pointsInTalent(LIQUID_NATURE)));
 			while (grassCells.size() > totalGrassCells){
 				grassCells.remove(0);
 			}
@@ -829,7 +828,7 @@ public enum Talent {
 		}
 		if (hero.hasTalent(RECALL_INSCRIPTION) && Scroll.class.isAssignableFrom(cls) && cls != ScrollOfUpgrade.class){
 			if (hero.heroClass == HeroClass.CLERIC){
-				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 300 : 10).item = cls;
+				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 50 : 10).item = cls;
 			} else {
 				// 10/15%
 				if (Random.Int(20) < 1 + hero.pointsInTalent(RECALL_INSCRIPTION)){
@@ -843,7 +842,7 @@ public enum Talent {
 	public static void onRunestoneUsed( Hero hero, int pos, Class<?extends Item> cls ){
 		if (hero.hasTalent(RECALL_INSCRIPTION) && Runestone.class.isAssignableFrom(cls)){
 			if (hero.heroClass == HeroClass.CLERIC){
-				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 300 : 10).item = cls;
+				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 50 : 10).item = cls;
 			} else {
 
 				//don't trigger on 1st intuition use
@@ -1128,7 +1127,7 @@ public enum Talent {
 		//tier 3
 		switch (cls){
 			case BERSERKER: default:
-				Collections.addAll(tierTalents, ENDLESS_RAGE, DEATHLESS_FURY, ENRAGED_CATALYST);
+				Collections.addAll(tierTalents, LAST_STAND, UNDYING_RAGE, ENRAGED_CATALYST);
 				break;
 			case GLADIATOR:
 				Collections.addAll(tierTalents, CLEAVE, LETHAL_DEFENSE, ENHANCED_COMBO);
