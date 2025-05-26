@@ -99,7 +99,7 @@ public class WarpingTrap extends TeleportationTrap {
 			if (target == Dungeon.hero && visited != null && mapped != null) {
 				boolean thisLevel = Dungeon.depth == depth && Dungeon.branch == branch;
 
-				Level level = thisLevel ? Dungeon.level : Dungeon.getLevel(depth, branch);
+				Level level = thisLevel ? Dungeon.level : Dungeon.Polished.getLevel(depth, branch);
 
 				if(level != null && level.length() == visited.length) {
 					BArray.or(level.visited, visited, level.visited);
@@ -109,7 +109,7 @@ public class WarpingTrap extends TeleportationTrap {
 						GameScene.updateFog();
 						Dungeon.observe();
 					} else {
-						Dungeon.replaceLevel(depth, branch, level);
+						Dungeon.Polished.replaceLevel(depth, branch, level);
 					}
 				}
 			}
