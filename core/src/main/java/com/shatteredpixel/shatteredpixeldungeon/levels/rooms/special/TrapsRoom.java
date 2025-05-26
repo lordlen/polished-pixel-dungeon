@@ -37,10 +37,12 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.traps.FlashingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.FlockTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrippingTrap;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GuardianTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.PoisonDartTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.TeleportationTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WarpingTrap;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WornDartTrap;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
@@ -50,7 +52,7 @@ public class TrapsRoom extends SpecialRoom {
 	//size is a bit limited to prevent too many or too few traps
 	@Override
 	public int minWidth() { return 6; }
-	public int maxWidth() { return 8; }
+	public int maxWidth() { return 7; }
 
 	@Override
 	public int minHeight() { return 6; }
@@ -159,13 +161,13 @@ public class TrapsRoom extends SpecialRoom {
 	@SuppressWarnings("unchecked")
 	private static Class<?extends Trap>[][] levelTraps = new Class[][]{
 			//sewers
-			{GrippingTrap.class, TeleportationTrap.class, FlockTrap.class},
+			{WornDartTrap.class, GrippingTrap.class, WarpingTrap.class},
 			//prison
 			{PoisonDartTrap.class, GrippingTrap.class, ExplosiveTrap.class},
 			//caves
-			{PoisonDartTrap.class, FlashingTrap.class, ExplosiveTrap.class},
+			{DisintegrationTrap.class, FlashingTrap.class, WarpingTrap.class},
 			//city
-			{WarpingTrap.class, FlashingTrap.class, DisintegrationTrap.class},
+			{DisintegrationTrap.class, FlashingTrap.class, GuardianTrap.class},
 			//halls, muahahahaha
 			{GrimTrap.class}
 	};
