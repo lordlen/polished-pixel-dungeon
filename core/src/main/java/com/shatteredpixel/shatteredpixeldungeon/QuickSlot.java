@@ -23,28 +23,41 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.watabou.input.GameAction;
-import com.watabou.noosa.Game;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class QuickSlot {
-
+	
 	/**
 	 * Slots contain objects which are also in a player's inventory. The one exception to this is when quantity is 0,
 	 * which can happen for a stackable item that has been 'used up', these are referred to as placeholders.
 	 */
-
-	//note that the current max size is coded at 7, due to UI constraints, but it could be much much bigger with no issue.
-	public static int SIZE = SPDSettings.Polished.quickslot() ? 7 : 6;
+	
+	public static int SIZE = 14;
 	private Item[] slots = new Item[SIZE];
-
-
+	
+	
+	public static class Polished {
+		public static int quickslotsEnabled() {
+			return SPDSettings.Polished.total_quickslots();
+		}
+		
+		public static int quickslotsActive() {
+			int quickslotsToShow = 4;
+			for (int i = 5; i <= quickslotsEnabled(); i++) {
+				if(PixelScene.uiCamera.width > 62 + i*18) quickslotsToShow++;
+			}
+			
+			return quickslotsToShow;
+		}
+	}
+	
+	
 	//direct array interaction methods, everything should build from these methods.
 	public void setSlot(int slot, Item item){
 		clearItem(item); //we don't want to allow the same item in multiple slots.

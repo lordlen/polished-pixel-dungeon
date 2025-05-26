@@ -280,6 +280,14 @@ public class GameScene extends PixelScene {
 				indicatorsQueued.clear();
 			}
 		}
+		
+		public static InventoryPane invPane() {
+			return scene != null ? scene.inventory : null;
+		}
+		
+		public static StatusPane statPane() {
+			return scene != null ? scene.status : null;
+		}
 	}
 	
 	@Override
@@ -1365,7 +1373,7 @@ public class GameScene extends PixelScene {
 			layoutTags();
 		}
 	}
-
+	
 	public static void centerNextWndOnInvPane(){
 		if (scene != null && scene.inventory != null && scene.inventory.visible){
 			lastOffset = new Point((int)scene.inventory.centerX() - uiCamera.width/2,
