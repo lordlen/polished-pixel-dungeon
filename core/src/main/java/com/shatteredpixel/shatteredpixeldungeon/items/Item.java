@@ -100,11 +100,11 @@ public class Item implements Bundlable {
 
 	// whether an item can be included in heroes remains
 	public boolean bones = false;
-  
-  // for keeping track of floor records
+	
+	// for keeping track of floor records
 	public boolean Polished_toFind = false;
-  
-  // For wrapper behaviour
+	
+	// for wrapper behaviour
 	protected WealthDrop<?, ?> Polished_wealthDrop = null;
   
 	
