@@ -268,7 +268,7 @@ public class BuffIndicator extends Component {
 		float lastIconLeft = 0;
 		for (BuffButton icon : buffButtons.values()){
 			if(Polished_followsChar) {
-				icon.icon.scale = new PointF(0.6f, 0.6f);
+				icon.icon.scale.set(PixelScene.align(0.6f));
 				icon.Polished_mini = true;
 			}
 			
@@ -357,7 +357,9 @@ public class BuffIndicator extends Component {
 				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1);
 				
 				if(Polished_mini) {
+					//disable touch
 					hotArea = new PointerArea( 0, 0, 0, 0 ) {};
+					
 					float result = Buff.Polished_genericIconFade(buff);
 					fadeHeight = result != -1 ? result : fadeHeight;
 				}
