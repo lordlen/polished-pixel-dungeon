@@ -1845,7 +1845,6 @@ public class Hero extends Char {
 				}
 
 				//Clear blobs that only exist for landmarks.
-				// Might want to make this a properly if it's used more
 				if (found && b instanceof LandmarkBlob){
 					b.fullyClear();
 				}

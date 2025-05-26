@@ -372,7 +372,7 @@ public abstract class RegularLevel extends Level {
 
 			Item toDrop = Generator.random();
 			if (toDrop == null) continue;
-			toDrop.toFind = true;
+			toDrop.Polished_toFind = true;
 
 			int cell = randomDropCell();
 			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
@@ -434,7 +434,7 @@ public abstract class RegularLevel extends Level {
 		}
 
 		for (Item item : itemsToSpawn) {
-			item.toFind = true;
+			item.Polished_toFind = true;
 
 			int cell = randomDropCell();
 			if (item instanceof TrinketCatalyst){
@@ -486,7 +486,7 @@ public abstract class RegularLevel extends Level {
 					losBlocking[cell] = false;
 				}
 				for (Item i : bonesItems) {
-					i.toFind = true;
+					i.Polished_toFind = true;
 					drop(i, cell).setHauntedIfCursed().type = Heap.Type.REMAINS;
 				}
 			}

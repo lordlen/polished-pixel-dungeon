@@ -268,8 +268,8 @@ public class TitleScene extends PixelScene {
 		}
 
 		if (DeviceCompat.isDebug()) {
-			Catalog.setSeenAll();
-			Bestiary.setSeenAll();
+			Catalog.Polished_setSeenAll();
+			Bestiary.Polished_setSeenAll();
 		}
 
 		fadeIn();

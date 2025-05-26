@@ -296,7 +296,7 @@ public enum Bestiary {
 		Badges.validateCatalogBadges();
 	}
 
-	public static void setSeenAll(){
+	public static void Polished_setSeenAll(){
 		for (Bestiary cat : values()) {
 			for(Class<?> cls : cat.seen.keySet()) {
 				cat.seen.put(cls, true);

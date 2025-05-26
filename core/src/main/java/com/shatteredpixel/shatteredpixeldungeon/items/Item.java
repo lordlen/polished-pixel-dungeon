@@ -99,7 +99,7 @@ public class Item implements Bundlable {
 	public boolean bones = false;
 
 	// for keeping track of floor records
-	public boolean toFind = false;
+	public boolean Polished_toFind = false;
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
@@ -596,7 +596,7 @@ public class Item implements Bundlable {
 			bundle.put( QUICKSLOT, Dungeon.quickslot.getSlot(this) );
 		}
 		bundle.put( KEPT_LOST, keptThoughLostInvent );
-		bundle.put( TO_FIND, toFind );
+		bundle.put( TO_FIND, Polished_toFind);
 	}
 	
 	@Override
@@ -622,7 +622,7 @@ public class Item implements Bundlable {
 		}
 
 		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
-		toFind = bundle.getBoolean(TO_FIND);
+		Polished_toFind = bundle.getBoolean(TO_FIND);
 	}
 
 	public int targetingPos( Hero user, int dst ){

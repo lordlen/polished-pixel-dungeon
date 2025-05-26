@@ -93,7 +93,7 @@ public class Heap implements Bundlable {
 		default:
 		}
 
-		Notes.LandmarkRecord.updateOnContainerOpen(pos, type);
+		Notes.LandmarkRecord.Polished.updateOnContainerOpen(pos, type);
 		
 		if (haunted){
 			if (Wraith.spawnAt( pos ) == null) {

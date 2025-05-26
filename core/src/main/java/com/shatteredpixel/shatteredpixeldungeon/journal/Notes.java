@@ -204,8 +204,7 @@ public class Notes {
 					return Icons.MAGICAL_FIRE.get();
 				case POOL_ROOM:
 					return Icons.POOL_ROOM.get();
-				case BARRICADE:
-				case BARRICADE_QUEST:
+				case BARRICADE: case BARRICADE_QUEST:
 					return Icons.BARRICADE.get();
 				case TOXIC_GAS_ROOM:
 					return Icons.TOXIC_GAS_ROOM.get();
@@ -248,47 +247,50 @@ public class Notes {
 			}
 		}
 
-		public static void updateOnContainerOpen(int pos, Heap.Type type) {
-			if(!(Dungeon.level instanceof RegularLevel)) return;
-			Room room = ((RegularLevel)Dungeon.level).room(pos);
-
-            switch (type) {
-                case CHEST:
-                    if (room instanceof SentryRoom) Notes.remove(Landmark.RED_SENTRY);
-                    else if (room instanceof TrapsRoom) {
-                        Notes.remove(Landmark.TRAPS_ROOM);
-                        Notes.remove(Landmark.CHASM_ROOM);
-                    } else if (room instanceof PoolRoom) Notes.remove(Landmark.POOL_ROOM);
-                    else if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
-                    break;
-
-                case SKELETON:
-                    if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
-                    break;
-
-                case LOCKED_CHEST:
-                    if (room instanceof SecretChestChasmRoom)
-                        Notes.remove(Landmark.CHASM_ROOM_SECRET);
-                    break;
-            }
-		}
-
-		public static void updateOnBarricade(int pos) {
-			if(!(Dungeon.level instanceof RegularLevel)) return;
-
-			for (int i : PathFinder.NEIGHBOURS9) {
-				Room room = ((RegularLevel)Dungeon.level).room(pos+i);
-				if(room instanceof StorageRoom) {
-					Notes.remove(Landmark.BARRICADE);
-					return;
+		public static class Polished {
+			
+			public static void updateOnContainerOpen(int pos, Heap.Type type) {
+				if(!(Dungeon.level instanceof RegularLevel)) return;
+				Room room = ((RegularLevel)Dungeon.level).room(pos);
+	
+				switch (type) {
+					case CHEST:
+						if (room instanceof SentryRoom) Notes.remove(Landmark.RED_SENTRY);
+						else if (room instanceof TrapsRoom) {
+							Notes.remove(Landmark.TRAPS_ROOM);
+							Notes.remove(Landmark.CHASM_ROOM);
+						} else if (room instanceof PoolRoom) Notes.remove(Landmark.POOL_ROOM);
+						else if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
+						break;
+	
+					case SKELETON:
+						if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
+						break;
+	
+					case LOCKED_CHEST:
+						if (room instanceof SecretChestChasmRoom)
+							Notes.remove(Landmark.CHASM_ROOM_SECRET);
+						break;
 				}
-				else if(room instanceof MassGraveRoom) {
-					Notes.remove(Landmark.BARRICADE_QUEST);
-					return;
+			}
+			
+			public static void updateOnBarricade(int pos) {
+				if(!(Dungeon.level instanceof RegularLevel)) return;
+	
+				for (int i : PathFinder.NEIGHBOURS9) {
+					Room room = ((RegularLevel)Dungeon.level).room(pos+i);
+					if(room instanceof StorageRoom) {
+						Notes.remove(Landmark.BARRICADE);
+						return;
+					}
+					else if(room instanceof MassGraveRoom) {
+						Notes.remove(Landmark.BARRICADE_QUEST);
+						return;
+					}
 				}
 			}
 		}
-
+		
 		@Override
 		public String title() {
 			switch (landmark) {

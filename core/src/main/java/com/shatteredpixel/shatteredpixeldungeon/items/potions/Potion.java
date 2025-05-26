@@ -151,9 +151,9 @@ public class Potion extends Item {
 	public boolean doPickUp(Hero hero, int pos) {
 		boolean picked = super.doPickUp(hero, pos);
 
-		if(picked && toFind) {
+		if(picked && Polished_toFind) {
 			FoundItems.add(getClass(), Dungeon.depth);
-			toFind = false;
+			Polished_toFind = false;
 		}
 
 		return picked;

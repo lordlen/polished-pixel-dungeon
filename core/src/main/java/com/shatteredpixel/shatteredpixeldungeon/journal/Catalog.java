@@ -323,7 +323,7 @@ public enum Catalog {
 		Badges.validateCatalogBadges();
 	}
 
-	public static void setSeenAll(){
+	public static void Polished_setSeenAll(){
 		for (Catalog cat : values()) {
 			for(Class<?> cls : cat.seen.keySet()) {
 				cat.seen.put(cls, true);
