@@ -124,7 +124,7 @@ public class CavesBossLevel extends Level {
 		//set up main boss arena
 		Painter.fillEllipse(this, mainArena, Terrain.EMPTY);
 
-		boolean[] patch = Patch.generate( width, height-14, 0.15f, 2, true );
+		boolean[] patch = Patch.generate( width, height-14, 0.2f, 1, true );
 		for (int i= 14*width(); i < length(); i++) {
 			if (map[i] == Terrain.EMPTY) {
 				if (patch[i - 14*width()]){
