@@ -142,7 +142,7 @@ public class Buff extends Actor {
 		return Math.max(cooldown(), 0.01f);
 	}
 	
-	static public float genericIconFade(Buff buff) {
+	public static float Polished_genericIconFade(Buff buff) {
 		float fade = -1f;
 		
 		if(buff instanceof FlavourBuff) {

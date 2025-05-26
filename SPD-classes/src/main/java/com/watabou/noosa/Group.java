@@ -273,7 +273,7 @@ public class Group extends Gizmo {
 		return count;
 	}
 	
-	public synchronized ArrayList<Gizmo> all() {
+	public synchronized ArrayList<Gizmo> Polished_all() {
 		return members;
 	}
 	

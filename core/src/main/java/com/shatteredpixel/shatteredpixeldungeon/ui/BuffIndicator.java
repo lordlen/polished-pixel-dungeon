@@ -154,10 +154,21 @@ public class BuffIndicator extends Component {
 	
 	private LinkedHashMap<Buff, BuffButton> buffButtons = new LinkedHashMap<>();
 	private boolean needsRefresh;
-	private boolean followsChar = false;
 	private Char ch;
-
 	private boolean large = false;
+	
+	private boolean Polished_followsChar = false;
+	public void Polished_target(Char ch ) {
+		if (ch != null && ch.isAlive() && ch.isActive()) {
+			this.ch = ch;
+			Polished_followsChar = true;
+			GameScene.Polished.add(this);
+		} else {
+			this.ch = null;
+			Polished_followsChar = false;
+			killAndErase();
+		}
+	}
 	
 	public BuffIndicator( Char ch, boolean large ) {
 		super();
@@ -166,18 +177,6 @@ public class BuffIndicator extends Component {
 		this.large = large;
 		if (ch == Dungeon.hero) {
 			heroInstance = this;
-		}
-	}
-
-	public void target( Char ch ) {
-		if (ch != null && ch.isAlive() && ch.isActive()) {
-			this.ch = ch;
-			followsChar = true;
-			GameScene.add(this);
-		} else {
-			this.ch = null;
-			followsChar = false;
-			killAndErase();
 		}
 	}
 	
@@ -194,7 +193,7 @@ public class BuffIndicator extends Component {
 	public synchronized void update() {
 		super.update();
 		
-		if(followsChar) {
+		if(Polished_followsChar) {
 			if (ch != null && ch.isAlive() && ch.isActive() && ch.sprite.visible) {
 				CharSprite sprite = ch.sprite;
 				
@@ -227,7 +226,7 @@ public class BuffIndicator extends Component {
 		}
 
 		int size = large ? SIZE_LARGE : SIZE_SMALL;
-		if(followsChar) size = SIZE_MINI;
+		if(Polished_followsChar) size = SIZE_MINI;
 
 		//remove any icons no longer present
 		for (Buff buff : buffButtons.keySet().toArray(new Buff[0])){
@@ -268,13 +267,13 @@ public class BuffIndicator extends Component {
 		int pos = 0;
 		float lastIconLeft = 0;
 		for (BuffButton icon : buffButtons.values()){
-			if(followsChar) {
+			if(Polished_followsChar) {
 				icon.icon.scale = new PointF(0.6f, 0.6f);
-				icon.mini = true;
+				icon.Polished_mini = true;
 			}
 			
 			icon.updateIcon();
-			if(followsChar) {
+			if(Polished_followsChar) {
 				icon.setRect(x + pos * (size + 1), y, size + 1, size + 1);
 			}
 			else {
@@ -297,7 +296,7 @@ public class BuffIndicator extends Component {
 			if (large && leftAdjust >= size*0.45f) leftAdjust = size*0.45f;
 			if (!large && leftAdjust >= size*0.32f) leftAdjust = size*0.32f;
 
-			if(followsChar) leftAdjust *= 0;
+			if(Polished_followsChar) leftAdjust *= 0;
 			float cumulativeAdjust = leftAdjust * (buffButtons.size()-1);
 
 			ArrayList<BuffButton> buttons = new ArrayList<>(buffButtons.values());
@@ -327,7 +326,7 @@ public class BuffIndicator extends Component {
 		public Image grey; //only for small
 		public BitmapText text; //only for large
 		
-		public boolean mini = false;
+		public boolean Polished_mini = false;
 
 		public BuffButton( Buff buff, boolean large ){
 			super( new BuffIcon(buff, large));
@@ -357,9 +356,9 @@ public class BuffIndicator extends Component {
 				
 				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1);
 				
-				if(mini) {
+				if(Polished_mini) {
 					hotArea = new PointerArea( 0, 0, 0, 0 ) {};
-					float result = Buff.genericIconFade(buff);
+					float result = Buff.Polished_genericIconFade(buff);
 					fadeHeight = result != -1 ? result : fadeHeight;
 				}
 				
@@ -439,7 +438,7 @@ public class BuffIndicator extends Component {
 		}
 	}
 	
-	public void refreshMob(){
+	public void Polished_refreshMob(){
 		needsRefresh = true;
 	}
 

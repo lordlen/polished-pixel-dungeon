@@ -164,7 +164,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			}
 
 			if(buffs == null || !buffs.alive) buffs = new BuffIndicator(ch, false);
-			buffs.target(ch);
+			buffs.Polished_target(ch);
 		}
 
 		ch.updateSpriteState();
