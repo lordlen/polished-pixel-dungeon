@@ -41,7 +41,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GreaterHaste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSleep;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
@@ -946,7 +945,7 @@ public abstract class Mob extends Char {
 			
 			for (Mob mob : Dungeon.level.mobs) {
 				ChampionEnemy.Growing grow = mob.buff(ChampionEnemy.Growing.class);
-				if(grow != null) grow.weaken(this);
+				if(grow != null) grow.Polished_weaken(this);
 			}
 		}
 

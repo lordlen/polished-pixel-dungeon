@@ -365,7 +365,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 		
 		private boolean Polished_weakenNoti = false;
-		public void weaken(Mob src) {
+		public void Polished_weaken(Mob src) {
 			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
 				//-10 turns
 				multiplier -= 0.04f;
