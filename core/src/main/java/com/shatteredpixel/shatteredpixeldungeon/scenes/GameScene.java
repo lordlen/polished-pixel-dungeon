@@ -283,11 +283,11 @@ public class GameScene extends PixelScene {
 			}
 		}
 		
-		public static void add( BuffIndicator indicator ){
+		public static void add( BuffIndicator indicator ) {
 			if (scene != null) scene.buffIndicators.add(indicator);
 		}
 		
-		public static void updateMobBuffIndicators(){
+		public static void updateMobBuffIndicators() {
 			if(scene != null && scene.buffIndicators != null) {
 				for(Gizmo indicator : scene.buffIndicators.Polished_all()) {
 					if(indicator instanceof BuffIndicator) {
@@ -295,7 +295,7 @@ public class GameScene extends PixelScene {
 					}
 				}
 			}
-    }
+    	}
     
 		public static InventoryPane invPane() {
 			return scene != null ? scene.inventory : null;
@@ -304,7 +304,8 @@ public class GameScene extends PixelScene {
 		public static StatusPane statPane() {
 			return scene != null ? scene.status : null;
 		}
-  }
+		
+	}
 	
 	@Override
 	public void create() {
