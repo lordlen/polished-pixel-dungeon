@@ -48,8 +48,8 @@ public abstract class EquipableItem extends Item {
 		bones = true;
 		defaultAction = AC_EQUIP;
 		
-		Callback cb = this::Polished_updateDefaultAction;
-		//Dungeon.runafterload()
+		Callback update = this::Polished_updateDefaultAction;
+		Dungeon.Polished.runAfterLoad(update);
 	}
 	
 	void Polished_updateDefaultAction() {
