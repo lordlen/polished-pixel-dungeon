@@ -45,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -68,6 +69,8 @@ public class Item implements Bundlable {
 	
 	public static final String AC_DROP		= "DROP";
 	public static final String AC_THROW		= "THROW";
+	public static final String AC_NOTE		= "NOTE";
+	public static final String AC_EDIT		= "EDIT";
 	
 	protected String defaultAction;
 	public boolean usesTargeting;
@@ -168,6 +171,12 @@ public class Item implements Bundlable {
 			if (hero.belongings.backpack.contains(this) || isEquipped(hero)) {
 				doThrow(hero);
 			}
+			
+		}
+		
+		else if (action.equals( AC_NOTE ) || action.equals( AC_EDIT )) {
+			
+			CustomNoteButton.Polished.addNote(this);
 			
 		}
 	}
