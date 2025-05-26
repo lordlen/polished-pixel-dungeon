@@ -41,7 +41,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GreaterHaste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSleep;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
@@ -119,7 +118,7 @@ public abstract class Mob extends Char {
 	
 	public Class<? extends CharSprite> spriteClass;
 	
-	protected int target = -1;
+	public int target = -1;
 	
 	public int defenseSkill = 0;
 	
@@ -258,8 +257,6 @@ public abstract class Mob extends Char {
 	protected boolean act() {
 		
 		super.act();
-
-		Polished_growingHunt();
 		
 		boolean justAlerted = alerted;
 		alerted = false;
@@ -280,6 +277,11 @@ public abstract class Mob extends Char {
 		if (buff(Terror.class) != null || buff(Dread.class) != null ){
 			state = FLEEING;
 		}
+		
+		//
+		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
+		if (grow != null) grow.Polished_growingHunt();
+		//
 		
 		enemy = chooseEnemy();
 		
@@ -940,6 +942,11 @@ public abstract class Mob extends Char {
 				Berserk berserk = Dungeon.hero.buff(Berserk.class);
 				if(berserk != null) berserk.continueRampage();
 			}
+			
+			for (Mob mob : Dungeon.level.mobs) {
+				ChampionEnemy.Growing grow = mob.buff(ChampionEnemy.Growing.class);
+				if(grow != null) grow.Polished_weaken(this);
+			}
 		}
 
 		if (Dungeon.hero.isAlive() && !Dungeon.level.heroFOV[pos]) {
@@ -1074,28 +1081,6 @@ public abstract class Mob extends Char {
 		}
 		target = cell;
 	}
-
-	private boolean Polished_huntNoti = false;
-	private boolean Polished_growingThreshold() {
-		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
-		return (grow != null && grow.Polished_huntThreshold());
-	}
-	private void Polished_growingHunt() {
-		if(buff(MagicalSleep.class) != null) {
-			Polished_huntNoti = false;
-			return;
-		}
-
-		if(Polished_growingThreshold()) {
-			aggro(Dungeon.hero);
-			target=enemy.pos;
-
-			if(!Polished_huntNoti) {
-				GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
-				Polished_huntNoti = true;
-			}
-		}
-	}
 	
 	public String description() {
 		return Messages.get(this, "desc");
@@ -1198,7 +1183,7 @@ public abstract class Mob extends Char {
 			} else {
 				notice();
 				state = WANDERING;
-				target = Dungeon.level.randomDestination( Mob.this );
+				target = ((Mob.Wandering)WANDERING).randomDestination();
 			}
       
 			if (alignment == Alignment.ENEMY && Dungeon.isChallenged(Challenges.SWARM_INTELLIGENCE)
