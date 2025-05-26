@@ -180,8 +180,6 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
-import com.watabou.input.KeyBindings;
-import com.watabou.input.KeyEvent;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.Delayer;
@@ -955,6 +953,7 @@ public class Hero extends Char {
 
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshBoss();
+		GameScene.Polished.updateMobBuffIndicators();
 
 		if (paralysed > 0) {
 			

@@ -88,6 +88,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Banner;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
@@ -191,6 +192,7 @@ public class GameScene extends PixelScene {
 	private Group emoicons;
 	private Group overFogEffects;
 	private Group healthIndicators;
+	private Group buffIndicators;
 
 	private InventoryPane inventory;
 	private static boolean invVisible = true;
@@ -281,6 +283,20 @@ public class GameScene extends PixelScene {
 			}
 		}
 		
+		public static void add( BuffIndicator indicator ){
+			if (scene != null) scene.buffIndicators.add(indicator);
+		}
+		
+		public static void updateMobBuffIndicators(){
+			if(scene != null && scene.buffIndicators != null) {
+				for(Gizmo indicator : scene.buffIndicators.Polished_all()) {
+					if(indicator instanceof BuffIndicator) {
+						((BuffIndicator) indicator).Polished_refreshMob();
+					}
+				}
+			}
+    }
+    
 		public static InventoryPane invPane() {
 			return scene != null ? scene.inventory : null;
 		}
@@ -288,7 +304,7 @@ public class GameScene extends PixelScene {
 		public static StatusPane statPane() {
 			return scene != null ? scene.status : null;
 		}
-	}
+  }
 	
 	@Override
 	public void create() {
@@ -376,6 +392,7 @@ public class GameScene extends PixelScene {
 		emitters = new Group();
 		effects = new Group();
 		healthIndicators = new Group();
+		buffIndicators = new Group();
 		emoicons = new Group();
 		overFogEffects = new Group();
 		
@@ -434,6 +451,7 @@ public class GameScene extends PixelScene {
 		add( statuses );
 		
 		add( healthIndicators );
+		add( buffIndicators );
 		//always appears ontop of other health indicators
 		add( new TargetHealthIndicator() );
 		
