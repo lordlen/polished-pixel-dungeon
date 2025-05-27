@@ -46,8 +46,7 @@ public class Bolas extends MissileWeapon {
 	
 	@Override
 	public int proc( Char attacker, Char defender, int damage ) {
-		Buff.prolong( defender, Cripple.class, 7f );
-		//Buff.Polished.prolongAligned( defender, Cripple.class, 6f );
+		Buff.Polished.prolongAligned( defender, Cripple.class, 6f );
 		return super.proc( attacker, defender, damage );
 	}
 }
