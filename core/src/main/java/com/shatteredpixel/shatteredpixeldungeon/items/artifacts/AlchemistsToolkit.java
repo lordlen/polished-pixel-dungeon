@@ -54,6 +54,11 @@ public class AlchemistsToolkit extends Artifact {
 		partialCharge = 0;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_TOOLKIT : image;
+	}
+
 	public static final String AC_BREW = "BREW";
 	public static final String AC_ENERGIZE = "ENERGIZE";
 

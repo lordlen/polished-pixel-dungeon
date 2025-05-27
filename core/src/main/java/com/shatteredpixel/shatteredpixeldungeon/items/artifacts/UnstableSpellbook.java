@@ -76,6 +76,11 @@ public class UnstableSpellbook extends Artifact {
 		defaultAction = AC_READ;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_SPELLBOOK : image;
+	}
+
 	public static final String AC_READ = "READ";
 	public static final String AC_ADD = "ADD";
 

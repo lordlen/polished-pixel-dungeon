@@ -66,6 +66,11 @@ public class MasterThievesArmband extends Artifact {
 		defaultAction = AC_STEAL;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_ARMBAND : image;
+	}
+
 	public static final String AC_STEAL = "STEAL";
 
 	@Override

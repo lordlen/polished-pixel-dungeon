@@ -76,6 +76,11 @@ public class EtherealChains extends Artifact {
 	}
 
 	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_CHAINS : image;
+	}
+
+	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions( hero );
 		if (isEquipped(hero) && charge > 0 && !cursed && hero.buff(MagicImmune.class) == null) {

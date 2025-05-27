@@ -76,6 +76,11 @@ public class TimekeepersHourglass extends Artifact {
 	}
 
 	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_HOURGLASS : image;
+	}
+
+	@Override
 	public void resetForTrinity(int visibleLevel) {
 		super.resetForTrinity(visibleLevel);
 		charge = visibleLevel/2 - 1; //grants 4-10 turns of time freeze
