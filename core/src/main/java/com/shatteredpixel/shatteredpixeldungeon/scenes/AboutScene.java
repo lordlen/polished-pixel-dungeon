@@ -70,7 +70,7 @@ public class AboutScene extends PixelScene {
 		ppd.setRect((w - fullWidth)/2f, 10, 120, 0);
 		content.add(ppd);
 
-		CreditsBlock zrp = new CreditsBlock(false, Window.POLISHED_COLOR_PURPLE,"Borrowed code", new Image(Icons.ZRP200.get()),"Zrp200",null,null);
+		CreditsBlock zrp = new CreditsBlock(false, Window.POLISHED_COLOR_PURPLE,"Shared code", new Image(Icons.ZRP200.get()),"Zrp200",null,null);
 		zrp.setSize(colWidth/2, 0);
 		if (landscape()){
 			zrp.setPos(ppd.right(), ppd.top() + (ppd.height() - zrp.height())/2f);
@@ -79,7 +79,7 @@ public class AboutScene extends PixelScene {
 		}
 		content.add(zrp);
 
-		CreditsBlock boby = new CreditsBlock(false, Window.POLISHED_COLOR_PURPLE, "Borrowed code",new Image(Icons.BOBY.get()),"Trashbox\nBobylev","trashboxbobylev.itch.io","https://trashboxbobylev.itch.io");
+		CreditsBlock boby = new CreditsBlock(false, Window.POLISHED_COLOR_PURPLE, "Shared code",new Image(Icons.BOBY.get()),"Trashbox\nBobylev","trashboxbobylev.itch.io","https://trashboxbobylev.itch.io");
 		boby.setRect(zrp.right(), zrp.top(), colWidth/2f, 0);
 		content.add(boby);
 

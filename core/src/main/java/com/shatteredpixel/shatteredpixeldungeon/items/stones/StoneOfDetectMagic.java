@@ -67,13 +67,6 @@ public class StoneOfDetectMagic extends InventoryStone {
 		}
 
 		positiveMagic = item.trueLevel() > 0;
-		if (!positiveMagic){
-			if (item instanceof Weapon && ((Weapon) item).hasGoodEnchant()){
-				positiveMagic = true;
-			} else if (item instanceof Armor && ((Armor) item).hasGoodGlyph()){
-				positiveMagic = true;
-			}
-		}
 
 		if (!positiveMagic && !negativeMagic){
 			GLog.i(Messages.get(this, "detected_none"));
