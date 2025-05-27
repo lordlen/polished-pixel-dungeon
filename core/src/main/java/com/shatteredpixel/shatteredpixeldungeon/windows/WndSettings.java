@@ -968,18 +968,19 @@ public class WndSettings extends WndTabbed {
 			
 			if (width > 200) {
 				chkRemoveNotes.setRect(0, sep1.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
-				chkTrapsWarn.setRect(width / 2 + 1, sep1.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
+				chkQuickTransitions.setRect(width / 2 + 1, sep1.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
 			} else {
 				chkRemoveNotes.setRect(0, sep1.y + 2*GAP, width, BTN_HEIGHT);
-				chkTrapsWarn.setRect(0, chkRemoveNotes.bottom() + GAP, width, BTN_HEIGHT);
+				chkQuickTransitions.setRect(0, chkRemoveNotes.bottom() + GAP, width, BTN_HEIGHT);
 			}
-			chkQuickTransitions.setRect(0, chkTrapsWarn.bottom() + GAP, width, BTN_HEIGHT);
 			height = chkQuickTransitions.bottom();
 			
 			//remove option for now
 			{
-				remove(chkQuickTransitions);
-				height = chkTrapsWarn.bottom();
+				remove(chkTrapsWarn);
+				
+				//chkQuickTransitions.setRect(0, chkTrapsWarn.bottom() + GAP, width, BTN_HEIGHT);
+				//height = chkTrapsWarn.bottom();
 			}
 
 			sep2.size(width, 1);
