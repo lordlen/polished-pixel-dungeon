@@ -55,6 +55,11 @@ public class ChaliceOfBlood extends Artifact {
 		levelCap = 10;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_CHALICE : image;
+	}
+
 	public static final String AC_PRICK = "PRICK";
 
 	@Override

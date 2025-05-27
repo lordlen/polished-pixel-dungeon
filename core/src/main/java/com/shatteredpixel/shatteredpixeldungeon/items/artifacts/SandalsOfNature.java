@@ -80,6 +80,11 @@ public class SandalsOfNature extends Artifact {
 		defaultAction = AC_ROOT;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_SANDALS : image;
+	}
+
 	public static final String AC_FEED = "FEED";
 	public static final String AC_ROOT = "ROOT";
 

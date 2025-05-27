@@ -95,6 +95,11 @@ public class DriedRose extends Artifact {
 		defaultAction = AC_SUMMON;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_ROSE : image;
+	}
+
 	private boolean talkedTo = false;
 	private boolean firstSummon = false;
 	

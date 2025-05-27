@@ -67,6 +67,11 @@ public class HornOfPlenty extends Artifact {
 		defaultAction = AC_SNACK;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_HORN : image;
+	}
+
 	private int storedFoodEnergy = 0;
 
 	public static final String AC_SNACK = "SNACK";
