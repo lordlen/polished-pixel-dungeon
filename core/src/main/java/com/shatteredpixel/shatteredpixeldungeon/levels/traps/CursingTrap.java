@@ -84,7 +84,7 @@ public class CursingTrap extends Trap {
 
 		Armor armor = hero.belongings.armor();
 		if (armor != null){
-			if (armor.glyph == null)
+			if (armor.activeGlyph() == null)
 				priorityCurse.add(armor);
 			else
 				canCurse.add(armor);
@@ -114,8 +114,8 @@ public class CursingTrap extends Trap {
 		}
 		if (item instanceof Armor){
 			Armor a = (Armor) item;
-			if (a.glyph == null){
-				a.inscribe(Armor.Glyph.randomCurse());
+			if (a.activeGlyph() == null){
+				a.inscribeActiveGlyph(Armor.Glyph.randomCurse());
 			}
 		}
 	}

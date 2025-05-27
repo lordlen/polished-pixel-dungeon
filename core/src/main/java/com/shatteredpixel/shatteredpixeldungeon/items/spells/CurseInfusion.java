@@ -79,13 +79,13 @@ public class CurseInfusion extends InventorySpell {
 			}
 		} else if (item instanceof Armor){
 			Armor a = (Armor) item;
-			if (a.glyph != null){
+			if (a.activeGlyph() != null){
 				//if we are freshly applying curse infusion, don't replace an existing curse
 				if (a.hasGoodGlyph() || a.curseInfusionBonus) {
-					a.inscribe(Armor.Glyph.randomCurse(a.glyph.getClass()));
+					a.inscribeActiveGlyph(Armor.Glyph.randomCurse(a.glyph.getClass()));
 				}
 			} else {
-				a.inscribe(Armor.Glyph.randomCurse());
+				a.inscribeActiveGlyph(Armor.Glyph.randomCurse());
 			}
 			a.curseInfusionBonus = true;
 		} else if (item instanceof Wand){
