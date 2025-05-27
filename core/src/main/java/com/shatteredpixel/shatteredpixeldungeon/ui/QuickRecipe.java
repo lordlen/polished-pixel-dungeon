@@ -291,6 +291,22 @@ public class QuickRecipe extends Component {
 				}
 				return result;
 			case 2:
+				r = new ExoticPotion.PotionToExotic();
+				for (Class<?> cls : Generator.Category.POTION.classes){
+					Potion pot = (Potion) Reflection.newInstance(cls);
+					ArrayList<Item> in = new ArrayList<>(Arrays.asList(pot));
+					result.add(new QuickRecipe( r, in, r.sampleOutput(in)));
+				}
+				return result;
+			case 3:
+				r = new ExoticScroll.ScrollToExotic();
+				for (Class<?> cls : Generator.Category.SCROLL.classes){
+					Scroll scroll = (Scroll) Reflection.newInstance(cls);
+					ArrayList<Item> in = new ArrayList<>(Arrays.asList(scroll));
+					result.add(new QuickRecipe( r, in, r.sampleOutput(in)));
+				}
+				return result;
+			case 4:
 				result.add(new QuickRecipe( new ChargrilledMeat.oneMeat() ));
 				result.add(new QuickRecipe( new ChargrilledMeat.threeMeat() ));
 				result.add(null);
@@ -302,7 +318,7 @@ public class QuickRecipe extends Component {
 				result.add(new QuickRecipe( new Blandfruit.CookFruit(),
 						new ArrayList<>(Arrays.asList(new Blandfruit(), new Plant.Seed.PlaceHolder())),
 						new Blandfruit(){
-
+							
 							public String name(){
 								return Messages.get(Blandfruit.class, "cooked");
 							}
@@ -312,22 +328,6 @@ public class QuickRecipe extends Component {
 								return "";
 							}
 						}));
-				return result;
-			case 3:
-				r = new ExoticPotion.PotionToExotic();
-				for (Class<?> cls : Generator.Category.POTION.classes){
-					Potion pot = (Potion) Reflection.newInstance(cls);
-					ArrayList<Item> in = new ArrayList<>(Arrays.asList(pot));
-					result.add(new QuickRecipe( r, in, r.sampleOutput(in)));
-				}
-				return result;
-			case 4:
-				r = new ExoticScroll.ScrollToExotic();
-				for (Class<?> cls : Generator.Category.SCROLL.classes){
-					Scroll scroll = (Scroll) Reflection.newInstance(cls);
-					ArrayList<Item> in = new ArrayList<>(Arrays.asList(scroll));
-					result.add(new QuickRecipe( r, in, r.sampleOutput(in)));
-				}
 				return result;
 			case 5:
 				r = new Bomb.EnhanceBomb();

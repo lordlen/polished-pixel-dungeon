@@ -290,9 +290,9 @@ public class WndJournal extends WndTabbed {
 		private static final int[] sprites = {
 				ItemSpriteSheet.SEED_HOLDER,
 				ItemSpriteSheet.STONE_HOLDER,
-				ItemSpriteSheet.FOOD_HOLDER,
 				ItemSpriteSheet.POTION_HOLDER,
 				ItemSpriteSheet.SCROLL_HOLDER,
+				ItemSpriteSheet.FOOD_HOLDER,
 				ItemSpriteSheet.BOMB_HOLDER,
 				ItemSpriteSheet.MISSILE_HOLDER,
 				ItemSpriteSheet.ELIXIR_HOLDER,
