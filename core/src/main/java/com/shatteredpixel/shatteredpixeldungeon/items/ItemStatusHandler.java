@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
@@ -197,8 +199,17 @@ public class ItemStatusHandler<T extends Item> {
 	}
 	
 	public void know( Class<?extends T> itemCls ){
-		if(known.add( itemCls ))
+		if(known.add( itemCls )) {
 			WealthDrop.onId();
+			
+			if(SPDSettings.Polished.removeNotes()) {
+				Notes.CustomRecord rec;
+				do {
+					rec = Notes.findCustomRecord(itemCls);
+					Notes.remove(rec);
+				} while(rec != null);
+			}
+		}
 	}
 	
 	public HashSet<Class<? extends T>> known() {
