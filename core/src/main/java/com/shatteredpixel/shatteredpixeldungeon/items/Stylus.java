@@ -22,8 +22,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -31,9 +33,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
 
 import java.util.ArrayList;
@@ -97,7 +101,7 @@ public class Stylus extends Item {
 		detach(curUser.belongings.backpack);
 		Catalog.countUse(getClass());
 
-		GLog.w( Messages.get(this, "inscribed"));
+		GLog.w( Messages.get(this, "inscribed_armor"));
 
 		armor.inscribe();
 		
@@ -106,6 +110,24 @@ public class Stylus extends Item {
 		Enchanting.show(curUser, armor);
 		Sample.INSTANCE.play(Assets.Sounds.BURNING);
 		
+		curUser.spend(TIME_TO_INSCRIBE);
+		curUser.busy();
+	}
+
+	private void inscribe( BrokenSeal seal ) {
+
+		detach(curUser.belongings.backpack);
+		Catalog.countUse(getClass());
+
+		GLog.w( Messages.get(this, "inscribed_seal"));
+
+		seal.inscribe();
+
+		curUser.sprite.operate(curUser.pos);
+		curUser.sprite.centerEmitter().start(PurpleParticle.BURST, 0.05f, 10);
+		Enchanting.show(curUser, seal);
+		Sample.INSTANCE.play(Assets.Sounds.BURNING);
+
 		curUser.spend(TIME_TO_INSCRIBE);
 		curUser.busy();
 	}
@@ -129,13 +151,49 @@ public class Stylus extends Item {
 
 		@Override
 		public boolean itemSelectable(Item item) {
-			return item instanceof Armor;
+			return item instanceof Armor || item instanceof BrokenSeal;
 		}
 
 		@Override
 		public void onSelect( Item item ) {
-			if (item != null) {
-				Stylus.this.inscribe( (Armor)item );
+			if(item instanceof Armor) {
+				Armor armor = (Armor)item;
+				BrokenSeal seal = armor.checkSeal();
+				
+				if(seal == null) {
+					inscribe( armor );
+				}
+				else {
+					if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+						inscribe(seal);
+					}
+					else {
+						GameScene.show(new WndOptions(
+								new ItemSprite(Stylus.this),
+								Messages.get(BrokenSeal.class, "choose_title"),
+								Messages.get(BrokenSeal.class, "choose_desc"),
+								"Armor: " + (armor.glyph != null ? armor.glyph.name() : "none"),
+								"Seal: " + (seal.getGlyph() != null ? seal.getGlyph().name() : "none")) {
+
+							@Override
+							protected void onSelect(int index) {
+								if(index == 0) 	inscribe(armor);
+								else 			inscribe(seal);
+
+								super.onSelect(index);
+							}
+						});
+					}
+				}
+			}
+
+			else if(item instanceof BrokenSeal) {
+				if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+					GLog.w(Messages.get(Stylus.this, "no_runic"));
+					return;
+				}
+
+				inscribe( (BrokenSeal) item );
 			}
 		}
 	};

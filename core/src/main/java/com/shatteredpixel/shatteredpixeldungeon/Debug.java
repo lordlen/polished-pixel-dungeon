@@ -2,9 +2,11 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
@@ -13,8 +15,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfFeatherFall;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.PhaseShift;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlast;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlink;
@@ -34,7 +38,7 @@ public class Debug {
     public static final boolean DEBUG_MODE = DeviceCompat.isDebug();
 
 
-    private static final boolean DebuggingStats = false;
+    private static final boolean DebuggingStats = true;
     //                                                                  Debug  /  Default
     public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1f;
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1f;
@@ -51,7 +55,8 @@ public class Debug {
     static {
         //Testing items
         Starting_Items = new ArrayList<>(Arrays.asList(
-                
+                Stylus.class, MailArmor.class, MailArmor.class, CurseInfusion.class, ScrollOfIdentify.class,
+                TimekeepersHourglass.class
         ));
 
 
@@ -112,7 +117,7 @@ public class Debug {
         if(i == null) return null;
 
         i.quantity(i.stackable ? quantity : 1);
-        i.identify();
+        //i.identify();
         i.level(i.isUpgradable() ? level : 0);
 
         if(enchant != null) {

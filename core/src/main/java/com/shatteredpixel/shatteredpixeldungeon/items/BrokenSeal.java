@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
@@ -31,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -63,20 +65,48 @@ public class BrokenSeal extends Item {
 	}
 
 	private Armor.Glyph glyph;
+	public boolean glyphChosen = false;
+	public boolean overwriteGlyph() {
+		int points = Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE);
+
+		if(points == 0) {
+			return glyph != null;
+		}
+		else if(points == 1)
+			return glyphChosen;
+		else
+			return false;
+	}
+
+	public boolean curseInfusionBonus = false;
+
+
+	public BrokenSeal inscribe( ) {
+		Class<? extends Armor.Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
+		Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass );
+
+		return inscribe( gl );
+	}
+
+	public BrokenSeal inscribe( Armor.Glyph glyph ) {
+		if (glyph == null || !glyph.curse()) curseInfusionBonus = false;
+		this.glyph = glyph;
+
+		//so once we upgrade the talent, this gets chosen by default
+		if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) glyphChosen = true;
+		if(glyph != null && glyph.curse()) glyphChosen = true;
+
+		if (glyph != null && Dungeon.hero != null && Dungeon.hero.belongings.contains(this)){
+			Catalog.setSeen(glyph.getClass());
+			Statistics.itemTypesDiscovered.add(glyph.getClass());
+		}
+		return this;
+	}
 
 	public boolean canTransferGlyph(){
-		if (glyph == null){
-			return false;
-		}
-		if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2){
-			return true;
-		} else if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1
-			&& (Arrays.asList(Armor.Glyph.common).contains(glyph.getClass())
-				|| Arrays.asList(Armor.Glyph.uncommon).contains(glyph.getClass()))){
-			return true;
-		} else {
-			return false;
-		}
+		return true;
+
+		//FIX
 	}
 
 	public Armor.Glyph getGlyph(){
@@ -157,25 +187,21 @@ public class BrokenSeal extends Item {
 		@Override
 		public void onSelect( Item item ) {
 			BrokenSeal seal = (BrokenSeal) curItem;
-			if (item != null && item instanceof Armor) {
+			if (item instanceof Armor) {
 				Armor armor = (Armor)item;
-				if (!armor.levelKnown){
-					GLog.w(Messages.get(BrokenSeal.class, "unknown_armor"));
 
-				} else if (armor.cursed && (seal.getGlyph() == null || !seal.getGlyph().curse())){
-					GLog.w(Messages.get(BrokenSeal.class, "cursed_armor"));
+				if(Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
 
-				} else if (armor.glyph != null && seal.getGlyph() != null
-						&& armor.glyph.getClass() != seal.getGlyph().getClass()) {
-					GameScene.show(new WndOptions(new ItemSprite(seal),
+					GameScene.show(new WndOptions(
+							new ItemSprite(seal),
 							Messages.get(BrokenSeal.class, "choose_title"),
 							Messages.get(BrokenSeal.class, "choose_desc"),
-							armor.glyph.name(),
-							seal.getGlyph().name()){
+							"Armor: " + (armor.glyph != null ? armor.glyph.name() : "none"),
+							"Seal: " + (seal.getGlyph() != null ? seal.getGlyph().name() : "none")) {
+
 						@Override
 						protected void onSelect(int index) {
-							if (index == 0) seal.setGlyph(null);
-							//if index is 1, then the glyph transfer happens in affixSeal
+							seal.glyphChosen = index == 1;
 
 							GLog.p(Messages.get(BrokenSeal.class, "affix"));
 							Dungeon.hero.sprite.operate(Dungeon.hero.pos);
@@ -184,13 +210,14 @@ public class BrokenSeal extends Item {
 							seal.detach(Dungeon.hero.belongings.backpack);
 						}
 					});
+				}
 
-				} else {
+				else {
 					GLog.p(Messages.get(BrokenSeal.class, "affix"));
 					Dungeon.hero.sprite.operate(Dungeon.hero.pos);
 					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-					armor.affixSeal((BrokenSeal)curItem);
-					curItem.detach(Dungeon.hero.belongings.backpack);
+					armor.affixSeal(seal);
+					seal.detach(Dungeon.hero.belongings.backpack);
 				}
 			}
 		}
