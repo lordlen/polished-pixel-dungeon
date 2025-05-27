@@ -257,8 +257,6 @@ public class RingOfWealth extends Ring {
 		potionChances.put(PotionOfInvisibility.class,   1f);
 		potionChances.put(PotionOfStamina.class,   		1f);
 		potionChances.put(PotionOfParalyticGas.class,   1f);
-		potionChances.put(ElixirOfDragonsBlood.class,   1f);
-		potionChances.put(ElixirOfIcyTouch.class,   	1f);
 	}
 
 	private static HashMap<Class<? extends Scroll>, Float> scrollChances = new HashMap<>();

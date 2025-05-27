@@ -125,7 +125,6 @@ public class Dungeon {
 		
 		public static void runAfterLoad(Callback callback) {
 			Callback current = afterLoad;
-	
 			afterLoad = () -> {
 				current.call();
 				callback.call();

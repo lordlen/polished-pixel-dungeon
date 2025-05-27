@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.BlizzardBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfSnapFreeze;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
@@ -38,6 +39,11 @@ public class ElixirOfIcyTouch extends Elixir {
 	public void apply(Hero hero) {
 		Buff.affect(hero, FrostImbue.class, FrostImbue.DURATION);
 		hero.sprite.emitter().burst(SnowParticle.FACTORY, 5);
+	}
+	
+	@Override
+	public void shatter(int cell) {
+		new BlizzardBrew().shatter(cell);
 	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {

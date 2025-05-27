@@ -274,9 +274,9 @@ public enum Document {
 		//given in sewers
 		ALCHEMY_GUIDE.pagesStates.put("Potions",                READ);
 		ALCHEMY_GUIDE.pagesStates.put("Stones",                 READ);
-		ALCHEMY_GUIDE.pagesStates.put("Energy_Food",            READ);
 		ALCHEMY_GUIDE.pagesStates.put("Exotic_Potions",         READ);
 		ALCHEMY_GUIDE.pagesStates.put("Exotic_Scrolls",         READ);
+		ALCHEMY_GUIDE.pagesStates.put("Energy_Food",            READ);
 		//given in prison
 		ALCHEMY_GUIDE.pagesStates.put("Bombs",                  READ);
 		ALCHEMY_GUIDE.pagesStates.put("Weapons",                READ);

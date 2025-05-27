@@ -36,6 +36,8 @@ public class ShockingBrew extends Brew {
 	
 	{
 		image = ItemSpriteSheet.BREW_SHOCKING;
+		
+		talentChance = 1/(float) Recipe.OUT_QUANTITY;
 	}
 	
 	@Override
@@ -52,22 +54,29 @@ public class ShockingBrew extends Brew {
 			}
 		}
 	}
-
+	
+	@Override
+	public int value() {
+		return (int)(60 * (quantity/(float) Recipe.OUT_QUANTITY));
+	}
+	
 	@Override
 	public int energyVal() {
-		return quantity * 7;
+		return (int)(12 * (quantity/(float) Recipe.OUT_QUANTITY));
 	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
+		
+		private static final int OUT_QUANTITY = 2;
 		
 		{
 			inputs =  new Class[]{PotionOfParalyticGas.class};
 			inQuantity = new int[]{1};
 			
-			cost = 1;
+			cost = 6;
 			
 			output = ShockingBrew.class;
-			outQuantity = 1;
+			outQuantity = OUT_QUANTITY;
 		}
 		
 	}

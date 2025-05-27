@@ -56,11 +56,15 @@ public class RightClickMenu extends Component {
 
 	public RightClickMenu(Item item){
 		ArrayList<String> actions = item.actions(Dungeon.hero);
-		if (actions.remove(item.defaultAction())) {
-			actions.add(0, item.defaultAction());
+		
+		if (actions.remove(Item.AC_THROW)) {
+			actions.add(actions.size(), Item.AC_THROW);
 		}
 		if (actions.remove(Item.AC_DROP)) {
 			actions.add(actions.size(), Item.AC_DROP);
+		}
+		if (actions.remove(item.defaultAction())) {
+			actions.add(0, item.defaultAction());
 		}
 		
 		Notes.CustomRecord rec = Notes.findCustomRecord(item);

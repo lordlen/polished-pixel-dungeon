@@ -63,9 +63,10 @@ public class MeatPie extends Food {
 					} else if (ingredient.getClass() == Food.class) {
 						ration = true;
 					} else if (ingredient instanceof MysteryMeat
-							|| ingredient instanceof StewedMeat
 							|| ingredient instanceof ChargrilledMeat
-							|| ingredient instanceof FrozenCarpaccio) {
+							|| ingredient instanceof FrozenCarpaccio
+							|| ingredient instanceof HoneyedMeat
+					) {
 						meat = true;
 					}
 				}
