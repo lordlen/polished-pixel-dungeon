@@ -39,7 +39,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.ItemStatusHandler;
 import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.AquaBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfDragonsBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfHoneyedHealing;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfIcyTouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCorrosiveGas;
@@ -115,7 +117,6 @@ public class Potion extends Item {
 		//exotic
 		mustThrowPots.add(PotionOfCorrosiveGas.class);
 		mustThrowPots.add(PotionOfSnapFreeze.class);
-		mustThrowPots.add(PotionOfShroudingFog.class);
 		mustThrowPots.add(PotionOfStormClouds.class);
 		
 		//also all brews except unstable, hardcoded
@@ -128,9 +129,12 @@ public class Potion extends Item {
 		
 		//exotic
 		canThrowPots.add(PotionOfCleansing.class);
+		mustThrowPots.add(PotionOfShroudingFog.class);
 		
 		//elixirs
 		canThrowPots.add(ElixirOfHoneyedHealing.class);
+		canThrowPots.add(ElixirOfDragonsBlood.class);
+		canThrowPots.add(ElixirOfIcyTouch.class);
 	}
 	
 	protected static ItemStatusHandler<Potion> handler;
