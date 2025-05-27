@@ -222,19 +222,28 @@ public class BrokenSeal extends Item {
 			}
 		}
 	};
-
-	private static final String GLYPH = "glyph";
+	
+	private static final String GLYPH 			= "glyph";
+	
+	private static final String GLYPH_CHOSEN 	= "glyph_chosen";
+	private static final String CURSE_INFUSE 	= "curse_infuse";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(GLYPH, glyph);
+		
+		bundle.put(GLYPH_CHOSEN, glyphChosen);
+		bundle.put(CURSE_INFUSE, curseInfusionBonus);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		glyph = (Armor.Glyph)bundle.get(GLYPH);
+		
+		glyphChosen = bundle.getBoolean(GLYPH_CHOSEN);
+		curseInfusionBonus = bundle.getBoolean(CURSE_INFUSE);
 	}
 
 	public static class WarriorShield extends ShieldBuff {

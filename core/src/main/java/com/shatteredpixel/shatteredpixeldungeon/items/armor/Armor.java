@@ -125,6 +125,13 @@ public class Armor extends EquipableItem {
 		}
 		else inscribe(glyph);
 	}
+	
+	public Glyph extraGlyph() {
+		if(seal != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2) {
+			return seal.getGlyph();
+		}
+		else return null;
+	}
 
 	public boolean glyphHardened = false;
 	public boolean curseInfusionBonus = false;
@@ -484,6 +491,9 @@ public class Armor extends EquipableItem {
 				if (activeGlyph() != null) {
 					damage = activeGlyph().proc(this, attacker, defender, damage);
 				}
+				if(extraGlyph() != null) {
+					damage = extraGlyph().proc(this, attacker, defender, damage);
+				}
 				if (trinityGlyph != null){
 					damage = trinityGlyph.proc( this, attacker, defender, damage );
 				}
@@ -706,22 +716,26 @@ public class Armor extends EquipableItem {
 	}
 
 	public boolean hasGlyph(Class<?extends Glyph> type, Char owner) {
-		if (activeGlyph() == null){
+		if (owner.buff(MagicImmune.class) != null) {
 			return false;
-		} else if (owner.buff(MagicImmune.class) != null) {
-			return false;
-		} else if (!activeGlyph().curse()
+		}
+		else if (activeGlyph() == null){
+			return extraGlyph() != null && extraGlyph().getClass() == type;
+		}
+		else if (!activeGlyph().curse()
 				&& owner instanceof Hero
 				&& isEquipped((Hero) owner)
 				&& owner.buff(HolyWard.HolyArmBuff.class) != null
 				&& ((Hero) owner).subClass != HeroSubClass.PALADIN){
 			return false;
-		} else if (owner.buff(BodyForm.BodyFormBuff.class) != null
+		}
+		else if (owner.buff(BodyForm.BodyFormBuff.class) != null
 				&& owner.buff(BodyForm.BodyFormBuff.class).glyph() != null
 				&& owner.buff(BodyForm.BodyFormBuff.class).glyph().getClass().equals(type)){
 			return true;
-		} else {
-			return activeGlyph().getClass() == type;
+		}
+		else {
+			return activeGlyph().getClass() == type || (extraGlyph() != null && extraGlyph().getClass() == type);
 		}
 	}
 
