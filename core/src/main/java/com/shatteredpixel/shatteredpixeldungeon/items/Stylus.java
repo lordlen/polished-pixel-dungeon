@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -161,39 +162,37 @@ public class Stylus extends Item {
 				BrokenSeal seal = armor.checkSeal();
 				
 				if(seal == null) {
-					inscribe( armor );
+					inscribe(armor);
+				}
+				else if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+					inscribe(seal);
 				}
 				else {
-					if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
-						inscribe(seal);
-					}
-					else {
-						GameScene.show(new WndOptions(
-								new ItemSprite(Stylus.this),
-								Messages.get(BrokenSeal.class, "choose_title"),
-								Messages.get(BrokenSeal.class, "choose_desc"),
-								"Armor: " + (armor.glyph() != null ? armor.glyph().name() : "none"),
-								"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
+					GameScene.show(new WndOptions(
+							new ItemSprite(Stylus.this),
+							Messages.titleCase(new Stylus().name()),
+							Messages.get(Stylus.class, "choose_desc"),
+							"Armor: " + (armor.glyph() != null ? armor.glyph().name() : "none"),
+							"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
 
-							@Override
-							protected void onSelect(int index) {
-								if(index == 0) 	inscribe(armor);
-								else 			inscribe(seal);
+						@Override
+						protected void onSelect(int index) {
+							if(index == 0) 	inscribe(armor);
+							else 			inscribe(seal);
 
-								super.onSelect(index);
-							}
-						});
-					}
+							super.onSelect(index);
+						}
+					});
 				}
 			}
 
 			else if(item instanceof BrokenSeal) {
 				if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
 					GLog.w(Messages.get(Stylus.this, "no_runic"));
-					return;
 				}
-
-				inscribe( (BrokenSeal) item );
+				else {
+					inscribe( (BrokenSeal) item );
+				}
 			}
 		}
 	};

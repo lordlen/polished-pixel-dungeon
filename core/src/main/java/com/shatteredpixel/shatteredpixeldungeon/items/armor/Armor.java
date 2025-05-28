@@ -159,6 +159,7 @@ public class Armor extends EquipableItem {
 		curseInfusionBonus = bundle.getBoolean( CURSE_INFUSION_BONUS );
 		masteryPotionBonus = bundle.getBoolean( MASTERY_POTION_BONUS );
 		seal = (BrokenSeal)bundle.get(SEAL);
+		if(seal != null) seal.armor = this;
 		
 		augment = bundle.getEnum(AUGMENT, Augment.class);
 	}
@@ -185,28 +186,7 @@ public class Armor extends EquipableItem {
 		super.execute(hero, action);
 
 		if (action.equals(AC_DETACH) && seal != null){
-			BrokenSeal.WarriorShield sealBuff = hero.buff(BrokenSeal.WarriorShield.class);
-			if (sealBuff != null) sealBuff.setArmor(null);
-
-			BrokenSeal detaching = seal;
-			seal = null;
-
-			if (detaching.level() > 0){
-				level(trueLevel() - 1);
-			}
-
-			if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE) && detaching.overwriteGlyph()){
-				inscribe(detaching.glyph(), true);
-				detaching.inscribe(null);
-			}
-			detaching.glyphChosen = false;
-
-			GLog.i( Messages.get(Armor.class, "detach_seal") );
-			hero.sprite.operate(hero.pos);
-			if (!detaching.collect()){
-				Dungeon.level.drop(detaching, hero.pos);
-			}
-			updateQuickslot();
+			detachSeal();
 		}
 	}
 
@@ -285,6 +265,8 @@ public class Armor extends EquipableItem {
 
 	public void affixSeal(BrokenSeal seal){
 		this.seal = seal;
+		seal.armor = this;
+		
 		if (seal.level() > 0){
 			//doesn't trigger upgrading logic such as affecting curses/glyphs
 			int newLevel = trueLevel()+1;
@@ -294,6 +276,34 @@ public class Armor extends EquipableItem {
 		if (isEquipped(Dungeon.hero)){
 			Buff.affect(Dungeon.hero, BrokenSeal.WarriorShield.class).setArmor(this);
 		}
+	}
+	
+	public void detachSeal() {
+		if(seal == null) return;
+		
+		BrokenSeal detaching = seal;
+		seal = null;
+		detaching.armor = null;
+		
+		BrokenSeal.WarriorShield sealBuff = Dungeon.hero.buff(BrokenSeal.WarriorShield.class);
+		if (sealBuff != null) sealBuff.setArmor(null);
+		
+		if (detaching.level() > 0){
+			level(trueLevel() - 1);
+		}
+		
+		if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE) && detaching.overwriteGlyph()){
+			inscribe(detaching.glyph(), true);
+			detaching.inscribe(null);
+		}
+		detaching.glyphChosen = false;
+		
+		GLog.i( Messages.get(Armor.class, "detach_seal") );
+		Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+		if (!detaching.collect()){
+			Dungeon.level.drop(detaching, Dungeon.hero.pos);
+		}
+		updateQuickslot();
 	}
 
 	public BrokenSeal checkSeal(){
@@ -394,6 +404,7 @@ public class Armor extends EquipableItem {
 		//TODO warrior's seal upgrade should probably be considered here too
 		// instead of being part of true level
 		if (curseInfusionBonus) level += 1 + level/6;
+		if (seal != null && seal.curseInfusionBonus) level += 1 + level/6;
 		return level;
 	}
 	
@@ -704,7 +715,8 @@ public class Armor extends EquipableItem {
 	public Armor inscribe(boolean force) {
 
 		Class<? extends Glyph> oldGlyphClass = glyph() != null ? glyph().getClass() : null;
-		Glyph gl = Glyph.random( oldGlyphClass );
+		Class<? extends Glyph> oldSealGlyphClass = seal != null && seal.glyph() != null ? seal.glyph().getClass() : null;
+		Glyph gl = Glyph.random( oldGlyphClass, oldSealGlyphClass );
 
 		return inscribe( gl, force );
 	}

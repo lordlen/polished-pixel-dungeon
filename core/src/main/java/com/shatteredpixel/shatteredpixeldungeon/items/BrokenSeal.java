@@ -62,12 +62,17 @@ public class BrokenSeal extends Item {
 
 		defaultAction = AC_INFO;
 	}
+	
 
+	public Armor armor;
 	private Armor.Glyph glyph;
 	public boolean glyphChosen = false;
+
+	public boolean curseInfusionBonus = false;
+	
 	public boolean overwriteGlyph() {
 		int points = Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE);
-
+		
 		if(points == 0) {
 			return glyph != null;
 		}
@@ -77,12 +82,10 @@ public class BrokenSeal extends Item {
 			return false;
 	}
 
-	public boolean curseInfusionBonus = false;
-
-
 	public BrokenSeal inscribe( ) {
 		Class<? extends Armor.Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
-		Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass );
+		Class<? extends Armor.Glyph> oldArmorGlyphClass = armor != null && armor.glyph() != null ? armor.glyph().getClass() : null;
+		Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass, oldArmorGlyphClass );
 
 		return inscribe( gl );
 	}
@@ -213,6 +216,7 @@ public class BrokenSeal extends Item {
 	};
 	
 	private static final String GLYPH 			= "glyph";
+	// Armor handles itself
 	
 	private static final String GLYPH_CHOSEN 	= "glyph_chosen";
 	private static final String CURSE_INFUSE 	= "curse_infuse";
