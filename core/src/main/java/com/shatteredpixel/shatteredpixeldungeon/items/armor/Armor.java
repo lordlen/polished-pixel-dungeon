@@ -294,6 +294,7 @@ public class Armor extends EquipableItem {
 		
 		if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE) && detaching.overwriteGlyph()){
 			inscribe(detaching.glyph(), true);
+			curseInfusionBonus = detaching.curseInfusionBonus;
 			detaching.inscribe(null);
 		}
 		detaching.glyphChosen = false;
@@ -304,6 +305,18 @@ public class Armor extends EquipableItem {
 			Dungeon.level.drop(detaching, Dungeon.hero.pos);
 		}
 		updateQuickslot();
+	}
+	
+	public void transfer() {
+		/*if (seal != null && seal.glyph() == null) {
+			seal.inscribe(glyph());
+			seal.curseInfusionBonus = curseInfusionBonus;
+			seal.glyphChosen = true;
+			
+			inscribe(null);
+			
+			updateQuickslot();
+		}*/
 	}
 
 	public BrokenSeal checkSeal(){
@@ -413,13 +426,9 @@ public class Armor extends EquipableItem {
 		return upgrade( false );
 	}
 	
-	public Item upgrade( boolean inscribe ) {
+	public Item upgrade( boolean preserve ) {
 
-		if (inscribe){
-			if (activeGlyph() == null){
-				inscribe( Glyph.random() );
-			}
-		} else if (activeGlyph() != null) {
+		if (activeGlyph() != null && !preserve) {
 			//chance to lose harden buff is 10/20/40/80/100% when upgrading from +6/7/8/9/10
 			if (glyphHardened) {
 				if (level() >= 6 && Random.Float(10) < Math.pow(2, level()-6)){
@@ -742,6 +751,14 @@ public class Armor extends EquipableItem {
 			Statistics.itemTypesDiscovered.add(glyph.getClass());
 		}
 		return this;
+	}
+	
+	public Class<? extends Armor.Glyph> armorGlyphClass() {
+		return glyph() != null ? glyph().getClass() : null;
+	}
+	
+	public Class<? extends Armor.Glyph> sealGlyphClass() {
+		return (checkSeal() != null && checkSeal().glyph() != null) ? checkSeal().glyph().getClass() : null;
 	}
 
 	public boolean hasGlyph(Class<?extends Glyph> type, Char owner) {

@@ -283,9 +283,9 @@ public class WndBlacksmith extends Window {
 					}
 
 					//preserves enchant/glyphs if present
-					if (first instanceof Weapon && ((Weapon) first).hasGoodEnchant()){
+					if (first instanceof Weapon){
 						((Weapon) first).upgrade(true);
-					} else if (first instanceof Armor && ((Armor) first).hasGoodGlyph()){
+					} else if (first instanceof Armor){
 						((Armor) first).upgrade(true);
 					} else {
 						first.upgrade();

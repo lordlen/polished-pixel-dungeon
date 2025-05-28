@@ -64,7 +64,7 @@ public class BrokenSeal extends Item {
 	}
 	
 
-	public Armor armor;
+	public static Armor armor;
 	private Armor.Glyph glyph;
 	public boolean glyphChosen = false;
 
@@ -84,8 +84,7 @@ public class BrokenSeal extends Item {
 
 	public BrokenSeal inscribe( ) {
 		Class<? extends Armor.Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
-		Class<? extends Armor.Glyph> oldArmorGlyphClass = armor != null && armor.glyph() != null ? armor.glyph().getClass() : null;
-		Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass, oldArmorGlyphClass );
+		Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass, armorGlyphClass() );
 
 		return inscribe( gl );
 	}
@@ -107,6 +106,14 @@ public class BrokenSeal extends Item {
 
 	public Armor.Glyph glyph(){
 		return glyph;
+	}
+	
+	public Class<? extends Armor.Glyph> sealGlyphClass() {
+		return glyph() != null ? glyph().getClass() : null;
+	}
+	
+	public Class<? extends Armor.Glyph> armorGlyphClass() {
+		return (armor != null && armor.glyph() != null) ? armor.glyph().getClass() : null;
 	}
 
 	public int maxShield( int armTier, int armLvl ){
@@ -180,7 +187,7 @@ public class BrokenSeal extends Item {
 		public void onSelect( Item item ) {
 			BrokenSeal seal = (BrokenSeal) curItem;
 			if (item instanceof Armor) {
-				Armor armor = (Armor)item;
+				Armor arm = (Armor)item;
 
 				if(Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
 
@@ -188,7 +195,7 @@ public class BrokenSeal extends Item {
 							new ItemSprite(seal),
 							Messages.get(BrokenSeal.class, "choose_title"),
 							Messages.get(BrokenSeal.class, "choose_desc"),
-							"Armor: " + (armor.glyph() != null ? armor.glyph().name() : "none"),
+							"Armor: " + (arm.glyph() != null ? arm.glyph().name() : "none"),
 							"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
 
 						@Override
@@ -198,7 +205,7 @@ public class BrokenSeal extends Item {
 							GLog.p(Messages.get(BrokenSeal.class, "affix"));
 							Dungeon.hero.sprite.operate(Dungeon.hero.pos);
 							Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-							armor.affixSeal(seal);
+							arm.affixSeal(seal);
 							seal.detach(Dungeon.hero.belongings.backpack);
 						}
 					});
@@ -208,7 +215,7 @@ public class BrokenSeal extends Item {
 					GLog.p(Messages.get(BrokenSeal.class, "affix"));
 					Dungeon.hero.sprite.operate(Dungeon.hero.pos);
 					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-					armor.affixSeal(seal);
+					arm.affixSeal(seal);
 					seal.detach(Dungeon.hero.belongings.backpack);
 				}
 			}

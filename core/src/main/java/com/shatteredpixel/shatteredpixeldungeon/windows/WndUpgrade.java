@@ -416,7 +416,7 @@ public class WndUpgrade extends Window {
 					upgraded = ((ScrollOfUpgrade) upgrader).upgradeItem(toUpgrade);
 					Sample.INSTANCE.play( Assets.Sounds.READ );
 				} else if (upgrader instanceof MagicalInfusion){
-					((MagicalInfusion) upgrader).useAnimation();
+					((MagicalInfusion) upgrader).onUse();
 					upgraded = ((MagicalInfusion) upgrader).upgradeItem(toUpgrade);
 				}
 

@@ -86,10 +86,9 @@ public class ScrollOfEnchantment extends ExoticScroll {
 	public void enchant(Armor armor) {
 		final Armor.Glyph glyphs[] = new Armor.Glyph[3];
 		
-		Class<? extends Armor.Glyph> existing = armor.activeGlyph() != null ? armor.activeGlyph().getClass() : null;
-		glyphs[0] = Armor.Glyph.randomCommon( existing );
-		glyphs[1] = Armor.Glyph.randomUncommon( existing );
-		glyphs[2] = Armor.Glyph.random( existing, glyphs[0].getClass(), glyphs[1].getClass());
+		glyphs[0] = Armor.Glyph.randomCommon( armor.armorGlyphClass(), armor.sealGlyphClass() );
+		glyphs[1] = Armor.Glyph.randomUncommon( armor.armorGlyphClass(), armor.sealGlyphClass() );
+		glyphs[2] = Armor.Glyph.random( armor.armorGlyphClass(), armor.sealGlyphClass(), glyphs[0].getClass(), glyphs[1].getClass());
 		
 		detachOnUse();
 		GameScene.show(new WndGlyphSelect(armor, null, glyphs[0], glyphs[1], glyphs[2]));
@@ -98,10 +97,9 @@ public class ScrollOfEnchantment extends ExoticScroll {
 	public void enchant(BrokenSeal seal) {
 		final Armor.Glyph glyphs[] = new Armor.Glyph[3];
 		
-		Class<? extends Armor.Glyph> existing = seal.glyph() != null ? seal.glyph().getClass() : null;
-		glyphs[0] = Armor.Glyph.randomCommon( existing );
-		glyphs[1] = Armor.Glyph.randomUncommon( existing );
-		glyphs[2] = Armor.Glyph.random( existing, glyphs[0].getClass(), glyphs[1].getClass());
+		glyphs[0] = Armor.Glyph.randomCommon( seal.armorGlyphClass(), seal.sealGlyphClass() );
+		glyphs[1] = Armor.Glyph.randomUncommon( seal.armorGlyphClass(), seal.sealGlyphClass() );
+		glyphs[2] = Armor.Glyph.random( seal.armorGlyphClass(), seal.sealGlyphClass(), glyphs[0].getClass(), glyphs[1].getClass());
 		
 		detachOnUse();
 		GameScene.show(new WndGlyphSelect(null, seal, glyphs[0], glyphs[1], glyphs[2]));
@@ -320,6 +318,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				
 				((ScrollOfEnchantment) curItem).readAnimation();
 				Sample.INSTANCE.play(Assets.Sounds.READ);
+				updateQuickslot();
 			} else {
 				GameScene.show(new WndConfirmCancel());
 			}
