@@ -71,6 +71,18 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		GameScene.selectItem( itemSelector );
 	}
 	
+	public void enchant(Weapon weapon) {
+		final Weapon.Enchantment enchants[] = new Weapon.Enchantment[3];
+		
+		Class<? extends Weapon.Enchantment> existing = weapon.enchantment != null ? weapon.enchantment.getClass() : null;
+		enchants[0] = Weapon.Enchantment.randomCommon( existing );
+		enchants[1] = Weapon.Enchantment.randomUncommon( existing );
+		enchants[2] = Weapon.Enchantment.random( existing, enchants[0].getClass(), enchants[1].getClass());
+		
+		detachOnUse();
+		GameScene.show(new WndEnchantSelect(weapon, enchants[0], enchants[1], enchants[2]));
+	}
+	
 	public void enchant(Armor armor) {
 		final Armor.Glyph glyphs[] = new Armor.Glyph[3];
 		
@@ -79,6 +91,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		glyphs[1] = Armor.Glyph.randomUncommon( existing );
 		glyphs[2] = Armor.Glyph.random( existing, glyphs[0].getClass(), glyphs[1].getClass());
 		
+		detachOnUse();
 		GameScene.show(new WndGlyphSelect(armor, null, glyphs[0], glyphs[1], glyphs[2]));
 	}
 	
@@ -90,6 +103,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		glyphs[1] = Armor.Glyph.randomUncommon( existing );
 		glyphs[2] = Armor.Glyph.random( existing, glyphs[0].getClass(), glyphs[1].getClass());
 		
+		detachOnUse();
 		GameScene.show(new WndGlyphSelect(null, seal, glyphs[0], glyphs[1], glyphs[2]));
 	}
 
@@ -119,6 +133,13 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		} );
 	}
 	
+	private void detachOnUse() {
+		if (!identifiedByUse) {
+			curItem.detach(curUser.belongings.backpack);
+		}
+		identifiedByUse = false;
+	}
+	
 	protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
 
 		@Override
@@ -136,38 +157,21 @@ public class ScrollOfEnchantment extends ExoticScroll {
 			return enchantable(item);
 		}
 		
-		private void detachOnUse() {
-			if (!identifiedByUse) {
-				curItem.detach(curUser.belongings.backpack);
-			}
-			identifiedByUse = false;
-		}
-		
 		@Override
 		public void onSelect(final Item item) {
 			
 			if (item instanceof Weapon){
 				
-				final Weapon.Enchantment enchants[] = new Weapon.Enchantment[3];
-				
-				Class<? extends Weapon.Enchantment> existing = ((Weapon) item).enchantment != null ? ((Weapon) item).enchantment.getClass() : null;
-				enchants[0] = Weapon.Enchantment.randomCommon( existing );
-				enchants[1] = Weapon.Enchantment.randomUncommon( existing );
-				enchants[2] = Weapon.Enchantment.random( existing, enchants[0].getClass(), enchants[1].getClass());
-				
-				detachOnUse();
-				GameScene.show(new WndEnchantSelect((Weapon) item, enchants[0], enchants[1], enchants[2]));
+				enchant( (Weapon) item );
 			
 			} else if (item instanceof Armor) {
 				Armor armor = (Armor)item;
 				BrokenSeal seal = armor.checkSeal();
 				
 				if(seal == null) {
-					detachOnUse();
 					enchant(armor);
 				}
 				else if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
-					detachOnUse();
 					enchant(seal);
 				}
 				else {
@@ -183,7 +187,6 @@ public class ScrollOfEnchantment extends ExoticScroll {
 							if(index == 0) 	enchant(armor);
 							else 			enchant(seal);
 							
-							detachOnUse();
 							super.onSelect(index);
 						}
 						
@@ -200,7 +203,6 @@ public class ScrollOfEnchantment extends ExoticScroll {
 					GameScene.selectItem(itemSelector);
 				}
 				else {
-					detachOnUse();
 					enchant( (BrokenSeal) item );
 				}
 			} else if (identifiedByUse){
