@@ -546,7 +546,8 @@ public enum Talent {
 		}
 
 		if (talent == TWIN_UPGRADES || talent == DESPERATE_POWER
-				|| talent == STRONGMAN || talent == DURABLE_PROJECTILES){
+			|| talent == STRONGMAN || talent == DURABLE_PROJECTILES
+			|| talent == RUNIC_TRANSFERENCE) {
 			Item.updateQuickslot();
 		}
 

@@ -45,7 +45,6 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class BrokenSeal extends Item {
 
@@ -93,28 +92,18 @@ public class BrokenSeal extends Item {
 		this.glyph = glyph;
 
 		//so once we upgrade the talent, this gets chosen by default
-		if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) glyphChosen = true;
+		if(Dungeon.hero != null && !Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) glyphChosen = true;
 		if(glyph != null && glyph.curse()) glyphChosen = true;
 
-		if (glyph != null && Dungeon.hero != null && Dungeon.hero.belongings.contains(this)){
+		if (glyph != null) {
 			Catalog.setSeen(glyph.getClass());
 			Statistics.itemTypesDiscovered.add(glyph.getClass());
 		}
 		return this;
 	}
 
-	public boolean canTransferGlyph(){
-		return true;
-
-		//FIX
-	}
-
-	public Armor.Glyph getGlyph(){
+	public Armor.Glyph glyph(){
 		return glyph;
-	}
-
-	public void setGlyph( Armor.Glyph glyph ){
-		this.glyph = glyph;
 	}
 
 	public int maxShield( int armTier, int armLvl ){
@@ -196,8 +185,8 @@ public class BrokenSeal extends Item {
 							new ItemSprite(seal),
 							Messages.get(BrokenSeal.class, "choose_title"),
 							Messages.get(BrokenSeal.class, "choose_desc"),
-							"Armor: " + (armor.glyph != null ? armor.glyph.name() : "none"),
-							"Seal: " + (seal.getGlyph() != null ? seal.getGlyph().name() : "none")) {
+							"Armor: " + (armor.glyph() != null ? armor.glyph().name() : "none"),
+							"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
 
 						@Override
 						protected void onSelect(int index) {
@@ -240,7 +229,7 @@ public class BrokenSeal extends Item {
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
-		glyph = (Armor.Glyph)bundle.get(GLYPH);
+		inscribe((Armor.Glyph)bundle.get(GLYPH));
 		
 		glyphChosen = bundle.getBoolean(GLYPH_CHOSEN);
 		curseInfusionBonus = bundle.getBoolean(CURSE_INFUSE);

@@ -241,7 +241,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		@Override
 		protected void onSelect(int index) {
 			if (index < 3) {
-				arm.inscribeActiveGlyph(glyphs[index]);
+				arm.inscribe(glyphs[index]);
 				GLog.p(Messages.get(StoneOfEnchantment.class, "armor"));
 				((ScrollOfEnchantment) curItem).readAnimation();
 

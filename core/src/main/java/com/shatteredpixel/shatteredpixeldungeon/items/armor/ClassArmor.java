@@ -123,7 +123,7 @@ abstract public class ClassArmor extends Armor {
 		classArmor.level(armor.trueLevel());
 		classArmor.tier = armor.tier;
 		classArmor.augment = armor.augment;
-		classArmor.inscribe(armor.glyph);
+		classArmor.inscribe(armor.glyph(), true);
 		if (armor.seal != null) {
 			classArmor.seal = armor.seal;
 		}
@@ -243,33 +243,19 @@ abstract public class ClassArmor extends Armor {
 								cursed = armor.cursed;
 								curseInfusionBonus = armor.curseInfusionBonus;
 								masteryPotionBonus = armor.masteryPotionBonus;
+								
+								inscribe(armor.glyph(), true);
+								
 								if (armor.checkSeal() != null) {
-									inscribe(armor.glyph);
 									seal = armor.checkSeal();
-								} else if (checkSeal() != null){
+								} else if (checkSeal() != null) {
 									//automates the process of detaching the seal manually
 									// and re-affixing it to the new armor
-									if (seal.level() > 0){
+									if (seal.level() > 0) {
 										int newLevel = trueLevel() + 1;
 										level(newLevel);
 										Badges.validateItemLevelAquired(ClassArmor.this);
 									}
-
-									//if both source and destination armor have glyphs
-									// we assume the player wants the glyph on the destination armor
-									// they can always manually detach first if they don't.
-									// otherwise we automate glyph transfer just like upgrades
-									/*if (armor.glyph == null && seal.canTransferGlyph()){
-										//do nothing, keep our glyph
-									} else {
-										inscribe(armor.glyph);
-										seal.setGlyph(null);
-									}*/
-									
-									inscribe(armor.glyph);
-									
-								} else {
-									inscribe(armor.glyph);
 								}
 
 								if (armor.levelKnown && armor.cursedKnown) {

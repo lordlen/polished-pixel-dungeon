@@ -115,7 +115,7 @@ public class CursingTrap extends Trap {
 		if (item instanceof Armor){
 			Armor a = (Armor) item;
 			if (a.activeGlyph() == null){
-				a.inscribeActiveGlyph(Armor.Glyph.randomCurse());
+				a.inscribe(Armor.Glyph.randomCurse());
 			}
 		}
 	}

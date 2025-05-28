@@ -103,7 +103,7 @@ public class Stylus extends Item {
 
 		GLog.w( Messages.get(this, "inscribed_armor"));
 
-		armor.inscribe();
+		armor.inscribe(true);
 		
 		curUser.sprite.operate(curUser.pos);
 		curUser.sprite.centerEmitter().start(PurpleParticle.BURST, 0.05f, 10);
@@ -172,8 +172,8 @@ public class Stylus extends Item {
 								new ItemSprite(Stylus.this),
 								Messages.get(BrokenSeal.class, "choose_title"),
 								Messages.get(BrokenSeal.class, "choose_desc"),
-								"Armor: " + (armor.glyph != null ? armor.glyph.name() : "none"),
-								"Seal: " + (seal.getGlyph() != null ? seal.getGlyph().name() : "none")) {
+								"Armor: " + (armor.glyph() != null ? armor.glyph().name() : "none"),
+								"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
 
 							@Override
 							protected void onSelect(int index) {
