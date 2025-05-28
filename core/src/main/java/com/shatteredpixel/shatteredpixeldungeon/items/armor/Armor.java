@@ -308,10 +308,11 @@ public class Armor extends EquipableItem {
 	}
 	
 	public void transfer() {
-		/*if (seal != null && seal.glyph() == null) {
+		/*if (seal != null && seal.glyph() == null && seal.transfer) {
 			seal.inscribe(glyph());
 			seal.curseInfusionBonus = curseInfusionBonus;
 			seal.glyphChosen = true;
+			seal.transfer = false;
 			
 			inscribe(null);
 			
