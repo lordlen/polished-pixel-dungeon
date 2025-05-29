@@ -577,9 +577,9 @@ public enum Talent {
 			Dungeon.hero.updateHT(false);
 		}
 		
-		if (talent == RUNIC_TRANSFERENCE && hero.pointsInTalent(talent) == 1){
-			//if(BrokenSeal.armor != null) BrokenSeal.armor.transfer();
-		}
+		/*if (talent == RUNIC_TRANSFERENCE && hero.pointsInTalent(talent) == 1){
+			if(BrokenSeal.armor != null) BrokenSeal.armor.transfer();
+		}*/
 	}
 
 	public static class CachedRationsDropped extends CounterBuff{{revivePersists = true;}};

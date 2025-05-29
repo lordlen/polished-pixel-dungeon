@@ -419,7 +419,7 @@ public class Armor extends EquipableItem {
 		// instead of being part of true level
 		if (curseInfusionBonus) level += 1 + level/6;
 		if (seal != null && seal.curseInfusionBonus
-			&& seal.overwriteGlyph() || Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2)
+			&& seal.overwriteGlyph() || extraGlyph() == seal.glyph())
 			level += 1 + level/6;
 		
 		return level;
