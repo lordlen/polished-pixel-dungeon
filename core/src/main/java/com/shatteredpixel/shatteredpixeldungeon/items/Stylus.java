@@ -117,7 +117,7 @@ public class Stylus extends Item {
 
 	private void inscribe( BrokenSeal seal ) {
 		
-		if (seal.cursed || seal.hasCurseGlyph()){
+		if (seal.hasCurseGlyph()){
 			GLog.w( Messages.get(this, "cursed_seal"));
 			return;
 		}
@@ -170,15 +170,28 @@ public class Stylus extends Item {
 					inscribe(armor);
 				}
 				else if(!Armor.runic()) {
-					inscribe(seal);
+					if (!armor.cursedKnown) GLog.w( Messages.get(this, "identify"));
+					else inscribe(seal);
 				}
 				else {
+					String armorGlyph;
+					if(!armor.cursedKnown && (armor.glyph() == null || armor.hasCurseGlyph())) {
+						armorGlyph = Messages.get(Stylus.class, "unknown");
+					}
+					else if(armor.glyph() != null) {
+						armorGlyph = armor.glyph().name();
+					}
+					else {
+						armorGlyph = Messages.get(Stylus.class, "none");
+					}
+					String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
+					
 					GameScene.show(new WndOptions(
 							new ItemSprite(Stylus.this),
 							Messages.titleCase(new Stylus().name()),
 							Messages.get(Stylus.class, "choose_desc"),
-							"Armor: " + (armor.glyph() != null ? armor.glyph().name() : "none"),
-							"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
+							"Armor: " + armorGlyph,
+							"Seal: " + sealGlyph) {
 
 						@Override
 						protected void onSelect(int index) {
@@ -190,7 +203,6 @@ public class Stylus extends Item {
 					});
 				}
 			}
-
 			else if(item instanceof BrokenSeal) {
 				if (!Armor.runic()) {
 					GLog.w(Messages.get(Stylus.this, "no_runic"));

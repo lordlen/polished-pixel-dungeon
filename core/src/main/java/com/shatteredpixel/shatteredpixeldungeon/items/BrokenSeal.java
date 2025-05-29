@@ -207,13 +207,24 @@ public class BrokenSeal extends Item {
 				Armor arm = (Armor)item;
 
 				if(Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+					String armorGlyph;
+					if(!arm.cursedKnown && (arm.glyph() == null || arm.hasCurseGlyph())) {
+						armorGlyph = Messages.get(Stylus.class, "unknown");
+					}
+					else if(arm.glyph() != null) {
+						armorGlyph = arm.glyph().name();
+					}
+					else {
+						armorGlyph = Messages.get(Stylus.class, "none");
+					}
+					String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
 
 					GameScene.show(new WndOptions(
 							new ItemSprite(seal),
 							Messages.get(BrokenSeal.class, "choose_title"),
 							Messages.get(BrokenSeal.class, "choose_desc"),
-							"Armor: " + (arm.glyph() != null ? arm.glyph().name() : "none"),
-							"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
+							"Armor: " + armorGlyph,
+							"Seal: " + sealGlyph) {
 
 						@Override
 						protected void onSelect(int index) {

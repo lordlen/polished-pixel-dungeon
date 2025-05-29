@@ -173,12 +173,24 @@ public class ScrollOfEnchantment extends ExoticScroll {
 					enchant(seal);
 				}
 				else {
+					String armorGlyph;
+					if(!armor.cursedKnown && (armor.glyph() == null || armor.hasCurseGlyph())) {
+						armorGlyph = Messages.get(Stylus.class, "unknown");
+					}
+					else if(armor.glyph() != null) {
+						armorGlyph = armor.glyph().name();
+					}
+					else {
+						armorGlyph = Messages.get(Stylus.class, "none");
+					}
+					String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
+					
 					GameScene.show(new WndOptions(
 							new ItemSprite(ScrollOfEnchantment.this),
 							Messages.titleCase(new ScrollOfEnchantment().name()),
 							Messages.get(Stylus.class, "choose_desc"),
-							"Armor: " + (armor.glyph() != null ? armor.glyph().name() : "none"),
-							"Seal: " + (seal.glyph() != null ? seal.glyph().name() : "none")) {
+							"Armor: " + armorGlyph,
+							"Seal: " + sealGlyph) {
 						
 						@Override
 						protected void onSelect(int index) {
