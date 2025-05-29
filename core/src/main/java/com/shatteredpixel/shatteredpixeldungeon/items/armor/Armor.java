@@ -307,8 +307,8 @@ public class Armor extends EquipableItem {
 		updateQuickslot();
 	}
 	
-	public void transfer() {
-		/*if (seal != null && seal.glyph() == null && seal.transfer) {
+	/*public void transfer() {
+		if (seal != null && seal.glyph() == null && seal.transfer) {
 			seal.inscribe(glyph());
 			seal.curseInfusionBonus = curseInfusionBonus;
 			seal.glyphChosen = true;
@@ -317,8 +317,8 @@ public class Armor extends EquipableItem {
 			inscribe(null);
 			
 			updateQuickslot();
-		}*/
-	}
+		}
+	}*/
 
 	public BrokenSeal checkSeal(){
 		return seal;
@@ -543,12 +543,10 @@ public class Armor extends EquipableItem {
 	
 	@Override
 	public String name() {
-		if (isEquipped(Dungeon.hero) && !hasCurseGlyph() && Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null
-			&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || activeGlyph() == null)){
-				return Messages.get(HolyWard.class, "glyph_name", super.name());
-			} else {
-				return activeGlyph() != null && (cursedKnown || !activeGlyph().curse()) ? activeGlyph().name( super.name() ) : super.name();
-
+		if (HolyWard.HolyArmBuff.active(this)) {
+			return Messages.get(HolyWard.class, "glyph_name", super.name());
+		} else {
+			return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown) ? activeGlyph().name( super.name() ) : super.name();
 		}
 	}
 	
@@ -581,11 +579,10 @@ public class Armor extends EquipableItem {
 			case NONE:
 		}
 
-		if (isEquipped(Dungeon.hero) && !hasCurseGlyph() && Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null
-				&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || activeGlyph() == null)){
+		if (HolyWard.HolyArmBuff.active(this)){
 			info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", Messages.get(HolyWard.class, "glyph_name", Messages.get(Glyph.class, "glyph"))));
 			info += " " + Messages.get(HolyWard.class, "glyph_desc");
-		} else if (activeGlyph() != null  && (cursedKnown || !activeGlyph().curse())) {
+		} else if (activeGlyph() != null  && (!activeGlyph().curse() || cursedKnown)) {
 			info += "\n\n" +  Messages.capitalize(Messages.get(Armor.class, "inscribed", activeGlyph().name()));
 			if (glyphHardened) info += " " + Messages.get(Armor.class, "glyph_hardened");
 			info += " " + activeGlyph().desc();
@@ -598,7 +595,7 @@ public class Armor extends EquipableItem {
 		} else if (cursedKnown && cursed) {
 			info += "\n\n" + Messages.get(Armor.class, "cursed");
 		} else if (!isIdentified() && cursedKnown){
-			if (activeGlyph() != null && activeGlyph().curse()) {
+			if (hasCurseGlyph()) {
 				info += "\n\n" + Messages.get(Armor.class, "weak_cursed");
 			} else {
 				info += "\n\n" + Messages.get(Armor.class, "not_cursed");
@@ -746,7 +743,6 @@ public class Armor extends EquipableItem {
 		}
 		
 		this.glyph(glyph);
-		if(seal != null && glyph != null && glyph.curse()) seal.glyphChosen = false;
 		
 		if (glyph != null && isIdentified() && Dungeon.hero != null
 			&& Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(this)) {
@@ -794,13 +790,31 @@ public class Armor extends EquipableItem {
 	public boolean hasCurseGlyph(){
 		return activeGlyph() != null && activeGlyph().curse();
 	}
+	
+	public boolean hasGoodGlyph(boolean seal){
+		if(seal) {
+			return this.seal != null && this.seal.glyph() != null && !this.seal.glyph().curse();
+		}
+		else {
+			return glyph() != null && !glyph().curse();
+		}
+	}
+	
+	public boolean hasCurseGlyph(boolean seal){
+		if(seal) {
+			return this.seal != null && this.seal.glyph() != null && this.seal.glyph().curse();
+		}
+		else {
+			return glyph() != null && glyph().curse();
+		}
+	}
 
 	@Override
 	public ItemSprite.Glowing glowing() {
 		if (HolyWard.HolyArmBuff.active(this)){
 			return HolyWard.HolyArmBuff.HOLY;
 		} else {
-			return activeGlyph() != null && (cursedKnown || !activeGlyph().curse()) ? activeGlyph().glowing() : null;
+			return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown) ? activeGlyph().glowing() : null;
 		}
 	}
 	

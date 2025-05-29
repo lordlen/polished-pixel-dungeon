@@ -75,7 +75,7 @@ public class CurseInfusion extends InventorySpell {
 	
 	private void curseEnchant(Armor a) {
 		//if we are freshly applying curse infusion, don't replace an existing curse
-		if (a.glyph() == null || !a.glyph().curse() || a.curseInfusionBonus) {
+		if (a.glyph() == null || !a.hasCurseGlyph(false) || a.curseInfusionBonus) {
 			a.inscribe(Armor.Glyph.randomCurse(a.armorGlyphClass(), a.sealGlyphClass()), true);
 		}
 		a.cursed = true;
@@ -84,7 +84,7 @@ public class CurseInfusion extends InventorySpell {
 	
 	private void curseEnchant(BrokenSeal s) {
 		//if we are freshly applying curse infusion, don't replace an existing curse
-		if (s.glyph() == null || !s.glyph().curse() || s.curseInfusionBonus) {
+		if (s.glyph() == null || !s.hasCurseGlyph() || s.curseInfusionBonus) {
 			s.inscribe(Armor.Glyph.randomCurse(s.armorGlyphClass(), s.sealGlyphClass()));
 		}
 		s.curseInfusionBonus = true;

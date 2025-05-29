@@ -94,7 +94,7 @@ public class Stylus extends Item {
 		if (!armor.cursedKnown){
 			GLog.w( Messages.get(this, "identify"));
 			return;
-		} else if (armor.cursed || armor.hasCurseGlyph()){
+		} else if (armor.cursed || armor.hasCurseGlyph(false)){
 			GLog.w( Messages.get(this, "cursed"));
 			return;
 		}
@@ -117,7 +117,7 @@ public class Stylus extends Item {
 
 	private void inscribe( BrokenSeal seal ) {
 		
-		if (seal.cursed || seal.glyph().curse()){
+		if (seal.cursed || seal.hasCurseGlyph()){
 			GLog.w( Messages.get(this, "cursed"));
 			return;
 		}

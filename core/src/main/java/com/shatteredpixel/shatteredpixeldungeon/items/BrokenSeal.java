@@ -64,7 +64,7 @@ public class BrokenSeal extends Item {
 	}
 	
 
-	public static Armor armor;
+	public Armor armor;
 	private Armor.Glyph glyph;
 	public boolean glyphChosen = false;
 
@@ -95,7 +95,6 @@ public class BrokenSeal extends Item {
 
 		//so once we upgrade the talent, this gets chosen by default
 		if(Dungeon.hero != null && !Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) glyphChosen = true;
-		if(glyph != null && glyph.curse()) glyphChosen = true;
 
 		if (glyph != null) {
 			Catalog.setSeen(glyph.getClass());
@@ -106,6 +105,15 @@ public class BrokenSeal extends Item {
 
 	public Armor.Glyph glyph(){
 		return glyph;
+	}
+	
+	//these are not used to process specific glyph effects, so magic immune doesn't affect them
+	public boolean hasGoodGlyph(){
+		return glyph() != null && !glyph().curse();
+	}
+	
+	public boolean hasCurseGlyph(){
+		return glyph() != null && glyph().curse();
 	}
 	
 	public Class<? extends Armor.Glyph> sealGlyphClass() {
