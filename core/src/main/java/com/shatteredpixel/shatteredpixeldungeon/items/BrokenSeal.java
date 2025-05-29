@@ -64,7 +64,7 @@ public class BrokenSeal extends Item {
 	}
 	
 
-	public Armor armor;
+	public static Armor armor;
 	private Armor.Glyph glyph;
 	public boolean glyphChosen = false;
 

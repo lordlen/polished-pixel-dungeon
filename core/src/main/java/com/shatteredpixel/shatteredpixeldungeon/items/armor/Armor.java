@@ -180,8 +180,13 @@ public class Armor extends EquipableItem {
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
 		if(seal != null) {
-			actions.add(0, AC_DETACH);
-			if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) actions.add(0, AC_SWAP_GLYPH);
+			if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+				actions.add(0, AC_SWAP_GLYPH);
+				actions.add(0, AC_DETACH);
+			}
+			else {
+				actions.add(AC_DETACH);
+			}
 		}
 		return actions;
 	}
@@ -285,6 +290,11 @@ public class Armor extends EquipableItem {
 		if (isEquipped(Dungeon.hero)){
 			Buff.affect(Dungeon.hero, BrokenSeal.WarriorShield.class).setArmor(this);
 		}
+		
+		if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+			defaultAction = AC_SWAP_GLYPH;
+			//updateaction()
+		}
 	}
 	
 	private void detachSeal() {
@@ -311,6 +321,9 @@ public class Armor extends EquipableItem {
 		if (!detaching.collect()){
 			Dungeon.level.drop(detaching, Dungeon.hero.pos);
 		}
+		
+		defaultAction = null;
+		//updateaction()
 		updateQuickslot();
 	}
 	
