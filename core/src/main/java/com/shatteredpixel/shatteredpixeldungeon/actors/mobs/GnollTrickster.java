@@ -78,20 +78,9 @@ public class GnollTrickster extends Gnoll {
 		damage = super.attackProc( enemy, damage );
 		//The gnoll's attacks get more severe the more the player lets it hit them
 		combo++;
-		int effect = Random.Int(4)+combo;
 
-		if (effect > 2) {
-
-			if (effect >=6 && enemy.buff(Burning.class) == null){
-
-				if (Dungeon.level.flamable[enemy.pos])
-					GameScene.add(Blob.seed(enemy.pos, 4, Fire.class));
-				Buff.affect(enemy, Burning.class).reignite( enemy );
-
-			} else
-				Buff.affect( enemy, Poison.class).set((effect-2) );
-
-		}
+		if (combo > 1) Buff.affect( enemy, Poison.class).set(combo + Random.Int(3));
+		if (combo > 3) Buff.affect(enemy, Burning.class).reignite( enemy );
 
 		if(enemy == Dungeon.hero) {
 			GameScene.Polished.queueIndicator(this);

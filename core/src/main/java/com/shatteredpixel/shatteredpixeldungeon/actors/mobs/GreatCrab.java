@@ -42,7 +42,7 @@ public class GreatCrab extends Crab {
 	{
 		spriteClass = GreatCrabSprite.class;
 
-		HP = HT = 25;
+		HP = HT = 20;
 		defenseSkill = 0; //see damage()
 		baseSpeed = 1f;
 
@@ -51,7 +51,7 @@ public class GreatCrab extends Crab {
 		WANDERING = new Wandering();
 		state = WANDERING;
 
-		loot = new MysteryMeat().quantity(2);
+		loot = new MysteryMeat();
 		lootChance = 1f;
 
 		properties.add(Property.MINIBOSS);
