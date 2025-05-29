@@ -181,8 +181,8 @@ public class Armor extends EquipableItem {
 		ArrayList<String> actions = super.actions(hero);
 		if(seal != null) {
 			if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
-				actions.add(0, AC_SWAP_GLYPH);
 				actions.add(0, AC_DETACH);
+				actions.add(0, AC_SWAP_GLYPH);
 			}
 			else {
 				actions.add(AC_DETACH);
@@ -446,10 +446,8 @@ public class Armor extends EquipableItem {
 		int level = super.level();
 		//TODO warrior's seal upgrade should probably be considered here too
 		// instead of being part of true level
-		if (curseInfusionBonus) level += 1 + level/6;
-		if (seal != null && seal.curseInfusionBonus
-			&& (seal.overwriteGlyph() || extraGlyph() == seal.glyph()))
-			level += 1 + level/6;
+		if (curseInfusionBonus && glyph() == activeGlyph()) level += 1 + level/6;
+		if (seal != null && seal.curseInfusionActive()) level += 1 + level/6;
 		
 		return level;
 	}
@@ -575,6 +573,9 @@ public class Armor extends EquipableItem {
 		if (HolyWard.HolyArmBuff.active(this)) {
 			return Messages.get(HolyWard.class, "glyph_name", super.name());
 		} else {
+			boolean main = activeGlyph() != null && (!activeGlyph().curse() || cursedKnown);
+			boolean extra = extraGlyph() != null;
+			
 			return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown) ? activeGlyph().name( super.name() ) : super.name();
 		}
 	}
@@ -837,6 +838,11 @@ public class Armor extends EquipableItem {
 			return glyph() != null && glyph().curse();
 		}
 	}
+	
+	public boolean curseInfusionActive() {
+		return  (curseInfusionBonus && glyph() == activeGlyph()) ||
+				(seal != null && seal.curseInfusionActive());
+	}
 
 	@Override
 	public ItemSprite.Glowing glowing() {
@@ -896,6 +902,10 @@ public class Armor extends EquipableItem {
 		
 		public String name( String armorName ) {
 			return Messages.get(this, "name", armorName);
+		}
+		
+		public String suffix( String armorName ) {
+			return Messages.get(this, "name_suffix", armorName);
 		}
 
 		public String desc() {

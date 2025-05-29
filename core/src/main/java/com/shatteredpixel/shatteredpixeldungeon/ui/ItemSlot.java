@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -284,10 +285,10 @@ public class ItemSlot extends Button {
 			level.measure();
 			if (trueLvl == buffedLvl || buffedLvl <= 0) {
 				if (buffedLvl > 0){
-					if ((item instanceof Weapon && ((Weapon) item).curseInfusionBonus)
-						|| (item instanceof Armor && ((Armor) item).curseInfusionBonus)
-							|| (item instanceof Armor && ((Armor) item).checkSeal() != null && ((Armor) item).checkSeal().curseInfusionBonus)
-								|| (item instanceof Wand && ((Wand) item).curseInfusionBonus)){
+					if ((item instanceof Wand && ((Wand) item).curseInfusionBonus)
+						|| (item instanceof Weapon && ((Weapon) item).curseInfusionBonus)
+							|| (item instanceof Armor && ((Armor) item).curseInfusionActive())
+								|| (item instanceof BrokenSeal && ((BrokenSeal) item).curseInfusionActive())) {
 						level.hardlight(CURSE_INFUSED);
 					} else {
 						level.hardlight(UPGRADED);

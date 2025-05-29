@@ -81,6 +81,11 @@ public class BrokenSeal extends Item {
 		else
 			return false;
 	}
+	
+	public boolean curseInfusionActive() {
+		if(!curseInfusionBonus) return false;
+		return armor == null || armor.activeGlyph() == glyph() || armor.extraGlyph() == glyph();
+	}
 
 	public BrokenSeal inscribe( ) {
 		Class<? extends Armor.Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
@@ -166,6 +171,10 @@ public class BrokenSeal extends Item {
 			info += " " + glyph.desc();
 		}
 		return info;
+	}
+	
+	public int buffedVisiblyUpgraded() {
+		return curseInfusionBonus ? buffedLvl()+1 : buffedLvl();
 	}
 
 	@Override
