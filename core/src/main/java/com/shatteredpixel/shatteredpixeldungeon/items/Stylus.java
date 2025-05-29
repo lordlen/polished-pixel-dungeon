@@ -116,6 +116,11 @@ public class Stylus extends Item {
 	}
 
 	private void inscribe( BrokenSeal seal ) {
+		
+		if (seal.cursed || seal.glyph().curse()){
+			GLog.w( Messages.get(this, "cursed"));
+			return;
+		}
 
 		detach(curUser.belongings.backpack);
 		Catalog.countUse(getClass());
