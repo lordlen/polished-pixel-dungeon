@@ -580,11 +580,7 @@ public class Armor extends EquipableItem {
 		} else {
 			//warrior seal doesn't need to interact with cleric holy armor
 			
-			boolean main =  activeGlyph() != null &&
-							(
-							!activeGlyph().curse() || cursedKnown ||
-							(runic() && seal != null && activeGlyph() == seal.glyph())
-							);
+			boolean main = displayGlyph();
 			
 			boolean extra = extraGlyph() != null;
 			
@@ -631,20 +627,49 @@ public class Armor extends EquipableItem {
 				break;
 			case NONE:
 		}
-
-		if (HolyWard.HolyArmBuff.active(this)){
-			info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", Messages.get(HolyWard.class, "glyph_name", Messages.get(Glyph.class, "glyph"))));
-			info += " " + Messages.get(HolyWard.class, "glyph_desc");
-		} else if (activeGlyph() != null  && (!activeGlyph().curse() || cursedKnown)) {
-			info += "\n\n" +  Messages.capitalize(Messages.get(Armor.class, "inscribed", activeGlyph().name()));
-			if (glyphHardened) info += " " + Messages.get(Armor.class, "glyph_hardened");
-			info += " " + activeGlyph().desc();
-		} else if (glyphHardened){
-			info += "\n\n" + Messages.get(Armor.class, "hardened_no_glyph");
-		}
 		
-		if (seal != null) {
-			info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+		if(!runic()) {
+			if (HolyWard.HolyArmBuff.active(this)){
+				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", Messages.get(HolyWard.class, "glyph_name", Messages.get(Glyph.class, "glyph"))));
+				info += " " + Messages.get(HolyWard.class, "glyph_desc");
+			} else if (displayGlyph()) {
+				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", activeGlyph().name()));
+				if (glyphHardened) info += " " + Messages.get(Armor.class, "glyph_hardened");
+				info += " " + activeGlyph().desc();
+			} else if (glyphHardened){
+				info += "\n\n" + Messages.get(Armor.class, "no_glyph_hardened");
+			}
+			
+			if (seal != null) {
+				info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+			}
+		}
+		else {
+			if(glyph() != null && (!glyph.curse() || cursedKnown)) {
+				if(!seal.overwriteGlyph()) {
+					info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", glyph().name()));
+					info += " " + glyph().desc();
+				} else {
+					info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed_inactive", glyph().name()));
+				}
+			}
+			
+			if (seal != null) {
+				if(seal.glyph() == null) {
+					info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+				} else {
+					if(seal.glyph() == activeGlyph() || seal.glyph() == extraGlyph()) {
+						info += "\n\n" + Messages.get(Armor.class, "seal_attached_active", seal.maxShield(tier, level()), seal.glyph().name());
+						info += " " + seal.glyph().desc();
+					} else {
+						info += "\n\n" + Messages.get(Armor.class, "seal_attached_inactive", seal.maxShield(tier, level()), seal.glyph().name());
+					}
+				}
+			}
+			
+			if (glyphHardened){
+				info += "\n\n" + Messages.get(Armor.class, "generic_hardened");
+			}
 		}
 		
 		if (cursed && isEquipped( Dungeon.hero )) {
@@ -867,8 +892,8 @@ public class Armor extends EquipableItem {
 				(seal != null && seal.curseInfusion());
 	}
 	
-	public static boolean runic() {
-		return Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE);
+	public boolean displayGlyph() {
+		return activeGlyph() != null && (hasCurseGlyph() || cursedKnown || (runic() && seal != null && seal.overwriteGlyph()));
 	}
 
 	@Override
@@ -876,8 +901,12 @@ public class Armor extends EquipableItem {
 		if (HolyWard.HolyArmBuff.active(this)){
 			return HolyWard.HolyArmBuff.HOLY;
 		} else {
-			return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown) ? activeGlyph().glowing() : null;
+			return displayGlyph() ? activeGlyph().glowing() : null;
 		}
+	}
+	
+	public static boolean runic() {
+		return Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE);
 	}
 	
 	public static abstract class Glyph implements Bundlable {
