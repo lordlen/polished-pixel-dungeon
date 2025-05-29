@@ -287,8 +287,8 @@ public class ItemSlot extends Button {
 				if (buffedLvl > 0){
 					if ((item instanceof Wand && ((Wand) item).curseInfusionBonus)
 						|| (item instanceof Weapon && ((Weapon) item).curseInfusionBonus)
-							|| (item instanceof Armor && ((Armor) item).curseInfusionActive())
-								|| (item instanceof BrokenSeal && ((BrokenSeal) item).curseInfusionActive())) {
+							|| (item instanceof Armor && ((Armor) item).curseInfusion())
+								|| (item instanceof BrokenSeal && ((BrokenSeal) item).curseInfusion())) {
 						level.hardlight(CURSE_INFUSED);
 					} else {
 						level.hardlight(UPGRADED);

@@ -169,7 +169,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				if(seal == null) {
 					enchant(armor);
 				}
-				else if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+				else if(!Armor.runic()) {
 					enchant(seal);
 				}
 				else {
@@ -196,7 +196,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 					});
 				}
 			} else if (item instanceof BrokenSeal) {
-				if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+				if (!Armor.runic()) {
 					GLog.w(Messages.get(Stylus.class, "no_runic"));
 					GameScene.selectItem(itemSelector);
 				}

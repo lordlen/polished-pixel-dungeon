@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.Trinity;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -123,10 +124,12 @@ abstract public class ClassArmor extends Armor {
 		classArmor.level(armor.trueLevel());
 		classArmor.tier = armor.tier;
 		classArmor.augment = armor.augment;
-		classArmor.inscribe(armor.glyph(), true);
 		if (armor.seal != null) {
-			classArmor.seal = armor.seal;
+			int oldLvl = classArmor.trueLevel();
+			classArmor.affixSeal(armor.detachSeal(false));
+			classArmor.level(oldLvl);
 		}
+		classArmor.inscribe(armor.glyph(), true);
 		classArmor.glyphHardened = armor.glyphHardened;
 		classArmor.cursed = armor.cursed;
 		classArmor.curseInfusionBonus = armor.curseInfusionBonus;
@@ -241,10 +244,24 @@ abstract public class ClassArmor extends Armor {
 								tier = armor.tier;
 								augment = armor.augment;
 								cursed = armor.cursed;
-								curseInfusionBonus = armor.curseInfusionBonus;
-								masteryPotionBonus = armor.masteryPotionBonus;
+								
+								if (armor.seal != null) {
+									int oldLvl = trueLevel();
+									affixSeal(armor.detachSeal(false));
+									level(oldLvl);
+								} else if(seal != null) {
+									//automates the process of detaching the seal manually
+									// and re-affixing it to the new armor
+									if (seal.level() > 0) {
+										int newLevel = trueLevel() + 1;
+										level(newLevel);
+										Badges.validateItemLevelAquired(ClassArmor.this);
+									}
+								}
 								
 								inscribe(armor.glyph(), true);
+								curseInfusionBonus = armor.curseInfusionBonus;
+								masteryPotionBonus = armor.masteryPotionBonus;
 								
 								if (armor.checkSeal() != null) {
 									seal = armor.checkSeal();

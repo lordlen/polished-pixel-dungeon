@@ -197,7 +197,7 @@ public class Armor extends EquipableItem {
 		super.execute(hero, action);
 
 		if (action.equals(AC_DETACH) && seal != null){
-			detachSeal();
+			detachSeal(true);
 		}
 		else if (action.equals(AC_SWAP_GLYPH) && seal != null){
 			swapSealGlyph();
@@ -297,7 +297,7 @@ public class Armor extends EquipableItem {
 		}
 	}
 	
-	private void detachSeal() {
+	public BrokenSeal detachSeal(boolean operate) {
 		BrokenSeal detaching = seal;
 		seal = null;
 		detaching.armor = null;
@@ -309,22 +309,27 @@ public class Armor extends EquipableItem {
 			level(trueLevel() - 1);
 		}
 		
-		if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE) && detaching.overwriteGlyph()){
+		if (!runic() && detaching.overwriteGlyph()){
 			inscribe(detaching.glyph(), true);
 			curseInfusionBonus = detaching.curseInfusionBonus;
 			detaching.inscribe(null);
 		}
-		detaching.glyphChosen = false;
 		
-		GLog.i( Messages.get(Armor.class, "detach_seal") );
-		Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-		if (!detaching.collect()){
-			Dungeon.level.drop(detaching, Dungeon.hero.pos);
+		if(operate) {
+			detaching.glyphChosen = false;
+			
+			GLog.i( Messages.get(Armor.class, "detach_seal") );
+			Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+			if (!detaching.collect()){
+				Dungeon.level.drop(detaching, Dungeon.hero.pos);
+			}
 		}
 		
 		defaultAction = null;
 		//updateaction()
 		updateQuickslot();
+		
+		return detaching;
 	}
 	
 	private void swapSealGlyph() {
@@ -447,7 +452,7 @@ public class Armor extends EquipableItem {
 		//TODO warrior's seal upgrade should probably be considered here too
 		// instead of being part of true level
 		if (curseInfusionBonus && glyph() == activeGlyph()) level += 1 + level/6;
-		if (seal != null && seal.curseInfusionActive()) level += 1 + level/6;
+		if (seal != null && seal.curseInfusion()) level += 1 + level/6;
 		
 		return level;
 	}
@@ -458,7 +463,7 @@ public class Armor extends EquipableItem {
 	}
 	
 	public Item upgrade( boolean preserve ) {
-
+		
 		if (activeGlyph() != null && !preserve) {
 			//chance to lose harden buff is 10/20/40/80/100% when upgrading from +6/7/8/9/10
 			if (glyphHardened) {
@@ -475,7 +480,7 @@ public class Armor extends EquipableItem {
 
 				//the chance from +4/5, and then +6 can be set to 0% with metamorphed runic transference
 				int lossChanceStart = 4;
-				if (Dungeon.hero != null && Dungeon.hero.heroClass != HeroClass.WARRIOR && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)){
+				if (Dungeon.hero != null && Dungeon.hero.heroClass != HeroClass.WARRIOR && runic()){
 					lossChanceStart += 1+Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE);
 				}
 
@@ -573,10 +578,28 @@ public class Armor extends EquipableItem {
 		if (HolyWard.HolyArmBuff.active(this)) {
 			return Messages.get(HolyWard.class, "glyph_name", super.name());
 		} else {
-			boolean main = activeGlyph() != null && (!activeGlyph().curse() || cursedKnown);
+			//warrior seal doesn't need to interact with cleric holy armor
+			
+			boolean main =  activeGlyph() != null &&
+							(
+							!activeGlyph().curse() || cursedKnown ||
+							(runic() && seal != null && activeGlyph() == seal.glyph())
+							);
+			
 			boolean extra = extraGlyph() != null;
 			
-			return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown) ? activeGlyph().name( super.name() ) : super.name();
+			if(main && extra) {
+				return extraGlyph().suffix( activeGlyph().name( super.name() ) );
+			}
+			else if(main) {
+				return activeGlyph().name( super.name() );
+			}
+			else if(extra) {
+				return extraGlyph().name( super.name() );
+			}
+			else {
+				return super.name();
+			}
 		}
 	}
 	
@@ -620,6 +643,10 @@ public class Armor extends EquipableItem {
 			info += "\n\n" + Messages.get(Armor.class, "hardened_no_glyph");
 		}
 		
+		if (seal != null) {
+			info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+		}
+		
 		if (cursed && isEquipped( Dungeon.hero )) {
 			info += "\n\n" + Messages.get(Armor.class, "cursed_worn");
 		} else if (cursedKnown && cursed) {
@@ -630,10 +657,6 @@ public class Armor extends EquipableItem {
 			} else {
 				info += "\n\n" + Messages.get(Armor.class, "not_cursed");
 			}
-		}
-
-		if (seal != null) {
-			info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
 		}
 		
 		return info;
@@ -767,7 +790,7 @@ public class Armor extends EquipableItem {
 	
 	public Armor inscribe( Glyph glyph, boolean force ) {
 		if (seal != null && !force
-			&& (seal.overwriteGlyph() || !Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE))) {
+			&& (seal.overwriteGlyph() || !runic())) {
 			seal.inscribe(glyph);
 			return this;
 		}
@@ -839,9 +862,13 @@ public class Armor extends EquipableItem {
 		}
 	}
 	
-	public boolean curseInfusionActive() {
+	public boolean curseInfusion() {
 		return  (curseInfusionBonus && glyph() == activeGlyph()) ||
-				(seal != null && seal.curseInfusionActive());
+				(seal != null && seal.curseInfusion());
+	}
+	
+	public static boolean runic() {
+		return Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE);
 	}
 
 	@Override

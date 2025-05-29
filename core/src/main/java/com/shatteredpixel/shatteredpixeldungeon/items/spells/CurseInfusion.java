@@ -66,6 +66,7 @@ public class CurseInfusion extends InventorySpell {
 			w.enchant(Weapon.Enchantment.randomCurse(w.enchantment != null ? w.enchantment.getClass() : null));
 		}
 		w.cursed = true;
+		w.cursedKnown = true;
 		w.curseInfusionBonus = true;
 		
 		if (w instanceof MagesStaff){
@@ -79,6 +80,7 @@ public class CurseInfusion extends InventorySpell {
 			a.inscribe(Armor.Glyph.randomCurse(a.armorGlyphClass(), a.sealGlyphClass()), true);
 		}
 		a.cursed = true;
+		a.cursedKnown = true;
 		a.curseInfusionBonus = true;
 	}
 	
@@ -108,9 +110,10 @@ public class CurseInfusion extends InventorySpell {
 			if(seal == null) {
 				curseEnchant(armor);
 			}
-			else if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+			else if(!Armor.runic()) {
 				curseEnchant(seal);
 				armor.cursed = true;
+				armor.cursedKnown = true;
 			}
 			else {
 				GameScene.show(new WndOptions(
@@ -150,7 +153,7 @@ public class CurseInfusion extends InventorySpell {
 			}
 		}
 		else if (item instanceof BrokenSeal) {
-			if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+			if (!Armor.runic()) {
 				GLog.w(Messages.get(Stylus.class, "no_runic"));
 				
 				GameScene.selectItem(itemSelector);

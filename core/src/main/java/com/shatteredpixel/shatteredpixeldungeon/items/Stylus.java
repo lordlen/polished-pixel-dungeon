@@ -169,7 +169,7 @@ public class Stylus extends Item {
 				if(seal == null) {
 					inscribe(armor);
 				}
-				else if(!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+				else if(!Armor.runic()) {
 					inscribe(seal);
 				}
 				else {
@@ -192,7 +192,7 @@ public class Stylus extends Item {
 			}
 
 			else if(item instanceof BrokenSeal) {
-				if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+				if (!Armor.runic()) {
 					GLog.w(Messages.get(Stylus.this, "no_runic"));
 				}
 				else {
