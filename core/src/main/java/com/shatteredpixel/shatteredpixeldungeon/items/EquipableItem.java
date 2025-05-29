@@ -50,7 +50,7 @@ public abstract class EquipableItem extends Item {
 	@Override
 	public ArrayList<String> actions(Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
-		actions.add( isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
+		actions.add( 0, isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
 		return actions;
 	}
 

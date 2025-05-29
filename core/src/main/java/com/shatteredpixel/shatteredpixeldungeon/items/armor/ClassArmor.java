@@ -166,10 +166,10 @@ abstract public class ClassArmor extends Armor {
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
+		actions.add( AC_TRANSFER );
 		if (isEquipped( hero )) {
 			actions.add( AC_ABILITY );
 		}
-		actions.add( AC_TRANSFER );
 		return actions;
 	}
 
@@ -250,13 +250,9 @@ abstract public class ClassArmor extends Armor {
 									affixSeal(armor.detachSeal(false));
 									level(oldLvl);
 								} else if(seal != null) {
-									//automates the process of detaching the seal manually
+									// simulate the process of detaching the seal manually
 									// and re-affixing it to the new armor
-									if (seal.level() > 0) {
-										int newLevel = trueLevel() + 1;
-										level(newLevel);
-										Badges.validateItemLevelAquired(ClassArmor.this);
-									}
+									affixSeal(detachSeal(false));
 								}
 								
 								inscribe(armor.glyph(), true);
