@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -72,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
@@ -83,7 +85,8 @@ import java.util.Arrays;
 
 public class Armor extends EquipableItem {
 
-	protected static final String AC_DETACH       = "DETACH";
+	protected static final String AC_DETACH		= "DETACH";
+	protected static final String AC_SWAP_GLYPH	= "SWAP_GLYPH";
 	
 	public enum Augment {
 		EVASION (2f , -1f),
@@ -176,7 +179,10 @@ public class Armor extends EquipableItem {
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
-		if (seal != null) actions.add(AC_DETACH);
+		if(seal != null) {
+			actions.add(0, AC_DETACH);
+			if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) actions.add(0, AC_SWAP_GLYPH);
+		}
 		return actions;
 	}
 
@@ -187,6 +193,9 @@ public class Armor extends EquipableItem {
 
 		if (action.equals(AC_DETACH) && seal != null){
 			detachSeal();
+		}
+		else if (action.equals(AC_SWAP_GLYPH) && seal != null){
+			swapSealGlyph();
 		}
 	}
 
@@ -278,9 +287,7 @@ public class Armor extends EquipableItem {
 		}
 	}
 	
-	public void detachSeal() {
-		if(seal == null) return;
-		
+	private void detachSeal() {
 		BrokenSeal detaching = seal;
 		seal = null;
 		detaching.armor = null;
@@ -304,6 +311,15 @@ public class Armor extends EquipableItem {
 		if (!detaching.collect()){
 			Dungeon.level.drop(detaching, Dungeon.hero.pos);
 		}
+		updateQuickslot();
+	}
+	
+	private void swapSealGlyph() {
+		seal.glyphChosen = !seal.glyphChosen;
+		
+		GLog.i( Messages.get(Armor.class, "swap_glyph") );
+		Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+		Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
 		updateQuickslot();
 	}
 	
@@ -419,7 +435,7 @@ public class Armor extends EquipableItem {
 		// instead of being part of true level
 		if (curseInfusionBonus) level += 1 + level/6;
 		if (seal != null && seal.curseInfusionBonus
-			&& seal.overwriteGlyph() || extraGlyph() == seal.glyph())
+			&& (seal.overwriteGlyph() || extraGlyph() == seal.glyph()))
 			level += 1 + level/6;
 		
 		return level;
