@@ -62,7 +62,7 @@ public class Brute extends Mob {
 	@Override
 	public Item createLoot() {
 		Item gold = super.createLoot();
-		return gold.quantity(Math.round(0.7f * gold.quantity()));
+		return gold.quantity(Math.round(0.75f * gold.quantity()));
 	}
 	
 	protected boolean hasRaged = false;
