@@ -391,8 +391,6 @@ public class ItemSpriteSheet {
 		assignItemRect(ARMOR_CLERIC,    13, 14);
 	}
 
-	                                                                                    //16 free slots
-
 	private static final int WANDS              =                           xy(1, 14);  //16 slots
 	public static final int WAND_MAGIC_MISSILE  = WANDS+0;
 	public static final int WAND_FIREBOLT       = WANDS+1;
@@ -796,7 +794,43 @@ public class ItemSpriteSheet {
 		assignItemRect(CITY_PAGE,   10, 11);
 		assignItemRect(HALLS_PAGE,  10, 11);
 	}
-
+	
+	// *** POLISHED ***
+	private static final int CURSED_ARTIS      	=                           xy(1, 35);  //16 slots
+	public static final int CURSED_ARMBAND     	= CURSED_ARTIS+0;
+	public static final int CURSED_TALISMAN     = CURSED_ARTIS+1;
+	public static final int CURSED_HOURGLASS    = CURSED_ARTIS+2;
+	public static final int CURSED_TOOLKIT     	= CURSED_ARTIS+3;
+	public static final int CURSED_SPELLBOOK    = CURSED_ARTIS+4;
+	public static final int CURSED_CHAINS     	= CURSED_ARTIS+5;
+	public static final int CURSED_HORN     	= CURSED_ARTIS+6;
+	public static final int CURSED_CHALICE     	= CURSED_ARTIS+7;
+	public static final int CURSED_SANDALS     	= CURSED_ARTIS+8;
+	public static final int CURSED_ROSE     	= CURSED_ARTIS+9;
+	static {
+		assignItemRect(CURSED_ARMBAND,    16, 13);
+		assignItemRect(CURSED_TALISMAN,   15, 13);
+		assignItemRect(CURSED_HOURGLASS,  13, 16);
+		assignItemRect(CURSED_TOOLKIT,    15, 13);
+		assignItemRect(CURSED_SPELLBOOK,  13, 16);
+		assignItemRect(CURSED_CHAINS,     16, 16);
+		assignItemRect(CURSED_HORN,       15, 15);
+		assignItemRect(CURSED_CHALICE,    12, 15);
+		assignItemRect(CURSED_SANDALS,    16, 6 );
+		assignItemRect(CURSED_ROSE,       14, 14);
+	}
+	
+	private static final int POLISHED_ITEMS		=                 			xy(1, 36);  //16 slots
+	public static final int MYSTERY_SCROLL  	= POLISHED_ITEMS+0;
+	public static final int MYSTERY_POTION  	= POLISHED_ITEMS+1;
+	public static final int HONEYED_MEAT    	= POLISHED_ITEMS+2;
+	static {
+		assignItemRect(MYSTERY_SCROLL , 15, 14);
+		assignItemRect(MYSTERY_POTION,  12, 14);
+		assignItemRect(HONEYED_MEAT,    15, 11);
+	}
+	
+	
 	//for smaller 8x8 icons that often accompany an item sprite
 	public static class Icons {
 

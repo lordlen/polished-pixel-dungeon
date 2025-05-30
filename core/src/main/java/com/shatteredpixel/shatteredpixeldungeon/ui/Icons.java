@@ -132,7 +132,46 @@ public enum Icons {
 	KRISTJAN,
 	CUBE_CODE,
 	PURIGRO,
-	ARCNOR;
+	ARCNOR,
+
+
+
+
+
+	// *** POLISHED PIXEL DUNGEON ***
+
+	//puzzle room landmarks
+	RED_SENTRY,
+	TRAPS_ROOM,
+	CHASM_ROOM,
+	MAGICAL_FIRE,
+	POOL_ROOM,
+	BARRICADE,
+	TOXIC_GAS_ROOM,
+	CHASM_ROOM_SECRET,
+
+	WELL_CHANGE,
+
+
+	//ui menus, credits scene
+	UNCHECKED_POLISHED,
+	CHECKED_POLISHED,
+	CLOSE_POLISHED,
+	PLUS_POLISHED,
+	REPEAT_POLISHED,
+	UNCHECKED_GRAY,
+	CHECKED_GRAY,
+
+	BOBY,
+	ZRP200,
+	PPD,
+
+	//unused
+	WELL_EMPTY,
+	TRAPS_ROOM_POISON,
+	PIRANHA,
+	TOXIC_GAS_ROOM_SIMPLIFIED
+	;
 
 	public Image get() {
 		return get( this );
@@ -424,6 +463,86 @@ public enum Icons {
 			case CUBE_CODE:
 				icon.frame( icon.texture.uvRectBySize( 160, 96, 27, 30 ) );
 				icon.scale.set(PixelScene.align(0.49f));
+				break;
+
+
+			// *** POLISHED PIXEL DUNGEON ***
+
+			//puzzle room landmarks
+			case RED_SENTRY:
+				icon.frame( icon.texture.uvRectBySize( 0, 144, 16, 16 ) );
+				break;
+			case TRAPS_ROOM:
+				icon.frame( icon.texture.uvRectBySize( 16, 144, 16, 16 ) );
+				break;
+			case CHASM_ROOM:
+				icon.frame( icon.texture.uvRectBySize( 32, 144, 16, 16 ) );
+				break;
+			case MAGICAL_FIRE:
+				icon.frame( icon.texture.uvRectBySize( 48, 144, 16, 16 ) );
+				break;
+			case POOL_ROOM:
+				icon.frame( icon.texture.uvRectBySize( 64, 144, 16, 16 ) );
+				break;
+			case BARRICADE:
+				icon.frame( icon.texture.uvRectBySize( 80, 144, 16, 16 ) );
+				break;
+			case TOXIC_GAS_ROOM:
+				icon.frame( icon.texture.uvRectBySize( 96, 144, 16, 16 ) );
+				break;
+			case CHASM_ROOM_SECRET:
+				icon.frame( icon.texture.uvRectBySize( 112, 144, 16, 16 ) );
+				break;
+
+			case WELL_CHANGE:
+				icon.frame( icon.texture.uvRectBySize( 144, 144, 16, 16 ) );
+				break;
+
+			//ui menus, credits scene
+			case UNCHECKED_POLISHED:
+				icon.frame( icon.texture.uvRectBySize( 0, 160, 12, 12 ) );
+				break;
+			case CHECKED_POLISHED:
+				icon.frame( icon.texture.uvRectBySize( 16, 160, 12, 12 ) );
+				break;
+			case CLOSE_POLISHED:
+				icon.frame( icon.texture.uvRectBySize( 32, 160, 11, 11 ) );
+				break;
+			case PLUS_POLISHED:
+				icon.frame( icon.texture.uvRectBySize( 48, 160, 11, 11 ) );
+				break;
+			case REPEAT_POLISHED:
+				icon.frame( icon.texture.uvRectBySize( 64, 160, 11, 11 ) );
+				break;
+			case UNCHECKED_GRAY:
+				icon.frame( icon.texture.uvRectBySize( 80, 160, 12, 12 ) );
+				break;
+			case CHECKED_GRAY:
+				icon.frame( icon.texture.uvRectBySize( 96, 160, 12, 12 ) );
+				break;
+
+			case BOBY:
+				icon.frame( icon.texture.uvRectBySize( 128, 160, 14, 16 ) );
+				break;
+			case ZRP200:
+				icon.frame( icon.texture.uvRectBySize( 144, 160, 12, 12 ) );
+				break;
+			case PPD:
+				icon.frame( icon.texture.uvRectBySize( 160, 160, 12, 14 ) );
+				break;
+
+			//unusued
+			case WELL_EMPTY:
+				icon.frame( icon.texture.uvRectBySize( 192, 176, 16, 16 ) );
+				break;
+			case TRAPS_ROOM_POISON:
+				icon.frame( icon.texture.uvRectBySize( 208, 176, 16, 16 ) );
+				break;
+			case PIRANHA:
+				icon.frame( icon.texture.uvRectBySize( 224, 176, 16, 16 ) );
+				break;
+			case TOXIC_GAS_ROOM_SIMPLIFIED:
+				icon.frame( icon.texture.uvRectBySize( 240, 176, 16, 16 ) );
 				break;
 
 		}

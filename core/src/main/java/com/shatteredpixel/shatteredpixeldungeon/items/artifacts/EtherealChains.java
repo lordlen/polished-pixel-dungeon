@@ -59,7 +59,7 @@ import java.util.ArrayList;
 
 public class EtherealChains extends Artifact {
 
-	protected static final float baseCripple = 0f;
+	protected static final float baseCripple = 1f;
 
 	public static final String AC_CAST       = "CAST";
 
@@ -73,6 +73,11 @@ public class EtherealChains extends Artifact {
 
 		defaultAction = AC_CAST;
 		usesTargeting = true;
+	}
+
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_CHAINS : image;
 	}
 
 	@Override
@@ -123,6 +128,11 @@ public class EtherealChains extends Artifact {
 	public void resetForTrinity(int visibleLevel) {
 		super.resetForTrinity(visibleLevel);
 		charge = 5+(level()*2); //sets charge to soft cap
+	}
+
+	@Override
+	public void Polished_maxCharge() {
+		charge = 5+(level()*2);
 	}
 
 	public CellSelector.Listener caster = new CellSelector.Listener(){
@@ -182,7 +192,7 @@ public class EtherealChains extends Artifact {
 		
 		final int pulledPos = bestPos;
 		
-		int chargeUse = Dungeon.level.distance(enemy.pos, pulledPos);
+		int chargeUse = Dungeon.level.distance(hero.pos, enemy.pos);
 		if (chargeUse > charge) {
 			GLog.w( Messages.get(this, "no_charge") );
 			return;
@@ -241,7 +251,7 @@ public class EtherealChains extends Artifact {
 		for (int i : PathFinder.NEIGHBOURS8){
 			Mob mob = Dungeon.level.findMob(chain.collisionPos+i);
 			if (mob != null && mob.alignment == Char.Alignment.ENEMY &&
-					Dungeon.hero.fieldOfView[chain.collisionPos+i] && Dungeon.hero.fieldOfView[chain.collisionPos]) {
+					Dungeon.hero.fieldOfView[chain.collisionPos+i]) {
 				enemyFound = true;
 				break;
 			}
@@ -277,7 +287,7 @@ public class EtherealChains extends Artifact {
 						updateQuickslot();
 
 						Dungeon.level.occupyCell(hero);
-						hero.spendAndNext(1f);
+						//hero.spendAndNext(1f);
 						Dungeon.observe();
 						GameScene.updateFog();
 					}
@@ -329,8 +339,8 @@ public class EtherealChains extends Artifact {
 					&& !cursed
 					&& target.buff(MagicImmune.class) == null
 					&& Regeneration.regenOn()) {
-				//gains a charge in 40 - 2*missingCharge turns
-				float chargeGain = (1 / (40f - (chargeTarget - charge)*2f));
+				//gains a charge in 50 - 2*missingCharge turns
+				float chargeGain = (1 / (50f - (chargeTarget - charge)*2f));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 				partialCharge += chargeGain;
 			} else if (cursed && Random.Int(100) == 0){

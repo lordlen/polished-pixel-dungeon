@@ -58,6 +58,7 @@ import com.watabou.noosa.Tilemap;
 import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.GameMath;
@@ -73,6 +74,8 @@ public class CavesBossLevel extends Level {
 	{
 		color1 = 0x534f3e;
 		color2 = 0xb9d661;
+
+		viewDistance = 6;
 	}
 
 	@Override
@@ -121,12 +124,12 @@ public class CavesBossLevel extends Level {
 		//set up main boss arena
 		Painter.fillEllipse(this, mainArena, Terrain.EMPTY);
 
-		boolean[] patch = Patch.generate( width, height-14, 0.15f, 2, true );
+		boolean[] patch = Patch.generate( width, height-14, 0.2f, 1, true );
 		for (int i= 14*width(); i < length(); i++) {
 			if (map[i] == Terrain.EMPTY) {
 				if (patch[i - 14*width()]){
 					map[i] = Terrain.WATER;
-				} else if (Random.Int(Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 4 : 8) == 0){
+				} else if (Random.Int(Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 8 : 12) == 0){
 					map[i] = Terrain.INACTIVE_TRAP;
 				}
 			}
@@ -321,11 +324,29 @@ public class CavesBossLevel extends Level {
 		PixelScene.shake( 3, 0.7f );
 		Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 
+
+		boolean[] pass = BArray.not( solid, null );
+		for (int pos = 0; pos < length; pos++) {
+			if(!openSpace[pos] && insideEntrance(pos))
+				pass[pos] = false;
+		}
+
+		PathFinder.buildDistanceMap( Dungeon.hero.pos, pass, 15 );
+		ArrayList<Integer> candidates = new ArrayList<>();
+		for (Point p : mainArena.getPoints()){
+			int pos = pointToCell(p);
+
+			if (openSpace[pos] && map[pos] != Terrain.EMPTY_SP && Actor.findChar(pos) == null &&
+				PathFinder.distance[pos] >= 13 && PathFinder.distance[pos] <= 15) {
+				candidates.add(pos);
+			}
+		}
+		int placeholder = pointToCell(Random.element(mainArena.getPoints()));
+
 		DM300 boss = new DM300();
-		boss.state = boss.WANDERING;
-		do {
-			boss.pos = pointToCell(Random.element(mainArena.getPoints()));
-		} while (!openSpace[boss.pos] || map[boss.pos] == Terrain.EMPTY_SP || Actor.findChar(boss.pos) != null);
+		//12-14 tiles distance on spawn
+		boss.pos = candidates.isEmpty() ? placeholder : Random.element(candidates);
+		boss.aggroHero();
 		GameScene.add( boss );
 
 		Game.runOnRenderThread(new Callback() {
@@ -522,8 +543,8 @@ public class CavesBossLevel extends Level {
 	private static short[][] entranceVariants = {
 			entrance1,
 			entrance2,
-			entrance3,
-			entrance4
+			entrance3//,
+			//entrance4
 	};
 
 	private void buildEntrance(){
@@ -550,6 +571,10 @@ public class CavesBossLevel extends Level {
 
 		Painter.set(this, entrance, Terrain.ENTRANCE);
 		transitions.add(new LevelTransition(this, entrance, LevelTransition.Type.REGULAR_ENTRANCE));
+	}
+
+	public static boolean insideEntrance(int cell) {
+		return mainArena.shrink(2).inside(Dungeon.level.cellToPoint(cell));
 	}
 
 	private static short[] corner1 = {

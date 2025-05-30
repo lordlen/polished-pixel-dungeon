@@ -27,8 +27,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -37,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Rect;
 
 public class ItemSlot extends Button {
@@ -143,14 +146,27 @@ public class ItemSlot extends Button {
 		
 		if (extra != null) {
 			extra.x = x + (width - extra.width()) - margin.right;
-			extra.y = y + margin.top;
-			PixelScene.align(extra);
-
-			if ((status.width() + extra.width()) > width){
-				extra.visible = false;
-			} else if (item != null) {
-				extra.visible = true;
+			extra.y = margin.top + y;
+			
+			if(item instanceof WealthDrop) {
+				extra.x--;
+				extra.y = margin.top + bottom() - extra.height() - 0;
+				
+				if (extra.width() > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
 			}
+			else {
+				if ((status.width() + extra.width()) > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
+			}
+			
+			PixelScene.align(extra);
 		}
 
 		if (itemIcon != null){
@@ -239,11 +255,16 @@ public class ItemSlot extends Button {
 				&& ((MissileWeapon) item).durabilityLeft() <= 50f
 				&& ((MissileWeapon) item).durabilityLeft() <= ((MissileWeapon) item).durabilityPerUse()){
 			status.hardlight(WARNING);
-		} else {
+		}
+		else if (item instanceof SpiritBow) {
+			((SpiritBow) item).statusColor(status);
+		}
+		else {
 			status.resetColor();
 		}
 
-		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()))){
+		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
+
 			extra.text( null );
 
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
@@ -276,6 +297,18 @@ public class ItemSlot extends Button {
 			extra.text( null );
 
 		}
+
+		if(item instanceof WealthDrop) {
+			extra.text( ((WealthDrop) item).dropExtra() );
+			((WealthDrop) item).dropColor(extra);
+			
+			extra.scale.set(PixelScene.align(0.9f));
+			extra.measure();
+		} else {
+			extra.resetColor();
+			extra.scale.set(1f);
+		}
+
 
 		int trueLvl = item.visiblyUpgraded();
 		int buffedLvl = item.buffedVisiblyUpgraded();

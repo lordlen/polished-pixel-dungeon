@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -55,6 +56,13 @@ public class GreatCrab extends Crab {
 
 		properties.add(Property.MINIBOSS);
 	}
+	
+	@Override
+	public Item createLoot(){
+		//doesn't affect regular crab drops
+		Dungeon.LimitedDrops.CRAB_MEAT.count--;
+		return super.createLoot();
+	}
 
 	private int moving = 0;
 
@@ -80,7 +88,7 @@ public class GreatCrab extends Crab {
 				&& paralysed == 0
 				&& (src instanceof Wand || src instanceof ClericSpell)
 				&& enemy == Dungeon.hero
-				&& enemy.invisible == 0){
+				&& !enemy.isStealthyTo(this)){
 			GLog.n( Messages.get(this, "noticed") );
 			sprite.showStatus( CharSprite.NEUTRAL, Messages.get(this, "def_verb") );
 			Sample.INSTANCE.play( Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
@@ -96,7 +104,7 @@ public class GreatCrab extends Crab {
 				&& state != SLEEPING
 				&& paralysed == 0
 				&& enemy == this.enemy
-				&& enemy.invisible == 0){
+				&& !enemy.isStealthyTo(this)){
 			if (sprite != null && sprite.visible) {
 				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 				GLog.n( Messages.get(this, "noticed") );

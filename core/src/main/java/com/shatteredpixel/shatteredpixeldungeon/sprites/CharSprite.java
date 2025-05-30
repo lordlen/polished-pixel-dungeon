@@ -41,6 +41,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
@@ -97,6 +98,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected Callback animCallback;
 	
 	protected PosTweener motion;
+	private Callback motionCallback;
 	
 	protected Emitter burning;
 	protected Emitter chilled;
@@ -115,6 +117,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	
 	protected EmoIcon emo;
 	protected CharHealthIndicator health;
+	protected BuffIndicator buffs;
 
 	private Tweener jumpTweener;
 	private Callback jumpCallback;
@@ -127,6 +130,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 
 	//used to prevent the actor associated with this sprite from acting until movement completes
 	public volatile boolean isMoving = false;
+	public volatile boolean isJumping = false;
 	
 	public CharSprite() {
 		super();
@@ -158,6 +162,9 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			} else {
 				health.target(ch);
 			}
+
+			if(buffs == null || !buffs.alive) buffs = new BuffIndicator(ch, false);
+			buffs.Polished_target(ch);
 		}
 
 		ch.updateSpriteState();
@@ -249,7 +256,25 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			motion.stop(false);
 		}
 	}
-	
+
+	public synchronized void doAfterAnim(Callback callback) {
+		Callback current = isJumping ? jumpCallback : (isMoving ? motionCallback : animCallback);
+
+		Callback updated = callback;
+		if(current != null) {
+			updated = () -> {
+				current.call();
+				callback.call();
+			};
+		}
+
+		if(isJumping) jumpCallback = updated;
+		else if(isMoving) motionCallback = updated;
+		else {
+			if(curAnim != idle) animCallback = updated;
+			else callback.call();
+		}
+	}
 	public void attack( int cell ) {
 		attack( cell, null );
 	}
@@ -302,6 +327,8 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		jumpTweener.listener = this;
 		parent.add( jumpTweener );
 
+		isJumping = true;
+
 		turnTo( from, to );
 	}
 
@@ -314,6 +341,9 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		
 		if (health != null){
 			health.killAndErase();
+		}
+		if (buffs != null) {
+			buffs.killAndErase();
 		}
 	}
 	
@@ -725,6 +755,9 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		if (health != null){
 			health.killAndErase();
 		}
+		if (buffs != null) {
+			buffs.killAndErase();
+		}
 	}
 
 	private float[] shadowMatrix = new float[16];
@@ -778,12 +811,15 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	@Override
 	public void onComplete( Tweener tweener ) {
 		if (tweener == jumpTweener) {
+			isJumping = false;
 
 			if (visible && Dungeon.level.water[ch.pos] && !ch.flying) {
 				GameScene.ripple( ch.pos );
 			}
 			if (jumpCallback != null) {
-				jumpCallback.call();
+				Callback executing = jumpCallback;
+				jumpCallback = null;
+				executing.call();
 			}
 			GameScene.sortMobSprites();
 
@@ -795,6 +831,12 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				motion.killAndErase();
 				motion = null;
 				ch.onMotionComplete();
+
+				if (motionCallback != null) {
+					Callback executing = motionCallback;
+					motionCallback = null;
+					executing.call();
+				}
 
 				GameScene.sortMobSprites();
 				notifyAll();

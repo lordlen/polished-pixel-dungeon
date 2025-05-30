@@ -138,10 +138,10 @@ public class SPDSettings extends GameSettings {
 
 	public static final String KEY_UI_SIZE 	    = "full_ui";
 	public static final String KEY_SCALE		= "scale";
-	public static final String KEY_QUICK_SWAP	= "quickslot_swapper";
 	public static final String KEY_FLIPTOOLBAR	= "flipped_ui";
 	public static final String KEY_FLIPTAGS 	= "flip_tags";
 	public static final String KEY_BARMODE		= "toolbar_mode";
+	public static final String KEY_TRIMMING		= "quickslot_trimming";
 	public static final String KEY_SLOTWATERSKIN= "quickslot_waterskin";
 	public static final String KEY_SYSTEMFONT	= "system_font";
 	public static final String KEY_VIBRATION    = "vibration";
@@ -174,10 +174,6 @@ public class SPDSettings extends GameSettings {
 		return getInt( KEY_SCALE, 0 );
 	}
 	
-	public static void quickSwapper(boolean value ){ put( KEY_QUICK_SWAP, value ); }
-	
-	public static boolean quickSwapper(){ return getBoolean( KEY_QUICK_SWAP, true); }
-	
 	public static void flipToolbar( boolean value) {
 		put(KEY_FLIPTOOLBAR, value );
 	}
@@ -197,7 +193,15 @@ public class SPDSettings extends GameSettings {
 	public static String toolbarMode() {
 		return getString(KEY_BARMODE, PixelScene.landscape() ? "GROUP" : "SPLIT");
 	}
-
+	
+	public static void quickslotTrimming( String value ) {
+		put( KEY_TRIMMING, value );
+	}
+	
+	public static String quickslotTrimming() {
+		return getString(KEY_TRIMMING, "SWAP");
+	}
+	
 	public static void quickslotWaterskin( boolean value ){
 		put( KEY_SLOTWATERSKIN, value);
 	}
@@ -321,17 +325,35 @@ public class SPDSettings extends GameSettings {
 
 	public static class Polished {
 		public static final String KEY_HUNTRESS= "POLISHED_huntress";
+		
 		public static void huntress( boolean value ) { put(KEY_HUNTRESS, value); }
 		public static boolean huntress(){
 			return getBoolean(KEY_HUNTRESS, false);
 		}
-
+		
+		public static final String KEY_REMOVE_NOTES		= "remove_notes";
+		public static final String KEY_TRAPS_WARN		= "traps_warn";
 		public static final String KEY_INPUT_BLOCK		= "input_block";
 		public static final String KEY_AUTO_PICKUP		= "auto_pickup";
 		public static final String KEY_BUFFERS			= "buffers";
-		public static final String KEY_QUICKSLOT		= "quickslot";
+		public static final String KEY_TOTAL_QUICKSLOTS	= "total_quickslots";
 		public static final String KEY_QUICK_TRANSITIONS= "quick_transitions";
-
+		public static final String KEY_FORCE_ALIGN 		= "force_align";
+		
+		public static void removeNotes(boolean value){
+			put(KEY_REMOVE_NOTES, value);
+		}
+		public static boolean removeNotes(){
+			return getBoolean(KEY_REMOVE_NOTES, false);
+		}
+		
+		public static void trapsWarn(boolean value){
+			put(KEY_TRAPS_WARN, value);
+		}
+		public static boolean trapsWarn(){
+			return getBoolean(KEY_TRAPS_WARN, false);
+		}
+		
 		public static void inputBlock( boolean value ) { put(KEY_INPUT_BLOCK, value); }
 		public static boolean inputBlock(){
 			return getBoolean(KEY_INPUT_BLOCK, true);
@@ -342,21 +364,27 @@ public class SPDSettings extends GameSettings {
 
 		public static void buffers( int value ) { put(KEY_BUFFERS, value); }
 		public static int buffers() {return getInt(KEY_BUFFERS, 2);}
-
-
-		public static void quickslot(boolean value){
-			put(KEY_QUICKSLOT, value);
+		
+		public static void total_quickslots(int value){
+			put(KEY_TOTAL_QUICKSLOTS, value);
 		}
-
-		public static boolean quickslot(){
-			return getBoolean(KEY_QUICKSLOT, true);
+		public static int total_quickslots(){
+			return getInt(KEY_TOTAL_QUICKSLOTS, 6);
 		}
-
+		
 		public static void quickTransitions(boolean value){
 			put(KEY_QUICK_TRANSITIONS, value);
 		}
 		public static boolean quickTransitions(){
-			return getBoolean(KEY_QUICK_TRANSITIONS, true);
+			return getBoolean(KEY_QUICK_TRANSITIONS, false);
+		}
+		
+		public static void forceAlign( boolean value ) {
+			put(KEY_FORCE_ALIGN, value );
+		}
+		
+		public static boolean forceAlign() {
+			return getBoolean(KEY_FORCE_ALIGN, true);
 		}
 	}
 

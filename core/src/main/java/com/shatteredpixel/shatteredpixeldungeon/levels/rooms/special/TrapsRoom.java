@@ -22,12 +22,15 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLevitation;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -37,10 +40,12 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.traps.FlashingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.FlockTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrippingTrap;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GuardianTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.PoisonDartTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.TeleportationTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WarpingTrap;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WornDartTrap;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
@@ -50,7 +55,7 @@ public class TrapsRoom extends SpecialRoom {
 	//size is a bit limited to prevent too many or too few traps
 	@Override
 	public int minWidth() { return 6; }
-	public int maxWidth() { return 8; }
+	public int maxWidth() { return 7; }
 
 	@Override
 	public int minHeight() { return 6; }
@@ -118,8 +123,11 @@ public class TrapsRoom extends SpecialRoom {
 			Painter.set( level, pos, Terrain.PEDESTAL );
 			level.drop( prize( level ), pos ).type = Heap.Type.CHEST;
 		}
-		
+
 		level.addItemToSpawn( new PotionOfLevitation() );
+
+		if(trapClass == null) 	Blob.seed( pos, 1, ChasmID.class, level );
+		else 					Blob.seed( pos, 1, TrapsID.class, level );
 	}
 	
 	private static Item prize( Level level ) {
@@ -159,14 +167,28 @@ public class TrapsRoom extends SpecialRoom {
 	@SuppressWarnings("unchecked")
 	private static Class<?extends Trap>[][] levelTraps = new Class[][]{
 			//sewers
-			{GrippingTrap.class, TeleportationTrap.class, FlockTrap.class},
+			{WornDartTrap.class, GrippingTrap.class, WarpingTrap.class},
 			//prison
 			{PoisonDartTrap.class, GrippingTrap.class, ExplosiveTrap.class},
 			//caves
-			{PoisonDartTrap.class, FlashingTrap.class, ExplosiveTrap.class},
+			{DisintegrationTrap.class, FlashingTrap.class, WarpingTrap.class},
 			//city
-			{WarpingTrap.class, FlashingTrap.class, DisintegrationTrap.class},
+			{DisintegrationTrap.class, FlashingTrap.class, GuardianTrap.class},
 			//halls, muahahahaha
 			{GrimTrap.class}
 	};
+
+	public static class TrapsID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.TRAPS_ROOM;
+		}
+	}
+
+	public static class ChasmID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.CHASM_ROOM;
+		}
+	}
 }

@@ -29,9 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Speed;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Stamina;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
@@ -77,16 +75,18 @@ public class Necromancer extends Mob {
 
 	protected class Polished {
 		private static final String SUMMON_COOLDOWN = "summon_cooldown";
-		private static final String ZAP_COOLDOWN = "zap_cooldown";
-		private static final String TP_COOLDOWN = "zap_cooldown";
+		private static final String ZAP_COOLDOWN 	= "zap_cooldown";
+		private static final String TP_COOLDOWN 	= "zap_cooldown";
 
 		public int summonCooldown = -1;
 		public int zapCooldown = -1;
 		public int tpCooldown = -1;
 
 
-		private static final String ALT_POS = "alt_pos";
-		public boolean alt_pos = false;
+		private static final String ALT_POS 		= "alt_pos";
+		private static final String SAW_LAST 		= "saw_last";
+		public boolean altPos = false;
+		public boolean sawLast = false;
 	}
 	Polished polished = new Polished();
 
@@ -115,6 +115,7 @@ public class Necromancer extends Mob {
 		if(polished.summonCooldown > 0 && mySkeleton == null) polished.summonCooldown--;
 		if(polished.zapCooldown > 0) polished.zapCooldown--;
 		if(polished.tpCooldown > 0) polished.tpCooldown--;
+		polished.sawLast = mySkeleton != null && fieldOfView[mySkeleton.pos];
 		return next;
 	}
 
@@ -194,7 +195,8 @@ public class Necromancer extends Mob {
 		if (polished.tpCooldown != -1) {
 			bundle.put(Polished.TP_COOLDOWN, polished.tpCooldown);
 		}
-		bundle.put(Polished.ALT_POS, polished.alt_pos);
+		bundle.put(Polished.ALT_POS, polished.altPos);
+		bundle.put(Polished.SAW_LAST, polished.sawLast);
 	}
 
 	@Override
@@ -218,9 +220,9 @@ public class Necromancer extends Mob {
 		if (bundle.contains( Polished.TP_COOLDOWN )){
 			polished.tpCooldown = bundle.getInt( Polished.TP_COOLDOWN );
 		}
-		if (bundle.contains( Polished.ALT_POS )){
-			polished.alt_pos = bundle.getBoolean( Polished.ALT_POS );
-		}
+		
+		polished.altPos = bundle.getBoolean( Polished.ALT_POS );
+		polished.sawLast = bundle.getBoolean( Polished.SAW_LAST );
 	}
 	
 	public void onZapComplete(){
@@ -255,7 +257,7 @@ public class Necromancer extends Mob {
 		if (Actor.findChar(summoningPos) != null) {
 
 			//cancel if character cannot be moved, except if there's no other summon positions
-			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE) && polished.alt_pos){
+			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE) && polished.altPos){
 				summoning = false;
 				((NecromancerSprite)sprite).finishSummoning();
 				spend(-TICK);
@@ -358,7 +360,7 @@ public class Necromancer extends Mob {
 			if (enemySeen && Dungeon.level.distance(pos, enemy.pos) <= 4 && mySkeleton == null && polished.summonCooldown <= 0){
 				
 				summoningPos = -1;
-				polished.alt_pos = false;
+				polished.altPos = false;
 
 				//we can summon around blocking terrain, but not through it, except unlocked doors
 				boolean[] passable = BArray.not(Dungeon.level.solid, null);
@@ -374,7 +376,7 @@ public class Necromancer extends Mob {
 							&& fieldOfView[enemy.pos+c]
 							&& Dungeon.level.trueDistance(pos, enemy.pos+c) < Dungeon.level.trueDistance(pos, summoningPos))
 					{
-						polished.alt_pos = summoningPos != -1;
+						polished.altPos = summoningPos != -1;
 						summoningPos = enemy.pos+c;
 					}
 				}
@@ -401,7 +403,7 @@ public class Necromancer extends Mob {
 				
 				spend(TICK);
 				
-				if (!fieldOfView[mySkeleton.pos] && alignment == mySkeleton.alignment) {
+				if (!fieldOfView[mySkeleton.pos] && alignment == mySkeleton.alignment && !polished.sawLast) {
 					
 					//if the skeleton is not next to the enemy
 					//teleport them to the closest spot next to the enemy that can be seen
@@ -424,10 +426,17 @@ public class Necromancer extends Mob {
 							polished.tpCooldown = 3;
 						}
 					}
+					else {
+						//try to get closer
+						if(Dungeon.level.distance(pos, enemy.pos) > 4) {
+							spend(-TICK);
+							return super.act(enemyInFOV, justAlerted);
+						}
+					}
 					
 					return true;
 					
-				} else if(polished.zapCooldown <= 0 && fieldOfView[mySkeleton.pos]) {
+				} else if(fieldOfView[mySkeleton.pos] && polished.zapCooldown <= 0) {
 					
 					//zap skeleton
 					//its actually 1 turn
@@ -465,9 +474,6 @@ public class Necromancer extends Mob {
 			
 			//no loot or exp
 			maxLvl = -5;
-			
-			//20/25 health to start
-			//HP = 20;
 		}
 
 		@Override

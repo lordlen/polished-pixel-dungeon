@@ -320,14 +320,15 @@ public abstract class Elemental extends Mob {
 				if (!candidates.isEmpty()){
 					targetingPos = Random.element(candidates);
 
+					spend(GameMath.gate(attackDelay(), (int)Math.ceil(Dungeon.hero.cooldown()), 3*attackDelay()));
+
 					for (int i : PathFinder.NEIGHBOURS9){
 						if (!Dungeon.level.solid[targetingPos + i]) {
-							sprite.parent.addToBack(new TargetedCell(targetingPos + i, 0xFF0000));
+							sprite.parent.addToBack(new TargetedCell(targetingPos + i, 0xFF0000, now()+cooldown(), this));
 						}
 					}
 
 					GLog.n(Messages.get(this, "charging"));
-					spend(GameMath.gate(attackDelay(), (int)Math.ceil(Dungeon.hero.cooldown()), 3*attackDelay()));
 					Dungeon.hero.interrupt();
 					return true;
 				} else {
@@ -493,8 +494,7 @@ public abstract class Elemental extends Mob {
 		
 		@Override
 		protected void rangedProc( Char enemy ) {
-			//Buff.Polished.affectAligned(enemy, Chill.class, 1f);
-			Buff.affect(enemy, Chill.class, 1f);
+			Buff.Polished.affectAligned(enemy, Chill.class, 1f);
 			Freezing.freeze( enemy.pos );
 			if (enemy.sprite.visible) Splash.at( enemy.sprite.center(), sprite.blood(), 5);
 		}

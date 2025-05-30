@@ -67,6 +67,11 @@ public class TalismanOfForesight extends Artifact {
 		defaultAction = AC_SCRY;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_TALISMAN : image;
+	}
+
 	public static final String AC_SCRY = "SCRY";
 
 	@Override

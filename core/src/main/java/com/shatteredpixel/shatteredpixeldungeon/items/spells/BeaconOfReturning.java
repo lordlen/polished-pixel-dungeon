@@ -173,6 +173,7 @@ public class BeaconOfReturning extends Spell {
 			InterlevelScene.returnPos = returnPos;
 			Game.switchScene( InterlevelScene.class );
 		}
+
 		detach(hero.belongings.backpack);
 		Catalog.countUse(getClass());
 		if (Random.Float() < talentChance){

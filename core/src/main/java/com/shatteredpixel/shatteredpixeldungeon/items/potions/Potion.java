@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.potions;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.FoundItems;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -38,7 +39,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.ItemStatusHandler;
 import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.AquaBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfDragonsBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfHoneyedHealing;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfIcyTouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCorrosiveGas;
@@ -114,7 +117,6 @@ public class Potion extends Item {
 		//exotic
 		mustThrowPots.add(PotionOfCorrosiveGas.class);
 		mustThrowPots.add(PotionOfSnapFreeze.class);
-		mustThrowPots.add(PotionOfShroudingFog.class);
 		mustThrowPots.add(PotionOfStormClouds.class);
 		
 		//also all brews except unstable, hardcoded
@@ -127,9 +129,12 @@ public class Potion extends Item {
 		
 		//exotic
 		canThrowPots.add(PotionOfCleansing.class);
+		mustThrowPots.add(PotionOfShroudingFog.class);
 		
 		//elixirs
 		canThrowPots.add(ElixirOfHoneyedHealing.class);
+		canThrowPots.add(ElixirOfDragonsBlood.class);
+		canThrowPots.add(ElixirOfIcyTouch.class);
 	}
 	
 	protected static ItemStatusHandler<Potion> handler;
@@ -145,7 +150,19 @@ public class Potion extends Item {
 		stackable = true;
 		defaultAction = AC_DRINK;
 	}
-	
+
+	@Override
+	public boolean doPickUp(Hero hero, int pos) {
+		boolean picked = super.doPickUp(hero, pos);
+
+		if(picked && Polished_toFind) {
+			FoundItems.add(getClass(), Dungeon.depth);
+			Polished_toFind = false;
+		}
+
+		return picked;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static void initColors() {
 		handler = new ItemStatusHandler<>( (Class<? extends Potion>[])Generator.Category.POTION.classes, colors );

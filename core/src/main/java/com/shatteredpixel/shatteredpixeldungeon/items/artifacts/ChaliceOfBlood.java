@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -39,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -53,6 +55,11 @@ public class ChaliceOfBlood extends Artifact {
 		levelCap = 10;
 	}
 
+	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_CHALICE : image;
+	}
+
 	public static final String AC_PRICK = "PRICK";
 
 	@Override
@@ -62,6 +69,7 @@ public class ChaliceOfBlood extends Artifact {
 				&& level() < levelCap
 				&& !cursed
 				&& !hero.isInvulnerable(getClass())
+				&& (hero.buff(Berserk.class) == null || !hero.buff(Berserk.class).raging())
 				&& hero.buff(MagicImmune.class) == null)
 			actions.add(AC_PRICK);
 		return actions;
@@ -72,7 +80,6 @@ public class ChaliceOfBlood extends Artifact {
 		super.execute(hero, action);
 
 		if (action.equals(AC_PRICK)){
-
 			int damage = 5 + 3*(level()*level());
 
 			if (damage > hero.HP*0.75) {
@@ -129,7 +136,8 @@ public class ChaliceOfBlood extends Artifact {
 			Badges.validateDeathFromFriendlyMagic();
 			Dungeon.fail( this );
 			GLog.n( Messages.get(this, "ondeath") );
-		} else {
+		}
+		if(hero.isAlive() || WndResurrect.instance != null){
 			upgrade();
 			Catalog.countUse(getClass());
 		}

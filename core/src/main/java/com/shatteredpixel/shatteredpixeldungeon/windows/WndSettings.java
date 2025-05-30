@@ -29,8 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
@@ -52,8 +50,6 @@ import com.watabou.utils.Random;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
-
-import javax.swing.Icon;
 
 public class WndSettings extends WndTabbed {
 
@@ -135,11 +131,7 @@ public class WndSettings extends WndTabbed {
 		height = Math.max(height, data.height());
 		add( data );
 
-		Image scroll = Icons.get(Icons.SCROLL_GREY);
-		scroll.hardlight(0xFFFF00);
-		scroll.scale.scale(1.15f);
-
-		add( new IconTab(scroll){
+		add( new IconTab(Icons.get(Icons.PPD)){
 			@Override
 			protected void select(boolean value) {
 				super.select(value);
@@ -481,8 +473,8 @@ public class WndSettings extends WndTabbed {
 
 							RenderedTextBlock barDesc;
 							RedButton btnSplit; RedButton btnGrouped; RedButton btnCentered;
-							CheckBox chkQuickSwapper;
-							RenderedTextBlock swapperDesc;
+							RedButton btnCrop; RedButton btnSwap; RedButton btnStack;
+							ColorBlock sep;
 							CheckBox chkFlipToolbar;
 							CheckBox chkFlipTags;
 
@@ -496,11 +488,11 @@ public class WndSettings extends WndTabbed {
 										textColor(TITLE_COLOR);
 										btnGrouped.textColor(WHITE);
 										btnCentered.textColor(WHITE);
-										SPDSettings.toolbarMode(Toolbar.Mode.SPLIT.name());
+										SPDSettings.toolbarMode(Toolbar.Layout.SPLIT.name());
 										Toolbar.updateLayout();
 									}
 								};
-								if (SPDSettings.toolbarMode().equals(Toolbar.Mode.SPLIT.name())) {
+								if (SPDSettings.toolbarMode().equals(Toolbar.Layout.SPLIT.name())) {
 									btnSplit.textColor(TITLE_COLOR);
 								}
 								add(btnSplit);
@@ -511,11 +503,11 @@ public class WndSettings extends WndTabbed {
 										btnSplit.textColor(WHITE);
 										textColor(TITLE_COLOR);
 										btnCentered.textColor(WHITE);
-										SPDSettings.toolbarMode(Toolbar.Mode.GROUP.name());
+										SPDSettings.toolbarMode(Toolbar.Layout.GROUP.name());
 										Toolbar.updateLayout();
 									}
 								};
-								if (SPDSettings.toolbarMode().equals(Toolbar.Mode.GROUP.name())) {
+								if (SPDSettings.toolbarMode().equals(Toolbar.Layout.GROUP.name())) {
 									btnGrouped.textColor(TITLE_COLOR);
 								}
 								add(btnGrouped);
@@ -526,29 +518,62 @@ public class WndSettings extends WndTabbed {
 										btnSplit.textColor(WHITE);
 										btnGrouped.textColor(WHITE);
 										textColor(TITLE_COLOR);
-										SPDSettings.toolbarMode(Toolbar.Mode.CENTER.name());
+										SPDSettings.toolbarMode(Toolbar.Layout.CENTER.name());
 										Toolbar.updateLayout();
 									}
 								};
-								if (SPDSettings.toolbarMode().equals(Toolbar.Mode.CENTER.name())) {
+								if (SPDSettings.toolbarMode().equals(Toolbar.Layout.CENTER.name())) {
 									btnCentered.textColor(TITLE_COLOR);
 								}
 								add(btnCentered);
-
-								chkQuickSwapper = new CheckBox(Messages.get(WndSettings.UITab.this, "quickslot_swapper")) {
+								
+								btnCrop = new RedButton(Messages.get(WndSettings.UITab.this, "crop")) {
 									@Override
 									protected void onClick() {
-										super.onClick();
-										SPDSettings.quickSwapper(checked());
+										textColor(TITLE_COLOR);
+										btnSwap.textColor(WHITE);
+										btnStack.textColor(WHITE);
+										SPDSettings.quickslotTrimming(Toolbar.Trimming.CROP.name());
 										Toolbar.updateLayout();
 									}
 								};
-								chkQuickSwapper.checked(SPDSettings.quickSwapper());
-								add(chkQuickSwapper);
-
-								swapperDesc = PixelScene.renderTextBlock(Messages.get(WndSettings.UITab.this, "swapper_desc"), 5);
-								swapperDesc.hardlight(0x888888);
-								add(swapperDesc);
+								if (SPDSettings.quickslotTrimming().equals(Toolbar.Trimming.CROP.name())) {
+									btnCrop.textColor(TITLE_COLOR);
+								}
+								add(btnCrop);
+								
+								btnSwap = new RedButton(Messages.get(WndSettings.UITab.this, "swap")) {
+									@Override
+									protected void onClick() {
+										textColor(TITLE_COLOR);
+										btnCrop.textColor(WHITE);
+										btnStack.textColor(WHITE);
+										SPDSettings.quickslotTrimming(Toolbar.Trimming.SWAP.name());
+										Toolbar.updateLayout();
+									}
+								};
+								if (SPDSettings.quickslotTrimming().equals(Toolbar.Trimming.SWAP.name())) {
+									btnSwap.textColor(TITLE_COLOR);
+								}
+								add(btnSwap);
+								
+								btnStack = new RedButton(Messages.get(WndSettings.UITab.this, "stack")) {
+									@Override
+									protected void onClick() {
+										textColor(TITLE_COLOR);
+										btnCrop.textColor(WHITE);
+										btnSwap.textColor(WHITE);
+										SPDSettings.quickslotTrimming(Toolbar.Trimming.STACK.name());
+										Toolbar.updateLayout();
+									}
+								};
+								if (SPDSettings.quickslotTrimming().equals(Toolbar.Trimming.STACK.name())) {
+									btnStack.textColor(TITLE_COLOR);
+								}
+								add(btnStack);
+								
+								sep = new ColorBlock(1, 1, 0xFF000000);
+								add(sep);
 
 								chkFlipToolbar = new CheckBox(Messages.get(WndSettings.UITab.this, "flip_toolbar")) {
 									@Override
@@ -579,20 +604,22 @@ public class WndSettings extends WndTabbed {
 								PixelScene.align(barDesc);
 
 								int btnWidth = (int) (width - 2 * GAP) / 3;
-								btnSplit.setRect(0, barDesc.bottom() + GAP, btnWidth, BTN_HEIGHT-2);
+								btnSplit.setRect(0, barDesc.bottom() + 2*GAP, btnWidth, BTN_HEIGHT-2);
 								btnGrouped.setRect(btnSplit.right() + GAP, btnSplit.top(), btnWidth, BTN_HEIGHT-2);
 								btnCentered.setRect(btnGrouped.right() + GAP, btnSplit.top(), btnWidth, BTN_HEIGHT-2);
-
-								chkQuickSwapper.setRect(0, btnGrouped.bottom() + GAP, width, BTN_HEIGHT);
-
-								swapperDesc.maxWidth(width);
-								swapperDesc.setPos(0, chkQuickSwapper.bottom()+1);
+								
+								btnCrop.setRect(0, btnGrouped.bottom() + GAP, btnWidth, BTN_HEIGHT-2);
+								btnSwap.setRect(btnCrop.right() + GAP, btnCrop.top(), btnWidth, BTN_HEIGHT-2);
+								btnStack.setRect(btnSwap.right() + GAP, btnCrop.top(), btnWidth, BTN_HEIGHT-2);
+								
+								sep.size(width, 1);
+								sep.y = btnSwap.bottom() + GAP;
 
 								if (width > 200) {
-									chkFlipToolbar.setRect(0, swapperDesc.bottom() + GAP, width / 2 - 1, BTN_HEIGHT);
+									chkFlipToolbar.setRect(0, sep.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
 									chkFlipTags.setRect(chkFlipToolbar.right() + GAP, chkFlipToolbar.top(), width / 2 - 1, BTN_HEIGHT);
 								} else {
-									chkFlipToolbar.setRect(0, swapperDesc.bottom() + GAP, width, BTN_HEIGHT);
+									chkFlipToolbar.setRect(0, sep.y + 2*GAP, width, BTN_HEIGHT);
 									chkFlipTags.setRect(0, chkFlipToolbar.bottom() + GAP, width, BTN_HEIGHT);
 								}
 
@@ -831,18 +858,18 @@ public class WndSettings extends WndTabbed {
 
 	private static class DataTab extends Component{
 
-		//POLISHED:
-		//Since we're not checking for SPD updates anyway, we can get rid of all this in the future
-
 		RenderedTextBlock title;
 		ColorBlock sep1;
-		CheckBox chkQuickslot;
+		CheckBox chkRemoveNotes;
+		CheckBox chkTrapsWarn;
 		CheckBox chkQuickTransitions;
 		ColorBlock sep2;
 		CheckBox chkInputBlock;
 		CheckBox chkAutoPickUp;
 		ColorBlock sep3;
 		OptionSlider optBuffers;
+		ColorBlock sep4;
+		OptionSlider optQuickslots;
 
 		@Override
 		protected void createChildren() {
@@ -853,19 +880,26 @@ public class WndSettings extends WndTabbed {
 			sep1 = new ColorBlock(1, 1, 0xFF000000);
 			add(sep1);
 
-			if(PixelScene.uiCamera.width > 188) {
-				chkQuickslot = new CheckBox(Messages.get(this, "quickslot")){
-					@Override
-					protected void onClick() {
-						super.onClick();
-						SPDSettings.Polished.quickslot(checked());
-						Toolbar.updateLayout();
-					}
-				};
-				chkQuickslot.checked(SPDSettings.Polished.quickslot());
-				add(chkQuickslot);
-			}
-
+			chkRemoveNotes = new CheckBox(Messages.get(this, "remove_notes")){
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.Polished.removeNotes(checked());
+				}
+			};
+			chkRemoveNotes.checked(SPDSettings.Polished.removeNotes());
+			add(chkRemoveNotes);
+			
+			chkTrapsWarn = new CheckBox(Messages.get(this, "traps_warn")){
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.Polished.trapsWarn(checked());
+				}
+			};
+			chkTrapsWarn.checked(SPDSettings.Polished.trapsWarn());
+			add(chkTrapsWarn);
+			
 			chkQuickTransitions = new CheckBox(Messages.get(this, "quick_transitions")){
 				@Override
 				protected void onClick() {
@@ -910,6 +944,20 @@ public class WndSettings extends WndTabbed {
 			};
 			optBuffers.setSelectedValue(SPDSettings.Polished.buffers());
 			add(optBuffers);
+			
+			sep4 = new ColorBlock(1, 1, 0xFF000000);
+			add(sep4);
+			
+			optQuickslots = new OptionSlider(Messages.get(this, "total_quickslots"), "4", "14", 4, 14) {
+				@Override
+				protected void onChange() {
+					SPDSettings.Polished.total_quickslots(getSelectedValue());
+					Toolbar.updateLayout();
+					GameScene.layoutTags();
+				}
+			};
+			optQuickslots.setSelectedValue(SPDSettings.Polished.total_quickslots());
+			add(optQuickslots);
 		}
 
 		@Override
@@ -917,17 +965,23 @@ public class WndSettings extends WndTabbed {
 			title.setPos((width - title.width())/2, y + GAP);
 			sep1.size(width, 1);
 			sep1.y = title.bottom() + 3*GAP;
-
-			if (width > 200 && chkQuickslot != null) {
-				chkQuickslot.setRect(0, sep1.y + 2*GAP, width/2-1, BTN_HEIGHT);
-				chkQuickTransitions.setRect(width / 2 + 1, sep1.y + 2*GAP, width/2-1, BTN_HEIGHT);
+			
+			if (width > 200) {
+				chkRemoveNotes.setRect(0, sep1.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
+				chkQuickTransitions.setRect(width / 2 + 1, sep1.y + 2*GAP, width / 2 - 1, BTN_HEIGHT);
 			} else {
-				if(chkQuickslot != null) {
-					chkQuickslot.setRect(0, sep1.y + 2*GAP, width, BTN_HEIGHT);
-				}
-				chkQuickTransitions.setRect(0, (chkQuickslot != null ? chkQuickslot.bottom() : sep1.y + GAP) + GAP, width, BTN_HEIGHT);
+				chkRemoveNotes.setRect(0, sep1.y + 2*GAP, width, BTN_HEIGHT);
+				chkQuickTransitions.setRect(0, chkRemoveNotes.bottom() + GAP, width, BTN_HEIGHT);
 			}
 			height = chkQuickTransitions.bottom();
+			
+			//remove option for now
+			{
+				remove(chkTrapsWarn);
+				
+				//chkQuickTransitions.setRect(0, chkTrapsWarn.bottom() + GAP, width, BTN_HEIGHT);
+				//height = chkTrapsWarn.bottom();
+			}
 
 			sep2.size(width, 1);
 			sep2.y = height+ GAP;
@@ -945,8 +999,12 @@ public class WndSettings extends WndTabbed {
 			sep3.y = height+GAP;
 
 			optBuffers.setRect(0, sep3.y + 2*GAP, width, SLIDER_HEIGHT);
-
-			height = optBuffers.bottom();
+			
+			sep4.size(width, 1);
+			sep4.y = optBuffers.bottom()+GAP;
+			
+			optQuickslots.setRect(0, sep4.y + 2*GAP, width, SLIDER_HEIGHT);
+			height = optQuickslots.bottom();
 		}
 	}
 

@@ -72,6 +72,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesi
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
@@ -84,6 +85,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.HeavyBoomerang;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.HighGrass;
@@ -757,7 +759,7 @@ public abstract class Level implements Bundlable {
 		do {
 			mob.pos = randomRespawnCell(mob);
 			tries--;
-		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] < disLimit) && tries > 0);
+		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] <= disLimit) && tries > 0);
 
 		if (Dungeon.hero.isAlive() && mob.pos != -1 && PathFinder.distance[mob.pos] >= disLimit) {
 			GameScene.add( mob );
@@ -899,6 +901,8 @@ public abstract class Level implements Bundlable {
 		if (web != null){
 			web.clear(pos);
 		}
+
+		if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
 	}
 
 	public void cleanWalls() {
@@ -1258,6 +1262,22 @@ public abstract class Level implements Bundlable {
 
 		if (hard && Blob.volumeAt(cell, Web.class) > 0){
 			blobs.get(Web.class).clear(cell);
+		}
+	}
+
+	public void revealSecretDoor(int cell) {
+		if(Dungeon.level.map[cell] == Terrain.SECRET_DOOR) {
+			int oldValue = Dungeon.level.map[cell];
+
+			Dungeon.level.discover( cell );
+
+			if(Dungeon.level.heroFOV[cell]) {
+				GameScene.discoverTile( cell, oldValue );
+				ScrollOfMagicMapping.discover( cell );
+				GLog.w( Messages.get(Hero.class, "noticed_smth") );
+				Sample.INSTANCE.play( Assets.Sounds.SECRET );
+				Dungeon.hero.interrupt();
+			}
 		}
 	}
 

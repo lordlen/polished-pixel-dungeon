@@ -312,8 +312,7 @@ public class Ghost extends NPC {
 				
 				spawned = true;
 				//dungeon depth determines type of quest.
-				//depth2=fetid rat, 3=gnoll trickster, 4=great crab
-				//POLISHED: 2=fetid rat; 3=gnoll; 1/3 chance great crab instead.
+				//2=fetid rat; 3=gnoll/great crab
 
 				if(Dungeon.depth == 2) {
 					type = 1;

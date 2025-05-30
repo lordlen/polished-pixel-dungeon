@@ -296,6 +296,16 @@ public enum Bestiary {
 		Badges.validateCatalogBadges();
 	}
 
+	public static void Polished_setSeenAll(){
+		for (Bestiary cat : values()) {
+			for(Class<?> cls : cat.seen.keySet()) {
+				cat.seen.put(cls, true);
+				Journal.saveNeeded = true;
+			}
+		}
+		Badges.validateCatalogBadges();
+	}
+
 	public static int encounterCount(Class<?> cls) {
 		for (Bestiary cat : values()) {
 			if (cat.encounterCount.containsKey(cls)) {

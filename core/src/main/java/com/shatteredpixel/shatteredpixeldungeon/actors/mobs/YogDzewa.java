@@ -172,7 +172,7 @@ public class YogDzewa extends Mob {
 		//mob logic
 		enemy = chooseEnemy();
 
-		enemySeen = enemy != null && enemy.isAlive() && fieldOfView[enemy.pos] && enemy.invisible <= 0;
+		enemySeen = enemy != null && enemy.isAlive() && fieldOfView[enemy.pos] && !enemy.isStealthyTo(this);
 		//end of char/mob logic
 
 		if (phase == 0){
@@ -270,16 +270,17 @@ public class YogDzewa extends Mob {
 				if (allAdjTargeted){
 					targetedCells.remove(targetedCells.size()-1);
 				}
-				for (int i : targetedCells){
-					Ballistica b = new Ballistica(pos, i, Ballistica.WONT_STOP);
-					for (int p : b.path){
-						sprite.parent.add(new TargetedCell(p, 0xFF0000));
-						affectedCells.add(p);
-					}
-				}
 
 				//don't want to overly punish players with slow move or attack speed
 				spend(GameMath.gate(TICK, (int)Math.ceil(Dungeon.hero.cooldown()), 3*TICK));
+
+				for (int i : targetedCells){
+					Ballistica b = new Ballistica(pos, i, Ballistica.WONT_STOP);
+					for (int p : b.path){
+						sprite.parent.add(new TargetedCell(p, 0xFF0000, now()+cooldown(), this));
+						affectedCells.add(p);
+					}
+				}
 				Dungeon.hero.interrupt();
 
 				abilityCooldown += Random.NormalFloat(MIN_ABILITY_CD, MAX_ABILITY_CD);

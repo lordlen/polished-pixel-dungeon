@@ -34,9 +34,21 @@ public class ExplosiveTrap extends Trap {
 
 	@Override
 	public void activate() {
-		new Bomb().explode(pos);
+		new ExplosiveBomb().explode(pos);
 		if (reclaimed && !Dungeon.hero.isAlive()) {
 			Badges.validateDeathFromFriendlyMagic();
+		}
+	}
+
+	static class ExplosiveBomb extends Bomb {
+		@Override
+		protected int explosionRange() {
+			return 2;
+		}
+
+		@Override
+		protected int explosionDamage() {
+			return Math.round(super.explosionDamage() / 2f);
 		}
 	}
 

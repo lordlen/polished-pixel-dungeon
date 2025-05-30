@@ -26,10 +26,12 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndChallenges;
@@ -289,6 +291,22 @@ public class MenuPane extends Component {
 				bg.resetColor();
 			}
 		}
+		
+		private CellSelector.Listener Polished_notes = new CellSelector.Listener() {
+			@Override
+			public void onSelect( Integer target ) {
+				if(target == null) return;
+				Heap heap = Dungeon.level.heaps.get(target);
+				
+				if (RightClickMenu.Polished.validForNotes(heap)) {
+					CustomNoteButton.Polished.addNote(heap.peek());
+				}
+			}
+			@Override
+			public String prompt() {
+				return Messages.get(JournalButton.class, "prompt");
+			}
+		};
 
 		@Override
 		protected void onPointerDown() {
@@ -340,7 +358,13 @@ public class MenuPane extends Component {
 				GameScene.show( new WndJournal() );
 			}
 		}
-
+		
+		@Override
+		protected boolean onLongClick() {
+			GameScene.selectCell(Polished_notes);
+			return true;
+		}
+		
 		@Override
 		protected String hoverText() {
 			return Messages.titleCase(Messages.get(WndKeyBindings.class, "journal"));

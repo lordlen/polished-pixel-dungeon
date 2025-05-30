@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.BArray;
 import com.watabou.utils.PathFinder;
+import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
@@ -50,7 +51,7 @@ public class DisplacingDart extends TippedDart {
 
 		//attempts to teleport the enemy to a position 8-10 cells away from the hero
 		//prioritizes the closest visible cell to the defender, or closest non-visible if no visible are present
-		//grants vision on the defender if teleport goes to non-visible
+		//grants vision on the defender
 		if (!defender.properties().contains(Char.Property.IMMOVABLE)){
 			
 			ArrayList<Integer> visiblePositions = new ArrayList<>();
@@ -60,8 +61,8 @@ public class DisplacingDart extends TippedDart {
 
 			for (int pos = 0; pos < Dungeon.level.length(); pos++){
 				if (Dungeon.level.passable[pos]
-						&& PathFinder.distance[pos] >= 8
-						&& PathFinder.distance[pos] <= 10
+						&& PathFinder.distance[pos] >= 9
+						&& PathFinder.distance[pos] <= 11
 						&& (!Char.hasProp(defender, Char.Property.LARGE) || Dungeon.level.openSpace[pos])
 						&& Actor.findChar(pos) == null){
 
@@ -77,6 +78,8 @@ public class DisplacingDart extends TippedDart {
 			int chosenPos = -1;
 
 			if (!visiblePositions.isEmpty()) {
+				Random.shuffle(visiblePositions);
+				
 				for (int pos : visiblePositions) {
 					if (chosenPos == -1 || Dungeon.level.trueDistance(defender.pos, chosenPos)
 							> Dungeon.level.trueDistance(defender.pos, pos)){
@@ -84,6 +87,8 @@ public class DisplacingDart extends TippedDart {
 					}
 				}
 			} else {
+				Random.shuffle(nonVisiblePositions);
+				
 				for (int pos : nonVisiblePositions) {
 					if (chosenPos == -1 || Dungeon.level.trueDistance(defender.pos, chosenPos)
 							> Dungeon.level.trueDistance(defender.pos, pos)){
@@ -95,11 +100,11 @@ public class DisplacingDart extends TippedDart {
 			if (chosenPos != -1){
 				ScrollOfTeleportation.appear( defender, chosenPos );
 				Dungeon.level.occupyCell(defender );
+				Buff.append(attacker, TalismanOfForesight.CharAwareness.class, 5f).charID = defender.id();
+				
 				if (defender == Dungeon.hero){
 					Dungeon.observe();
 					GameScene.updateFog();
-				} else if (!Dungeon.level.heroFOV[chosenPos]){
-					Buff.append(attacker, TalismanOfForesight.CharAwareness.class, 5f).charID = defender.id();
 				}
 			}
 		

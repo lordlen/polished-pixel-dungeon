@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.Elixir;
@@ -53,6 +54,8 @@ public class Recycle extends InventorySpell {
 
 	@Override
 	protected boolean usableOnItem(Item item) {
+		if(item instanceof WealthDrop) return false;
+
 		return (item instanceof Potion && !(item instanceof Elixir || item instanceof Brew)) ||
 				item instanceof Scroll ||
 				item instanceof Plant.Seed ||

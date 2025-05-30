@@ -23,12 +23,14 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -70,10 +72,12 @@ public class ToxicGasRoom extends SpecialRoom {
 			level.setTrap(new ToxicVent().reveal(), cell);
 			Blob.seed(cell, 12, ToxicGasSeed.class, level);
 			Painter.set(level, cell, Terrain.INACTIVE_TRAP);
+
+			Blob.seed(cell, 1, GasID.class, level);
 		}
 
 		//skeleton with 2x gold, somewhat far from entry
-		//then 2 chests with regular gold (no mimics, chance for trinket catalyst)
+		//then 2 chests with regular gold (no mimics)
 		//we generate excess positions to ensure skull is far from entrance
 		ArrayList<Integer> goldPositions = new ArrayList<>();
 		for (int i = 0; i < 8; i++){
@@ -98,8 +102,7 @@ public class ToxicGasRoom extends SpecialRoom {
 		level.drop(mainGold, furthestPos).type = Heap.Type.SKELETON;
 
 		for (int i = 0; i < 2; i++){
-			Item item = level.findPrizeItem(TrinketCatalyst.class);
-			if (item == null) item = new Gold().random();
+			Item item = new Gold().random();
 			level.drop(item, goldPositions.remove(0)).type = Heap.Type.CHEST;
 		}
 
@@ -169,5 +172,12 @@ public class ToxicGasRoom extends SpecialRoom {
 			//does nothing, this trap is just decoration and is always deactivated
 		}
 
+	}
+
+	public static class GasID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.TOXIC_GAS_ROOM;
+		}
 	}
 }

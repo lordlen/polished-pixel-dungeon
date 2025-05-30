@@ -229,12 +229,12 @@ public abstract class RegularLevel extends Level {
 		Random.shuffle(stdRooms);
 		Iterator<Room> stdRoomIter = stdRooms.iterator();
 
-		//enemies cannot be within an 8-tile FOV of the entrance
+		//enemies cannot be within an 10-tile FOV of the entrance
 		// or a 6-tile open space distance from the entrance
 		boolean[] entranceFOV = new boolean[length()];
 		Point c = cellToPoint(entrance());
 		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 6);
-		PathFinder.buildDistanceMap(entrance(), BArray.not(solid, null), 8);
+		PathFinder.buildDistanceMap(entrance(), BArray.not(solid, null), 10);
 
 		Mob mob = null;
 		while (mobsToSpawn > 0) {
@@ -372,6 +372,7 @@ public abstract class RegularLevel extends Level {
 
 			Item toDrop = Generator.random();
 			if (toDrop == null) continue;
+			toDrop.Polished_toFind = true;
 
 			int cell = randomDropCell();
 			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
@@ -433,6 +434,8 @@ public abstract class RegularLevel extends Level {
 		}
 
 		for (Item item : itemsToSpawn) {
+			item.Polished_toFind = true;
+
 			int cell = randomDropCell();
 			if (item instanceof TrinketCatalyst){
 				drop( item, cell ).type = Heap.Type.LOCKED_CHEST;
@@ -483,6 +486,7 @@ public abstract class RegularLevel extends Level {
 					losBlocking[cell] = false;
 				}
 				for (Item i : bonesItems) {
+					i.Polished_toFind = true;
 					drop(i, cell).setHauntedIfCursed().type = Heap.Type.REMAINS;
 				}
 			}

@@ -35,7 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
 public class Invisibility extends FlavourBuff {
 
-	public static final float DURATION	= 20f;
+	public static final float DURATION	= 15f;
 
 	{
 		type = buffType.POSITIVE;
@@ -78,7 +78,7 @@ public class Invisibility extends FlavourBuff {
 	@Override
 	public void fx(boolean on) {
 		if (on) target.sprite.add( CharSprite.State.INVISIBLE );
-		else if (target.invisible == 0) target.sprite.remove( CharSprite.State.INVISIBLE );
+		else if (!target.isStealthy()) target.sprite.remove( CharSprite.State.INVISIBLE );
 	}
 
 	public static void dispel() {
@@ -91,6 +91,9 @@ public class Invisibility extends FlavourBuff {
 
 		for ( Buff invis : ch.buffs( Invisibility.class )){
 			invis.detach();
+		}
+		for ( Buff camo : ch.buffs( Camouflaged.class )){
+			camo.detach();
 		}
 		CloakOfShadows.cloakStealth cloakBuff = ch.buff( CloakOfShadows.cloakStealth.class );
 		if (cloakBuff != null) {
