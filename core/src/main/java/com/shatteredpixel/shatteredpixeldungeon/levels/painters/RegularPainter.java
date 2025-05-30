@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.painters;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrapMechanism;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -463,9 +464,11 @@ public abstract class RegularPainter extends Painter {
 
 		float revealedChance = TrapMechanism.revealHiddenTrapChance();
 		float revealInc = 0;
-
+		
+		int points = Dungeon.hero.pointsInTalent(Talent.SMART_ESCAPE);
+		
 		//5x traps on traps level feeling, but the extra traps are all visible
-		for (int i = 0; i < (l.feeling == Level.Feeling.TRAPS ? 5*nTraps : nTraps); i++) {
+		for (int i = 0; i < (l.feeling == Level.Feeling.TRAPS ? 5*nTraps : nTraps + 0.1f*points * nTraps); i++) {
 
 			Trap trap = Reflection.newInstance(trapClasses[Random.chances( trapChances )]);
 
