@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GreaterHaste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
@@ -169,6 +170,9 @@ public class MeleeWeapon extends Weapon {
 	protected void beforeAbilityUsed(Hero hero, Char target){
 		hero.belongings.abilityWeapon = this;
 		Charger charger = Buff.affect(hero, Charger.class);
+		Buff.affect(hero, PolishedAbilityUseTracker.class);
+
+		// add tracker that ability
 
 		charger.partialCharge -= abilityChargeUse(hero, target);
 		while (charger.partialCharge < 0 && charger.charges > 0) {
@@ -189,8 +193,9 @@ public class MeleeWeapon extends Weapon {
 
 	protected void afterAbilityUsed( Hero hero ){
 		hero.belongings.abilityWeapon = null;
+		hero.buff(PolishedAbilityUseTracker.class).detach();
 		if (hero.hasTalent(Talent.PRECISE_ASSAULT)){
-			Buff.prolong(hero, Talent.PreciseAssaultTracker.class, hero.cooldown()+4f);
+			Buff.prolong(hero, Talent.PreciseAssaultTracker.class, hero.cooldown()+5f);
 		}
 		if (hero.hasTalent(Talent.VARIED_CHARGE)){
 			Talent.VariedChargeTracker tracker = hero.buff(Talent.VariedChargeTracker.class);
@@ -199,7 +204,8 @@ public class MeleeWeapon extends Weapon {
 			} else {
 				tracker.detach();
 				Charger charger = Buff.affect(hero, Charger.class);
-				charger.gainCharge(hero.pointsInTalent(Talent.VARIED_CHARGE) / 6f);
+				// 0 / 0.2 / 0.36 / ~0.49
+				charger.gainCharge(1 - (float)Math.pow(0.8, hero.pointsInTalent(Talent.VARIED_CHARGE)));
 				ScrollOfRecharging.charge(hero);
 			}
 		}
@@ -268,7 +274,7 @@ public class MeleeWeapon extends Weapon {
 	private static boolean evaluatingTwinUpgrades = false;
 	@Override
 	public int buffedLvl() {
-		if (!evaluatingTwinUpgrades && Dungeon.hero != null && isEquipped(Dungeon.hero) && Dungeon.hero.hasTalent(Talent.TWIN_UPGRADES)){
+		if (!evaluatingTwinUpgrades && Dungeon.hero != null && isEquipped(Dungeon.hero) && Dungeon.hero.subClass == HeroSubClass.CHAMPION){
 			KindOfWeapon other = null;
 			if (Dungeon.hero.belongings.weapon() != this) other = Dungeon.hero.belongings.weapon();
 			if (Dungeon.hero.belongings.secondWep() != this) other = Dungeon.hero.belongings.secondWep();
@@ -279,7 +285,7 @@ public class MeleeWeapon extends Weapon {
 				evaluatingTwinUpgrades = false;
 
 				//weaker weapon needs to be 2/1/0 tiers lower, based on talent level
-				if ((tier + (3 - Dungeon.hero.pointsInTalent(Talent.TWIN_UPGRADES))) <= ((MeleeWeapon) other).tier
+				if ((tier + (2 - Dungeon.hero.pointsInTalent(Talent.TWIN_UPGRADES))) <= ((MeleeWeapon) other).tier
 						&& otherLevel > super.buffedLvl()) {
 					return otherLevel;
 				}
@@ -574,5 +580,7 @@ public class MeleeWeapon extends Weapon {
 			AttackIndicator.updateState();
 		}
 	}
+
+	public static class PolishedAbilityUseTracker extends FlavourBuff {}
 
 }
