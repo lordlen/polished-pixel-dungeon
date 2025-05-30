@@ -354,7 +354,8 @@ public class Combo extends Buff implements ActionIndicator.Action {
 				dmgMulti = 0;
 				break;
 			case SLAM:
-				dmgBonus = Math.round(target.drRoll() * count / 5f);
+				BrokenSeal.WarriorShield shield = target.buff(BrokenSeal.WarriorShield.class);
+				dmgBonus = shield != null ? Math.round(shield.Polished_reworkShield() * count / 5f) : 0;
 				break;
 			case CRUSH:
 				dmgMulti = 0.25f * count;
