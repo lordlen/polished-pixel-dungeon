@@ -191,6 +191,14 @@ public class Armor extends EquipableItem {
 		}
 		return actions;
 	}
+	
+	@Override
+	protected void Polished_updateDefaultAction() {
+		super.Polished_updateDefaultAction();
+		if(seal != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+			defaultAction = AC_SWAP_GLYPH;
+		}
+	}
 
 	@Override
 	public void execute(Hero hero, String action) {
@@ -278,7 +286,7 @@ public class Armor extends EquipableItem {
 		if (seal != null) Buff.affect(ch, BrokenSeal.WarriorShield.class).setArmor(this);
 	}
 
-	public void affixSeal(BrokenSeal seal){
+	public void affixSeal(BrokenSeal seal) {
 		this.seal = seal;
 		seal.armor = this;
 		
@@ -292,10 +300,7 @@ public class Armor extends EquipableItem {
 			Buff.affect(Dungeon.hero, BrokenSeal.WarriorShield.class).setArmor(this);
 		}
 		
-		if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
-			defaultAction = AC_SWAP_GLYPH;
-			//updateaction()
-		}
+		Polished_updateDefaultAction();
 	}
 	
 	public BrokenSeal detachSeal(boolean operate) {
@@ -327,7 +332,7 @@ public class Armor extends EquipableItem {
 		}
 		
 		defaultAction = null;
-		//updateaction()
+		Polished_updateDefaultAction();
 		updateQuickslot();
 		
 		return detaching;
