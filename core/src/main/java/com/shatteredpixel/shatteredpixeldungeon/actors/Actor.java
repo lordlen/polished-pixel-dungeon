@@ -62,9 +62,7 @@ public abstract class Actor implements Bundlable {
 		float partial = time % TICK;
 		if(partial < 0) partial++;
 
-		//do we wanna use spendConstant()? there might be unwanted rounding...
 		spendConstant(partial);
-		//this.time += partial;
 
 		return partial;
 	}
