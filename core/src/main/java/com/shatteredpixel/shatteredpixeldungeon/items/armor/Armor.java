@@ -199,8 +199,8 @@ public class Armor extends EquipableItem {
 		}
 		else {
 			defaultAction = null;
+			super.Polished_updateDefaultAction();
 		}
-		super.Polished_updateDefaultAction();
 	}
 
 	@Override
