@@ -173,6 +173,7 @@ public class BrokenSeal extends Item {
 		return info;
 	}
 	
+	@Override
 	public int buffedVisiblyUpgraded() {
 		return curseInfusionBonus ? buffedLvl()+1 : buffedLvl();
 	}
