@@ -23,10 +23,14 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
@@ -38,7 +42,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
 
 import java.util.ArrayList;
@@ -50,50 +59,136 @@ public class CurseInfusion extends InventorySpell {
 
 		talentChance = 1/(float)Recipe.OUT_QUANTITY;
 	}
-
+	
+	private void curseEnchant(Weapon w) {
+		//if we are freshly applying curse infusion, don't replace an existing curse
+		if (w.enchantment == null || !w.hasCurseEnchant() || w.curseInfusionBonus) {
+			w.enchant(Weapon.Enchantment.randomCurse(w.enchantment != null ? w.enchantment.getClass() : null));
+		}
+		w.cursed = true;
+		w.cursedKnown = true;
+		w.curseInfusionBonus = true;
+		
+		if (w instanceof MagesStaff){
+			((MagesStaff) w).updateWand(true);
+		}
+	}
+	
+	private void curseEnchant(Armor a) {
+		//if we are freshly applying curse infusion, don't replace an existing curse
+		if (a.glyph() == null || !a.hasCurseGlyph(false) || a.curseInfusionBonus) {
+			a.inscribe(Armor.Glyph.randomCurse(a.armorGlyphClass(), a.sealGlyphClass()), true);
+		}
+		a.cursed = true;
+		a.cursedKnown = true;
+		a.curseInfusionBonus = true;
+	}
+	
+	private void curseEnchant(BrokenSeal s) {
+		//if we are freshly applying curse infusion, don't replace an existing curse
+		if (s.glyph() == null || !s.hasCurseGlyph() || s.curseInfusionBonus) {
+			s.inscribe(Armor.Glyph.randomCurse(s.armorGlyphClass(), s.sealGlyphClass()));
+		}
+		s.curseInfusionBonus = true;
+	}
+	
 	@Override
 	protected boolean usableOnItem(Item item) {
-		return ((item instanceof EquipableItem && !(item instanceof MissileWeapon)) || item instanceof Wand);
+		return ((item instanceof EquipableItem && !(item instanceof MissileWeapon)) || item instanceof Wand || item instanceof BrokenSeal);
 	}
 
 	@Override
 	protected void onItemSelected(Item item) {
 		
+		if (item instanceof MeleeWeapon || item instanceof SpiritBow) {
+			curseEnchant( (Weapon) item );
+		}
+		else if (item instanceof Armor){
+			Armor armor = (Armor)item;
+			BrokenSeal seal = armor.checkSeal();
+			
+			if(seal == null) {
+				curseEnchant(armor);
+			}
+			else if(!Armor.runic()) {
+				curseEnchant(seal);
+				armor.cursed = true;
+				armor.cursedKnown = true;
+			}
+			else {
+				String armorGlyph;
+				if(!armor.cursedKnown && (armor.glyph() == null || armor.hasCurseGlyph())) {
+					armorGlyph = Messages.get(Stylus.class, "unknown");
+				}
+				else if(armor.glyph() != null) {
+					armorGlyph = armor.glyph().name();
+				}
+				else {
+					armorGlyph = Messages.get(Stylus.class, "none");
+				}
+				String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
+				
+				GameScene.show(new WndOptions(
+						new ItemSprite(CurseInfusion.this),
+						Messages.titleCase(new CurseInfusion().name()),
+						Messages.get(Stylus.class, "choose_desc"),
+						"Armor: " + armorGlyph,
+						"Seal: " + sealGlyph) {
+					
+					@Override
+					protected void onSelect(int index) {
+						if(index == 0) {
+							curseEnchant(armor);
+						}
+						else {
+							curseEnchant(seal);
+						}
+						
+						CellEmitter.get(curUser.pos).burst(ShadowParticle.UP, 5);
+						Sample.INSTANCE.play(Assets.Sounds.CURSED);
+						
+						onUse();
+						Badges.validateItemLevelAquired(armor);
+						updateQuickslot();
+						
+						super.onSelect(index);
+					}
+					
+					@Override
+					public void onBackPressed() {
+						super.onBackPressed();
+						GameScene.selectItem(itemSelector);
+					}
+				});
+				
+				return;
+			}
+		}
+		else if (item instanceof BrokenSeal) {
+			if (!Armor.runic()) {
+				GLog.w(Messages.get(Stylus.class, "no_runic"));
+				
+				GameScene.selectItem(itemSelector);
+				return;
+			}
+			else {
+				curseEnchant( (BrokenSeal) item );
+			}
+		}
+		else if (item instanceof Wand){
+			item.cursed = true;
+			((Wand) item).curseInfusionBonus = true;
+			((Wand) item).updateLevel();
+		}
+		else if (item instanceof RingOfMight){
+			item.cursed = true;
+			curUser.updateHT(false);
+		}
+		
 		CellEmitter.get(curUser.pos).burst(ShadowParticle.UP, 5);
 		Sample.INSTANCE.play(Assets.Sounds.CURSED);
 		
-		item.cursed = true;
-		if (item instanceof MeleeWeapon || item instanceof SpiritBow) {
-			Weapon w = (Weapon) item;
-			if (w.enchantment != null) {
-				//if we are freshly applying curse infusion, don't replace an existing curse
-				if (w.hasGoodEnchant() || w.curseInfusionBonus) {
-					w.enchant(Weapon.Enchantment.randomCurse(w.enchantment.getClass()));
-				}
-			} else {
-				w.enchant(Weapon.Enchantment.randomCurse());
-			}
-			w.curseInfusionBonus = true;
-			if (w instanceof MagesStaff){
-				((MagesStaff) w).updateWand(true);
-			}
-		} else if (item instanceof Armor){
-			Armor a = (Armor) item;
-			if (a.glyph != null){
-				//if we are freshly applying curse infusion, don't replace an existing curse
-				if (a.hasGoodGlyph() || a.curseInfusionBonus) {
-					a.inscribe(Armor.Glyph.randomCurse(a.glyph.getClass()));
-				}
-			} else {
-				a.inscribe(Armor.Glyph.randomCurse());
-			}
-			a.curseInfusionBonus = true;
-		} else if (item instanceof Wand){
-			((Wand) item).curseInfusionBonus = true;
-			((Wand) item).updateLevel();
-		} else if (item instanceof RingOfMight){
-			curUser.updateHT(false);
-		}
+		onUse();
 		Badges.validateItemLevelAquired(item);
 		updateQuickslot();
 	}

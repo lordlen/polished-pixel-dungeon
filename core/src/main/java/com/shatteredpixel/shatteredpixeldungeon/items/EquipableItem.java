@@ -52,7 +52,7 @@ public abstract class EquipableItem extends Item {
 		Dungeon.Polished.runAfterLoad(update);
 	}
 	
-	void Polished_updateDefaultAction() {
+	protected void Polished_updateDefaultAction() {
 		if(isEquipped(Dungeon.hero) && defaultAction.matches(AC_EQUIP)) defaultAction = AC_UNEQUIP;
 		if(!isEquipped(Dungeon.hero) && defaultAction.matches(AC_UNEQUIP)) defaultAction = AC_EQUIP;
 	}
@@ -60,7 +60,7 @@ public abstract class EquipableItem extends Item {
 	@Override
 	public ArrayList<String> actions(Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
-		actions.add( isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
+		actions.add( 0, isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
 		return actions;
 	}
 

@@ -117,8 +117,8 @@ public class Item implements Bundlable {
 	
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = new ArrayList<>();
-		actions.add( AC_DROP );
 		actions.add( AC_THROW );
+		actions.add( AC_DROP );
 		return actions;
 	}
 
@@ -421,7 +421,6 @@ public class Item implements Bundlable {
 		this.level++;
 
 		updateQuickslot();
-		
 		return this;
 	}
 	
@@ -437,6 +436,7 @@ public class Item implements Bundlable {
 		
 		this.level--;
 		
+		updateQuickslot();
 		return this;
 	}
 	
