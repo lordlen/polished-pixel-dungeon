@@ -204,7 +204,8 @@ public class MeleeWeapon extends Weapon {
 			} else {
 				tracker.detach();
 				Charger charger = Buff.affect(hero, Charger.class);
-				charger.gainCharge(hero.pointsInTalent(Talent.VARIED_CHARGE) / 6f);
+				// 0 / 0.2 / 0.36 / ~0.49
+				charger.gainCharge(1 - (float)Math.pow(0.8, hero.pointsInTalent(Talent.VARIED_CHARGE)));
 				ScrollOfRecharging.charge(hero);
 			}
 		}
