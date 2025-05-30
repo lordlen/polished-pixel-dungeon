@@ -195,9 +195,11 @@ abstract public class ClassArmor extends Armor {
 	
 	@Override
 	public void Polished_updateDefaultAction() {
-		super.Polished_updateDefaultAction();
 		if((isEquipped( Dungeon.hero )) && !Objects.equals(defaultAction, AC_SWAP_GLYPH)) {
 			defaultAction = AC_ABILITY;
+		} else {
+			defaultAction = null;
+			super.Polished_updateDefaultAction();
 		}
 	}
 	
