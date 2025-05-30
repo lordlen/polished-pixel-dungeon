@@ -182,8 +182,8 @@ public class Armor extends EquipableItem {
 		ArrayList<String> actions = super.actions(hero);
 		if(seal != null) {
 			if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
-				actions.add(0, AC_DETACH);
 				actions.add(0, AC_SWAP_GLYPH);
+				actions.add(1, AC_DETACH);
 			}
 			else {
 				actions.add(AC_DETACH);
@@ -193,11 +193,14 @@ public class Armor extends EquipableItem {
 	}
 	
 	@Override
-	protected void Polished_updateDefaultAction() {
-		super.Polished_updateDefaultAction();
+	public void Polished_updateDefaultAction() {
 		if(seal != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
 			defaultAction = AC_SWAP_GLYPH;
 		}
+		else {
+			defaultAction = null;
+		}
+		super.Polished_updateDefaultAction();
 	}
 
 	@Override
@@ -283,6 +286,7 @@ public class Armor extends EquipableItem {
 
 	@Override
 	public void activate(Char ch) {
+		super.activate(ch);
 		if (seal != null) Buff.affect(ch, BrokenSeal.WarriorShield.class).setArmor(this);
 	}
 
@@ -331,7 +335,6 @@ public class Armor extends EquipableItem {
 			}
 		}
 		
-		defaultAction = null;
 		Polished_updateDefaultAction();
 		updateQuickslot();
 		
@@ -634,7 +637,7 @@ public class Armor extends EquipableItem {
 			case NONE:
 		}
 		
-		if(!runic()) {
+		if(!runic() || seal == null) {
 			if (HolyWard.HolyArmBuff.active(this)){
 				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", Messages.get(HolyWard.class, "glyph_name", Messages.get(Glyph.class, "glyph"))));
 				info += " " + Messages.get(HolyWard.class, "glyph_desc");
@@ -660,16 +663,14 @@ public class Armor extends EquipableItem {
 				}
 			}
 			
-			if (seal != null) {
-				if(seal.glyph() == null) {
-					info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+			if(seal.glyph() == null) {
+				info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+			} else {
+				if(seal.glyph() == activeGlyph() || seal.glyph() == extraGlyph()) {
+					info += "\n\n" + Messages.get(Armor.class, "seal_attached_active", seal.maxShield(tier, level()), seal.glyph().name());
+					info += " " + seal.glyph().desc();
 				} else {
-					if(seal.glyph() == activeGlyph() || seal.glyph() == extraGlyph()) {
-						info += "\n\n" + Messages.get(Armor.class, "seal_attached_active", seal.maxShield(tier, level()), seal.glyph().name());
-						info += " " + seal.glyph().desc();
-					} else {
-						info += "\n\n" + Messages.get(Armor.class, "seal_attached_inactive", seal.maxShield(tier, level()), seal.glyph().name());
-					}
+					info += "\n\n" + Messages.get(Armor.class, "seal_attached_inactive", seal.maxShield(tier, level()), seal.glyph().name());
 				}
 			}
 			
