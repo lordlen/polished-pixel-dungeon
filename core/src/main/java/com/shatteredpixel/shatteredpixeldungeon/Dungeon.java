@@ -101,6 +101,7 @@ public class Dungeon {
 
 	public static class Polished {
 		public static final int DEFAULT_VIEW_DISTANCE = 8;
+		public static boolean loading = false;
 		static Callback afterLoad = () -> {};
 		
 		private static void updateNearbyTiles(boolean[] extendedHeroFOV, int pos) {
@@ -124,6 +125,11 @@ public class Dungeon {
 		}
 		
 		public static void runAfterLoad(Callback callback) {
+			if(!loading) {
+				callback.call();
+				return;
+			}
+			
 			Callback current = afterLoad;
 			afterLoad = () -> {
 				current.call();
@@ -781,6 +787,7 @@ public class Dungeon {
 	}
 	
 	public static void loadGame( int save, boolean fullLoad ) throws IOException {
+		Polished.loading = true;
 		
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.gameFile( save ) );
 
@@ -884,6 +891,7 @@ public class Dungeon {
 
 		Polished.afterLoad.call();
 		Polished.afterLoad = () -> {};
+		Polished.loading = false;
 
 		Debug.LoadGame();
 	}

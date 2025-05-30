@@ -48,6 +48,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 abstract public class ClassArmor extends Armor {
 
@@ -57,7 +58,6 @@ abstract public class ClassArmor extends Armor {
 	{
 		levelKnown = true;
 		cursedKnown = true;
-		defaultAction = AC_ABILITY;
 
 		bones = false;
 	}
@@ -166,13 +166,41 @@ abstract public class ClassArmor extends Armor {
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
-		actions.add( AC_TRANSFER );
-		if (isEquipped( hero )) {
-			actions.add( AC_ABILITY );
+		
+		switch (actions.size()) {
+			default:
+				if (isEquipped( hero )) {
+					actions.add( AC_ABILITY );
+				}
+				actions.add( AC_TRANSFER );
+				break;
+				
+			case 5:
+				actions.add( 3, AC_TRANSFER );
+				if (isEquipped( hero )) {
+					actions.add( AC_ABILITY );
+				}
+				break;
+			case 4:
+				if (isEquipped( hero )) {
+					actions.add( 3, AC_ABILITY );
+					actions.add( 4, AC_TRANSFER );
+				}
+				else actions.add( 3, AC_TRANSFER );
+				break;
 		}
+		
 		return actions;
 	}
-
+	
+	@Override
+	public void Polished_updateDefaultAction() {
+		super.Polished_updateDefaultAction();
+		if((isEquipped( Dungeon.hero )) && !Objects.equals(defaultAction, AC_SWAP_GLYPH)) {
+			defaultAction = AC_ABILITY;
+		}
+	}
+	
 	@Override
 	public String actionName(String action, Hero hero) {
 		if (hero.armorAbility != null && action.equals(AC_ABILITY)){

@@ -52,9 +52,9 @@ public abstract class EquipableItem extends Item {
 		Dungeon.Polished.runAfterLoad(update);
 	}
 	
-	protected void Polished_updateDefaultAction() {
-		if(isEquipped(Dungeon.hero) && defaultAction.matches(AC_EQUIP)) defaultAction = AC_UNEQUIP;
-		if(!isEquipped(Dungeon.hero) && defaultAction.matches(AC_UNEQUIP)) defaultAction = AC_EQUIP;
+	public void Polished_updateDefaultAction() {
+		if(isEquipped(Dungeon.hero) && (defaultAction == null || defaultAction.matches(AC_EQUIP))) defaultAction = AC_UNEQUIP;
+		if(!isEquipped(Dungeon.hero) && (defaultAction == null || defaultAction.matches(AC_UNEQUIP))) defaultAction = AC_EQUIP;
 	}
 
 	@Override
@@ -71,7 +71,6 @@ public abstract class EquipableItem extends Item {
 				GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_IDING);
 			}
 			
-			Polished_updateDefaultAction();
 			return true;
 		} else {
 			return false;
@@ -103,8 +102,6 @@ public abstract class EquipableItem extends Item {
 		} else if (action.equals( AC_UNEQUIP )) {
 			doUnequip( hero, true );
 		}
-		
-		Polished_updateDefaultAction();
 	}
 
 	@Override
@@ -164,7 +161,8 @@ public abstract class EquipableItem extends Item {
 			if (collect) Dungeon.level.drop( this, hero.pos ).sprite.drop();
 		}
 		keptThoughLostInvent = wasKept;
-
+		
+		Polished_updateDefaultAction();
 		return true;
 	}
 
@@ -172,7 +170,10 @@ public abstract class EquipableItem extends Item {
 		return doUnequip( hero, collect, true );
 	}
 
-	public void activate( Char ch ){}
+	public void activate( Char ch ) {
+		Callback update = this::Polished_updateDefaultAction;
+		Dungeon.Polished.runAfterLoad(update);
+	}
 
 	private static final String CUSTOM_NOTE_ID = "custom_note_id";
 

@@ -589,7 +589,7 @@ public enum Talent {
 		}
 		
 		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null){
-			//BrokenSeal.armor.updateaction();
+			BrokenSeal.armor.Polished_updateDefaultAction();
 			//if(hero.pointsInTalent(talent) == 1) BrokenSeal.armor.transfer();
 		}
 	}
