@@ -913,7 +913,7 @@ public class Armor extends EquipableItem {
 	}
 	
 	public static boolean runic() {
-		return Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE);
+		return Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE);
 	}
 	
 	public static abstract class Glyph implements Bundlable {
