@@ -328,7 +328,7 @@ public enum Document {
 	
 	//pages and default states
 	static {
-		init(!SPDSettings.intro());
+		init(false);
 	}
 	
 	private static final String DOCUMENTS = "documents";
