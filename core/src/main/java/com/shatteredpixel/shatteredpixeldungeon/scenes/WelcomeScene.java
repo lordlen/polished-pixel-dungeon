@@ -157,7 +157,7 @@ public class WelcomeScene extends PixelScene {
 						SPDSettings.intro(false);
 						ShatteredPixelDungeon.switchScene(TitleScene.class);
 					} else {
-						ShatteredPixelDungeon.switchScene(HeroSelectScene.class);
+						ShatteredPixelDungeon.switchScene(HeroSelectScene.class, TitleScene.Polished_introCallback);
 					}
 				} else {
 					updateVersion(previousVersion);
