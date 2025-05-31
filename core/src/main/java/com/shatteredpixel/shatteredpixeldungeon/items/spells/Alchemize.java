@@ -77,7 +77,7 @@ public class Alchemize extends Spell {
 		@Override
 		public boolean testIngredients(ArrayList<Item> ingredients) {
 			if (ingredients.size() != 1) return false;
-            return ingredients.get(0) instanceof Plant.Seed || ingredients.get(0) instanceof Runestone;
+            else return ingredients.get(0) instanceof Plant.Seed || ingredients.get(0) instanceof Runestone;
         }
 
 		@Override
