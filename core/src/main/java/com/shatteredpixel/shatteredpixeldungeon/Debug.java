@@ -21,6 +21,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlink;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Reflection;
 
@@ -84,6 +85,8 @@ public class Debug {
         Starting_Bag();
         SetQuickslots();
         Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
+        MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
+        if(charger != null) charger.gainCharge(charger.chargeCap());
         
         
     }

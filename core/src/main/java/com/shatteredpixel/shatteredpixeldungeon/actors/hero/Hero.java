@@ -261,9 +261,6 @@ public class Hero extends Char {
 
 			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
 			if(bow != null) bow.Polished_resetCharges();
-			
-			MeleeWeapon.Charger charger = hero.buff(MeleeWeapon.Charger.class);
-			if(charger != null) charger.gainCharge(charger.chargeCap());
 		}
 
 		public static boolean noEnemiesLast = false;
