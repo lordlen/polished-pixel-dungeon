@@ -71,6 +71,7 @@ public class BrokenSeal extends Item {
 	public boolean curseInfusionBonus = false;
 	
 	public boolean overwriteGlyph() {
+		if(Dungeon.hero == null) return false;
 		int points = Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE);
 		
 		if(points == 0) {

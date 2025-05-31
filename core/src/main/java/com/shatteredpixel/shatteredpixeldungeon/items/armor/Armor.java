@@ -181,7 +181,7 @@ public class Armor extends EquipableItem {
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
 		if(seal != null) {
-			if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+			if (hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
 				actions.add(AC_DETACH);
 				actions.add(AC_SWAP_GLYPH);
 			}
@@ -489,7 +489,7 @@ public class Armor extends EquipableItem {
 
 				//the chance from +4/5, and then +6 can be set to 0% with metamorphed runic transference
 				int lossChanceStart = 4;
-				if (Dungeon.hero != null && Dungeon.hero.heroClass != HeroClass.WARRIOR && runic()){
+				if (runic() && Dungeon.hero.heroClass != HeroClass.WARRIOR){
 					lossChanceStart += 1+Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE);
 				}
 
@@ -590,7 +590,6 @@ public class Armor extends EquipableItem {
 			//warrior seal doesn't need to interact with cleric holy armor
 			
 			boolean main = displayGlyph();
-			
 			boolean extra = extraGlyph() != null;
 			
 			if(main && extra) {
@@ -797,7 +796,7 @@ public class Armor extends EquipableItem {
 	}
 	
 	public Glyph extraGlyph() {
-		if(seal != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2) {
+		if(seal != null && Dungeon.hero != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2) {
 			return seal.glyph();
 		}
 		else return null;
@@ -850,9 +849,6 @@ public class Armor extends EquipableItem {
 		if (owner.buff(MagicImmune.class) != null) {
 			return false;
 		}
-		else if (activeGlyph() == null){
-			return extraGlyph() != null && extraGlyph().getClass() == type;
-		}
 		else if (owner == Dungeon.hero
 				&& HolyWard.HolyArmBuff.active(this)) {
 			return false;
@@ -863,7 +859,7 @@ public class Armor extends EquipableItem {
 			return true;
 		}
 		else {
-			return activeGlyph().getClass() == type || (extraGlyph() != null && extraGlyph().getClass() == type);
+			return (activeGlyph() != null && activeGlyph().getClass() == type) || (extraGlyph() != null && extraGlyph().getClass() == type);
 		}
 	}
 
@@ -900,7 +896,7 @@ public class Armor extends EquipableItem {
 	}
 	
 	public boolean displayGlyph() {
-		return activeGlyph() != null && (hasCurseGlyph() || cursedKnown || (runic() && seal != null && seal.overwriteGlyph()));
+		return activeGlyph() != null && (!hasCurseGlyph() || cursedKnown || (runic() && seal != null && seal.overwriteGlyph()));
 	}
 
 	@Override
