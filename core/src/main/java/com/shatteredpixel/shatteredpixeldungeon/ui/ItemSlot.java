@@ -264,11 +264,21 @@ public class ItemSlot extends Button {
 
 		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
 
-			extra.text( null );
-
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
 			itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
 			add(itemIcon);
+			
+			if(item instanceof WealthDrop) {
+				extra.text( ((WealthDrop) item).dropExtra() );
+				((WealthDrop) item).dropColor(extra);
+				
+				extra.scale.set(PixelScene.align(0.9f));
+				extra.measure();
+			} else {
+				extra.text( null );
+				extra.resetColor();
+				extra.scale.set(1f);
+			}
 
 		} else if (item instanceof Weapon || item instanceof Armor) {
 
@@ -294,20 +304,9 @@ public class ItemSlot extends Button {
 		} else {
 
 			extra.text( null );
-
-		}
-
-		if(item instanceof WealthDrop) {
-			extra.text( ((WealthDrop) item).dropExtra() );
-			((WealthDrop) item).dropColor(extra);
-			
-			extra.scale.set(PixelScene.align(0.9f));
-			extra.measure();
-		} else {
 			extra.resetColor();
-			extra.scale.set(1f);
-		}
 
+		}
 
 		int trueLvl = item.visiblyUpgraded();
 		int buffedLvl = item.buffedVisiblyUpgraded();
