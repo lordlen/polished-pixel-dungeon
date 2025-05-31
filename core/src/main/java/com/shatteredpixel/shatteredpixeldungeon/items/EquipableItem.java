@@ -48,8 +48,7 @@ public abstract class EquipableItem extends Item {
 		bones = true;
 		defaultAction = AC_EQUIP;
 		
-		Callback update = this::Polished_updateDefaultAction;
-		Dungeon.Polished.runAfterLoad(update);
+		Dungeon.Polished.runAfterLoad(this::Polished_updateDefaultAction);
 	}
 	
 	public void Polished_updateDefaultAction() {
@@ -60,7 +59,7 @@ public abstract class EquipableItem extends Item {
 	@Override
 	public ArrayList<String> actions(Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
-		actions.add( 0, isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
+		actions.add( isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
 		return actions;
 	}
 
@@ -162,7 +161,7 @@ public abstract class EquipableItem extends Item {
 		}
 		keptThoughLostInvent = wasKept;
 		
-		Polished_updateDefaultAction();
+		Dungeon.Polished.runDelayed(this::Polished_updateDefaultAction);
 		return true;
 	}
 

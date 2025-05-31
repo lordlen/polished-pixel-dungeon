@@ -182,8 +182,8 @@ public class Armor extends EquipableItem {
 		ArrayList<String> actions = super.actions(hero);
 		if(seal != null) {
 			if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
-				actions.add(0, AC_SWAP_GLYPH);
-				actions.add(1, AC_DETACH);
+				actions.add(AC_DETACH);
+				actions.add(AC_SWAP_GLYPH);
 			}
 			else {
 				actions.add(AC_DETACH);
@@ -194,7 +194,7 @@ public class Armor extends EquipableItem {
 	
 	@Override
 	public void Polished_updateDefaultAction() {
-		if(seal != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+		if(seal != null && Dungeon.hero != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
 			defaultAction = AC_SWAP_GLYPH;
 		}
 		else {
