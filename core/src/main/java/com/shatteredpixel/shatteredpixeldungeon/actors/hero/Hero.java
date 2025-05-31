@@ -150,6 +150,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
@@ -260,6 +261,9 @@ public class Hero extends Char {
 
 			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
 			if(bow != null) bow.Polished_resetCharges();
+			
+			MeleeWeapon.Charger charger = hero.buff(MeleeWeapon.Charger.class);
+			if(charger != null) charger.gainCharge(charger.chargeCap());
 		}
 
 		public static boolean noEnemiesLast = false;
@@ -287,7 +291,7 @@ public class Hero extends Char {
 			if (item instanceof Dewdrop && waterskin == null) return false;
 			if (item instanceof Dewdrop && waterskin.isFull()) return false;
 			if (!(item instanceof Dewdrop || item instanceof Plant.Seed || item instanceof Runestone || item instanceof Berry)) return false;
-			if(!Dungeon.hero.belongings.backpack.Polished_canHoldGlobal(item)) return false;
+			if(!Dungeon.hero.belongings.Polished_canHold(item)) return false;
 
 			return (SPDSettings.Polished.autoPickup() && noEnemiesSeen() && noEnemiesLast);
 		}
