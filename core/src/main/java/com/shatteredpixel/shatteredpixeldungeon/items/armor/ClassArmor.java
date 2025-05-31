@@ -167,27 +167,14 @@ abstract public class ClassArmor extends Armor {
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
 		
-		switch (actions.size()) {
-			default:
-				if (isEquipped( hero )) {
-					actions.add( AC_ABILITY );
-				}
-				actions.add( AC_TRANSFER );
-				break;
-				
-			case 5:
-				actions.add( 3, AC_TRANSFER );
-				if (isEquipped( hero )) {
-					actions.add( AC_ABILITY );
-				}
-				break;
-			case 4:
-				if (isEquipped( hero )) {
-					actions.add( 3, AC_ABILITY );
-					actions.add( 4, AC_TRANSFER );
-				}
-				else actions.add( 3, AC_TRANSFER );
-				break;
+		if(actions.size() == 5) {
+			actions.add( 4, AC_TRANSFER );
+		} else {
+			actions.add(AC_TRANSFER);
+		}
+		
+		if (isEquipped( hero )) {
+			actions.add( AC_ABILITY );
 		}
 		
 		return actions;

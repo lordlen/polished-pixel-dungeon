@@ -124,6 +124,22 @@ public class Dungeon {
 			}
 		}
 		
+		public static void runDelayed(Callback callback) {
+			Actor.add(new Actor() {
+				{
+					actPriority = VFX_PRIO;
+				}
+				
+				@Override
+				protected boolean act() {
+					callback.call();
+					
+					Actor.remove(this);
+					return true;
+				}
+			});
+		}
+		
 		public static void runAfterLoad(Callback callback) {
 			if(!loading) {
 				callback.call();
