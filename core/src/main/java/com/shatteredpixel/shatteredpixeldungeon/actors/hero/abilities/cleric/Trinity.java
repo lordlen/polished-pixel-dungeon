@@ -157,8 +157,8 @@ public class Trinity extends ArmorAbility {
 						@Override
 						protected void onClick() {
 							if (Dungeon.hero.belongings.armor() != null &&
-									Dungeon.hero.belongings.armor().glyph != null &&
-									(Dungeon.hero.belongings.armor()).glyph.getClass().equals(bodyForm.getClass())){
+									Dungeon.hero.belongings.armor().activeGlyph() != null &&
+									(Dungeon.hero.belongings.armor()).activeGlyph().getClass().equals(bodyForm.getClass())){
 								GLog.w(Messages.get(Trinity.class, "no_duplicate"));
 								hide();
 							} else {
@@ -433,7 +433,7 @@ public class Trinity extends ArmorAbility {
 					if (item instanceof MeleeWeapon) {
 						((Trinity)Dungeon.hero.armorAbility).bodyForm = ((MeleeWeapon) item).enchantment;
 					} else if (item instanceof Armor) {
-						((Trinity)Dungeon.hero.armorAbility).bodyForm = ((Armor) item).glyph;
+						((Trinity)Dungeon.hero.armorAbility).bodyForm = ((Armor) item).activeGlyph();
 					} else if (item instanceof Wand || item instanceof MissileWeapon){
 						((Trinity)Dungeon.hero.armorAbility).mindForm = item;
 					} else {
@@ -457,7 +457,7 @@ public class Trinity extends ArmorAbility {
 			if (item instanceof MeleeWeapon){
 				return ((MeleeWeapon) item).enchantment.name();
 			} else if (item instanceof Armor){
-				return (((Armor) item).glyph.name());
+				return (((Armor) item).activeGlyph().name());
 			}
 			return item.name();
 		}
@@ -466,7 +466,7 @@ public class Trinity extends ArmorAbility {
 			if (item instanceof MeleeWeapon){
 				return ((MeleeWeapon) item).enchantment.desc() + "\n\n" + trinityItemUseText(((MeleeWeapon) item).enchantment.getClass());
 			} else if (item instanceof Armor){
-				return ((Armor) item).glyph.desc() + "\n\n" + trinityItemUseText(((Armor) item).glyph.getClass());
+				return ((Armor) item).activeGlyph().desc() + "\n\n" + trinityItemUseText(((Armor) item).glyph().getClass());
 			} else {
 				return item.desc() + "\n\n" + trinityItemUseText(item.getClass());
 			}

@@ -421,7 +421,6 @@ public class Item implements Bundlable {
 		this.level++;
 
 		updateQuickslot();
-		
 		return this;
 	}
 	
@@ -437,6 +436,7 @@ public class Item implements Bundlable {
 		
 		this.level--;
 		
+		updateQuickslot();
 		return this;
 	}
 	

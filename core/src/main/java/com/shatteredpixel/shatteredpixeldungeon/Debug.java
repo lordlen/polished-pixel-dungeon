@@ -65,7 +65,6 @@ public class Debug {
 
 
 
-
         if(DebuggingStats || false) {
             Starting_Items.addAll(Arrays.asList(
                 PotionOfMindVision.class, PotionOfHaste.class, PotionOfInvisibility.class, ElixirOfFeatherFall.class,

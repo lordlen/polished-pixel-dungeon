@@ -557,7 +557,8 @@ public enum Talent {
 		}
 
 		if (talent == TWIN_UPGRADES || talent == DESPERATE_POWER
-				|| talent == STRONGMAN || talent == DURABLE_PROJECTILES){
+			|| talent == STRONGMAN || talent == DURABLE_PROJECTILES
+			|| talent == RUNIC_TRANSFERENCE) {
 			Item.updateQuickslot();
 		}
 
@@ -585,6 +586,11 @@ public enum Talent {
 		//if we happen to have spirit form applied with a ring of might
 		if (talent == SPIRIT_FORM){
 			Dungeon.hero.updateHT(false);
+		}
+		
+		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null){
+			BrokenSeal.armor.Polished_updateDefaultAction();
+			//if(hero.pointsInTalent(talent) == 1) BrokenSeal.armor.transfer();
 		}
 	}
 

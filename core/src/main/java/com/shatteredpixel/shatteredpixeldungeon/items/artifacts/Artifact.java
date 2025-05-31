@@ -93,6 +93,8 @@ public class Artifact extends KindofMisc {
 	}
 
 	public void activate( Char ch ) {
+		super.activate(ch);
+		
 		if (passiveBuff != null){
 			if (passiveBuff.target != null) passiveBuff.detach();
 			passiveBuff = null;
