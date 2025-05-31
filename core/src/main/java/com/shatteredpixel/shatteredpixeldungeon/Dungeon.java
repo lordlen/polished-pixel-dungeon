@@ -331,6 +331,7 @@ public class Dungeon {
 		droppedItems = new SparseArray<>();
 
 		LimitedDrops.reset();
+		FoundItems.reset();
 		
 		chapters = new HashSet<>();
 		
@@ -814,6 +815,7 @@ public class Dungeon {
 		if (fullLoad) {
 			
 			LimitedDrops.restore( bundle.getBundle(LIMDROPS) );
+			FoundItems.restore( bundle.getBundle(FOUND_ITEMS) );
 
 			chapters = new HashSet<>();
 			int ids[] = bundle.getIntArray( CHAPTERS );
