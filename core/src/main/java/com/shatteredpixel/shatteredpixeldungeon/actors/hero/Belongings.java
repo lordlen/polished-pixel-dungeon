@@ -78,6 +78,15 @@ public class Belongings implements Iterable<Item> {
 		backpack = new Backpack();
 		backpack.owner = owner;
 	}
+	
+	public boolean Polished_canHold( Item item ) {
+		for (Item i : backpack.items) {
+			if (i instanceof Bag && ((Bag)i).canHold( item )) {
+				return true;
+			}
+		}
+		return backpack.canHold(item);
+	}
 
 	public KindOfWeapon weapon = null;
 	public Armor armor = null;

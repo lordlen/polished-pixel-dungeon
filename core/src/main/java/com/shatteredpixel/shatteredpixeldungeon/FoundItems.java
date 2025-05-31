@@ -12,12 +12,12 @@ import java.util.HashMap;
 
 public class FoundItems {
     private static final HashMap<Class<?>, Pair> floors = new HashMap<>();
-    static
-    {
+    
+    public static void reset() {
         for(Class<?> cls : Generator.Category.POTION.classes) {
             floors.put(cls, new Pair());
         }
-
+        
         for(Class<?> cls : Generator.Category.SCROLL.classes) {
             floors.put(cls, new Pair());
         }
@@ -71,6 +71,7 @@ public class FoundItems {
     }
 
     public static void restore(Bundle bundle) {
+        reset();
         for(Class<?> cls : floors.keySet()) {
             if(bundle.contains(cls.getName())) {
                 Bundle pair = bundle.getBundle(cls.getName());
@@ -86,11 +87,6 @@ public class FoundItems {
         public Pair() {
             this.first = 0;
             this.second = 0;
-        }
-
-        public Pair(int first, int second) {
-            this.first = first;
-            this.second = second;
         }
 
         public static final String FIRST = "first";

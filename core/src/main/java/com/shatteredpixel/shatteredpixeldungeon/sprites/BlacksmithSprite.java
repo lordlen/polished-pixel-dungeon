@@ -72,16 +72,21 @@ public class BlacksmithSprite extends MobSprite {
 		}
 	}
 	
+	public static float fadeout = 1f;
 	@Override
 	public void onComplete( Animation anim ) {
 		super.onComplete( anim );
 		
 		if (visible && emitter != null && anim == idle) {
 			emitter.burst( Speck.factory( Speck.FORGE ), 3 );
-			if (!Music.INSTANCE.paused()) {
-				float volume = 0.2f / (Dungeon.level.distance(ch.pos, Dungeon.hero.pos));
+			if (!Music.INSTANCE.paused() && fadeout > 0) {
+				float volume = fadeout * 0.2f / (Dungeon.level.distance(ch.pos, Dungeon.hero.pos));
 				Sample.INSTANCE.play(Assets.Sounds.EVOKE, volume, volume, 0.8f);
+				fadeout -= Math.max(fadeout / 8f, 0.041f);
 			}
+		}
+		if(!visible || Music.INSTANCE.paused()) {
+			fadeout = 1f;
 		}
 	}
 

@@ -1,25 +1,18 @@
 package com.shatteredpixel.shatteredpixeldungeon;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
-import com.shatteredpixel.shatteredpixeldungeon.items.food.SupplyRation;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfFeatherFall;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.PhaseShift;
@@ -27,14 +20,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlast;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlink;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("PointlessBooleanExpression")
 public class Debug {
@@ -49,7 +41,7 @@ public class Debug {
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1f;
 
     public static final int Starting_Floor = DebuggingStats ?           6       : 1;
-    public static final int Starting_HeroLevel = DebuggingStats ?       15      : 1;
+    public static final int Starting_HeroLevel = DebuggingStats ?       11      : 1;
     public static final int Starting_Str = DebuggingStats ?             16      : 10;
     public static final int Starting_HP = DebuggingStats ?              2000    : 20;
 
@@ -60,54 +52,49 @@ public class Debug {
     static {
         //Testing items
         Starting_Items = new ArrayList<>(Arrays.asList(
-
+        
         ));
 
 
 
-
-        if(DebuggingStats || false) {
+        if(true && DebuggingStats) {
             Starting_Items.addAll(Arrays.asList(
-                PotionOfMindVision.class, PotionOfHaste.class, PotionOfInvisibility.class, ElixirOfFeatherFall.class,
+                PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class,
                 ScrollOfMagicMapping.class, PhaseShift.class, ScrollOfUpgrade.class,
-                StoneOfBlast.class, StoneOfBlink.class, StoneOfShock.class,
-                TimekeepersHourglass.class, Food.class
+                StoneOfBlink.class, StoneOfBlast.class, StoneOfShock.class,
+                TimekeepersHourglass.class, Food.class, EnergyCrystal.class
             ));
         }
     }
     public static void Starting_Bag() {
-        if(!Debug.DEBUG_MODE || Starting_Items == null) return;
+        if(!DEBUG_MODE || Starting_Items == null) return;
 
-        for(Class<?extends Item> itemType : Debug.Starting_Items) {
+        for(Class<?extends Item> itemType : Starting_Items) {
             DebugCollect(itemType);
         }
         if(Dungeon.isChallenged(Challenges.DARKNESS))
             DebugCollect(Torch.class);
-
-        //DebugCollect(ClothArmor.class, 0, 1, Swiftness.class);
+        
         
     }
 
     public static void StartGame() {
-        if(!Debug.DEBUG_MODE || !Debug.ActOnStart) return;
-        ClearWaterskin();
-
-        DebugCollect(EnergyCrystal.class);
-        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
+        if(!DEBUG_MODE || !ActOnStart) return;
+        
         Starting_Bag();
-
-        MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
-        if(charger != null) charger.gainCharge(charger.chargeCap());
+        SetQuickslots();
+        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
+        
+        
     }
     public static void LoadGame() {
-        if(!Debug.DEBUG_MODE || !Debug.ActOnLoad) return;
-
+        if(!DEBUG_MODE || !ActOnLoad) return;
+        
         Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
         Dungeon.hero.STR = Math.max(Dungeon.hero.STR, Starting_Str);
         //Starting_Bag();
-
-        //DebugCollect(ClothArmor.class, 0, 1, Swiftness.class);
-
+        
+        
     }
 
 
@@ -155,10 +142,31 @@ public class Debug {
     }
 
 
-    private static void ClearWaterskin() {
-        if(DebuggingStats) {
+    private static void SetQuickslots() {
+        List<Class<? extends Item>> quickslot = Arrays.asList(
+                ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class, StoneOfBlink.class, StoneOfBlast.class
+        );
+        
+        ArrayList<Item> items = new ArrayList<>();
+        boolean contains = true;
+        for (Class<? extends Item> cls : quickslot) {
+            Item item = Dungeon.hero.belongings.getItem(cls);
+            if(item != null) items.add(item);
+            else {
+                contains = false;
+                break;
+            }
+        }
+        
+        if(DebuggingStats && contains) {
             Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
             if(waterskin != null) waterskin.detachAll(Dungeon.hero.belongings.backpack);
+            
+            int index = 0;
+            for(Item item : items) {
+                Dungeon.quickslot.setSlot(index, item);
+                index++;
+            }
         }
     }
 }
