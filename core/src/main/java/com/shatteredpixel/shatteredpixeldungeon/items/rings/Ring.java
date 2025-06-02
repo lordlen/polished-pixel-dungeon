@@ -126,6 +126,7 @@ public class Ring extends KindofMisc {
 	}
 	
 	public void activate( Char ch ) {
+		super.activate(ch);
 		if (buff != null){
 			buff.detach();
 			buff = null;

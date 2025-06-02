@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
@@ -31,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -43,7 +45,6 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class BrokenSeal extends Item {
 
@@ -61,30 +62,71 @@ public class BrokenSeal extends Item {
 
 		defaultAction = AC_INFO;
 	}
+	
 
+	public static Armor armor;
 	private Armor.Glyph glyph;
+	public boolean glyphChosen = false;
 
-	public boolean canTransferGlyph(){
-		if (glyph == null){
-			return false;
+	public boolean curseInfusionBonus = false;
+	
+	public boolean overwriteGlyph() {
+		if(Dungeon.hero == null) return false;
+		
+		if(Armor.runic == 0) {
+			return glyph != null;
 		}
-		if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2){
-			return true;
-		} else if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1
-			&& (Arrays.asList(Armor.Glyph.common).contains(glyph.getClass())
-				|| Arrays.asList(Armor.Glyph.uncommon).contains(glyph.getClass()))){
-			return true;
-		} else {
+		else if(Armor.runic == 1)
+			return glyphChosen;
+		else
 			return false;
-		}
+	}
+	
+	public boolean curseInfusion() {
+		if(!curseInfusionBonus) return false;
+		return armor == null || armor.activeGlyph() == glyph() || armor.extraGlyph() == glyph();
 	}
 
-	public Armor.Glyph getGlyph(){
+	public BrokenSeal inscribe( ) {
+		Class<? extends Armor.Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
+		Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass, armorGlyphClass() );
+
+		return inscribe( gl );
+	}
+
+	public BrokenSeal inscribe( Armor.Glyph glyph ) {
+		if (glyph == null || !glyph.curse()) curseInfusionBonus = false;
+		this.glyph = glyph;
+
+		//so once we upgrade the talent, this gets chosen by default
+		if(Armor.runic == 0) glyphChosen = true;
+
+		if (glyph != null) {
+			Catalog.setSeen(glyph.getClass());
+			Statistics.itemTypesDiscovered.add(glyph.getClass());
+		}
+		return this;
+	}
+
+	public Armor.Glyph glyph(){
 		return glyph;
 	}
-
-	public void setGlyph( Armor.Glyph glyph ){
-		this.glyph = glyph;
+	
+	//these are not used to process specific glyph effects, so magic immune doesn't affect them
+	public boolean hasGoodGlyph(){
+		return glyph() != null && !glyph().curse();
+	}
+	
+	public boolean hasCurseGlyph(){
+		return glyph() != null && glyph().curse();
+	}
+	
+	public Class<? extends Armor.Glyph> sealGlyphClass() {
+		return glyph() != null ? glyph().getClass() : null;
+	}
+	
+	public Class<? extends Armor.Glyph> armorGlyphClass() {
+		return (armor != null && armor.glyph() != null) ? armor.glyph().getClass() : null;
 	}
 
 	public int maxShield( int armTier, int armLvl ){
@@ -130,6 +172,11 @@ public class BrokenSeal extends Item {
 		}
 		return info;
 	}
+	
+	@Override
+	public int buffedVisiblyUpgraded() {
+		return curseInfusionBonus ? buffedLvl()+1 : buffedLvl();
+	}
 
 	@Override
 	//scroll of upgrade can be used directly once, same as upgrading armor the seal is affixed to then removing it.
@@ -157,57 +204,75 @@ public class BrokenSeal extends Item {
 		@Override
 		public void onSelect( Item item ) {
 			BrokenSeal seal = (BrokenSeal) curItem;
-			if (item != null && item instanceof Armor) {
-				Armor armor = (Armor)item;
-				if (!armor.levelKnown){
-					GLog.w(Messages.get(BrokenSeal.class, "unknown_armor"));
+			if (item instanceof Armor) {
+				Armor arm = (Armor)item;
 
-				} else if (armor.cursed && (seal.getGlyph() == null || !seal.getGlyph().curse())){
-					GLog.w(Messages.get(BrokenSeal.class, "cursed_armor"));
+				if(Armor.runic == 1) {
+					String armorGlyph;
+					if(!arm.cursedKnown && (arm.glyph() == null || arm.hasCurseGlyph())) {
+						armorGlyph = Messages.get(Stylus.class, "unknown");
+					}
+					else if(arm.glyph() != null) {
+						armorGlyph = arm.glyph().name();
+					}
+					else {
+						armorGlyph = Messages.get(Stylus.class, "none");
+					}
+					String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
 
-				} else if (armor.glyph != null && seal.getGlyph() != null
-						&& armor.glyph.getClass() != seal.getGlyph().getClass()) {
-					GameScene.show(new WndOptions(new ItemSprite(seal),
+					GameScene.show(new WndOptions(
+							new ItemSprite(seal),
 							Messages.get(BrokenSeal.class, "choose_title"),
 							Messages.get(BrokenSeal.class, "choose_desc"),
-							armor.glyph.name(),
-							seal.getGlyph().name()){
+							"Armor: " + armorGlyph,
+							"Seal: " + sealGlyph) {
+
 						@Override
 						protected void onSelect(int index) {
-							if (index == 0) seal.setGlyph(null);
-							//if index is 1, then the glyph transfer happens in affixSeal
+							seal.glyphChosen = index == 1;
 
 							GLog.p(Messages.get(BrokenSeal.class, "affix"));
 							Dungeon.hero.sprite.operate(Dungeon.hero.pos);
 							Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-							armor.affixSeal(seal);
+							arm.affixSeal(seal);
 							seal.detach(Dungeon.hero.belongings.backpack);
 						}
 					});
+				}
 
-				} else {
+				else {
 					GLog.p(Messages.get(BrokenSeal.class, "affix"));
 					Dungeon.hero.sprite.operate(Dungeon.hero.pos);
 					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-					armor.affixSeal((BrokenSeal)curItem);
-					curItem.detach(Dungeon.hero.belongings.backpack);
+					arm.affixSeal(seal);
+					seal.detach(Dungeon.hero.belongings.backpack);
 				}
 			}
 		}
 	};
-
-	private static final String GLYPH = "glyph";
+	
+	private static final String GLYPH 			= "glyph";
+	// Armor handles itself
+	
+	private static final String GLYPH_CHOSEN 	= "glyph_chosen";
+	private static final String CURSE_INFUSE 	= "curse_infuse";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(GLYPH, glyph);
+		
+		bundle.put(GLYPH_CHOSEN, glyphChosen);
+		bundle.put(CURSE_INFUSE, curseInfusionBonus);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
-		glyph = (Armor.Glyph)bundle.get(GLYPH);
+		inscribe((Armor.Glyph)bundle.get(GLYPH));
+		
+		glyphChosen = bundle.getBoolean(GLYPH_CHOSEN);
+		curseInfusionBonus = bundle.getBoolean(CURSE_INFUSE);
 	}
 
 	public static class WarriorShield extends ShieldBuff {

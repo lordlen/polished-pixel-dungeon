@@ -65,6 +65,8 @@ public class Recycle extends InventorySpell {
 
 	@Override
 	protected void onItemSelected(Item item) {
+		onUse();
+		
 		Item result;
 		do {
 			if (item instanceof Potion) {

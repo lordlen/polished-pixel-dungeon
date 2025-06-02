@@ -29,8 +29,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HolyTome;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.audio.Sample;
@@ -76,6 +78,8 @@ public class HolyWard extends ClericSpell {
 		{
 			type = buffType.POSITIVE;
 		}
+		
+		public static ItemSprite.Glowing HOLY = new ItemSprite.Glowing( 0xFFFF00 );
 
 		@Override
 		public int icon() {
@@ -95,7 +99,12 @@ public class HolyWard extends ClericSpell {
 				return Messages.get(this, "desc", dispTurns());
 			}
 		}
-
+		
+		public static boolean active(Armor armor) {
+			return  armor.isEquipped(Dungeon.hero) && Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null && !armor.hasCurseGlyph()
+					&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || armor.activeGlyph() == null);
+		}
+		
 		@Override
 		public void detach() {
 			super.detach();
