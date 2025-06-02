@@ -169,7 +169,7 @@ public class Stylus extends Item {
 				if(seal == null) {
 					inscribe(armor);
 				}
-				else if(!Armor.runic()) {
+				else if(Armor.runic == 0) {
 					if (!armor.cursedKnown) GLog.w( Messages.get(this, "identify"));
 					else inscribe(seal);
 				}
@@ -204,7 +204,7 @@ public class Stylus extends Item {
 				}
 			}
 			else if(item instanceof BrokenSeal) {
-				if (!Armor.runic()) {
+				if (Armor.runic == 0) {
 					GLog.w(Messages.get(Stylus.this, "no_runic"));
 				}
 				else {

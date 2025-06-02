@@ -181,7 +181,7 @@ public class Armor extends EquipableItem {
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
 		if(seal != null) {
-			if (hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+			if (Armor.runic == 1) {
 				actions.add(AC_DETACH);
 				actions.add(AC_SWAP_GLYPH);
 			}
@@ -194,7 +194,7 @@ public class Armor extends EquipableItem {
 	
 	@Override
 	public void Polished_updateDefaultAction() {
-		if(seal != null && Dungeon.hero != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+		if(seal != null && Armor.runic == 1) {
 			defaultAction = AC_SWAP_GLYPH;
 		}
 		else {
@@ -321,7 +321,7 @@ public class Armor extends EquipableItem {
 			level(trueLevel() - 1);
 		}
 		
-		if (!runic() && detaching.overwriteGlyph()){
+		if (Armor.runic == 0 && detaching.overwriteGlyph()){
 			inscribe(detaching.glyph(), true);
 			curseInfusionBonus = detaching.curseInfusionBonus;
 			detaching.inscribe(null);
@@ -491,8 +491,8 @@ public class Armor extends EquipableItem {
 
 				//the chance from +4/5, and then +6 can be set to 0% with metamorphed runic transference
 				int lossChanceStart = 4;
-				if (runic() && Dungeon.hero.heroClass != HeroClass.WARRIOR){
-					lossChanceStart += 1+Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE);
+				if (Armor.runic > 0 && Dungeon.hero.heroClass != HeroClass.WARRIOR){
+					lossChanceStart += 1+Armor.runic;
 				}
 
 				if (level() >= lossChanceStart && Random.Float(10) < Math.pow(2, level()-4)) {
@@ -643,7 +643,7 @@ public class Armor extends EquipableItem {
 		
 		Glyph active = activeGlyph();
 		
-		if(!runic() || seal == null) {
+		if(Armor.runic == 0 || seal == null) {
 			if (HolyWard.HolyArmBuff.active(this)){
 				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", Messages.get(HolyWard.class, "glyph_name", Messages.get(Glyph.class, "glyph"))));
 				info += " " + Messages.get(HolyWard.class, "glyph_desc");
@@ -803,7 +803,7 @@ public class Armor extends EquipableItem {
 	}
 	
 	public Glyph extraGlyph() {
-		if(seal != null && Dungeon.hero != null && Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2) {
+		if(seal != null && Armor.runic == 2) {
 			return seal.glyph();
 		}
 		else return null;
@@ -828,7 +828,7 @@ public class Armor extends EquipableItem {
 	
 	public Armor inscribe( Glyph glyph, boolean force ) {
 		if (seal != null && !force
-			&& (seal.overwriteGlyph() || !runic())) {
+			&& (seal.overwriteGlyph() || Armor.runic == 0)) {
 			seal.inscribe(glyph);
 			return this;
 		}
@@ -903,7 +903,7 @@ public class Armor extends EquipableItem {
 	}
 	
 	public boolean displayGlyph() {
-		return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown || (runic() && seal != null && seal.overwriteGlyph()));
+		return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown || (Armor.runic > 0 && seal != null && seal.overwriteGlyph()));
 	}
 
 	@Override
@@ -920,9 +920,6 @@ public class Armor extends EquipableItem {
 	public static int runic = 0;
 	public static void cacheRunic(int points) {
 		runic = points;
-	}
-	public static boolean runic() {
-		return Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE);
 	}
 	
 	public static abstract class Glyph implements Bundlable {

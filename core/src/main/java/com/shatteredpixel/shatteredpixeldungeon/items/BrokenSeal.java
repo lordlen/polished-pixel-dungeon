@@ -72,12 +72,11 @@ public class BrokenSeal extends Item {
 	
 	public boolean overwriteGlyph() {
 		if(Dungeon.hero == null) return false;
-		int points = Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE);
 		
-		if(points == 0) {
+		if(Armor.runic == 0) {
 			return glyph != null;
 		}
-		else if(points == 1)
+		else if(Armor.runic == 1)
 			return glyphChosen;
 		else
 			return false;
@@ -100,7 +99,7 @@ public class BrokenSeal extends Item {
 		this.glyph = glyph;
 
 		//so once we upgrade the talent, this gets chosen by default
-		if(Dungeon.hero != null && !Armor.runic()) glyphChosen = true;
+		if(Armor.runic == 0) glyphChosen = true;
 
 		if (glyph != null) {
 			Catalog.setSeen(glyph.getClass());
@@ -208,7 +207,7 @@ public class BrokenSeal extends Item {
 			if (item instanceof Armor) {
 				Armor arm = (Armor)item;
 
-				if(Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 1) {
+				if(Armor.runic == 1) {
 					String armorGlyph;
 					if(!arm.cursedKnown && (arm.glyph() == null || arm.hasCurseGlyph())) {
 						armorGlyph = Messages.get(Stylus.class, "unknown");

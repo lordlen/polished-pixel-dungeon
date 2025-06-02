@@ -66,7 +66,7 @@ public class StoneOfEnchantment extends InventoryStone {
 			if(seal == null) {
 				armor.inscribe(true);
 			}
-			else if(!Armor.runic()) {
+			else if(Armor.runic == 0) {
 				seal.inscribe();
 			}
 			else {
@@ -120,7 +120,7 @@ public class StoneOfEnchantment extends InventoryStone {
 			}
 		}
 		else if (item instanceof BrokenSeal) {
-			if (!Armor.runic()) {
+			if (Armor.runic == 0) {
 				GLog.w(Messages.get(Stylus.class, "no_runic"));
 				
 				GameScene.selectItem(itemSelector);

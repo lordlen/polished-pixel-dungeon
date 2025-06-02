@@ -110,7 +110,7 @@ public class CurseInfusion extends InventorySpell {
 			if(seal == null) {
 				curseEnchant(armor);
 			}
-			else if(!Armor.runic()) {
+			else if(Armor.runic == 0) {
 				curseEnchant(seal);
 				armor.cursed = true;
 				armor.cursedKnown = true;
@@ -165,7 +165,7 @@ public class CurseInfusion extends InventorySpell {
 			}
 		}
 		else if (item instanceof BrokenSeal) {
-			if (!Armor.runic()) {
+			if (Armor.runic == 0) {
 				GLog.w(Messages.get(Stylus.class, "no_runic"));
 				
 				GameScene.selectItem(itemSelector);
