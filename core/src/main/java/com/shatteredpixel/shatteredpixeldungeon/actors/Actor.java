@@ -163,7 +163,7 @@ public abstract class Actor implements Bundlable {
 	// *** Static members ***
 	// **********************
 	
-	private static LinkedHashSet<Actor> all = new LinkedHashSet<>();
+	private static HashSet<Actor> all = new HashSet<>();
 	private static HashSet<Char> chars = new HashSet<>();
 	private static volatile Actor current;
 

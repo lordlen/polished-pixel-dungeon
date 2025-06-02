@@ -88,7 +88,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Banner;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.MobBuffDisplay;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
@@ -283,15 +283,15 @@ public class GameScene extends PixelScene {
 			}
 		}
 		
-		public static void add( BuffIndicator indicator ) {
+		public static void add( MobBuffDisplay indicator ) {
 			if (scene != null) scene.buffIndicators.add(indicator);
 		}
 		
 		public static void updateMobBuffIndicators() {
 			if(scene != null && scene.buffIndicators != null) {
 				for(Gizmo indicator : scene.buffIndicators.Polished_all()) {
-					if(indicator instanceof BuffIndicator) {
-						((BuffIndicator) indicator).Polished_refreshMob();
+					if(indicator instanceof MobBuffDisplay) {
+						((MobBuffDisplay) indicator).refresh();
 					}
 				}
 			}
