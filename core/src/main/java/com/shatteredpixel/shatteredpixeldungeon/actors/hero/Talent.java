@@ -323,13 +323,12 @@ public enum Talent {
 	};
 	public static class SwiftEquipCooldown extends FlavourBuff{
 		{
-			actPriority = VFX_PRIO;
+			actPriority = HERO_PRIO+1;
 		}
 
-		//REMOVED
 		public boolean secondUse;
 		public boolean hasSecondUse(){
-			return false;
+			return secondUse;
 		}
 
 		public int icon() { return BuffIndicator.TIME; }
@@ -338,6 +337,11 @@ public enum Talent {
 			else                icon.hardlight(0.35f, 0f, 0.7f);
 		}
 		public float iconFadePercent() { return GameMath.gate(0, visualcooldown() / 20f, 1); }
+
+		@Override
+		public String desc() {
+			return hasSecondUse() ? Messages.get(this, "desc_second", dispTurns()) : super.desc();
+		}
 
 		private static final String SECOND_USE = "second_use";
 		@Override
@@ -370,10 +374,31 @@ public enum Talent {
 		}
 	}
 	public static class PreciseAssaultTracker extends FlavourBuff{
-		{ type = buffType.POSITIVE; }
+		{
+			actPriority = HERO_PRIO+1;
+		}
+
+		public boolean secondUse;
+
 		public int icon() { return BuffIndicator.INVERT_MARK; }
-		public void tintIcon(Image icon) { icon.hardlight(1f, 1f, 0.0f); }
+		public void tintIcon(Image icon) {
+			icon.hardlight(1f, 1f, 0.0f);
+			if (secondUse) 	icon.hardlight(1f, 0.5f, 0.0f);
+			else           	icon.hardlight(1f, 1f, 0.0f);
+		}
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
+
+		private static final String SECOND_USE = "second_use";
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(SECOND_USE, secondUse);
+		}
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			secondUse = bundle.getBoolean(SECOND_USE);
+		}
 	};
 	public static class VariedChargeTracker extends Buff{
 		public Class weapon;
