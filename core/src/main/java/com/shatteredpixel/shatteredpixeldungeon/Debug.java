@@ -21,6 +21,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlink;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Reflection;
 
@@ -84,6 +85,8 @@ public class Debug {
         Starting_Bag();
         SetQuickslots();
         Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
+        MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
+        if(charger != null) charger.gainCharge(charger.chargeCap());
         
         
     }
@@ -144,7 +147,7 @@ public class Debug {
 
     private static void SetQuickslots() {
         List<Class<? extends Item>> quickslot = Arrays.asList(
-                ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class, StoneOfBlink.class, StoneOfBlast.class
+                ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class, StoneOfBlast.class
         );
         
         ArrayList<Item> items = new ArrayList<>();
@@ -162,7 +165,7 @@ public class Debug {
             Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
             if(waterskin != null) waterskin.detachAll(Dungeon.hero.belongings.backpack);
             
-            int index = 0;
+            int index = 1;
             for(Item item : items) {
                 Dungeon.quickslot.setSlot(index, item);
                 index++;

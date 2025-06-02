@@ -804,6 +804,7 @@ public abstract class Level implements Bundlable {
 	
 	public void addItemToSpawn( Item item ) {
 		if (item != null) {
+			item.Polished_toFind = true;
 			itemsToSpawn.add( item );
 		}
 	}
