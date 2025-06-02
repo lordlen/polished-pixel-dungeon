@@ -915,6 +915,12 @@ public class Armor extends EquipableItem {
 		}
 	}
 	
+	
+	//we cache this since it gets called a lot
+	public static int runic = 0;
+	public static void cacheRunic(int points) {
+		runic = points;
+	}
 	public static boolean runic() {
 		return Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE);
 	}

@@ -170,8 +170,7 @@ public abstract class EquipableItem extends Item {
 	}
 
 	public void activate( Char ch ) {
-		Callback update = this::Polished_updateDefaultAction;
-		Dungeon.Polished.runAfterLoad(update);
+		Dungeon.Polished.runAfterLoad(this::Polished_updateDefaultAction);
 	}
 
 	private static final String CUSTOM_NOTE_ID = "custom_note_id";

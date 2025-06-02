@@ -590,6 +590,7 @@ public enum Talent {
 		
 		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null){
 			BrokenSeal.armor.Polished_updateDefaultAction();
+			Armor.cacheRunic(hero.pointsInTalent(talent));
 			//if(hero.pointsInTalent(talent) == 1) BrokenSeal.armor.transfer();
 		}
 	}
@@ -1115,6 +1116,9 @@ public enum Talent {
 
 		//tier4
 		//TBD
+		
+		
+		Armor.cacheRunic(0);
 	}
 
 	public static void initSubclassTalents( Hero hero ){
