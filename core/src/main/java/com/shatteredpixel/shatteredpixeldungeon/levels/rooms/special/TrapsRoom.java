@@ -57,7 +57,7 @@ public class TrapsRoom extends SpecialRoom {
 
 	@Override
 	public int minHeight() { return 6; }
-	public int maxHeight() { return 8; }
+	public int maxHeight() { return 7; }
 
 	public void paint( Level level ) {
 		 
@@ -167,7 +167,7 @@ public class TrapsRoom extends SpecialRoom {
 			//sewers
 			{WornDartTrap.class, GrippingTrap.class, WarpingTrap.class},
 			//prison
-			{PoisonDartTrap.class, GrippingTrap.class, BlastingTrap.class},
+			{BlastingTrap.class},
 			//caves
 			{DisintegrationTrap.class, GuardianTrap.class, WarpingTrap.class},
 			//city
