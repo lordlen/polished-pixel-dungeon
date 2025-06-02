@@ -101,7 +101,7 @@ public class HolyWard extends ClericSpell {
 		}
 		
 		public static boolean active(Armor armor) {
-			return  armor.isEquipped(Dungeon.hero) && !armor.hasCurseGlyph() && Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null
+			return  armor.isEquipped(Dungeon.hero) && Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null && !armor.hasCurseGlyph()
 					&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || armor.activeGlyph() == null);
 		}
 		

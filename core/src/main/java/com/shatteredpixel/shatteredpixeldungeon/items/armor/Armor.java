@@ -219,9 +219,10 @@ public class Armor extends EquipableItem {
 	@Override
 	public boolean collect(Bag container) {
 		if(super.collect(container)){
-			if (Dungeon.hero != null && Dungeon.hero.isAlive() && isIdentified() && activeGlyph() != null){
-				Catalog.setSeen(activeGlyph().getClass());
-				Statistics.itemTypesDiscovered.add(activeGlyph().getClass());
+			Glyph active = activeGlyph();
+			if (Dungeon.hero != null && Dungeon.hero.isAlive() && isIdentified() && active != null){
+				Catalog.setSeen(active.getClass());
+				Statistics.itemTypesDiscovered.add(active.getClass());
 			}
 			return true;
 		} else {
@@ -231,9 +232,10 @@ public class Armor extends EquipableItem {
 
 	@Override
 	public Item identify(boolean byHero) {
-		if (activeGlyph() != null && byHero && Dungeon.hero != null && Dungeon.hero.isAlive()){
-			Catalog.setSeen(activeGlyph().getClass());
-			Statistics.itemTypesDiscovered.add(activeGlyph().getClass());
+		Glyph active = activeGlyph();
+		if (active != null && byHero && Dungeon.hero != null && Dungeon.hero.isAlive()){
+			Catalog.setSeen(active.getClass());
+			Statistics.itemTypesDiscovered.add(active.getClass());
 		}
 		return super.identify(byHero);
 	}
@@ -508,21 +510,22 @@ public class Armor extends EquipableItem {
 	}
 	
 	public int proc( Char attacker, Char defender, int damage ) {
+		Glyph active = activeGlyph();
 
 		if (defender.buff(MagicImmune.class) == null) {
 			Glyph trinityGlyph = null;
 			if (Dungeon.hero.buff(BodyForm.BodyFormBuff.class) != null){
 				trinityGlyph = Dungeon.hero.buff(BodyForm.BodyFormBuff.class).glyph();
-				if (activeGlyph() != null && trinityGlyph != null && trinityGlyph.getClass() == activeGlyph().getClass()){
+				if (active != null && trinityGlyph != null && trinityGlyph.getClass() == active.getClass()){
 					trinityGlyph = null;
 				}
 			}
 
 			if (defender instanceof Hero && isEquipped((Hero) defender)
 					&& defender.buff(HolyWard.HolyArmBuff.class) != null){
-				if (activeGlyph() != null &&
+				if (active != null &&
 						(((Hero) defender).subClass == HeroSubClass.PALADIN || hasCurseGlyph())){
-					damage = activeGlyph().proc( this, attacker, defender, damage );
+					damage = active.proc( this, attacker, defender, damage );
 				}
 				if (trinityGlyph != null){
 					damage = trinityGlyph.proc( this, attacker, defender, damage );
@@ -531,11 +534,13 @@ public class Armor extends EquipableItem {
 				damage -= Math.round(blocking * Glyph.genericProcChanceMultiplier(defender));
 
 			} else {
-				if (activeGlyph() != null) {
-					damage = activeGlyph().proc(this, attacker, defender, damage);
+				Glyph extra = extraGlyph();
+				
+				if (active != null) {
+					damage = active.proc(this, attacker, defender, damage);
 				}
-				if(extraGlyph() != null && extraGlyph() != activeGlyph()) {
-					damage = extraGlyph().proc(this, attacker, defender, damage);
+				if(extra != null && extra != active) {
+					damage = extra.proc(this, attacker, defender, damage);
 				}
 				if (trinityGlyph != null){
 					damage = trinityGlyph.proc( this, attacker, defender, damage );
@@ -636,14 +641,16 @@ public class Armor extends EquipableItem {
 			case NONE:
 		}
 		
+		Glyph active = activeGlyph();
+		
 		if(!runic() || seal == null) {
 			if (HolyWard.HolyArmBuff.active(this)){
 				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", Messages.get(HolyWard.class, "glyph_name", Messages.get(Glyph.class, "glyph"))));
 				info += " " + Messages.get(HolyWard.class, "glyph_desc");
 			} else if (displayGlyph()) {
-				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", activeGlyph().name()));
+				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", active.name()));
 				if (glyphHardened) info += " " + Messages.get(Armor.class, "glyph_hardened");
-				info += " " + activeGlyph().desc();
+				info += " " + active.desc();
 			} else if (glyphHardened){
 				info += "\n\n" + Messages.get(Armor.class, "no_glyph_hardened");
 			}
@@ -665,7 +672,7 @@ public class Armor extends EquipableItem {
 			if(seal.glyph() == null) {
 				info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
 			} else {
-				if(seal.glyph() == activeGlyph() || seal.glyph() == extraGlyph()) {
+				if(seal.glyph() == active || seal.glyph() == extraGlyph()) {
 					info += "\n\n" + Messages.get(Armor.class, "seal_attached_active", seal.maxShield(tier, level()), seal.glyph().name());
 					info += " " + seal.glyph().desc();
 				} else {
@@ -896,7 +903,7 @@ public class Armor extends EquipableItem {
 	}
 	
 	public boolean displayGlyph() {
-		return activeGlyph() != null && (!hasCurseGlyph() || cursedKnown || (runic() && seal != null && seal.overwriteGlyph()));
+		return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown || (runic() && seal != null && seal.overwriteGlyph()));
 	}
 
 	@Override
