@@ -34,15 +34,13 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BlastingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DisintegrationTrap;
-import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ExplosiveTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.FlashingTrap;
-import com.shatteredpixel.shatteredpixeldungeon.levels.traps.FlockTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrippingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GuardianTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.PoisonDartTrap;
-import com.shatteredpixel.shatteredpixeldungeon.levels.traps.TeleportationTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WarpingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WornDartTrap;
@@ -169,11 +167,11 @@ public class TrapsRoom extends SpecialRoom {
 			//sewers
 			{WornDartTrap.class, GrippingTrap.class, WarpingTrap.class},
 			//prison
-			{PoisonDartTrap.class, GrippingTrap.class, ExplosiveTrap.class},
+			{PoisonDartTrap.class, GrippingTrap.class, BlastingTrap.class},
 			//caves
-			{DisintegrationTrap.class, FlashingTrap.class, WarpingTrap.class},
+			{DisintegrationTrap.class, GuardianTrap.class, WarpingTrap.class},
 			//city
-			{DisintegrationTrap.class, FlashingTrap.class, GuardianTrap.class},
+			{BlastingTrap.class, FlashingTrap.class, GuardianTrap.class},
 			//halls, muahahahaha
 			{GrimTrap.class}
 	};

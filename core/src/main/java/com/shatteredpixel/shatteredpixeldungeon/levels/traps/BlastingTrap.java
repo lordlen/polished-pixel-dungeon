@@ -25,18 +25,30 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 
-public class ExplosiveTrap extends Trap {
+public class BlastingTrap extends Trap {
 
 	{
 		color = ORANGE;
-		shape = DIAMOND;
+		shape = LARGE_DOT;
 	}
 	
 	@Override
 	public void activate() {
-		new Bomb().explode(pos);
+		new BlastingBomb().explode(pos);
 		if (reclaimed && !Dungeon.hero.isAlive()) {
 			Badges.validateDeathFromFriendlyMagic();
+		}
+	}
+	
+	static class BlastingBomb extends Bomb {
+		@Override
+		protected int explosionRange() {
+			return 2;
+		}
+		
+		@Override
+		protected int explosionDamage() {
+			return Math.round(super.explosionDamage() * 0.75f);
 		}
 	}
 
