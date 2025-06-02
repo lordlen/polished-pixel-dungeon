@@ -167,11 +167,11 @@ public class TrapsRoom extends SpecialRoom {
 			//sewers
 			{WornDartTrap.class, GrippingTrap.class, WarpingTrap.class},
 			//prison
-			{BlastingTrap.class},
+			{PoisonDartTrap.class, GrippingTrap.class, BlastingTrap.class},
 			//caves
 			{DisintegrationTrap.class, GuardianTrap.class, WarpingTrap.class},
 			//city
-			{BlastingTrap.class, FlashingTrap.class, GuardianTrap.class},
+			{GuardianTrap.class, FlashingTrap.class, BlastingTrap.class},
 			//halls, muahahahaha
 			{GrimTrap.class}
 	};
