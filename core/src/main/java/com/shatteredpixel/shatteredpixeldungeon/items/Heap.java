@@ -208,6 +208,22 @@ public class Heap implements Bundlable {
 		}
 	}
 	
+	public void Polished_destroyEquipables() {
+		if(type != Type.HEAP || isEmpty()) return;
+		
+		for (Item item : items.toArray( new Item[0] )) {
+			if (!item.unique && (item.isUpgradable() || item instanceof EquipableItem)) {
+				items.remove(item);
+			}
+		}
+		
+		if (isEmpty()){
+			destroy();
+		} else if (sprite != null) {
+			sprite.view(this).place( pos );
+		}
+	}
+	
 	public void burn() {
 
 		if (type != Type.HEAP) {

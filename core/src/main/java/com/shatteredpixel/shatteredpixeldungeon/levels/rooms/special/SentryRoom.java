@@ -43,10 +43,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.EmptyRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
@@ -229,7 +231,16 @@ public class SentryRoom extends SpecialRoom {
 		}
 		return true;
 	}
-
+	
+	public static void aquaBrew(int cell) {
+		if(Dungeon.level instanceof RegularLevel) {
+			RegularLevel level = (RegularLevel)Dungeon.level;
+			if(level.room(cell) instanceof SentryRoom) {
+				GameScene.Polished.blockInput(3f);
+				GLog.n(Messages.get(SentryRoom.class, "aqua_brew"));
+			}
+		}
+	}
 	public static class Sentry extends NPC {
 
 		{

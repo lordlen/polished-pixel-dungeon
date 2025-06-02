@@ -23,20 +23,52 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.watabou.utils.BArray;
+import com.watabou.utils.PathFinder;
 
-public class ExplosiveTrap extends Trap {
+public class BlastingTrap extends Trap {
 
 	{
 		color = ORANGE;
-		shape = DIAMOND;
+		shape = LARGE_DOT;
 	}
 	
 	@Override
 	public void activate() {
-		new Bomb().explode(pos);
+		destroyEquipables();
+		new BlastingBomb().explode(pos);
+		
 		if (reclaimed && !Dungeon.hero.isAlive()) {
 			Badges.validateDeathFromFriendlyMagic();
+		}
+	}
+	
+	private void destroyEquipables() {
+		boolean[] explodable = new boolean[Dungeon.level.length()];
+		BArray.not( Dungeon.level.solid, explodable);
+		BArray.or( Dungeon.level.flamable, explodable, explodable);
+		
+		PathFinder.buildDistanceMap( pos, explodable, 2 );
+		for (int i = 0; i < PathFinder.distance.length; i++) {
+			if (PathFinder.distance[i] != Integer.MAX_VALUE) {
+				
+				Heap heap = Dungeon.level.heaps.get(i);
+				if(heap != null) heap.Polished_destroyEquipables();
+			}
+		}
+	}
+	
+	static class BlastingBomb extends Bomb {
+		@Override
+		protected int explosionRange() {
+			return 2;
+		}
+		
+		@Override
+		protected int explosionDamage() {
+			return Math.round(super.explosionDamage() * 0.75f);
 		}
 	}
 
