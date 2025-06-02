@@ -1083,6 +1083,7 @@ public enum Talent {
 			}
 			talents.get(1).put(talent, 0);
 		}
+		Armor.cacheRunic(0);
 		tierTalents.clear();
 
 		//tier 3
@@ -1116,9 +1117,6 @@ public enum Talent {
 
 		//tier4
 		//TBD
-		
-		
-		Armor.cacheRunic(0);
 	}
 
 	public static void initSubclassTalents( Hero hero ){
@@ -1276,6 +1274,8 @@ public enum Talent {
 				}
 			}
 		}
+		
+		Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
 	}
 
 }
