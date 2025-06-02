@@ -35,7 +35,12 @@ public class BuffIcon extends Image {
 	private static final int LRG_SIZE = 16;
 
 	private final boolean large;
-
+	
+	public BuffIcon(){
+		super( Assets.Interfaces.BUFFS_SMALL );
+		this.large = false;
+	}
+	
 	public BuffIcon(Buff buff, boolean large){
 		super( large ? Assets.Interfaces.BUFFS_LARGE : Assets.Interfaces.BUFFS_SMALL );
 		this.large = large;

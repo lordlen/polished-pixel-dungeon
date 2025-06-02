@@ -41,8 +41,8 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.MobBuffDisplay;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
@@ -117,7 +117,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	
 	protected EmoIcon emo;
 	protected CharHealthIndicator health;
-	protected BuffIndicator buffs;
+	protected MobBuffDisplay buffs;
 
 	private Tweener jumpTweener;
 	private Callback jumpCallback;
@@ -163,8 +163,11 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				health.target(ch);
 			}
 
-			if(buffs == null || !buffs.alive) buffs = new BuffIndicator(ch, false);
-			buffs.Polished_target(ch);
+			if(buffs == null) {
+				buffs = new MobBuffDisplay(ch, health);
+			} else {
+				buffs.target(ch, health);
+			}
 		}
 
 		ch.updateSpriteState();
@@ -341,9 +344,11 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		
 		if (health != null){
 			health.killAndErase();
+			health = null;
 		}
 		if (buffs != null) {
 			buffs.killAndErase();
+			buffs = null;
 		}
 	}
 	
@@ -754,9 +759,11 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		
 		if (health != null){
 			health.killAndErase();
+			health = null;
 		}
 		if (buffs != null) {
 			buffs.killAndErase();
+			buffs = null;
 		}
 	}
 

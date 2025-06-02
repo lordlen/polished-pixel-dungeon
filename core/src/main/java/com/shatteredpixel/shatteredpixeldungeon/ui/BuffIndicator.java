@@ -163,7 +163,7 @@ public class BuffIndicator extends Component {
 		if (ch != null && ch.isAlive() && ch.isActive()) {
 			this.ch = ch;
 			Polished_followsChar = true;
-			GameScene.Polished.add(this);
+			//GameScene.Polished.add(this);
 		} else {
 			this.ch = null;
 			Polished_followsChar = false;
@@ -283,16 +283,19 @@ public class BuffIndicator extends Component {
 			if(Polished_followsChar) {
 				icon.icon.scale.set(PixelScene.align(0.6f));
 				icon.Polished_mini = true;
-			}
-			
-			icon.updateIcon();
-			if(Polished_followsChar) {
+				
+				icon.updateIcon();
 				icon.setRect(x + pos * (size + 1), y, size + 1, size + 1);
+				//disable touch
+				icon.hotArea = new PointerArea(0, 0, 0, 0);
+				//hotArea.destroy();
 			}
 			else {
+				icon.updateIcon();
 				//button areas are slightly oversized, especially on small buttons
 				icon.setRect(x + pos * (size + 1), y, size + 1, size + (large ? 0 : 5));
 			}
+			
 			PixelScene.align(icon);
 			pos++;
 
@@ -370,10 +373,7 @@ public class BuffIndicator extends Component {
 				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1);
 				
 				if(Polished_mini) {
-					//disable touch
-					hotArea = new PointerArea( 0, 0, 0, 0 ) {};
-					
-					float result = Buff.Polished_genericIconFade(buff);
+					float result = Buff.Polished.customIconFade(buff);
 					fadeHeight = result != -1 ? result : fadeHeight;
 				}
 				

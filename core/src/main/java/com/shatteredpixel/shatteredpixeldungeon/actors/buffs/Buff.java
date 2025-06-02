@@ -142,23 +142,6 @@ public class Buff extends Actor {
 		return Math.max(cooldown(), 0.01f);
 	}
 	
-	public static float Polished_genericIconFade(Buff buff) {
-		float fade = -1f;
-		
-		if(buff instanceof FlavourBuff) {
-			fade = GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
-		}
-		else {
-			try {
-				fade = GameMath.gate(0, (10f - Integer.parseInt(buff.iconTextDisplay())) / 10f, 1);
-			} catch (NumberFormatException e) {}
-		}
-		
-		//to avoid scaling problems
-		if(fade > .995f) fade = 1.05f;
-		return fade;
-	}
-
 	private static final String MNEMONIC_EXTENDED    = "mnemonic_extended";
 
 	@Override
@@ -195,6 +178,23 @@ public class Buff extends Actor {
 
 			T buff = prolong(target, buffClass, duration);
 			return buff;
+		}
+		
+		public static float customIconFade(Buff buff) {
+			float fade = -1f;
+			
+			if(buff instanceof FlavourBuff) {
+				fade = GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
+			}
+			else {
+				try {
+					fade = GameMath.gate(0, (10f - Integer.parseInt(buff.iconTextDisplay())) / 10f, 1);
+				} catch (NumberFormatException e) {}
+			}
+			
+			//to avoid scaling problems
+			if(fade > .995f) fade = 1.05f;
+			return fade;
 		}
 	}
 
