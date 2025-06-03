@@ -92,9 +92,9 @@ public class SacrificialFire extends Blob {
 
 						if (off[cell] > 0 && Dungeon.level.visited[cell]) {
 
-							if (Dungeon.level.mobCount() == 0
+							if (Dungeon.level.mobCount() <= 1
 									&& bonusSpawns > 0) {
-								if (Dungeon.level.spawnMob(4)) {
+								if (Dungeon.level.spawnMob(6)) {
 									bonusSpawns--;
 								}
 							}
