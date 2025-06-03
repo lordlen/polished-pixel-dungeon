@@ -172,8 +172,6 @@ public class MeleeWeapon extends Weapon {
 		Charger charger = Buff.affect(hero, Charger.class);
 		Buff.affect(hero, PolishedAbilityUseTracker.class);
 
-		// add tracker that ability
-
 		charger.partialCharge -= abilityChargeUse(hero, target);
 		while (charger.partialCharge < 0 && charger.charges > 0) {
 			charger.charges--;
