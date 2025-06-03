@@ -74,7 +74,7 @@ public class BrokenSeal extends Item {
 		if(Dungeon.hero == null) return false;
 		
 		if(Armor.runic == 0) {
-			return glyph != null;
+			return false;
 		}
 		else if(Armor.runic == 1)
 			return glyphChosen;
@@ -97,9 +97,6 @@ public class BrokenSeal extends Item {
 	public BrokenSeal inscribe( Armor.Glyph glyph ) {
 		if (glyph == null || !glyph.curse()) curseInfusionBonus = false;
 		this.glyph = glyph;
-
-		//so once we upgrade the talent, this gets chosen by default
-		if(Armor.runic == 0) glyphChosen = true;
 
 		if (glyph != null) {
 			Catalog.setSeen(glyph.getClass());
@@ -209,7 +206,7 @@ public class BrokenSeal extends Item {
 
 				if(Armor.runic == 1) {
 					String armorGlyph;
-					if(!arm.cursedKnown && (arm.glyph() == null || arm.hasCurseGlyph())) {
+					if(!arm.cursedKnown && (arm.glyph() == null || arm.glyph().curse())) {
 						armorGlyph = Messages.get(Stylus.class, "unknown");
 					}
 					else if(arm.glyph() != null) {

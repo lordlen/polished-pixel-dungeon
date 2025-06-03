@@ -63,15 +63,12 @@ public class StoneOfEnchantment extends InventoryStone {
 			Armor armor = (Armor)item;
 			BrokenSeal seal = armor.checkSeal();
 			
-			if(seal == null) {
-				armor.inscribe(true);
-			}
-			else if(Armor.runic == 0) {
-				seal.inscribe();
+			if(seal == null || Armor.runic == 0) {
+				armor.inscribe();
 			}
 			else {
 				String armorGlyph;
-				if(!armor.cursedKnown && (armor.glyph() == null || armor.hasCurseGlyph())) {
+				if(!armor.cursedKnown && (armor.glyph() == null || armor.glyph().curse())) {
 					armorGlyph = Messages.get(Stylus.class, "unknown");
 				}
 				else if(armor.glyph() != null) {
@@ -122,7 +119,6 @@ public class StoneOfEnchantment extends InventoryStone {
 		else if (item instanceof BrokenSeal) {
 			if (Armor.runic == 0) {
 				GLog.w(Messages.get(Stylus.class, "no_runic"));
-				
 				GameScene.selectItem(itemSelector);
 				return;
 			}

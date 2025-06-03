@@ -166,15 +166,12 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				Armor armor = (Armor)item;
 				BrokenSeal seal = armor.checkSeal();
 				
-				if(seal == null) {
+				if(seal == null || Armor.runic == 0) {
 					enchant(armor);
-				}
-				else if(Armor.runic == 0) {
-					enchant(seal);
 				}
 				else {
 					String armorGlyph;
-					if(!armor.cursedKnown && (armor.glyph() == null || armor.hasCurseGlyph())) {
+					if(!armor.cursedKnown && (armor.glyph() == null || armor.glyph().curse())) {
 						armorGlyph = Messages.get(Stylus.class, "unknown");
 					}
 					else if(armor.glyph() != null) {
@@ -318,7 +315,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		protected void onSelect(int index) {
 			if (index < 3) {
 				if(arm != null) {
-					arm.inscribe(glyphs[index]);
+					arm.inscribe(glyphs[index], Armor.runic != 0);
 					GLog.p(Messages.get(StoneOfEnchantment.class, "armor"));
 					Enchanting.show(curUser, arm);
 				}

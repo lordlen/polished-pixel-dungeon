@@ -588,10 +588,11 @@ public enum Talent {
 			Dungeon.hero.updateHT(false);
 		}
 		
-		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null){
+		//we have to cache every time in case we've just replaced it with talent via metamorph
+		Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
+		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null) {
+			if(Armor.runic == 1) BrokenSeal.armor.transfer();
 			BrokenSeal.armor.Polished_updateDefaultAction();
-			Armor.cacheRunic(hero.pointsInTalent(talent));
-			//if(hero.pointsInTalent(talent) == 1) BrokenSeal.armor.transfer();
 		}
 	}
 

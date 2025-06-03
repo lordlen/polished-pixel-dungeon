@@ -137,8 +137,9 @@ public class Armor extends EquipableItem {
 	private static final String GLYPH_HARDENED	= "glyph_hardened";
 	private static final String CURSE_INFUSION_BONUS = "curse_infusion_bonus";
 	private static final String MASTERY_POTION_BONUS = "mastery_potion_bonus";
-	private static final String SEAL            = "seal";
 	private static final String AUGMENT			= "augment";
+	private static final String SEAL            = "seal";
+	private static final String OLD_GLYPH		= "old_glyph";
 
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -149,8 +150,9 @@ public class Armor extends EquipableItem {
 		bundle.put( GLYPH_HARDENED, glyphHardened );
 		bundle.put( CURSE_INFUSION_BONUS, curseInfusionBonus );
 		bundle.put( MASTERY_POTION_BONUS, masteryPotionBonus );
-		bundle.put( SEAL, seal);
 		bundle.put( AUGMENT, augment);
+		bundle.put( SEAL, seal);
+		bundle.put( OLD_GLYPH, oldGlyph);
 	}
 
 	@Override
@@ -162,10 +164,10 @@ public class Armor extends EquipableItem {
 		glyphHardened = bundle.getBoolean(GLYPH_HARDENED);
 		curseInfusionBonus = bundle.getBoolean( CURSE_INFUSION_BONUS );
 		masteryPotionBonus = bundle.getBoolean( MASTERY_POTION_BONUS );
+		augment = bundle.getEnum(AUGMENT, Augment.class);
 		seal = (BrokenSeal)bundle.get(SEAL);
 		if(seal != null) seal.armor = this;
-		
-		augment = bundle.getEnum(AUGMENT, Augment.class);
+		oldGlyph = (Glyph) bundle.get(OLD_GLYPH);
 	}
 
 	@Override
@@ -291,6 +293,10 @@ public class Armor extends EquipableItem {
 		super.activate(ch);
 		if (seal != null) Buff.affect(ch, BrokenSeal.WarriorShield.class).setArmor(this);
 	}
+	
+	public BrokenSeal checkSeal(){
+		return seal;
+	}
 
 	public void affixSeal(BrokenSeal seal) {
 		this.seal = seal;
@@ -321,17 +327,15 @@ public class Armor extends EquipableItem {
 			level(trueLevel() - 1);
 		}
 		
-		if (Armor.runic == 0 && detaching.overwriteGlyph()){
-			inscribe(detaching.glyph(), true);
-			curseInfusionBonus = detaching.curseInfusionBonus;
-			detaching.inscribe(null);
+		if (Armor.runic == 0){
+			oldGlyph = null;
 		}
 		
 		if(operate) {
-			detaching.glyphChosen = false;
-			
 			GLog.i( Messages.get(Armor.class, "detach_seal") );
 			Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+			
+			detaching.glyphChosen = false;
 			if (!detaching.collect()){
 				Dungeon.level.drop(detaching, Dungeon.hero.pos);
 			}
@@ -352,22 +356,24 @@ public class Armor extends EquipableItem {
 		updateQuickslot();
 	}
 	
-	/*public void transfer() {
-		if (seal != null && seal.glyph() == null && seal.transfer) {
+	public void transfer() {
+		if (seal != null && oldGlyph != null) {
 			seal.inscribe(glyph());
 			seal.curseInfusionBonus = curseInfusionBonus;
 			seal.glyphChosen = true;
-			seal.transfer = false;
 			
-			inscribe(null);
+			curseInfusionBonus = false;
+			inscribe(oldGlyph instanceof SealTransfer ? null : oldGlyph, true);
+			oldGlyph = null;
 			
 			updateQuickslot();
 		}
-	}*/
-
-	public BrokenSeal checkSeal(){
-		return seal;
 	}
+	
+	private Glyph oldGlyph;
+	
+	//dummy glyph to let us know we should transfer
+	private static class SealTransfer extends Glyph { public int proc(Armor armor, Char attacker, Char defender, int damage) { return 0; } public ItemSprite.Glowing glowing() { return null; } }
 
 	@Override
 	public boolean doUnequip( Hero hero, boolean collect, boolean single ) {
@@ -643,7 +649,7 @@ public class Armor extends EquipableItem {
 		
 		Glyph active = activeGlyph();
 		
-		if(Armor.runic == 0 || seal == null) {
+		if(seal == null || Armor.runic == 0) {
 			if (HolyWard.HolyArmBuff.active(this)){
 				info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", Messages.get(HolyWard.class, "glyph_name", Messages.get(Glyph.class, "glyph"))));
 				info += " " + Messages.get(HolyWard.class, "glyph_desc");
@@ -791,8 +797,6 @@ public class Armor extends EquipableItem {
 	public void glyph(Glyph glyph) {
 		this.glyph = glyph;
 		if (glyph == null || !glyph.curse()) curseInfusionBonus = false;
-		
-		if(seal != null && glyph != null && glyph.curse()) seal.glyphChosen = false;
 	}
 	
 	public Glyph activeGlyph() {
@@ -827,10 +831,15 @@ public class Armor extends EquipableItem {
 	}
 	
 	public Armor inscribe( Glyph glyph, boolean force ) {
-		if (seal != null && !force
-			&& (seal.overwriteGlyph() || Armor.runic == 0)) {
-			seal.inscribe(glyph);
-			return this;
+		if (seal != null && !force) {
+			if (seal.overwriteGlyph()) {
+				seal.inscribe(glyph);
+				return this;
+			}
+			
+			else if(Armor.runic == 0) {
+				oldGlyph = this.glyph == null ? new SealTransfer() : this.glyph;
+			}
 		}
 		
 		this.glyph(glyph);
@@ -877,15 +886,6 @@ public class Armor extends EquipableItem {
 
 	public boolean hasCurseGlyph(){
 		return activeGlyph() != null && activeGlyph().curse();
-	}
-	
-	public boolean hasGoodGlyph(boolean seal){
-		if(seal) {
-			return this.seal != null && this.seal.glyph() != null && !this.seal.glyph().curse();
-		}
-		else {
-			return glyph() != null && !glyph().curse();
-		}
 	}
 	
 	public boolean hasCurseGlyph(boolean seal){

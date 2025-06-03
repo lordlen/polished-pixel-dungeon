@@ -104,7 +104,7 @@ public class Stylus extends Item {
 
 		GLog.w( Messages.get(this, "inscribed_armor"));
 
-		armor.inscribe(true);
+		armor.inscribe(Armor.runic != 0);
 		
 		curUser.sprite.operate(curUser.pos);
 		curUser.sprite.centerEmitter().start(PurpleParticle.BURST, 0.05f, 10);
@@ -166,16 +166,12 @@ public class Stylus extends Item {
 				Armor armor = (Armor)item;
 				BrokenSeal seal = armor.checkSeal();
 				
-				if(seal == null) {
+				if(seal == null || Armor.runic == 0) {
 					inscribe(armor);
-				}
-				else if(Armor.runic == 0) {
-					if (!armor.cursedKnown) GLog.w( Messages.get(this, "identify"));
-					else inscribe(seal);
 				}
 				else {
 					String armorGlyph;
-					if(!armor.cursedKnown && (armor.glyph() == null || armor.hasCurseGlyph())) {
+					if(!armor.cursedKnown && (armor.glyph() == null || armor.glyph().curse())) {
 						armorGlyph = Messages.get(Stylus.class, "unknown");
 					}
 					else if(armor.glyph() != null) {

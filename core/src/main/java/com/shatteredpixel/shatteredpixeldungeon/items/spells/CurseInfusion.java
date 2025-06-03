@@ -77,7 +77,7 @@ public class CurseInfusion extends InventorySpell {
 	private void curseEnchant(Armor a) {
 		//if we are freshly applying curse infusion, don't replace an existing curse
 		if (a.glyph() == null || !a.hasCurseGlyph(false) || a.curseInfusionBonus) {
-			a.inscribe(Armor.Glyph.randomCurse(a.armorGlyphClass(), a.sealGlyphClass()), true);
+			a.inscribe(Armor.Glyph.randomCurse(a.armorGlyphClass(), a.sealGlyphClass()), Armor.runic != 0);
 		}
 		a.cursed = true;
 		a.cursedKnown = true;
@@ -107,13 +107,8 @@ public class CurseInfusion extends InventorySpell {
 			Armor armor = (Armor)item;
 			BrokenSeal seal = armor.checkSeal();
 			
-			if(seal == null) {
+			if(seal == null || Armor.runic == 0) {
 				curseEnchant(armor);
-			}
-			else if(Armor.runic == 0) {
-				curseEnchant(seal);
-				armor.cursed = true;
-				armor.cursedKnown = true;
 			}
 			else {
 				String armorGlyph;
@@ -167,7 +162,6 @@ public class CurseInfusion extends InventorySpell {
 		else if (item instanceof BrokenSeal) {
 			if (Armor.runic == 0) {
 				GLog.w(Messages.get(Stylus.class, "no_runic"));
-				
 				GameScene.selectItem(itemSelector);
 				return;
 			}
