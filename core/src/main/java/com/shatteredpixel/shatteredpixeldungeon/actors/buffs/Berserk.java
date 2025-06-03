@@ -191,7 +191,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	public float enchantBoost(boolean glyph){
 		int points = ((Hero)target).pointsInTalent(Talent.ENRAGED_CATALYST);
-		float maxBoost = points * (glyph ? 0.5f : 0.2f);
+		float maxBoost = points * (glyph ? 0.4f : 0.2f);
 		
 		//scales at 15%-100%, caps at 15% hp
 		float min = .15f;

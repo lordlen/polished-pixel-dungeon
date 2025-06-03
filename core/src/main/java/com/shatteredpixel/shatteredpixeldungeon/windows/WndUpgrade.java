@@ -107,7 +107,7 @@ public class WndUpgrade extends Window {
 		}
 
 		boolean curseInfused = (toUpgrade instanceof Weapon && ((Weapon) toUpgrade).curseInfusionBonus)
-				|| (toUpgrade instanceof Armor && ((Armor) toUpgrade).curseInfusionBonus)
+				|| (toUpgrade instanceof Armor && ((Armor) toUpgrade).curseInfusion())
 				|| (toUpgrade instanceof Wand && ((Wand) toUpgrade).curseInfusionBonus);
 
 		if (curseInfused){
@@ -116,6 +116,7 @@ public class WndUpgrade extends Window {
 				levelTo++;
 			}
 		}
+		//we dont calculate double armor infusions because it would be a mess...
 
 		// *** Sprites, showing item at current level and with +1 ***
 
@@ -416,7 +417,7 @@ public class WndUpgrade extends Window {
 					upgraded = ((ScrollOfUpgrade) upgrader).upgradeItem(toUpgrade);
 					Sample.INSTANCE.play( Assets.Sounds.READ );
 				} else if (upgrader instanceof MagicalInfusion){
-					((MagicalInfusion) upgrader).useAnimation();
+					((MagicalInfusion) upgrader).onUse();
 					upgraded = ((MagicalInfusion) upgrader).upgradeItem(toUpgrade);
 				}
 

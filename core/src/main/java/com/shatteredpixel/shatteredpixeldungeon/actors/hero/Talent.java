@@ -582,7 +582,8 @@ public enum Talent {
 		}
 
 		if (talent == TWIN_UPGRADES || talent == DESPERATE_POWER
-				|| talent == STRONGMAN || talent == DURABLE_PROJECTILES){
+			|| talent == STRONGMAN || talent == DURABLE_PROJECTILES
+			|| talent == RUNIC_TRANSFERENCE) {
 			Item.updateQuickslot();
 		}
 
@@ -610,6 +611,13 @@ public enum Talent {
 		//if we happen to have spirit form applied with a ring of might
 		if (talent == SPIRIT_FORM){
 			Dungeon.hero.updateHT(false);
+		}
+		
+		//we have to cache every time in case we've just replaced it with talent via metamorph
+		Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
+		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null) {
+			if(Armor.runic == 1) BrokenSeal.armor.transfer();
+			BrokenSeal.armor.Polished_updateDefaultAction();
 		}
 	}
 
@@ -1101,6 +1109,7 @@ public enum Talent {
 			}
 			talents.get(1).put(talent, 0);
 		}
+		Armor.cacheRunic(0);
 		tierTalents.clear();
 
 		//tier 3
@@ -1291,6 +1300,8 @@ public enum Talent {
 				}
 			}
 		}
+		
+		Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
 	}
 
 }
