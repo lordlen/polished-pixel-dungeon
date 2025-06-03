@@ -22,6 +22,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Reflection;
 
@@ -36,7 +38,7 @@ public class Debug {
     public static final boolean DEBUG_MODE = DeviceCompat.isDebug();
 
 
-    private static final boolean DebuggingStats = false;
+    private static final boolean DebuggingStats = true;
     //                                                                  Debug  /  Default
     public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1f;
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1f;
@@ -58,7 +60,7 @@ public class Debug {
 
 
 
-        if(true && DebuggingStats) {
+        if(false && DebuggingStats) {
             Starting_Items.addAll(Arrays.asList(
                 PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class,
                 ScrollOfMagicMapping.class, PhaseShift.class, ScrollOfUpgrade.class,
@@ -147,7 +149,7 @@ public class Debug {
 
     private static void SetQuickslots() {
         List<Class<? extends Item>> quickslot = Arrays.asList(
-                ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class, StoneOfBlast.class
+                StoneOfBlast.class, ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class
         );
         
         ArrayList<Item> items = new ArrayList<>();
@@ -165,11 +167,20 @@ public class Debug {
             Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
             if(waterskin != null) waterskin.detachAll(Dungeon.hero.belongings.backpack);
             
-            int index = 1;
+            int index = 0;
             for(Item item : items) {
                 Dungeon.quickslot.setSlot(index, item);
                 index++;
             }
+        }
+        else if(DebuggingStats) {
+            Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
+            ThrowingStone stones = Dungeon.hero.belongings.getItem(ThrowingStone.class);
+            ThrowingKnife knives = Dungeon.hero.belongings.getItem(ThrowingKnife.class);
+            
+            Dungeon.quickslot.clearItem(waterskin);
+            Dungeon.quickslot.clearItem(stones);
+            Dungeon.quickslot.clearItem(knives);
         }
     }
 }
