@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -51,6 +52,7 @@ public abstract class ChampionEnemy extends Buff {
 	}
 
 	protected int color;
+	protected int rays;
 
 	@Override
 	public int icon() {
@@ -64,7 +66,7 @@ public abstract class ChampionEnemy extends Buff {
 
 	@Override
 	public void fx(boolean on) {
-		if (on) target.sprite.aura( color );
+		if (on) target.sprite.aura( color, rays );
 		else target.sprite.clearAura();
 	}
 
@@ -114,7 +116,9 @@ public abstract class ChampionEnemy extends Buff {
 
 		if (Dungeon.mobsToChampion <= 0 && Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES)) {
 			Buff.affect(m, buffCls);
-			m.state = m.WANDERING;
+			if (m.state != m.PASSIVE) {
+				m.state = m.WANDERING;
+			}
 		}
 	}
 
@@ -122,6 +126,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0xFF8800;
+			rays = 4;
 		}
 
 		@Override
@@ -158,6 +163,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0x8800FF;
+			rays = 4;
 		}
 
 		public class Polished {
@@ -254,6 +260,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0x00FF00;
+			rays = 5;
 		}
 
 		@Override
@@ -284,6 +291,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0x0088FF;
+			rays = 5;
 		}
 
 		@Override
@@ -318,6 +326,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0xFFFF00;
+			rays = 6;
 		}
 
 		//Check Char::hit()
@@ -335,7 +344,8 @@ public abstract class ChampionEnemy extends Buff {
 	public static class Growing extends ChampionEnemy {
 
 		{
-			color = 0xFF0000;
+			color = 0xFF2222; //a little white helps it stick out from background
+			rays = 6;
 		}
 
 		//POLISHED: base 19%->30%
