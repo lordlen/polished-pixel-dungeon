@@ -126,7 +126,7 @@ abstract public class ClassArmor extends Armor {
 		classArmor.augment = armor.augment;
 		if (armor.seal != null) {
 			int oldLvl = classArmor.trueLevel();
-			classArmor.affixSeal(armor.detachSeal(false));
+			classArmor.affixSeal(armor.detachSeal());
 			classArmor.level(oldLvl);
 		}
 		classArmor.inscribe(armor.glyph(), true);
@@ -262,12 +262,12 @@ abstract public class ClassArmor extends Armor {
 								
 								if (armor.seal != null) {
 									int oldLvl = trueLevel();
-									affixSeal(armor.detachSeal(false));
+									affixSeal(armor.detachSeal());
 									level(oldLvl);
 								} else if(seal != null) {
 									// simulate the process of detaching the seal manually
 									// and re-affixing it to the new armor
-									affixSeal(detachSeal(false));
+									affixSeal(detachSeal());
 								}
 								
 								inscribe(armor.glyph(), true);

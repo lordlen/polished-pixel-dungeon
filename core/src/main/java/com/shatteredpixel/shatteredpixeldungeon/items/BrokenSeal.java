@@ -31,11 +31,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -186,67 +188,6 @@ public class BrokenSeal extends Item {
 	public boolean isUpgradable() {
 		return level() == 0;
 	}
-	
-	//POLISHED MERGE FIX
-	//outgoing is either the seal itself as an item, or an armor the seal is affixed to
-	public void affixToArmor(Armor armor, Item outgoing){
-		if (armor != null) {
-			if (!armor.cursedKnown){
-				GLog.w(Messages.get(BrokenSeal.class, "unknown_armor"));
-				
-			} else if (armor.cursed && (getGlyph() == null || !getGlyph().curse())){
-				GLog.w(Messages.get(BrokenSeal.class, "cursed_armor"));
-				
-			}else if (armor.glyph != null && getGlyph() != null
-					&& canTransferGlyph()
-					&& armor.glyph.getClass() != getGlyph().getClass()) {
-				
-				GameScene.show(new WndOptions(new ItemSprite(ItemSpriteSheet.SEAL),
-						Messages.get(BrokenSeal.class, "choose_title"),
-						Messages.get(BrokenSeal.class, "choose_desc", armor.glyph.name(), getGlyph().name()),
-						armor.glyph.name(),
-						getGlyph().name()){
-					@Override
-					protected void onSelect(int index) {
-						if (index == -1) return;
-						
-						if (outgoing == BrokenSeal.this) {
-							detach(Dungeon.hero.belongings.backpack);
-						} else if (outgoing instanceof Armor){
-							((Armor) outgoing).detachSeal();
-						}
-						
-						if (index == 0) setGlyph(null);
-						//if index is 1, then the glyph transfer happens in affixSeal
-						
-						GLog.p(Messages.get(BrokenSeal.class, "affix"));
-						Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-						Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-						armor.affixSeal(BrokenSeal.this);
-					}
-					
-					@Override
-					public void hide() {
-						super.hide();
-						Dungeon.hero.next();
-					}
-				});
-				
-			} else {
-				if (outgoing == this) {
-					detach(Dungeon.hero.belongings.backpack);
-				} else if (outgoing instanceof Armor){
-					((Armor) outgoing).detachSeal();
-				}
-				
-				GLog.p(Messages.get(BrokenSeal.class, "affix"));
-				Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-				Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-				armor.affixSeal(this);
-				Dungeon.hero.next();
-			}
-		}
-	}
 
 	protected static WndBag.ItemSelector armorSelector = new WndBag.ItemSelector() {
 
@@ -294,22 +235,14 @@ public class BrokenSeal extends Item {
 						@Override
 						protected void onSelect(int index) {
 							seal.glyphChosen = index == 1;
-
-							GLog.p(Messages.get(BrokenSeal.class, "affix"));
-							Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-							Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-							arm.affixSeal(seal);
-							seal.detach(Dungeon.hero.belongings.backpack);
+							
+							arm.affixSeal(seal, true);
 						}
 					});
 				}
 
 				else {
-					GLog.p(Messages.get(BrokenSeal.class, "affix"));
-					Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-					arm.affixSeal(seal);
-					seal.detach(Dungeon.hero.belongings.backpack);
+					arm.affixSeal(seal, true);
 				}
 			}
 		}
@@ -353,7 +286,7 @@ public class BrokenSeal extends Item {
 		private int cooldown = 0;
 		private int turnsSinceEnemies = 0;
 
-		private static int COOLDOWN_START = 150;
+		private static final int COOLDOWN_START = 120;
 
 		@Override
 		public int icon() {
@@ -449,10 +382,6 @@ public class BrokenSeal extends Item {
 			cooldown = Math.max(cooldown, -COOLDOWN_START);
 		}
 
-		/*public synchronized void clearShield(){
-			decShield(shielding());
-		}*/
-
 		public synchronized void setArmor(Armor arm){
 			armor = arm;
 		}
@@ -468,6 +397,23 @@ public class BrokenSeal extends Item {
 			} else {
 				return 0;
 			}
+		}
+		
+		public synchronized void clearShield(){
+			decShield(shielding());
+		}
+		
+		public synchronized void berserkerRampage(float factor) {
+			int shield = Math.round(factor * maxShield());
+			incShield(shield);
+			target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING );
+			
+			float percentLeft = shielding() / (float)maxShield();
+			//max of 50% cooldown refund
+			cooldown = (int)(COOLDOWN_START - COOLDOWN_START * (percentLeft / 2f));
+			
+			//make sure it doesn't prematurely end
+			turnsSinceEnemies = -100;
 		}
 
 		public static final String COOLDOWN = "cooldown";
@@ -491,12 +437,6 @@ public class BrokenSeal extends Item {
 			} else if (shielding() > 0) {
 				turnsSinceEnemies = -100;
 			}
-		}
-		
-		//as a placeholder until Warrior rework merge
-		public synchronized int Polished_reworkShield() {
-			//POLISHED MERGE FIX
-			return -1;
 		}
 	}
 }

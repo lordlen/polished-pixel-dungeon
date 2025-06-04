@@ -56,11 +56,7 @@ public class HeavyBoomerang extends MissileWeapon {
 	protected float adjacentAccFactor(Char owner, Char target) {
 		if (circleBackhit){
 			circleBackhit = false;
-
-			if(Dungeon.level.adjacent(owner.pos, target.pos))
-				return 2.25f;
-			else
-				return 1.5f;
+			return 1.5f;
 		}
 		return super.adjacentAccFactor(owner, target);
 	}

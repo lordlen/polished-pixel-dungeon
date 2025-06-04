@@ -422,7 +422,7 @@ public class CustomNoteButton extends IconButton {
 					if (positive && !text.isEmpty()){
 						rec.editText(text, rec.desc());
 						if(parentWindow != null) parentWindow.hide();
-						ShatteredPixelDungeon.scene().addToFront(new CustomNoteWindow(rec));
+						ShatteredPixelDungeon.scene().addToFront(new CustomNoteWindow(rec, null));
 					}
 				}
 			});

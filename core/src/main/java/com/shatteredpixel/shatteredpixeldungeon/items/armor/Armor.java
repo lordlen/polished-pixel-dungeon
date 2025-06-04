@@ -293,9 +293,11 @@ public class Armor extends EquipableItem {
 					protected void onSelect(int index) {
 						super.onSelect(index);
 						if (index == 0){
-							oldSeal.affixToArmor(Armor.this, oldArmor);
-							updateQuickslot();
+							oldArmor.detachSeal();
+							Armor.this.affixSeal(oldSeal, true);
 						}
+						
+						hero.next();
 						super.hide();
 					}
 					@Override
@@ -326,8 +328,12 @@ public class Armor extends EquipableItem {
 	public BrokenSeal checkSeal(){
 		return seal;
 	}
-
+	
 	public void affixSeal(BrokenSeal seal) {
+		affixSeal(seal, false);
+	}
+	
+	public void affixSeal(BrokenSeal seal, boolean operate) {
 		this.seal = seal;
 		seal.armor = this;
 		
@@ -341,7 +347,20 @@ public class Armor extends EquipableItem {
 			Buff.affect(Dungeon.hero, BrokenSeal.WarriorShield.class).setArmor(this);
 		}
 		
+		if(operate) {
+			GLog.p(Messages.get(BrokenSeal.class, "affix"));
+			Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+			Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
+			
+			seal.detach(Dungeon.hero.belongings.backpack);
+		}
+		
 		Polished_updateDefaultAction();
+		updateQuickslot();
+	}
+	
+	public BrokenSeal detachSeal() {
+		return detachSeal(false);
 	}
 	
 	public BrokenSeal detachSeal(boolean operate) {
@@ -365,6 +384,7 @@ public class Armor extends EquipableItem {
 		if(operate) {
 			GLog.i( Messages.get(Armor.class, "detach_seal") );
 			Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+			Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
 			
 			detaching.glyphChosen = false;
 			if (!detaching.collect()){
@@ -384,6 +404,7 @@ public class Armor extends EquipableItem {
 		GLog.i( Messages.get(Armor.class, "swap_glyph") );
 		Dungeon.hero.sprite.operate(Dungeon.hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
+		
 		updateQuickslot();
 	}
 	

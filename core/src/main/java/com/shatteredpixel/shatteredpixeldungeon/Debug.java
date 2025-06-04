@@ -3,9 +3,11 @@ package com.shatteredpixel.shatteredpixeldungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
@@ -55,12 +57,12 @@ public class Debug {
     static {
         //Testing items
         Starting_Items = new ArrayList<>(Arrays.asList(
-        
+            MailArmor.class, MailArmor.class, MailArmor.class, Stylus.class
         ));
 
 
 
-        if(false && DebuggingStats) {
+        if(true && DebuggingStats) {
             Starting_Items.addAll(Arrays.asList(
                 PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class,
                 ScrollOfMagicMapping.class, PhaseShift.class, ScrollOfUpgrade.class,
