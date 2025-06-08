@@ -169,7 +169,7 @@ public class Debug {
             Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
             if(waterskin != null) waterskin.detachAll(Dungeon.hero.belongings.backpack);
             
-            int index = 0;
+            int index = 1;
             for(Item item : items) {
                 Dungeon.quickslot.setSlot(index, item);
                 index++;
