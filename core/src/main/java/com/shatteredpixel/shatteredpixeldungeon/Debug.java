@@ -42,8 +42,8 @@ public class Debug {
 
     private static final boolean DebuggingStats = false;
     //                                                                  Debug  /  Default
-    public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1f;
-    public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1f;
+    public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1;
+    public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1;
 
     public static final int Starting_Floor = DebuggingStats ?           11      : 1;
     public static final int Starting_HeroLevel = DebuggingStats ?       15      : 1;
