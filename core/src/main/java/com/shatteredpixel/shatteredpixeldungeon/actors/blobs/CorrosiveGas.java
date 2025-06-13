@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corrosion;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.utils.Bundle;
 
@@ -54,7 +56,8 @@ public class CorrosiveGas extends Blob {
 				for (int j = area.top; j < area.bottom; j++){
 					cell = i + j*Dungeon.level.width();
 					if (cur[cell] > 0 && (ch = Actor.findChar( cell )) != null) {
-						if (!ch.isImmune(this.getClass()))
+						if (!ch.isImmune(this.getClass())
+							&& (ch.buff(ChampionEnemy.AntiMagic.class) == null || source != WandOfCorrosion.class))
 							Buff.affect(ch, Corrosion.class).set(2f, strength, source);
 					}
 				}

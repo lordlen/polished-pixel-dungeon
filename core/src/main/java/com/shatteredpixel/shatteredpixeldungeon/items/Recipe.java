@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Blandfruit;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.ChargrilledMeat;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.HoneyedMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MeatPie;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.StewedMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -176,8 +178,6 @@ public abstract class Recipe {
 		new ExoticPotion.PotionToExotic(),
 		new ExoticScroll.ScrollToExotic(),
 		new ArcaneResin.Recipe(),
-		new BlizzardBrew.Recipe(),
-		new InfernalBrew.Recipe(),
 		new AquaBrew.Recipe(),
 		new ShockingBrew.Recipe(),
 		new ElixirOfDragonsBlood.Recipe(),
@@ -185,13 +185,14 @@ public abstract class Recipe {
 		new ElixirOfToxicEssence.Recipe(),
 		new ElixirOfMight.Recipe(),
 		new ElixirOfFeatherFall.Recipe(),
+		new Alchemize.Recipe(),
 		new MagicalInfusion.Recipe(),
 		new BeaconOfReturning.Recipe(),
 		new PhaseShift.Recipe(),
 		new Recycle.Recipe(),
 		new TelekineticGrab.Recipe(),
 		new SummonElemental.Recipe(),
-		new StewedMeat.oneMeat(),
+		new ChargrilledMeat.oneMeat(),
 		new TrinketCatalyst.Recipe(),
 		new Trinket.UpgradeTrinket()
 	};
@@ -205,16 +206,16 @@ public abstract class Recipe {
 		new ElixirOfAquaticRejuvenation.Recipe(),
 		new ElixirOfHoneyedHealing.Recipe(),
 		new UnstableSpell.Recipe(),
-		new Alchemize.Recipe(),
 		new CurseInfusion.Recipe(),
 		new ReclaimTrap.Recipe(),
 		new WildEnergy.Recipe(),
-		new StewedMeat.twoMeat()
+		new ChargrilledMeat.twoMeat(),
+		new HoneyedMeat.Recipe()
 	};
 	
 	private static Recipe[] threeIngredientRecipes = new Recipe[]{
 		new Potion.SeedToPotion(),
-		new StewedMeat.threeMeat(),
+		new ChargrilledMeat.threeMeat(),
 		new MeatPie.Recipe()
 	};
 	
@@ -254,7 +255,9 @@ public abstract class Recipe {
 	}
 	
 	public static boolean usableInRecipe(Item item){
-		if (item instanceof EquipableItem){
+		if(item instanceof WealthDrop) {
+			return false;
+		} else if (item instanceof EquipableItem){
 			//only thrown weapons and wands allowed among equipment items
 			return item.isIdentified() && !item.cursed && item instanceof MissileWeapon;
 		} else if (item instanceof Wand) {

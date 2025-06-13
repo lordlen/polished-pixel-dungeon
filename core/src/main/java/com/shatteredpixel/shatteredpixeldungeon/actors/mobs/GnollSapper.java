@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -206,12 +206,12 @@ public class GnollSapper extends Mob {
 						}
 
 						Dungeon.hero.interrupt();
-                        GameScene.Polished.blockInput(.5f);
+						GameScene.Polished.blockInput(.75f);
 						return true;
 					} else if (GnollGeomancer.prepRockFallAttack(enemy, GnollSapper.this, 2, true)) {
 						lastAbilityWasRockfall = true;
 						Dungeon.hero.interrupt();
-						GameScene.Polished.blockInput(.5f);
+						GameScene.Polished.blockInput(.75f);
 
 						spend(GameMath.gate(TICK, (int)Math.ceil(enemy.cooldown()), 3*TICK));
 						abilityCooldown = Random.NormalIntRange(4, 6);

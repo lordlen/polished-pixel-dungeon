@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,12 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -51,12 +56,25 @@ public class RightClickMenu extends Component {
 
 	public RightClickMenu(Item item){
 		ArrayList<String> actions = item.actions(Dungeon.hero);
+		
+		if (actions.remove(Item.AC_THROW)) {
+			actions.add(actions.size(), Item.AC_THROW);
+		}
+		if (actions.remove(Item.AC_DROP)) {
+			actions.add(actions.size(), Item.AC_DROP);
+		}
 		if (actions.remove(item.defaultAction())) {
 			actions.add(0, item.defaultAction());
 		}
+		
+		Notes.CustomRecord rec = Notes.findCustomRecord(item);
+		if(Polished.notesAction(item)) {
+			actions.add(0, rec == null ? Item.AC_NOTE : Item.AC_EDIT);
+		}
+		
 		String[] options = actions.toArray(new String[0]);
 		this.item = item;
-		setup(new ItemSprite(item), Messages.titleCase(item.name()), options);
+		setup(new ItemSprite(item), rec == null ? Messages.titleCase(item.name()) : rec.title(), options);
 	}
 
 	public RightClickMenu(Image icon, String title, String... options){
@@ -114,7 +132,7 @@ public class RightClickMenu extends Component {
 				}
 			};
 			if (item != null){
-				if (options[i].equals(item.defaultAction())) {
+				if (options[i].equals(item.defaultAction()) || options[i].equals(Item.AC_NOTE) || options[i].equals(Item.AC_EDIT)) {
 					buttons[i].textColor(Window.TITLE_COLOR);
 				}
 				buttons[i].text(item.actionName(options[i], Dungeon.hero));
@@ -156,7 +174,7 @@ public class RightClickMenu extends Component {
 		icon.x = x+bg.marginLeft();
 		icon.y = y+bg.marginTop();
 
-		titleText.setPos(icon.x+icon.width()+2, icon.y + (icon.height()- titleText.height())/2);
+		titleText.setPos(icon.x+icon.width()+2, Math.max(icon.y + (icon.height()- titleText.height())/2, y+bg.marginTop()));
 
 		separator.x = x+bg.marginLeft();
 		separator.y = Math.max(icon.y + icon.height(), titleText.bottom()) + 1;
@@ -171,4 +189,20 @@ public class RightClickMenu extends Component {
 		bg.size(width, height);
 
 	}
+	
+	public static class Polished {
+		public static boolean notesAction(Item item) {
+			return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
+		}
+		
+		public static boolean notesAction(Heap heap) {
+			return (validForNotes(heap) && notesAction(heap.peek()));
+		}
+		
+		public static boolean validForNotes(Heap heap) {
+			return  heap != null && heap.peek() != null
+					&& (heap.type == Heap.Type.HEAP || heap.type == Heap.Type.FOR_SALE);
+		}
+	}
+	
 }

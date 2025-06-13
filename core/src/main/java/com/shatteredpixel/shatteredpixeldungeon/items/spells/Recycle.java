@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.Elixir;
@@ -53,6 +54,8 @@ public class Recycle extends InventorySpell {
 
 	@Override
 	protected boolean usableOnItem(Item item) {
+		if(item instanceof WealthDrop) return false;
+
 		return (item instanceof Potion && !(item instanceof Elixir || item instanceof Brew)) ||
 				item instanceof Scroll ||
 				item instanceof Plant.Seed ||
@@ -62,6 +65,8 @@ public class Recycle extends InventorySpell {
 
 	@Override
 	protected void onItemSelected(Item item) {
+		onUse();
+		
 		Item result;
 		do {
 			if (item instanceof Potion) {

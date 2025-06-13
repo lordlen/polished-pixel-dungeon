@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,14 +49,15 @@ public class ShockingDart extends TippedDart {
 
 		//when processing charged shot, only shock enemies
 		if (!processingChargedShot || attacker.alignment != defender.alignment) {
-			defender.damage(Random.NormalIntRange(5 + Dungeon.scalingDepth() / 4, 10 + Dungeon.scalingDepth() / 4), new Electricity());
 
-			//3x3 AoE mini-stun
+			//3x3 AoE dmg + mini-stun
 			ArrayList<Lightning.Arc> arcs = new ArrayList<>();
 			for (int i : PathFinder.NEIGHBOURS9) {
 				Char ch = Actor.findChar(defender.pos + i);
 
 				if(ch != null) {
+					ch.damage(Random.NormalIntRange(5 + Dungeon.scalingDepth() / 4, 10 + Dungeon.scalingDepth() / 4), new Electricity());
+
 					//<1 turn stun
 					Buff.Polished.affectAligned(ch, Paralysis.class, 0.75f);
 					arcs.add(new Lightning.Arc(defender.sprite.center(), ch.sprite.center()));

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -34,8 +35,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Holy
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -48,6 +52,7 @@ public abstract class ChampionEnemy extends Buff {
 	}
 
 	protected int color;
+	protected int rays;
 
 	@Override
 	public int icon() {
@@ -61,7 +66,7 @@ public abstract class ChampionEnemy extends Buff {
 
 	@Override
 	public void fx(boolean on) {
-		if (on) target.sprite.aura( color );
+		if (on) target.sprite.aura( color, rays );
 		else target.sprite.clearAura();
 	}
 
@@ -111,7 +116,9 @@ public abstract class ChampionEnemy extends Buff {
 
 		if (Dungeon.mobsToChampion <= 0 && Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES)) {
 			Buff.affect(m, buffCls);
-			m.state = m.WANDERING;
+			if (m.state != m.PASSIVE) {
+				m.state = m.WANDERING;
+			}
 		}
 	}
 
@@ -119,6 +126,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0xFF8800;
+			rays = 4;
 		}
 
 		@Override
@@ -155,6 +163,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0x8800FF;
+			rays = 4;
 		}
 
 		public class Polished {
@@ -223,10 +232,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float meleeDamageFactor(boolean adjacent) {
-			if(!adjacent) {
-				polished.initCooldown();
-			}
-
+			polished.initCooldown();
 			return 1.25f;
 		}
 
@@ -254,6 +260,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0x00FF00;
+			rays = 5;
 		}
 
 		@Override
@@ -263,7 +270,6 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			immunities.addAll(com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic.RESISTS);
-			immunities.add(Corrosion.class);
 
 			immunities.remove(HolyBomb.HolyDamage.class);
 			immunities.remove(HolyDart.class);
@@ -285,6 +291,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0x0088FF;
+			rays = 5;
 		}
 
 		@Override
@@ -319,6 +326,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			color = 0xFFFF00;
+			rays = 6;
 		}
 
 		//Check Char::hit()
@@ -336,7 +344,8 @@ public abstract class ChampionEnemy extends Buff {
 	public static class Growing extends ChampionEnemy {
 
 		{
-			color = 0xFF0000;
+			color = 0xFF2222; //a little white helps it stick out from background
+			rays = 6;
 		}
 
 		//POLISHED: base 19%->30%
@@ -344,6 +353,40 @@ public abstract class ChampionEnemy extends Buff {
 
 		public boolean Polished_huntThreshold() {
 			return multiplier >= 2f;
+		}
+		
+		private boolean Polished_huntNoti = false;
+		public void Polished_growingHunt() {
+			if(target.buff(MagicalSleep.class) != null) {
+				Polished_huntNoti = false;
+				return;
+			}
+			
+			Mob mob = (Mob) target;
+			if(Polished_huntThreshold() && !Dungeon.hero.isStealthyTo(target) && !(mob.state == mob.FLEEING)) {
+				mob.aggro(Dungeon.hero);
+				mob.target=Dungeon.hero.pos;
+				
+				if(!Polished_huntNoti) {
+					GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
+					Polished_huntNoti = true;
+				}
+			}
+		}
+		
+		private boolean Polished_weakenNoti = false;
+		public void Polished_weaken(Mob src) {
+			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
+				//-10 turns
+				multiplier -= 0.04f;
+				multiplier = Math.max(multiplier, 1.3f + .00001f);
+				
+				Sample.INSTANCE.play(Assets.Sounds.BURNING);
+				if(!Polished_weakenNoti) {
+					GLog.p(Messages.get(ChampionEnemy.Growing.class, "weaken"));
+					Polished_weakenNoti = true;
+				}
+			}
 		}
 
 		@Override

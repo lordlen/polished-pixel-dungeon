@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,7 +158,7 @@ public class ItemSpriteSheet {
 		assignItemRect(ANKH,            10, 16);
 		assignItemRect(STYLUS,          12, 13);
 		
-		assignItemRect(SEAL,            9,  15);
+		assignItemRect(SEAL,            13, 13);
 		assignItemRect(TORCH,           12, 15);
 		assignItemRect(BEACON,          16, 15);
 		
@@ -174,7 +174,7 @@ public class ItemSpriteSheet {
 		assignItemRect(MASTERY,         13, 16);
 		assignItemRect(KIT,             16, 15);
 
-		assignItemRect(SEAL_SHARD,      11, 11);
+		assignItemRect(SEAL_SHARD,      12, 12);
 		assignItemRect(BROKEN_STAFF,    14, 10);
 		assignItemRect(CLOAK_SCRAP,      9,  9);
 		assignItemRect(BOW_FRAGMENT,    12,  9);
@@ -391,8 +391,6 @@ public class ItemSpriteSheet {
 		assignItemRect(ARMOR_CLERIC,    13, 14);
 	}
 
-	                                                                                    //16 free slots
-
 	private static final int WANDS              =                           xy(1, 14);  //16 slots
 	public static final int WAND_MAGIC_MISSILE  = WANDS+0;
 	public static final int WAND_FIREBOLT       = WANDS+1;
@@ -498,6 +496,7 @@ public class ItemSpriteSheet {
 	public static final int BLOOD_VIAL      = TRINKETS+12;
 	public static final int OBLIVION_SHARD  = TRINKETS+13;
 	public static final int CHAOTIC_CENSER  = TRINKETS+14;
+	public static final int FERRET_TUFT     = TRINKETS+15;
 	static{
 		assignItemRect(RAT_SKULL,       16, 11);
 		assignItemRect(PARCHMENT_SCRAP, 10, 14);
@@ -514,6 +513,7 @@ public class ItemSpriteSheet {
 		assignItemRect(BLOOD_VIAL,      6,  15);
 		assignItemRect(OBLIVION_SHARD,  7,  14);
 		assignItemRect(CHAOTIC_CENSER,  13, 15);
+		assignItemRect(FERRET_TUFT,     16, 15);
 	}
 
 	private static final int SCROLLS        =                               xy(1, 19);  //16 slots
@@ -796,7 +796,43 @@ public class ItemSpriteSheet {
 		assignItemRect(CITY_PAGE,   10, 11);
 		assignItemRect(HALLS_PAGE,  10, 11);
 	}
-
+	
+	// *** POLISHED ***
+	private static final int CURSED_ARTIS      	=                           xy(1, 35);  //16 slots
+	public static final int CURSED_ARMBAND     	= CURSED_ARTIS+0;
+	public static final int CURSED_TALISMAN     = CURSED_ARTIS+1;
+	public static final int CURSED_HOURGLASS    = CURSED_ARTIS+2;
+	public static final int CURSED_TOOLKIT     	= CURSED_ARTIS+3;
+	public static final int CURSED_SPELLBOOK    = CURSED_ARTIS+4;
+	public static final int CURSED_CHAINS     	= CURSED_ARTIS+5;
+	public static final int CURSED_HORN     	= CURSED_ARTIS+6;
+	public static final int CURSED_CHALICE     	= CURSED_ARTIS+7;
+	public static final int CURSED_SANDALS     	= CURSED_ARTIS+8;
+	public static final int CURSED_ROSE     	= CURSED_ARTIS+9;
+	static {
+		assignItemRect(CURSED_ARMBAND,    16, 13);
+		assignItemRect(CURSED_TALISMAN,   15, 13);
+		assignItemRect(CURSED_HOURGLASS,  13, 16);
+		assignItemRect(CURSED_TOOLKIT,    15, 13);
+		assignItemRect(CURSED_SPELLBOOK,  13, 16);
+		assignItemRect(CURSED_CHAINS,     16, 16);
+		assignItemRect(CURSED_HORN,       15, 15);
+		assignItemRect(CURSED_CHALICE,    12, 15);
+		assignItemRect(CURSED_SANDALS,    16, 6 );
+		assignItemRect(CURSED_ROSE,       14, 14);
+	}
+	
+	private static final int POLISHED_ITEMS		=                 			xy(1, 36);  //16 slots
+	public static final int MYSTERY_SCROLL  	= POLISHED_ITEMS+0;
+	public static final int MYSTERY_POTION  	= POLISHED_ITEMS+1;
+	public static final int HONEYED_MEAT    	= POLISHED_ITEMS+2;
+	static {
+		assignItemRect(MYSTERY_SCROLL , 15, 14);
+		assignItemRect(MYSTERY_POTION,  12, 14);
+		assignItemRect(HONEYED_MEAT,    15, 11);
+	}
+	
+	
 	//for smaller 8x8 icons that often accompany an item sprite
 	public static class Icons {
 

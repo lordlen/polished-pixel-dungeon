@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +22,23 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
 
 import java.util.ArrayList;
@@ -89,23 +94,46 @@ public class Stylus extends Item {
 		if (!armor.cursedKnown){
 			GLog.w( Messages.get(this, "identify"));
 			return;
-		} else if (armor.cursed || armor.hasCurseGlyph()){
-			GLog.w( Messages.get(this, "cursed"));
+		} else if (armor.cursed || armor.hasCurseGlyph(false)){
+			GLog.w( Messages.get(this, "cursed_armor"));
 			return;
 		}
 		
 		detach(curUser.belongings.backpack);
 		Catalog.countUse(getClass());
 
-		GLog.w( Messages.get(this, "inscribed"));
+		GLog.w( Messages.get(this, "inscribed_armor"));
 
-		armor.inscribe();
+		armor.inscribe(Armor.runic != 0);
 		
 		curUser.sprite.operate(curUser.pos);
 		curUser.sprite.centerEmitter().start(PurpleParticle.BURST, 0.05f, 10);
 		Enchanting.show(curUser, armor);
 		Sample.INSTANCE.play(Assets.Sounds.BURNING);
 		
+		curUser.spend(TIME_TO_INSCRIBE);
+		curUser.busy();
+	}
+
+	private void inscribe( BrokenSeal seal ) {
+		
+		if (seal.hasCurseGlyph()){
+			GLog.w( Messages.get(this, "cursed_seal"));
+			return;
+		}
+
+		detach(curUser.belongings.backpack);
+		Catalog.countUse(getClass());
+
+		GLog.w( Messages.get(this, "inscribed_seal"));
+
+		seal.inscribe();
+
+		curUser.sprite.operate(curUser.pos);
+		curUser.sprite.centerEmitter().start(PurpleParticle.BURST, 0.05f, 10);
+		Enchanting.show(curUser, seal);
+		Sample.INSTANCE.play(Assets.Sounds.BURNING);
+
 		curUser.spend(TIME_TO_INSCRIBE);
 		curUser.busy();
 	}
@@ -129,13 +157,55 @@ public class Stylus extends Item {
 
 		@Override
 		public boolean itemSelectable(Item item) {
-			return item instanceof Armor;
+			return item instanceof Armor || item instanceof BrokenSeal;
 		}
 
 		@Override
 		public void onSelect( Item item ) {
-			if (item != null) {
-				Stylus.this.inscribe( (Armor)item );
+			if(item instanceof Armor) {
+				Armor armor = (Armor)item;
+				BrokenSeal seal = armor.checkSeal();
+				
+				if(seal == null || Armor.runic == 0) {
+					inscribe(armor);
+				}
+				else {
+					String armorGlyph;
+					if(!armor.cursedKnown && (armor.glyph() == null || armor.glyph().curse())) {
+						armorGlyph = Messages.get(Stylus.class, "unknown");
+					}
+					else if(armor.glyph() != null) {
+						armorGlyph = armor.glyph().name();
+					}
+					else {
+						armorGlyph = Messages.get(Stylus.class, "none");
+					}
+					String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
+					
+					GameScene.show(new WndOptions(
+							new ItemSprite(Stylus.this),
+							Messages.titleCase(new Stylus().name()),
+							Messages.get(Stylus.class, "choose_desc"),
+							"Armor: " + armorGlyph,
+							"Seal: " + sealGlyph) {
+
+						@Override
+						protected void onSelect(int index) {
+							if(index == 0) 	inscribe(armor);
+							else 			inscribe(seal);
+
+							super.onSelect(index);
+						}
+					});
+				}
+			}
+			else if(item instanceof BrokenSeal) {
+				if (Armor.runic == 0) {
+					GLog.w(Messages.get(Stylus.this, "no_runic"));
+				}
+				else {
+					inscribe( (BrokenSeal) item );
+				}
 			}
 		}
 	};

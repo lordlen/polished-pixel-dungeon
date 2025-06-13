@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,6 +92,10 @@ public class UnstableSpell extends Spell {
 	
 	@Override
 	protected void onCast(Hero hero) {
+		if(Polished_wealthDrop != null) {
+			scrollChances.put(ScrollOfTransmutation.class, 0f);
+			scrollChances.put(ScrollOfLullaby.class, 0f);
+		}
 		
 		detach( curUser.belongings.backpack );
 		updateQuickslot();
@@ -116,6 +120,11 @@ public class UnstableSpell extends Spell {
 		Catalog.countUse(getClass());
 		if (Random.Float() < talentChance){
 			Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
+		}
+
+		if(Polished_wealthDrop != null) {
+			scrollChances.put(ScrollOfTransmutation.class, 0f);
+			scrollChances.put(ScrollOfLullaby.class, 0f);
 		}
 	}
 

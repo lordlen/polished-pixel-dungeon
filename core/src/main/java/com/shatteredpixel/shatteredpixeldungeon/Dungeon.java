@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,9 +82,9 @@ import com.watabou.noosa.Game;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Callback;
 import com.watabou.utils.FileUtils;
 import com.watabou.utils.PathFinder;
-import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 import com.watabou.utils.SparseArray;
 
@@ -101,7 +101,9 @@ public class Dungeon {
 
 	public static class Polished {
 		public static final int DEFAULT_VIEW_DISTANCE = 8;
-
+		public static boolean loading = false;
+		static Callback afterLoad = () -> {};
+		
 		private static void updateNearbyTiles(boolean[] extendedHeroFOV, int pos) {
 			for (int i = 0; i < 3; i++) {
 				int offset = pos + level.pointToCell(-1, -1+i);
@@ -112,7 +114,7 @@ public class Dungeon {
 			for (int i = 0; i < 5; i++) {
 				int offset = pos + level.pointToCell(-2, -2+i);
 
-				BArray.or( level.traversable, extendedHeroFOV, offset, 5, level.traversable );
+				if(offset <= level.length() - 5) BArray.or( level.traversable, extendedHeroFOV, offset, 5, level.traversable );
 			}
 
 			if(Dungeon.hero.pointsInTalent(Talent.ROGUES_EXPERTISE) >= 2) {
@@ -121,6 +123,55 @@ public class Dungeon {
 				}
 			}
 		}
+		
+		public static void runDelayed(Callback callback) {
+			Actor.add(new Actor() {
+				{
+					actPriority = VFX_PRIO;
+				}
+				
+				@Override
+				protected boolean act() {
+					callback.call();
+					
+					Actor.remove(this);
+					return true;
+				}
+			});
+		}
+		
+		public static void runAfterLoad(Callback callback) {
+			if(!loading) {
+				callback.call();
+				return;
+			}
+			
+			Callback current = afterLoad;
+			afterLoad = () -> {
+				current.call();
+				callback.call();
+			};
+		}
+    
+		public static void replaceLevel( int depth, int branch, Level replacement ) {
+			try {
+				Bundle bundle = new Bundle();
+				bundle.put( LEVEL, replacement );
+	
+				FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
+			} catch (IOException e) { return; }
+		}
+		
+		public static Level getLevel(int depth, int branch) {
+			Level level;
+			try {
+				Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ));
+				level = (Level)bundle.get( LEVEL );
+			} catch (Exception e) { level = null; }
+	
+			return level;
+		}
+  
 	}
 
 	//enum of items which have limited spawns, records how many have spawned
@@ -134,6 +185,14 @@ public class Dungeon {
 		INT_STONE,
 		TRINKET_CATA,
 		LAB_ROOM, //actually a room, but logic is the same
+
+		//Food sources
+		CRAB_MEAT,
+		ALBINO_MEAT,
+		//Piranhas are already limited (except multiplicity, but that's niche anyway)
+		SPINNER_MEAT,
+		MONK_RATION,
+		SENIOR_PASTY,
 
 		//Health potion sources
 		//enemies
@@ -294,6 +353,7 @@ public class Dungeon {
 		droppedItems = new SparseArray<>();
 
 		LimitedDrops.reset();
+		FoundItems.reset();
 		
 		chapters = new HashSet<>();
 		
@@ -635,6 +695,7 @@ public class Dungeon {
 	private static final String PORTED      = "ported%d";
 	private static final String LEVEL		= "level";
 	private static final String LIMDROPS    = "limited_drops";
+	private static final String FOUND_ITEMS = "found_items";
 	private static final String CHAPTERS	= "chapters";
 	private static final String QUESTS		= "quests";
 	private static final String BADGES		= "badges";
@@ -668,6 +729,10 @@ public class Dungeon {
 			Bundle limDrops = new Bundle();
 			LimitedDrops.store( limDrops );
 			bundle.put ( LIMDROPS, limDrops );
+
+			Bundle foundItems = new Bundle();
+			FoundItems.store( foundItems );
+			bundle.put ( FOUND_ITEMS, foundItems );
 			
 			int count = 0;
 			int ids[] = new int[chapters.size()];
@@ -739,6 +804,7 @@ public class Dungeon {
 	}
 	
 	public static void loadGame( int save, boolean fullLoad ) throws IOException {
+		Polished.loading = true;
 		
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.gameFile( save ) );
 
@@ -772,6 +838,7 @@ public class Dungeon {
 		if (fullLoad) {
 			
 			LimitedDrops.restore( bundle.getBundle(LIMDROPS) );
+			FoundItems.restore( bundle.getBundle(FOUND_ITEMS) );
 
 			chapters = new HashSet<>();
 			int ids[] = bundle.getIntArray( CHAPTERS );
@@ -839,6 +906,10 @@ public class Dungeon {
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
 
+
+		Polished.afterLoad.call();
+		Polished.afterLoad = () -> {};
+		Polished.loading = false;
 
 		Debug.LoadGame();
 	}
@@ -909,7 +980,7 @@ public class Dungeon {
 
 	public static void updateLevelExplored(){
 		if (branch == 0 && level instanceof RegularLevel && !Dungeon.bossLevel()){
-			Statistics.floorsExplored.put( depth, level.isLevelExplored(depth));
+			Statistics.floorsExplored.put( depth, level.levelExplorePercent(depth));
 		}
 	}
 
@@ -948,10 +1019,10 @@ public class Dungeon {
 		int pos = l + t * level.width();
 
 		//POLISHED
-		int l_e = Math.max( 0, x - dist-1 );
-		int r_e = Math.min( x + dist+1, level.width() - 1 );
-		int t_e = Math.max( 0, y - dist-1 );
-		int b_e = Math.min( y + dist+1, level.height() - 1 );
+		int l_e = Math.max( 0, l-1 );
+		int r_e = Math.min( r+1, level.width() - 1 );
+		int t_e = Math.max( 0, t-1 );
+		int b_e = Math.min( b+1, level.height() - 1 );
 
 		int width_e = r_e - l_e + 1;
 		int height_e = b_e - t_e + 1;

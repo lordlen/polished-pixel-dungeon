@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,11 @@ public class EtherealChains extends Artifact {
 	}
 
 	@Override
+	public int image() {
+		return cursed && cursedKnown ? ItemSpriteSheet.CURSED_CHAINS : image;
+	}
+
+	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions( hero );
 		if (isEquipped(hero) && charge > 0 && !cursed && hero.buff(MagicImmune.class) == null) {
@@ -123,6 +128,11 @@ public class EtherealChains extends Artifact {
 	public void resetForTrinity(int visibleLevel) {
 		super.resetForTrinity(visibleLevel);
 		charge = 5+(level()*2); //sets charge to soft cap
+	}
+
+	@Override
+	public void Polished_maxCharge() {
+		charge = 5+(level()*2);
 	}
 
 	public CellSelector.Listener caster = new CellSelector.Listener(){
@@ -199,7 +209,7 @@ public class EtherealChains extends Artifact {
 				Actor.add(new Pushing(enemy, enemy.pos, pulledPos, new Callback() {
 					public void call() {
 						enemy.pos = pulledPos;
-            Buff.Polished.affectAligned(enemy, Cripple.class, baseCripple + 3*chargeUse);
+						Buff.Polished.affectAligned(enemy, Cripple.class, baseCripple + 3*chargeUse);
 
 						charge -= chargeUse;
 						Invisibility.dispel(hero);
@@ -329,8 +339,8 @@ public class EtherealChains extends Artifact {
 					&& !cursed
 					&& target.buff(MagicImmune.class) == null
 					&& Regeneration.regenOn()) {
-				//gains a charge in 40 - 2*missingCharge turns
-				float chargeGain = (1 / (40f - (chargeTarget - charge)*2f));
+				//gains a charge in 50 - 2*missingCharge turns
+				float chargeGain = (1 / (50f - (chargeTarget - charge)*2f));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 				partialCharge += chargeGain;
 			} else if (cursed && Random.Int(100) == 0){

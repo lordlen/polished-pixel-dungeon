@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ public class PotionOfPurity extends Potion {
 	@Override
 	public void apply( Hero hero ) {
 		GLog.w( Messages.get(this, "protected") );
-		Buff.prolong( hero, BlobImmunity.class, BlobImmunity.DURATION );
+		Buff.prolong( hero, BlobImmunity.class, 3*BlobImmunity.DURATION );
 		SpellSprite.show(hero, SpellSprite.PURITY);
 		identify();
 	}

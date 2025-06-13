@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,13 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.GoldenKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLevitation;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -66,6 +69,8 @@ public class SecretChestChasmRoom extends SecretRoom {
 		Painter.set(level, p, Terrain.EMPTY_SP);
 		level.drop(Generator.randomUsingDefaults(), level.pointToCell(p)).type = Heap.Type.LOCKED_CHEST;
 		if (level.heaps.get(level.pointToCell(p)) != null) chests++;
+
+		Blob.seed( level.pointToCell(p), 1, SecretChasmID.class, level );
 		
 		p.x = right-3;
 		Painter.set(level, p, Terrain.EMPTY_SP);
@@ -113,5 +118,12 @@ public class SecretChestChasmRoom extends SecretRoom {
 		level.addItemToSpawn(new PotionOfLevitation());
 		
 		entrance().set(Door.Type.HIDDEN);
+	}
+
+	public static class SecretChasmID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.CHASM_ROOM_SECRET;
+		}
 	}
 }

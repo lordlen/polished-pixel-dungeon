@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ public class RoundShield extends MeleeWeapon {
 
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
-		RoundShield.guardAbility(hero, 5+buffedLvl(), this);
+		RoundShield.guardAbility(hero, 2 * (5+buffedLvl()),3 + buffedLvl(), this);
 	}
 
 	@Override
@@ -90,9 +90,11 @@ public class RoundShield extends MeleeWeapon {
 		return Integer.toString(5 + level);
 	}
 
-	public static void guardAbility(Hero hero, int duration, MeleeWeapon wep){
+	public static void guardAbility(Hero hero, int duration, int totalBlock, MeleeWeapon wep){
 		wep.beforeAbilityUsed(hero, null);
-		Buff.prolong(hero, GuardTracker.class, duration).hasBlocked = false;
+		GuardTracker guardTracker = Buff.affect(hero, GuardTracker.class, duration);
+		guardTracker.initialDuration = guardTracker.cooldown();
+		guardTracker.blockLeft = totalBlock;
 		hero.sprite.operate(hero.pos);
 		hero.spendAndNext(Actor.TICK);
 		wep.afterAbilityUsed(hero);
@@ -103,9 +105,17 @@ public class RoundShield extends MeleeWeapon {
 		{
 			announced = true;
 			type = buffType.POSITIVE;
+			actPriority = HERO_PRIO+1;
 		}
 
 		public boolean hasBlocked = false;
+		public int blockLeft = 0;
+		float initialDuration = 0f;
+
+		@Override
+		public String desc() {
+			return Messages.get(this, "desc", visualcooldown(), blockLeft);
+		}
 
 		@Override
 		public int icon() {
@@ -114,7 +124,9 @@ public class RoundShield extends MeleeWeapon {
 
 		@Override
 		public void tintIcon(Image icon) {
-			if (hasBlocked){
+			if(blockLeft == 1) {
+				icon.hardlight(1f, 0f, 0f);
+			} else if (hasBlocked){
 				icon.tint(0x651f66, 0.5f);
 			} else {
 				icon.resetColor();
@@ -123,21 +135,24 @@ public class RoundShield extends MeleeWeapon {
 
 		@Override
 		public float iconFadePercent() {
-			return Math.max(0, (5 - visualcooldown()) / 5);
+			return Math.max(0, (initialDuration - cooldown()) / initialDuration);
 		}
 
 		private static final String BLOCKED = "blocked";
+		private static final String BLOCK_LEFT = "blockLeft";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
 			bundle.put(BLOCKED, hasBlocked);
+			bundle.put(BLOCK_LEFT, blockLeft);
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 			hasBlocked = bundle.getBoolean(BLOCKED);
+			blockLeft = bundle.getInt(BLOCK_LEFT);
 		}
 	}
 }

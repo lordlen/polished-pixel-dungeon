@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.RainbowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ToxicParticle;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
@@ -73,6 +74,9 @@ public class MagicMissile extends Emitter {
 	public static final int ELMO            = 14;
 	public static final int POISON          = 15;
 	public static final int LIGHT_MISSILE   = 16;
+
+	//POLISHED
+	public static final int TOXIC       	= 31;
 
 	public static final int MAGIC_MISS_CONE = 100;
 	public static final int FROST_CONE      = 101;
@@ -201,6 +205,11 @@ public class MagicMissile extends Emitter {
 			case LIGHT_MISSILE:
 				size( 4 );
 				pour( WhiteParticle.YELLOW, 0.01f );
+				break;
+
+			case TOXIC:
+				size( 3 );
+				pour( ToxicParticle.MISSILE, 0.03f );
 				break;
 
 			case MAGIC_MISS_CONE:

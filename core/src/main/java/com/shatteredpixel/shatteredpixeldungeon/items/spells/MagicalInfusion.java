@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,29 +67,15 @@ public class MagicalInfusion extends InventorySpell {
 		curItem = this;
 		GameScene.selectItem(itemSelector);
 	}
-
-	public void useAnimation(){
-		curUser.spend(1f);
-		curUser.busy();
-		(curUser.sprite).operate(curUser.pos);
-
-		Sample.INSTANCE.play(Assets.Sounds.READ);
-		Invisibility.dispel();
-
-		Catalog.countUse(curItem.getClass());
-		if (Random.Float() < ((Spell) curItem).talentChance) {
-			Talent.onScrollUsed(curUser, curUser.pos, ((Spell) curItem).talentFactor, getClass());
-		}
-	}
-
+	
 	public Item upgradeItem( Item item ){
 		ScrollOfUpgrade.upgrade(curUser);
 
 		Degrade.detach( curUser, Degrade.class );
 
-		if (item instanceof Weapon && ((Weapon) item).enchantment != null) {
+		if (item instanceof Weapon) {
 			item = ((Weapon) item).upgrade(true);
-		} else if (item instanceof Armor && ((Armor) item).glyph != null) {
+		} else if (item instanceof Armor) {
 			item = ((Armor) item).upgrade(true);
 		} else {
 			boolean wasCursed = item.cursed;

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,18 +21,24 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.stones;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 
 public class StoneOfEnchantment extends InventoryStone {
 	
@@ -50,33 +56,100 @@ public class StoneOfEnchantment extends InventoryStone {
 	
 	@Override
 	protected void onItemSelected(Item item) {
+		if (item instanceof Weapon) {
+			( (Weapon) item ).enchant();
+		}
+		else if (item instanceof Armor) {
+			Armor armor = (Armor)item;
+			BrokenSeal seal = armor.checkSeal();
+			
+			if(seal == null || Armor.runic == 0) {
+				armor.inscribe();
+			}
+			else {
+				String armorGlyph;
+				if(!armor.cursedKnown && (armor.glyph() == null || armor.glyph().curse())) {
+					armorGlyph = Messages.get(Stylus.class, "unknown");
+				}
+				else if(armor.glyph() != null) {
+					armorGlyph = armor.glyph().name();
+				}
+				else {
+					armorGlyph = Messages.get(Stylus.class, "none");
+				}
+				String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
+				
+				GameScene.show(new WndOptions(
+						new ItemSprite(StoneOfEnchantment.this),
+						Messages.titleCase(new StoneOfEnchantment().name()),
+						Messages.get(Stylus.class, "choose_desc"),
+						"Armor: " + armorGlyph,
+						"Seal: " + sealGlyph) {
+					
+					@Override
+					protected void onSelect(int index) {
+						if (!anonymous) {
+							curItem.detach(curUser.belongings.backpack);
+							Catalog.countUse(StoneOfEnchantment.class);
+							Talent.onRunestoneUsed(curUser, curUser.pos, StoneOfEnchantment.class);
+						}
+						
+						if(index == 0) {
+							armor.inscribe(true);
+							doAnimation(armor);
+						}
+						else {
+							seal.inscribe();
+							doAnimation(seal);
+						}
+						
+						super.onSelect(index);
+					}
+					
+					@Override
+					public void onBackPressed() {
+						super.onBackPressed();
+						GameScene.selectItem(itemSelector);
+					}
+				});
+				
+				return;
+			}
+		}
+		else if (item instanceof BrokenSeal) {
+			if (Armor.runic == 0) {
+				GLog.w(Messages.get(Stylus.class, "no_runic"));
+				GameScene.selectItem(itemSelector);
+				return;
+			}
+			else {
+				( (BrokenSeal) item ).inscribe();
+			}
+		}
+		
 		if (!anonymous) {
 			curItem.detach(curUser.belongings.backpack);
 			Catalog.countUse(getClass());
 			Talent.onRunestoneUsed(curUser, curUser.pos, getClass());
 		}
 		
-		if (item instanceof Weapon) {
-			
-			((Weapon)item).enchant();
-			
-		} else {
-			
-			((Armor)item).inscribe();
-			
-		}
+		doAnimation(item);
 		
+	}
+	
+	private void doAnimation(Item item) {
 		curUser.sprite.emitter().start( Speck.factory( Speck.LIGHT ), 0.1f, 5 );
 		Enchanting.show( curUser, item );
 		
 		if (item instanceof Weapon) {
 			GLog.p(Messages.get(this, "weapon"));
-		} else {
+		} else if(item instanceof Armor) {
 			GLog.p(Messages.get(this, "armor"));
+		} else if(item instanceof BrokenSeal) {
+			GLog.p(Messages.get(this, "seal"));
 		}
 		
 		useAnimation();
-		
 	}
 	
 	@Override

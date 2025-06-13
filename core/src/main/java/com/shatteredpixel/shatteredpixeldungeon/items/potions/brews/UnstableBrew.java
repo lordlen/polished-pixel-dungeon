@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,6 +85,9 @@ public class UnstableBrew extends Brew {
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 0f);
 		}
+		if(Polished_wealthDrop != null) {
+			potionChances.put(PotionOfExperience.class, 0f);
+		}
 
 		Potion p = Reflection.newInstance(Random.chances(potionChances));
 
@@ -98,6 +101,9 @@ public class UnstableBrew extends Brew {
 
 		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
 			potionChances.put(PotionOfHealing.class, 3f);
+		}
+		if(Polished_wealthDrop != null) {
+			potionChances.put(PotionOfExperience.class, 1f);
 		}
 	}
 	

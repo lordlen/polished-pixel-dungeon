@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,8 +157,8 @@ public class Trinity extends ArmorAbility {
 						@Override
 						protected void onClick() {
 							if (Dungeon.hero.belongings.armor() != null &&
-									Dungeon.hero.belongings.armor().glyph != null &&
-									(Dungeon.hero.belongings.armor()).glyph.getClass().equals(bodyForm.getClass())){
+									Dungeon.hero.belongings.armor().activeGlyph() != null &&
+									(Dungeon.hero.belongings.armor()).activeGlyph().getClass().equals(bodyForm.getClass())){
 								GLog.w(Messages.get(Trinity.class, "no_duplicate"));
 								hide();
 							} else {
@@ -359,18 +359,32 @@ public class Trinity extends ArmorAbility {
 			ArrayList<Item> options = new ArrayList<>();
 			for (Class<?> cls : discoveredClasses){
 				if (Weapon.Enchantment.class.isAssignableFrom(cls)){
-					MeleeWeapon w = new WornShortsword();
+					MeleeWeapon w = new WornShortsword(){
+						@Override
+						public String name() {
+							//for button tooltips
+							return enchantment.name();
+						}
+					};
 					if (Dungeon.hero.belongings.weapon() != null){
 						w.image = Dungeon.hero.belongings.weapon().image;
 					}
 					w.enchant((Weapon.Enchantment) Reflection.newInstance(cls));
+					w.cursedKnown = true;
 					options.add(w);
 				} else if (Armor.Glyph.class.isAssignableFrom(cls)) {
-					Armor a = new ClothArmor();
+					Armor a = new ClothArmor(){
+						@Override
+						public String name() {
+							//for button tooltips
+							return glyph.name();
+						}
+					};
 					if (Dungeon.hero.belongings.armor() != null){
 						a.image = Dungeon.hero.belongings.armor().image;
 					}
 					a.inscribe((Armor.Glyph) Reflection.newInstance(cls));
+					a.cursedKnown = true;
 					options.add(a);
 				} else {
 					options.add((Item) Reflection.newInstance(cls));
@@ -433,7 +447,7 @@ public class Trinity extends ArmorAbility {
 					if (item instanceof MeleeWeapon) {
 						((Trinity)Dungeon.hero.armorAbility).bodyForm = ((MeleeWeapon) item).enchantment;
 					} else if (item instanceof Armor) {
-						((Trinity)Dungeon.hero.armorAbility).bodyForm = ((Armor) item).glyph;
+						((Trinity)Dungeon.hero.armorAbility).bodyForm = ((Armor) item).activeGlyph();
 					} else if (item instanceof Wand || item instanceof MissileWeapon){
 						((Trinity)Dungeon.hero.armorAbility).mindForm = item;
 					} else {
@@ -457,7 +471,7 @@ public class Trinity extends ArmorAbility {
 			if (item instanceof MeleeWeapon){
 				return ((MeleeWeapon) item).enchantment.name();
 			} else if (item instanceof Armor){
-				return (((Armor) item).glyph.name());
+				return (((Armor) item).activeGlyph().name());
 			}
 			return item.name();
 		}
@@ -466,7 +480,7 @@ public class Trinity extends ArmorAbility {
 			if (item instanceof MeleeWeapon){
 				return ((MeleeWeapon) item).enchantment.desc() + "\n\n" + trinityItemUseText(((MeleeWeapon) item).enchantment.getClass());
 			} else if (item instanceof Armor){
-				return ((Armor) item).glyph.desc() + "\n\n" + trinityItemUseText(((Armor) item).glyph.getClass());
+				return ((Armor) item).activeGlyph().desc() + "\n\n" + trinityItemUseText(((Armor) item).glyph().getClass());
 			} else {
 				return item.desc() + "\n\n" + trinityItemUseText(item.getClass());
 			}

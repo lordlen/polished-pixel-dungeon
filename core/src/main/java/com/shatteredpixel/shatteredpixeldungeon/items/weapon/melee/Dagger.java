@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Camouflaged;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -90,7 +91,7 @@ public class Dagger extends MeleeWeapon {
 
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
-		sneakAbility(hero, target, 5, 2+buffedLvl(), this);
+		sneakAbility(hero, target, 2, 2+buffedLvl(), this);
 	}
 
 	@Override
@@ -107,7 +108,7 @@ public class Dagger extends MeleeWeapon {
 		return Integer.toString(2+level);
 	}
 
-	public static void sneakAbility(Hero hero, Integer target, int maxDist, int invisTurns, MeleeWeapon wep){
+	public static void sneakAbility(Hero hero, Integer target, int maxDist, int camoTurns, MeleeWeapon wep){
 		if (target == null) {
 			return;
 		}
@@ -125,7 +126,7 @@ public class Dagger extends MeleeWeapon {
 		}
 
 		wep.beforeAbilityUsed(hero, null);
-		Buff.affect(hero, Invisibility.class, invisTurns-1); //1 fewer turns as ability is instant
+		Buff.prolong(hero, Camouflaged.class, camoTurns);
 
 		Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, target);
 		Dungeon.hero.pos = target;
@@ -133,6 +134,7 @@ public class Dagger extends MeleeWeapon {
 		Dungeon.observe();
 		GameScene.updateFog();
 		Dungeon.hero.checkVisibleMobs();
+		Dungeon.hero.spend(1);
 
 		Dungeon.hero.sprite.place( Dungeon.hero.pos );
 		CellEmitter.get( Dungeon.hero.pos ).burst( Speck.factory( Speck.WOOL ), 6 );

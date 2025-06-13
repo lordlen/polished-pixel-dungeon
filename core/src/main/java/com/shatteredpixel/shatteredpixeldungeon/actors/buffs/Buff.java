@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.Reflection;
 
 import java.util.HashSet;
@@ -140,7 +141,7 @@ public class Buff extends Actor {
 	public float visualcooldown(){
 		return Math.max(cooldown(), 0.01f);
 	}
-
+	
 	private static final String MNEMONIC_EXTENDED    = "mnemonic_extended";
 
 	@Override
@@ -177,6 +178,23 @@ public class Buff extends Actor {
 
 			T buff = prolong(target, buffClass, duration);
 			return buff;
+		}
+		
+		public static float customIconFade(Buff buff) {
+			float fade = -1f;
+			
+			if(buff instanceof FlavourBuff) {
+				fade = GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
+			}
+			else {
+				try {
+					fade = GameMath.gate(0, (10f - Integer.parseInt(buff.iconTextDisplay())) / 10f, 1);
+				} catch (NumberFormatException e) {}
+			}
+			
+			//to avoid scaling problems
+			if(fade > .995f) fade = 1.05f;
+			return fade;
 		}
 	}
 

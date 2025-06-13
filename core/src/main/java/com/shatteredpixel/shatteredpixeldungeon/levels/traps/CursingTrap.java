@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ public class CursingTrap extends Trap {
 
 		Armor armor = hero.belongings.armor();
 		if (armor != null){
-			if (armor.glyph == null)
+			if (armor.activeGlyph() == null)
 				priorityCurse.add(armor);
 			else
 				canCurse.add(armor);
@@ -114,7 +114,7 @@ public class CursingTrap extends Trap {
 		}
 		if (item instanceof Armor){
 			Armor a = (Armor) item;
-			if (a.glyph == null){
+			if (a.activeGlyph() == null){
 				a.inscribe(Armor.Glyph.randomCurse());
 			}
 		}

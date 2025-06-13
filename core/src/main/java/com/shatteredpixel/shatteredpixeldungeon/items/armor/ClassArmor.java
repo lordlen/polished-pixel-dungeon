@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.Trinity;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -47,6 +48,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 abstract public class ClassArmor extends Armor {
 
@@ -56,7 +58,6 @@ abstract public class ClassArmor extends Armor {
 	{
 		levelKnown = true;
 		cursedKnown = true;
-		defaultAction = AC_ABILITY;
 
 		bones = false;
 	}
@@ -123,10 +124,12 @@ abstract public class ClassArmor extends Armor {
 		classArmor.level(armor.trueLevel());
 		classArmor.tier = armor.tier;
 		classArmor.augment = armor.augment;
-		classArmor.inscribe(armor.glyph);
 		if (armor.seal != null) {
-			classArmor.seal = armor.seal;
+			int oldLvl = classArmor.trueLevel();
+			classArmor.affixSeal(armor.detachSeal());
+			classArmor.level(oldLvl);
 		}
+		classArmor.inscribe(armor.glyph(), true);
 		classArmor.glyphHardened = armor.glyphHardened;
 		classArmor.cursed = armor.cursed;
 		classArmor.curseInfusionBonus = armor.curseInfusionBonus;
@@ -163,13 +166,28 @@ abstract public class ClassArmor extends Armor {
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
+		
+		if(actions.size() == 5) {
+			actions.add( 4, AC_TRANSFER );
+		} else {
+			actions.add(AC_TRANSFER);
+		}
+		
 		if (isEquipped( hero )) {
 			actions.add( AC_ABILITY );
 		}
-		actions.add( AC_TRANSFER );
+		
 		return actions;
 	}
-
+	
+	@Override
+	public void Polished_updateDefaultAction() {
+		super.Polished_updateDefaultAction();
+		if((isEquipped( Dungeon.hero )) && !Objects.equals(defaultAction, AC_SWAP_GLYPH)) {
+			defaultAction = AC_ABILITY;
+		}
+	}
+	
 	@Override
 	public String actionName(String action, Hero hero) {
 		if (hero.armorAbility != null && action.equals(AC_ABILITY)){
@@ -241,32 +259,31 @@ abstract public class ClassArmor extends Armor {
 								tier = armor.tier;
 								augment = armor.augment;
 								cursed = armor.cursed;
+								
+								if (armor.seal != null) {
+									int oldLvl = trueLevel();
+									affixSeal(armor.detachSeal());
+									level(oldLvl);
+								} else if(seal != null) {
+									// simulate the process of detaching the seal manually
+									// and re-affixing it to the new armor
+									affixSeal(detachSeal());
+								}
+								
+								inscribe(armor.glyph(), true);
 								curseInfusionBonus = armor.curseInfusionBonus;
 								masteryPotionBonus = armor.masteryPotionBonus;
+								
 								if (armor.checkSeal() != null) {
-									inscribe(armor.glyph);
 									seal = armor.checkSeal();
-								} else if (checkSeal() != null){
+								} else if (checkSeal() != null) {
 									//automates the process of detaching the seal manually
 									// and re-affixing it to the new armor
-									if (seal.level() > 0){
+									if (seal.level() > 0) {
 										int newLevel = trueLevel() + 1;
 										level(newLevel);
 										Badges.validateItemLevelAquired(ClassArmor.this);
 									}
-
-									//if both source and destination armor have glyphs
-									// we assume the player wants the glyph on the destination armor
-									// they can always manually detach first if they don't.
-									// otherwise we automate glyph transfer just like upgrades
-									if (armor.glyph == null && seal.canTransferGlyph()){
-										//do nothing, keep our glyph
-									} else {
-										inscribe(armor.glyph);
-										seal.setGlyph(null);
-									}
-								} else {
-									inscribe(armor.glyph);
 								}
 
 								if (armor.levelKnown && armor.cursedKnown) {

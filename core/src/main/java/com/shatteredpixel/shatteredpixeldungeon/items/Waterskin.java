@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,8 +112,7 @@ public class Waterskin extends Item {
 					}
 				}
 
-				//trimming off 0.01 drops helps with floating point errors
-				int dropsToConsume = (int)Math.ceil(dropsNeeded - 0.01f);
+				int dropsToConsume = (int)Math.floor(dropsNeeded + 0.01f);
 				dropsToConsume = (int)GameMath.gate(1, dropsToConsume, volume);
 
 				if (Dewdrop.consumeDew(dropsToConsume, hero, true)){
@@ -187,6 +186,10 @@ public class Waterskin extends Item {
 
 	public void fill() {
 		volume = MAX_VOLUME;
+		updateQuickslot();
+	}
+	public void fill(float percent) {
+		volume = Math.min(volume + Math.round(percent*MAX_VOLUME), MAX_VOLUME);
 		updateQuickslot();
 	}
 

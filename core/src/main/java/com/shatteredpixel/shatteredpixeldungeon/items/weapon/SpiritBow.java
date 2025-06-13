@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -54,6 +50,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
@@ -110,6 +107,13 @@ public class SpiritBow extends Weapon {
 			return curCharges + "/" + Polished_getMaxCharge();
 		else
 			return super.status();
+	}
+
+	private float colorSlider() {
+		return 2 * ((float)curCharges / Polished_getMaxCharge());
+	}
+	public void statusColor(BitmapText text) {
+		text.hardlight(Math.min(2-colorSlider(), 1), Math.min(colorSlider(), 1), 0);
 	}
 	
 	@Override
@@ -424,17 +428,6 @@ public class SpiritBow extends Weapon {
 		public void Polished_recharge(final Hero user) {
 			if(!SPDSettings.Polished.huntress()) return;
 
-			//dont punish the player for recharging
-			{
-				Hunger hunger = user.buff(Hunger.class);
-				if(hunger != null) hunger.POLISHED_delay(2);
-
-				Light light = user.buff(Light.class);
-				if(light != null) Buff.affect(user, Light.class, 2);
-
-				Regeneration regen = user.buff(Regeneration.class);
-				if(regen != null) regen.POLISHED_delay = 2;
-			}
 			user.spendAndNext(2);
 
 			curCharges = Polished_getMaxCharge();

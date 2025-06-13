@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,7 +153,7 @@ public class WndGameInProgress extends Window {
 		cont.setRect(0, pos, WIDTH/2 -1, 20);
 		add(cont);
 
-		erase.icon(Icons.get(Icons.CLOSE));
+		erase.icon(Icons.get(Icons.CLOSE_POLISHED));
 		erase.setRect(WIDTH/2 + 1, pos, WIDTH/2 - 1, 20);
 		add(erase);
 		

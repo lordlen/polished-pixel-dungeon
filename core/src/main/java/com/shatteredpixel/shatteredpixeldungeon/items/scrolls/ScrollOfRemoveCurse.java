@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.TormentedSpirit;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -90,7 +91,10 @@ public class ScrollOfRemoveCurse extends InventoryScroll {
 		} else if (item instanceof Weapon){
 			return ((Weapon)item).hasCurseEnchant();
 		} else if (item instanceof Armor){
-			return ((Armor)item).hasCurseGlyph();
+			return  ((Armor)item).hasCurseGlyph(false) ||
+					((Armor)item).hasCurseGlyph(true);
+		} else if (item instanceof BrokenSeal) {
+			return  ((BrokenSeal)item).hasCurseGlyph();
 		} else {
 			return false;
 		}
@@ -136,6 +140,21 @@ public class ScrollOfRemoveCurse extends InventoryScroll {
 				Armor a = (Armor) item;
 				if (a.hasCurseGlyph()){
 					a.inscribe(null);
+					procced = true;
+				}
+				else if (a.hasCurseGlyph(false)){
+					a.inscribe(null, true);
+					procced = true;
+				}
+				else if (a.hasCurseGlyph(true)){
+					a.checkSeal().inscribe(null);
+					procced = true;
+				}
+			}
+			if (item instanceof BrokenSeal){
+				BrokenSeal s = (BrokenSeal) item;
+				if (s.hasCurseGlyph()){
+					s.inscribe(null);
 					procced = true;
 				}
 			}

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -66,6 +67,11 @@ public class ElixirOfHoneyedHealing extends Elixir {
 			}
 		}
 	}
+
+	@Override
+	public int energyVal() {
+		return 10 * quantity;
+	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
 		
@@ -73,7 +79,7 @@ public class ElixirOfHoneyedHealing extends Elixir {
 			inputs =  new Class[]{PotionOfHealing.class, Honeypot.ShatteredPot.class};
 			inQuantity = new int[]{1, 1};
 			
-			cost = 4;
+			cost = 2;
 			
 			output = ElixirOfHoneyedHealing.class;
 			outQuantity = 1;

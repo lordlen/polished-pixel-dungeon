@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Identification;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
@@ -57,6 +58,8 @@ public class StoneOfIntuition extends InventoryStone {
 
 	@Override
 	protected boolean usableOnItem(Item item) {
+		if(item instanceof WealthDrop) return false;
+
 		if (item instanceof Ring){
 			return !((Ring) item).isKnown();
 		} else if (item instanceof Potion){
@@ -126,7 +129,11 @@ public class StoneOfIntuition extends InventoryStone {
 					} else {
 						GLog.w( Messages.get(WndGuess.class, "incorrect") );
 					}
-					if (!anonymous) {
+					if(Polished_wealthDrop != null) {
+						curItem.detach(curUser.belongings.backpack);
+						Talent.onRunestoneUsed(curUser, curUser.pos, StoneOfIntuition.class);
+					}
+					else if (!anonymous) {
 						Catalog.countUse(StoneOfIntuition.class);
 						if (curUser.buff(IntuitionUseTracker.class) == null) {
 							Buff.affect(curUser, IntuitionUseTracker.class);

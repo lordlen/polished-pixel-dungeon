@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
@@ -84,6 +85,7 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -117,7 +119,7 @@ public abstract class Mob extends Char {
 	
 	public Class<? extends CharSprite> spriteClass;
 	
-	protected int target = -1;
+	public int target = -1;
 	
 	public int defenseSkill = 0;
 	
@@ -256,8 +258,6 @@ public abstract class Mob extends Char {
 	protected boolean act() {
 		
 		super.act();
-
-		Polished_growingHunt();
 		
 		boolean justAlerted = alerted;
 		alerted = false;
@@ -278,6 +278,11 @@ public abstract class Mob extends Char {
 		if (buff(Terror.class) != null || buff(Dread.class) != null ){
 			state = FLEEING;
 		}
+		
+		//
+		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
+		if (grow != null) grow.Polished_growingHunt();
+		//
 		
 		enemy = chooseEnemy();
 		
@@ -518,7 +523,7 @@ public abstract class Mob extends Char {
 		return false;
 	}
 
-	private boolean cellIsPathable( int cell ){
+	protected boolean cellIsPathable( int cell ){
 		if (!Dungeon.level.passable[cell]){
 			if (flying || buff(Amok.class) != null){
 				if (!Dungeon.level.avoid[cell]){
@@ -897,10 +902,6 @@ public abstract class Mob extends Char {
 					Dungeon.hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(exp), FloatingText.EXPERIENCE);
 				}
 				Dungeon.hero.earnExp(exp, getClass());
-
-				if (Dungeon.hero.subClass == HeroSubClass.MONK){
-					Buff.affect(Dungeon.hero, MonkEnergy.class).gainEnergy(this);
-				}
 			}
 		}
 	}
@@ -915,9 +916,18 @@ public abstract class Mob extends Char {
 			//EXP /= 2;
 
 			EXP = 0;
+		} else {
+			if (Dungeon.hero.subClass == HeroSubClass.MONK){
+				Buff.affect(Dungeon.hero, MonkEnergy.class).gainEnergy(this);
+			}
 		}
 
 		if (alignment == Alignment.ENEMY){
+			if (buff(Trap.HazardAssistTracker.class) != null){
+				Statistics.hazardAssistedKills++;
+				Badges.validateHazardAssists();
+			}
+
 			rollToDropLoot();
 
 			if (cause == Dungeon.hero || cause instanceof Weapon || cause instanceof Weapon.Enchantment){
@@ -933,6 +943,16 @@ public abstract class Mob extends Char {
 				}
 			}
 
+			if ((cause == Dungeon.hero || cause instanceof Wand || cause instanceof ClericSpell || cause instanceof ArmorAbility)
+				&& Dungeon.hero.subClass == HeroSubClass.BERSERKER) {
+				Berserk berserk = Dungeon.hero.buff(Berserk.class);
+				if(berserk != null) berserk.continueRampage();
+			}
+			
+			for (Mob mob : Dungeon.level.mobs) {
+				ChampionEnemy.Growing grow = mob.buff(ChampionEnemy.Growing.class);
+				if(grow != null) grow.Polished_weaken(this);
+			}
 		}
 
 		if (Dungeon.hero.isAlive() && !Dungeon.level.heroFOV[pos]) {
@@ -960,7 +980,7 @@ public abstract class Mob extends Char {
 	public float lootChance(){
 		float lootChance = this.lootChance;
 
-		float dropBonus = RingOfWealth.dropChanceMultiplier( Dungeon.hero );
+		float dropPenalty = RingOfWealth.dropChanceMultiplier( Dungeon.hero );
 
 		Talent.BountyHunterTracker bhTracker = Dungeon.hero.buff(Talent.BountyHunterTracker.class);
 		if (bhTracker != null){
@@ -969,13 +989,13 @@ public abstract class Mob extends Char {
 				// 2/4/8/16% per prep level, multiplied by talent points
 				float bhBonus = 0.02f * (float)Math.pow(2, prep.attackLevel()-1);
 				bhBonus *= Dungeon.hero.pointsInTalent(Talent.BOUNTY_HUNTER);
-				dropBonus += bhBonus;
+				dropPenalty += bhBonus;
 			}
 		}
 
-		dropBonus += ShardOfOblivion.lootChanceMultiplier()-1f;
+		dropPenalty += ShardOfOblivion.lootChanceMultiplier()-1f;
 
-		return lootChance * dropBonus;
+		return lootChance * dropPenalty;
 	}
 	
 	public void rollToDropLoot(){
@@ -1066,23 +1086,6 @@ public abstract class Mob extends Char {
 			state = WANDERING;
 		}
 		target = cell;
-	}
-
-	private boolean Polished_huntNoti = false;
-	private boolean Polished_growingThreshold() {
-		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
-		return (grow != null && grow.Polished_huntThreshold());
-	}
-	private void Polished_growingHunt() {
-		if(Polished_growingThreshold()) {
-			aggro(Dungeon.hero);
-			target=enemy.pos;
-
-			if(!Polished_huntNoti) {
-				GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
-				Polished_huntNoti = true;
-			}
-		}
 	}
 	
 	public String description() {
@@ -1186,11 +1189,12 @@ public abstract class Mob extends Char {
 			} else {
 				notice();
 				state = WANDERING;
-				target = Dungeon.level.randomDestination( Mob.this );
+				target = ((Mob.Wandering)WANDERING).randomDestination();
 			}
-
+      
 			if (alignment == Alignment.ENEMY && Dungeon.isChallenged(Challenges.SWARM_INTELLIGENCE)
 					&& enemy != null && enemy.buff(Corruption.class) == null) {
+        
 				for (Mob mob : Dungeon.level.mobs) {
 					if (mob.paralysed <= 0
 							&& Dungeon.level.distance(pos, mob.pos) <= 8
@@ -1270,7 +1274,7 @@ public abstract class Mob extends Char {
 		public static final String TAG	= "HUNTING";
 
 		//prevents rare infinite loop cases
-		private boolean recursing = false;
+		protected boolean recursing = false;
 
 		@Override
 		public boolean act( boolean enemyInFOV, boolean justAlerted ) {

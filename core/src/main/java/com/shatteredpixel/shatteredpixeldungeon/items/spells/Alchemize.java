@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,42 +62,33 @@ public class Alchemize extends Spell {
 	@Override
 	public int value() {
 		//lower value, as it's very cheap to make (and also sold at shops)
-		return (int)(20 * (quantity/(float)Recipe.OUT_QUANTITY));
+		return (int)(12 * (quantity/(float)Recipe.OUT_QUANTITY));
 	}
 
 	@Override
 	public int energyVal() {
-		return (int)(4 * (quantity/(float)Recipe.OUT_QUANTITY));
+		return (int)(3 * (quantity/(float)Recipe.OUT_QUANTITY));
 	}
 
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe {
 
-		private static final int OUT_QUANTITY = 8;
+		private static final int OUT_QUANTITY = 12;
 
 		@Override
 		public boolean testIngredients(ArrayList<Item> ingredients) {
-			if (ingredients.size() != 2) return false;
-
-			if (ingredients.get(0) instanceof Plant.Seed && ingredients.get(1) instanceof Runestone){
-				return true;
-			}
-
-			if (ingredients.get(0) instanceof Runestone && ingredients.get(1) instanceof Plant.Seed){
-				return true;
-			}
-
-			return false;
-		}
+			if (ingredients.size() != 1) return false;
+            else return ingredients.get(0) instanceof Plant.Seed || ingredients.get(0) instanceof Runestone;
+        }
 
 		@Override
 		public int cost(ArrayList<Item> ingredients) {
-			return 2;
+			if (ingredients.size() != 1) return 0;
+			return ingredients.get(0) instanceof Plant.Seed ? 2 : 1;
 		}
 
 		@Override
 		public Item brew(ArrayList<Item> ingredients) {
 			ingredients.get(0).quantity(ingredients.get(0).quantity()-1);
-			ingredients.get(1).quantity(ingredients.get(1).quantity()-1);
 			return sampleOutput(null);
 		}
 

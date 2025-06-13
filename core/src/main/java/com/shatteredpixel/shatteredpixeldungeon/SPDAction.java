@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,6 +131,7 @@ public class SPDAction extends GameAction {
 		defaultBindings.put( Input.Keys.NUM_7,          SPDAction.QUICKSLOT_7 );
 		defaultBindings.put( Input.Keys.NUM_8,          SPDAction.QUICKSLOT_8 );
 		defaultBindings.put( Input.Keys.NUM_9,          SPDAction.QUICKSLOT_9 );
+		defaultBindings.put( Input.Keys.NUM_0,          SPDAction.QUICKSLOT_10 );
 
 		defaultBindings.put( Input.Keys.F1,             SPDAction.BAG_1 );
 		defaultBindings.put( Input.Keys.F2,             SPDAction.BAG_2 );

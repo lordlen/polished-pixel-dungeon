@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -356,13 +356,9 @@ abstract public class Weapon extends KindOfWeapon {
 		return upgrade(false);
 	}
 	
-	public Item upgrade(boolean enchant ) {
+	public Item upgrade( boolean preserve ) {
 
-		if (enchant){
-			if (enchantment == null){
-				enchant(Enchantment.random());
-			}
-		} else if (enchantment != null) {
+		if (enchantment != null && !preserve) {
 			//chance to lose harden buff is 10/20/40/80/100% when upgrading from +6/7/8/9/10
 			if (enchantHardened){
 				if (level() >= 6 && Random.Float(10) < Math.pow(2, level()-6)){
@@ -449,11 +445,10 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 
 	public boolean hasEnchant(Class<?extends Enchantment> type, Char owner) {
-		if (enchantment == null){
+		if (owner.buff(MagicImmune.class) != null) {
 			return false;
-		} else if (owner.buff(MagicImmune.class) != null) {
-			return false;
-		} else if (!enchantment.curse()
+		} else if (enchantment != null
+				&& !enchantment.curse()
 				&& owner instanceof Hero
 				&& isEquipped((Hero) owner)
 				&& owner.buff(HolyWeapon.HolyWepBuff.class) != null
@@ -463,8 +458,10 @@ abstract public class Weapon extends KindOfWeapon {
 				&& owner.buff(BodyForm.BodyFormBuff.class).enchant() != null
 				&& owner.buff(BodyForm.BodyFormBuff.class).enchant().getClass().equals(type)){
 			return true;
-		} else {
+		} else if (enchantment != null) {
 			return enchantment.getClass() == type;
+		} else {
+			return false;
 		}
 	}
 	
@@ -525,9 +522,10 @@ abstract public class Weapon extends KindOfWeapon {
 
 		public static float Polished_procChanceMultiplier(Char attacker, KindOfWeapon weapon ){
 			float multi = RingOfArcana.enchantPowerMultiplier(attacker);
-			Berserk rage = attacker.buff(Berserk.class);
-			if (rage != null) {
-				multi = rage.enchantFactor(multi);
+
+			Berserk berserk = attacker.buff(Berserk.class);
+			if (berserk != null) {
+				multi += berserk.enchantBoost(false);
 			}
 
 			if (attacker.buff(RunicBlade.RunicSlashTracker.class) != null){
@@ -536,7 +534,7 @@ abstract public class Weapon extends KindOfWeapon {
 			}
 
 			if (attacker.buff(Smite.SmiteTracker.class) != null){
-				multi += 3f;
+				multi += 1f;
 			}
 
 			if (attacker.buff(ElementalStrike.DirectedPowerTracker.class) != null){

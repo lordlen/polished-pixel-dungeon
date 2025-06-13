@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
@@ -29,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -87,6 +90,7 @@ public class PoolRoom extends SpecialRoom {
 		int pos = x + y * level.width();
 		level.drop( prize( level ), pos ).type = Heap.Type.CHEST;
 		Painter.set( level, pos, Terrain.PEDESTAL );
+		Blob.seed( pos, 1, PoolID.class, level );
 		
 		level.addItemToSpawn( new PotionOfInvisibility() );
 		
@@ -131,5 +135,12 @@ public class PoolRoom extends SpecialRoom {
 		}
 
 		return prize;
+	}
+
+	public static class PoolID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.POOL_ROOM;
+		}
 	}
 }

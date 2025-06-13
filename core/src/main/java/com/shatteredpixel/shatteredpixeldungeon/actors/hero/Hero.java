@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,13 +27,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Debug;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
-import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
@@ -99,6 +99,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap.Type;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
@@ -135,6 +136,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
@@ -148,6 +150,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
@@ -169,7 +172,6 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -182,8 +184,6 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
-import com.watabou.input.KeyBindings;
-import com.watabou.input.KeyEvent;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.Delayer;
@@ -248,19 +248,24 @@ public class Hero extends Char {
 	private ArrayList<Mob> visibleEnemies;
 
 	public static class Polished {
-		public static void Debug_UpdateStats(int newLvl) {
+		public static void Debug_UpdateStats(int newLvl, int newStr) {
+			if(!Debug.DEBUG_MODE) return;
+			
 			Hero hero = Dungeon.hero;
-			if(!Debug.DEBUG_MODE || newLvl <= hero.lvl) return;
-
-			int diff = newLvl - hero.lvl;
-			Dungeon.hero.attackSkill+=diff;
-			Dungeon.hero.defenseSkill+=diff;
-
-			hero.lvl = newLvl;
-			hero.updateHT(true);
-
-			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
-			if(bow != null) bow.Polished_resetCharges();
+			if(newLvl > hero.lvl) {
+				int diff = newLvl - hero.lvl;
+				Dungeon.hero.attackSkill+=diff;
+				Dungeon.hero.defenseSkill+=diff;
+				
+				hero.lvl = newLvl;
+				hero.updateHT(true);
+				
+				SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+				if(bow != null) bow.Polished_resetCharges();
+			}
+			
+			hero.STR = Math.max(hero.STR, newStr);
+			
 		}
 
 		public static boolean noEnemiesLast = false;
@@ -288,9 +293,38 @@ public class Hero extends Char {
 			if (item instanceof Dewdrop && waterskin == null) return false;
 			if (item instanceof Dewdrop && waterskin.isFull()) return false;
 			if (!(item instanceof Dewdrop || item instanceof Plant.Seed || item instanceof Runestone || item instanceof Berry)) return false;
-			if(!Dungeon.hero.belongings.backpack.Polished_canHoldGlobal(item)) return false;
+			if(!Dungeon.hero.belongings.Polished_canHold(item)) return false;
 
 			return (SPDSettings.Polished.autoPickup() && noEnemiesSeen() && noEnemiesLast);
+		}
+
+
+		public static ArrayList<LinkedHashMap<Talent, Integer>> getTalents() {
+			ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
+			Talent.initClassTalents(Dungeon.hero.heroClass, talents, Dungeon.hero.metamorphedTalents);
+			for (LinkedHashMap<Talent, Integer> tier : talents){
+				for (Talent talent : tier.keySet()){
+					tier.put(talent, Dungeon.hero.pointsInTalent(talent));
+				}
+			}
+
+			return talents;
+		}
+
+		public static int tiersUnlocked() {
+			int tiersAvailable = 1;
+			while ( tiersAvailable < Talent.MAX_TALENT_TIERS
+					&& Dungeon.hero.lvl+1 >= Talent.tierLevelThresholds[tiersAvailable+1] ) {
+				tiersAvailable++;
+			}
+
+			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
+				tiersAvailable = 2;
+			} else if (tiersAvailable > 3 && Dungeon.hero.armorAbility == null){
+				tiersAvailable = 3;
+			}
+
+			return tiersAvailable;
 		}
 	}
 
@@ -557,16 +591,8 @@ public class Hero extends Char {
 		float accuracy = 1;
 		accuracy *= RingOfAccuracy.accuracyMultiplier( this );
 		
-		if (wep instanceof MissileWeapon){
-			if (Dungeon.level.adjacent( pos, target.pos )) {
-				//do nothing, throwies already have lower acc on melee
-				//0.67
-			} else {
-				//1.5*1.5 = 2.25
-				accuracy *= 1.5f;
-			}
 		//precise assault and liquid agility
-		} else {
+		if (!(wep instanceof MissileWeapon)) {
 			if ((hasTalent(Talent.PRECISE_ASSAULT) || hasTalent(Talent.LIQUID_AGILITY))
 					//does not trigger on ability attacks
 					&& belongings.abilityWeapon != wep && buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) == null){
@@ -577,21 +603,25 @@ public class Hero extends Char {
 					accuracy *= 1f + 0.1f * pointsInTalent(Talent.PRECISE_ASSAULT);
 				}
 
+				Talent.PreciseAssaultTracker tracker = buff(Talent.PreciseAssaultTracker.class);
+
 				if (wep instanceof Flail && buff(Flail.SpinAbilityTracker.class) != null){
 					//do nothing, this is not a regular attack so don't consume talent fx
 				} else if (wep instanceof Crossbow && buff(Crossbow.ChargedShot.class) != null){
 					//do nothing, this is not a regular attack so don't consume talent fx
-				} else if (buff(Talent.PreciseAssaultTracker.class) != null) {
-					// 2x/5x/inf. ACC for duelist if she just used a weapon ability
+				} else if (tracker != null) {
+					// 3x/inf/inf+3x ACC for duelist if she just used a weapon ability
 					switch (pointsInTalent(Talent.PRECISE_ASSAULT)){
 						default: case 1:
-							accuracy *= 2; break;
+							accuracy *= 3; break;
 						case 2:
-							accuracy *= 5; break;
-						case 3:
 							accuracy *= Float.POSITIVE_INFINITY; break;
+						case 3:
+							accuracy *= tracker.secondUse ? 3 : Float.POSITIVE_INFINITY;
+							tracker.secondUse = !tracker.secondUse;
+							break;
 					}
-					buff(Talent.PreciseAssaultTracker.class).detach();
+					if(!tracker.secondUse) tracker.detach();
 				} else if (buff(Talent.LiquidAgilACCTracker.class) != null){
 					// 3x/inf. ACC, depending on talent level
 					accuracy *= pointsInTalent(Talent.LIQUID_AGILITY) == 2 ? Float.POSITIVE_INFINITY : 3f;
@@ -625,7 +655,9 @@ public class Hero extends Char {
 			return INFINITE_EVASION;
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.blockLeft--;
 			return INFINITE_EVASION;
 		}
 		
@@ -667,8 +699,12 @@ public class Hero extends Char {
 			return Messages.get(Monk.class, "parried");
 		}
 
-		if (buff(RoundShield.GuardTracker.class) != null){
-			buff(RoundShield.GuardTracker.class).hasBlocked = true;
+		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
+		if (guardTracker != null){
+			guardTracker.hasBlocked = true;
+			if(guardTracker.blockLeft == 0) {
+				guardTracker.detach();
+			}
 			BuffIndicator.refreshHero();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			return Messages.get(RoundShield.GuardTracker.class, "guarded");
@@ -922,7 +958,9 @@ public class Hero extends Char {
 
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshBoss();
-
+		GameScene.Polished.updateMobBuffIndicators();
+		WealthDrop.refreshIndicators();
+  
 		if (paralysed > 0) {
 			
 			curAction = null;
@@ -1486,9 +1524,10 @@ public class Hero extends Char {
 			if (heroClass != HeroClass.DUELIST
 					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
 					&& buff(Talent.AggressiveBarrierCooldown.class) == null
-					&& (HP / (float)HT) < 0.20f*(1+pointsInTalent(Talent.AGGRESSIVE_BARRIER))){
-				Buff.affect(this, Barrier.class).setShield(3);
-				sprite.showStatusWithIcon(CharSprite.POSITIVE, "3", FloatingText.SHIELDING);
+					&& (HP / (float)HT) <= 0.5f){
+				int shieldAmt = 1 + 2*pointsInTalent(Talent.AGGRESSIVE_BARRIER);
+				Buff.affect(this, Barrier.class).setShield(shieldAmt);
+				sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(shieldAmt), FloatingText.SHIELDING);
 				Buff.affect(this, Talent.AggressiveBarrierCooldown.class, 50f);
 
 			}
@@ -1670,7 +1709,7 @@ public class Hero extends Char {
 			}
 			//and to monk meditate damage reduction
 			if (buff(MonkEnergy.MonkAbility.Meditate.MeditateResistance.class) != null){
-				damage *= 0.2f;
+				damage *= 0.0f;
 			}
 		}
 
@@ -1685,6 +1724,9 @@ public class Hero extends Char {
 			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       damage /= (immu.snack ? 2f : 4f);
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  damage = 0;
 		}
+
+		Berserk berserk = buff(Berserk.class);
+		if(berserk != null) damage *= berserk.resistanceFactor();
 
 		dmg = Math.round(damage);
 
@@ -1808,8 +1850,7 @@ public class Hero extends Char {
 				}
 
 				//Clear blobs that only exist for landmarks.
-				// Might want to make this a properly if it's used more
-				if (found && b instanceof WeakFloorRoom.WellID){
+				if (found && b instanceof LandmarkBlob){
 					b.fullyClear();
 				}
 			}
@@ -2072,8 +2113,8 @@ public class Hero extends Char {
 		MasterThievesArmband.Thievery armband = buff(MasterThievesArmband.Thievery.class);
 		if (armband != null) armband.gainCharge(percent);
 
-		Berserk berserk = buff(Berserk.class);
-		if (berserk != null) berserk.recover(percent);
+		Berserk.UndyingRecovery recovery = buff(Berserk.UndyingRecovery.class);
+		if (recovery != null) recovery.recover(source != PotionOfExperience.class ? percent : 0.75f * percent);
 		
 		if (source != PotionOfExperience.class) {
 			for (Item i : belongings) {
@@ -2092,7 +2133,7 @@ public class Hero extends Char {
 				}
 			}
 			if (buff(HallowedGround.HallowedFurrowTracker.class) != null){
-				buff(HallowedGround.HallowedFurrowTracker.class).countDown(percent*5f);
+				buff(HallowedGround.HallowedFurrowTracker.class).countDown(percent*100f);
 				if (buff(HallowedGround.HallowedFurrowTracker.class).count() <= 0){
 					buff(HallowedGround.HallowedFurrowTracker.class).detach();
 				}
@@ -2115,6 +2156,8 @@ public class Hero extends Char {
 				if (buff(ElixirOfMight.HTBoost.class) != null){
 					buff(ElixirOfMight.HTBoost.class).onLevelUp();
 				}
+
+				RingOfWealth.onLevelUp(this);
 
 				SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
 				if(bow != null && lvl % 5 == 0) bow.Polished_resetCharges();
@@ -2355,7 +2398,7 @@ public class Hero extends Char {
 		
 		if (HP <= 0){
 			if (berserk == null) berserk = buff(Berserk.class);
-			return berserk != null && berserk.berserking();
+			return berserk != null && berserk.raging();
 		} else {
 			berserk = null;
 			return super.isAlive();
@@ -2411,6 +2454,11 @@ public class Hero extends Char {
 
 		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+		}
+
+		if (hit && subClass == HeroSubClass.BERSERKER && wasEnemy) {
+			Berserk berserk = buff(Berserk.class);
+			if(berserk != null) berserk.onHit();
 		}
 
 		curAction = null;

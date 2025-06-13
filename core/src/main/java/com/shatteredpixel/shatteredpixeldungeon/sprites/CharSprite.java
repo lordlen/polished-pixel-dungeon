@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.MobBuffDisplay;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
@@ -97,6 +98,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected Callback animCallback;
 	
 	protected PosTweener motion;
+	private Callback motionCallback;
 	
 	protected Emitter burning;
 	protected Emitter chilled;
@@ -115,6 +117,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	
 	protected EmoIcon emo;
 	protected CharHealthIndicator health;
+	protected MobBuffDisplay buffs;
 
 	private Tweener jumpTweener;
 	private Callback jumpCallback;
@@ -127,6 +130,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 
 	//used to prevent the actor associated with this sprite from acting until movement completes
 	public volatile boolean isMoving = false;
+	public volatile boolean isJumping = false;
 	
 	public CharSprite() {
 		super();
@@ -157,6 +161,12 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				health = new CharHealthIndicator(ch);
 			} else {
 				health.target(ch);
+			}
+
+			if(buffs == null) {
+				buffs = new MobBuffDisplay(ch, health);
+			} else {
+				buffs.target(ch, health);
 			}
 		}
 
@@ -249,7 +259,25 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			motion.stop(false);
 		}
 	}
-	
+
+	public synchronized void doAfterAnim(Callback callback) {
+		Callback current = isJumping ? jumpCallback : (isMoving ? motionCallback : animCallback);
+
+		Callback updated = callback;
+		if(current != null) {
+			updated = () -> {
+				current.call();
+				callback.call();
+			};
+		}
+
+		if(isJumping) jumpCallback = updated;
+		else if(isMoving) motionCallback = updated;
+		else {
+			if(curAnim != idle) animCallback = updated;
+			else callback.call();
+		}
+	}
 	public void attack( int cell ) {
 		attack( cell, null );
 	}
@@ -302,6 +330,8 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		jumpTweener.listener = this;
 		parent.add( jumpTweener );
 
+		isJumping = true;
+
 		turnTo( from, to );
 	}
 
@@ -314,6 +344,11 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		
 		if (health != null){
 			health.killAndErase();
+			health = null;
+		}
+		if (buffs != null) {
+			buffs.killAndErase();
+			buffs = null;
 		}
 	}
 	
@@ -361,18 +396,25 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	private final HashSet<State> stateAdditions = new HashSet<>();
 
 	public void add( State state ) {
-		synchronized (State.class) {
-			stateRemovals.remove(state);
-			stateAdditions.add(state);
+		//instant as it just changes an animation property that will get read later
+		if (state == State.PARALYSED){
+			paused = true;
+		} else {
+			synchronized (State.class) {
+				stateRemovals.remove(state);
+				stateAdditions.add(state);
+			}
 		}
 	}
 
 	private int auraColor = 0;
+	private int auraRays = 0;
 
-	//Aura needs color data too
-	public void aura( int color ){
+	//Aura needs color and ray count data too
+	public void aura( int color, int nRays ){
 		add(State.AURA);
 		auraColor = color;
+		auraRays = nRays;
 	}
 
 	protected synchronized void processStateAddition( State state ) {
@@ -445,7 +487,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				if (aura != null)   aura.killAndErase();
 				float size = Math.max(width(), height());
 				size = Math.max(size+4, 16);
-				aura = new Flare(5, size);
+				aura = new Flare(auraRays, size);
 				aura.angularSpeed = 90;
 				aura.color(auraColor, true);
 				aura.visible = visible;
@@ -460,9 +502,14 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	private final HashSet<State> stateRemovals = new HashSet<>();
 
 	public void remove( State state ) {
-		synchronized (State.class) {
-			stateAdditions.remove(state);
-			stateRemovals.add(state);
+		//instant as it just changes an animation property that will get read later
+		if (state == State.PARALYSED){
+			paused = false;
+		} else {
+			synchronized (State.class) {
+				stateAdditions.remove(state);
+				stateRemovals.add(state);
+			}
 		}
 	}
 
@@ -724,6 +771,11 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		
 		if (health != null){
 			health.killAndErase();
+			health = null;
+		}
+		if (buffs != null) {
+			buffs.killAndErase();
+			buffs = null;
 		}
 	}
 
@@ -778,12 +830,15 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	@Override
 	public void onComplete( Tweener tweener ) {
 		if (tweener == jumpTweener) {
+			isJumping = false;
 
 			if (visible && Dungeon.level.water[ch.pos] && !ch.flying) {
 				GameScene.ripple( ch.pos );
 			}
 			if (jumpCallback != null) {
-				jumpCallback.call();
+				Callback executing = jumpCallback;
+				jumpCallback = null;
+				executing.call();
 			}
 			GameScene.sortMobSprites();
 
@@ -795,6 +850,12 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				motion.killAndErase();
 				motion = null;
 				ch.onMotionComplete();
+
+				if (motionCallback != null) {
+					Callback executing = motionCallback;
+					motionCallback = null;
+					executing.call();
+				}
 
 				GameScene.sortMobSprites();
 				notifyAll();

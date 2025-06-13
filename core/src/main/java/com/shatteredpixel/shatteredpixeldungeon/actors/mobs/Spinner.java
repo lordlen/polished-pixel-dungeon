@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SpinnerSprite;
@@ -50,10 +52,22 @@ public class Spinner extends Mob {
 		maxLvl = 17;
 
 		loot = MysteryMeat.class;
-		lootChance = 0.125f;
+		lootChance = 0.167f;
 
 		HUNTING = new Hunting();
 		FLEEING = new Fleeing();
+	}
+
+	@Override
+	public float lootChance() {
+		if(this instanceof FungalSpinner) 	return super.lootChance();
+		else 								return super.lootChance() * ((6f - Dungeon.LimitedDrops.SPINNER_MEAT.count) / 6f);
+	}
+
+	@Override
+	public Item createLoot(){
+		Dungeon.LimitedDrops.SPINNER_MEAT.count++;
+		return super.createLoot();
 	}
 
 	@Override
@@ -207,7 +221,35 @@ public class Spinner extends Mob {
 	protected void applyWebToCell(int cell){
 		GameScene.add(Blob.seed(cell, 20, Web.class));
 	}
-	
+
+	@Override
+	protected boolean cellIsPathable( int cell ) {
+		Level level = Dungeon.level;
+		boolean oldval = level.openSpace[cell];
+
+		if (level.solid[cell] && Blob.volumeAt(cell, Web.class) == 0){
+			level.openSpace[cell] = false;
+		} else {
+			for (int i = 1; i < PathFinder.CIRCLE8.length; i += 2){
+				if (level.solid[cell+PathFinder.CIRCLE8[i]]
+					&& Blob.volumeAt(cell+PathFinder.CIRCLE8[i], Web.class) == 0) {
+
+					level.openSpace[cell] = false;
+				}
+				else if(( !level.solid[cell+PathFinder.CIRCLE8[(i+1)%8]] || Blob.volumeAt(cell+PathFinder.CIRCLE8[(i+1)%8], Web.class) > 0 )
+					 && ( !level.solid[cell+PathFinder.CIRCLE8[(i+2)%8]] || Blob.volumeAt(cell+PathFinder.CIRCLE8[(i+2)%8], Web.class) > 0 )) {
+
+					level.openSpace[cell] = true;
+					break;
+				}
+			}
+		}
+
+		boolean temp = super.cellIsPathable(cell);
+		level.openSpace[cell] = oldval;
+		return temp;
+	}
+
 	private int left(int direction){
 		return direction == 0 ? 7 : direction-1;
 	}

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
-public class Fury extends Buff {
-	
-	public static float LEVEL	= 0.5f;
+public class Fury extends FlavourBuff {
+
+	public static final float DURATION	= 15f;
 
 	{
 		type = buffType.POSITIVE;
@@ -33,18 +33,12 @@ public class Fury extends Buff {
 	}
 	
 	@Override
-	public boolean act() {
-		if (target.HP > target.HT * LEVEL) {
-			detach();
-		}
-		
-		spend( TICK );
-		
-		return true;
-	}
-	
-	@Override
 	public int icon() {
 		return BuffIndicator.FURY;
+	}
+
+	@Override
+	public float iconFadePercent() {
+		return Math.max(0, (DURATION - visualcooldown()) / DURATION);
 	}
 }

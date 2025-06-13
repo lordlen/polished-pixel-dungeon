@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,7 @@ public class FrostImbue extends FlavourBuff {
 	public static final float DURATION	= 50f;
 	
 	public void proc(Char enemy){
-		//Buff.Polished.affectAligned(enemy, Chill.class, Chill.Polished.CHILL_TICK);
-		Buff.affect(enemy, Chill.class, Chill.Polished.CHILL_TICK);
+		Buff.Polished.affectAligned(enemy, Chill.class, Chill.Polished.CHILL_TICK);
 
 		enemy.sprite.emitter().burst( SnowParticle.FACTORY, 3 );
 	}

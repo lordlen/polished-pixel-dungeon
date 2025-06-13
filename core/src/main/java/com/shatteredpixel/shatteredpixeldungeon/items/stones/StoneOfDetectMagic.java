@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,13 +67,6 @@ public class StoneOfDetectMagic extends InventoryStone {
 		}
 
 		positiveMagic = item.trueLevel() > 0;
-		if (!positiveMagic){
-			if (item instanceof Weapon && ((Weapon) item).hasGoodEnchant()){
-				positiveMagic = true;
-			} else if (item instanceof Armor && ((Armor) item).hasGoodGlyph()){
-				positiveMagic = true;
-			}
-		}
 
 		if (!positiveMagic && !negativeMagic){
 			GLog.i(Messages.get(this, "detected_none"));
@@ -85,7 +78,7 @@ public class StoneOfDetectMagic extends InventoryStone {
 			GLog.w(Messages.get(this, "detected_bad"));
 		}
 
-		if (!anonymous) {
+		if (!anonymous || Polished_wealthDrop != null) {
 			curItem.detach(curUser.belongings.backpack);
 			Catalog.countUse(getClass());
 			Talent.onRunestoneUsed(curUser, curUser.pos, getClass());

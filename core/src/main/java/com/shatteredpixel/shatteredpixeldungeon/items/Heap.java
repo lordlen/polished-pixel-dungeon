@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -91,6 +92,8 @@ public class Heap implements Bundlable {
 			break;
 		default:
 		}
+
+		Notes.LandmarkRecord.Polished.updateOnContainerOpen(pos, type);
 		
 		if (haunted){
 			if (Wraith.spawnAt( pos ) == null) {
@@ -199,6 +202,22 @@ public class Heap implements Bundlable {
 	public void remove( Item a ){
 		items.remove(a);
 		if (items.isEmpty()){
+			destroy();
+		} else if (sprite != null) {
+			sprite.view(this).place( pos );
+		}
+	}
+	
+	public void Polished_destroyEquipables() {
+		if(type != Type.HEAP || isEmpty()) return;
+		
+		for (Item item : items.toArray( new Item[0] )) {
+			if (!item.unique && (item.isUpgradable() || item instanceof EquipableItem)) {
+				items.remove(item);
+			}
+		}
+		
+		if (isEmpty()){
 			destroy();
 		} else if (sprite != null) {
 			sprite.view(this).place( pos );

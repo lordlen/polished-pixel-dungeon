@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,13 +119,14 @@ public class PixelScene extends Scene {
 			minHeight = MIN_HEIGHT_P;
 			scaleFactor = 2.5f;
 		}
-
+		
+		int minDefaultZoom = (int)Math.ceil( 2 * Game.density );
 		maxDefaultZoom = (int)Math.min(Game.width/minWidth, Game.height/minHeight);
 		maxScreenZoom = (int)Math.min(Game.dispWidth/minWidth, Game.dispHeight/minHeight);
-		defaultZoom = SPDSettings.scale();
-
-		if (defaultZoom < Math.ceil( Game.density * 2 ) || defaultZoom > maxDefaultZoom){
-			defaultZoom = (int)GameMath.gate(2, (int)Math.ceil( Game.density * scaleFactor ), maxDefaultZoom);
+		
+		defaultZoom = SPDSettings.scale() != 0 ? SPDSettings.scale() : (int)Math.ceil( Game.density * scaleFactor );
+		if (defaultZoom < minDefaultZoom || defaultZoom > maxDefaultZoom){
+			defaultZoom = GameMath.gate(minDefaultZoom, defaultZoom, maxDefaultZoom);
 
 			if (SPDSettings.interfaceSize() > 0 && defaultZoom < (maxDefaultZoom+1)/2){
 				defaultZoom = (maxDefaultZoom+1)/2;

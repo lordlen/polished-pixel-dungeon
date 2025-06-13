@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.food.Blandfruit;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.ChargrilledMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.FrozenCarpaccio;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.HoneyedMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MeatPie;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Pasty;
@@ -230,8 +231,7 @@ public enum Catalog {
 
 		STONES.addItems(Generator.Category.STONE.classes);
 
-		FOOD.addItems( Food.class, Pasty.class, MysteryMeat.class, ChargrilledMeat.class,
-				StewedMeat.class, FrozenCarpaccio.class, SmallRation.class, Berry.class,
+		FOOD.addItems( Food.class, Pasty.class, MysteryMeat.class, ChargrilledMeat.class, FrozenCarpaccio.class, HoneyedMeat.class, SmallRation.class, Berry.class,
 				SupplyRation.class, Blandfruit.class, PhantomMeat.class, MeatPie.class );
 
 		EXOTIC_POTIONS.addItems(ExoticPotion.exoToReg.keySet().toArray(new Class[0]));
@@ -316,6 +316,16 @@ public enum Catalog {
 	public static void setSeen(Class<?> cls){
 		for (Catalog cat : values()) {
 			if (cat.seen.containsKey(cls) && !cat.seen.get(cls)) {
+				cat.seen.put(cls, true);
+				Journal.saveNeeded = true;
+			}
+		}
+		Badges.validateCatalogBadges();
+	}
+
+	public static void Polished_setSeenAll(){
+		for (Catalog cat : values()) {
+			for(Class<?> cls : cat.seen.keySet()) {
 				cat.seen.put(cls, true);
 				Journal.saveNeeded = true;
 			}

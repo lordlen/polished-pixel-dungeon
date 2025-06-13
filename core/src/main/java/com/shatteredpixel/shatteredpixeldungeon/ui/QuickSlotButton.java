@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,14 +37,13 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.watabou.input.GameAction;
-import com.watabou.input.KeyBindings;
-import com.watabou.input.KeyEvent;
-import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 import com.watabou.utils.BArray;
 import com.watabou.utils.PathFinder;
 
 public class QuickSlotButton extends Button {
+	
+	public static final float HEIGHT = 24;
 	
 	private static QuickSlotButton[] instance = new QuickSlotButton[QuickSlot.SIZE];
 	private int slotNum;
@@ -230,6 +229,21 @@ public class QuickSlotButton extends Button {
 		} else {
 			return super.hoverText();
 		}
+	}
+	
+	@Override
+	protected void alignTooltip(Tooltip tip) {
+		super.alignTooltip(tip);
+		
+		if(GameScene.Polished.invPane() != null && GameScene.Polished.invPane().visible && parent.remove(tip) != null) {
+			GameScene.Polished.invPane().addToFront(tip);
+		}
+	}
+	
+	@Override
+	public void killTooltip() {
+		if(GameScene.Polished.invPane() != null && hoverTip != null) GameScene.Polished.invPane().remove(hoverTip);
+		super.killTooltip();
 	}
 	
 	@Override

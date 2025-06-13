@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.InventoryStone;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.WealthStone;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -51,6 +53,23 @@ public abstract class InventorySpell extends Spell {
 		return true;
 	}
 	
+	public void onUse() {
+		//WndUpgrade already handles this logic
+		if(!(this instanceof MagicalInfusion)) curItem = detach(curUser.belongings.backpack);
+		
+		curUser.spend(1f);
+		curUser.busy();
+		(curUser.sprite).operate(curUser.pos);
+		
+		Sample.INSTANCE.play(Assets.Sounds.READ);
+		Invisibility.dispel();
+		
+		Catalog.countUse(curItem.getClass());
+		if (Random.Float() < ((Spell) curItem).talentChance) {
+			Talent.onScrollUsed(curUser, curUser.pos, ((Spell) curItem).talentFactor, curItem.getClass());
+		}
+	}
+	
 	protected abstract void onItemSelected( Item item );
 	
 	protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
@@ -69,9 +88,14 @@ public abstract class InventorySpell extends Spell {
 		public boolean itemSelectable(Item item) {
 			return usableOnItem(item);
 		}
-
+		
 		@Override
 		public void onSelect( Item item ) {
+
+			if(curItem instanceof WealthSpell) {
+				WealthSpell wealthSpell = ((WealthSpell)curItem);
+				if(wealthSpell.item() instanceof InventorySpell) curItem = wealthSpell.item();
+			}
 			
 			//FIXME this safety check shouldn't be necessary
 			//it would be better to eliminate the curItem static variable.
@@ -80,27 +104,8 @@ public abstract class InventorySpell extends Spell {
 			}
 			
 			if (item != null) {
-
-				//Infusion opens a separate window that can be cancelled
-				//so we don't do a lot of logic here
-				if (!(curItem instanceof MagicalInfusion)) {
-					curItem = detach(curUser.belongings.backpack);
-				}
 				
 				((InventorySpell)curItem).onItemSelected( item );
-				if (!(curItem instanceof MagicalInfusion)) {
-					curUser.spend(1f);
-					curUser.busy();
-					(curUser.sprite).operate(curUser.pos);
-
-					Sample.INSTANCE.play(Assets.Sounds.READ);
-					Invisibility.dispel();
-
-					Catalog.countUse(curItem.getClass());
-					if (Random.Float() < ((Spell) curItem).talentChance) {
-						Talent.onScrollUsed(curUser, curUser.pos, ((Spell) curItem).talentFactor, curItem.getClass());
-					}
-				}
 				
 			}
 		}

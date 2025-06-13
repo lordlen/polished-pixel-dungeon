@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Eye;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
@@ -39,11 +41,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.EmptyRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
@@ -166,10 +171,15 @@ public class SentryRoom extends SpecialRoom {
 
 		Painter.set(level, treasurePos, Terrain.PEDESTAL);
 		level.drop( prize( level ), level.pointToCell(treasurePos) ).type = Heap.Type.CHEST;
+		Blob.seed(level.pointToCell(treasurePos), 1, SentryID.class, level);
 
 		level.addItemToSpawn(new PotionOfHaste());
 
 		entrance.set( Door.Type.REGULAR );
+	}
+
+	public boolean canPlaceWater(Point p){
+		return false;
 	}
 
 	private static Item prize(Level level ) {
@@ -221,7 +231,16 @@ public class SentryRoom extends SpecialRoom {
 		}
 		return true;
 	}
-
+	
+	public static void aquaBrew(int cell) {
+		if(Dungeon.level instanceof RegularLevel) {
+			RegularLevel level = (RegularLevel)Dungeon.level;
+			if(level.room(cell) instanceof SentryRoom) {
+				GameScene.Polished.blockInput(3f);
+				GLog.n(Messages.get(SentryRoom.class, "aqua_brew"));
+			}
+		}
+	}
 	public static class Sentry extends NPC {
 
 		{
@@ -237,6 +256,8 @@ public class SentryRoom extends SpecialRoom {
 
 		@Override
 		protected boolean act() {
+			if(paralysed > 0) return super.act();
+
 			if (Dungeon.level.heroFOV[pos]){
 				Bestiary.setSeen(getClass());
 			}
@@ -252,7 +273,7 @@ public class SentryRoom extends SpecialRoom {
 
 			if (Dungeon.hero != null){
 				if (fieldOfView[Dungeon.hero.pos]
-						&& Dungeon.level.map[Dungeon.hero.pos] == Terrain.EMPTY_SP
+						&& (Dungeon.level.map[Dungeon.hero.pos] == Terrain.EMPTY_SP || Dungeon.level.map[Dungeon.hero.pos] == Terrain.WATER)
 						&& room.inside(Dungeon.level.cellToPoint(Dungeon.hero.pos))
 						&& !Dungeon.hero.belongings.lostInventory()){
 
@@ -316,10 +337,10 @@ public class SentryRoom extends SpecialRoom {
 			//do nothing
 		}
 
-		@Override
+		/*@Override
 		public boolean add( Buff buff ) {
 			return false;
-		}
+		}*/
 
 		@Override
 		public boolean reset() {
@@ -454,6 +475,13 @@ public class SentryRoom extends SpecialRoom {
 			}
 		}
 
+	}
+
+	public static class SentryID extends LandmarkBlob {
+		@Override
+		public Notes.Landmark landmark() {
+			return Notes.Landmark.RED_SENTRY;
+		}
 	}
 
 }

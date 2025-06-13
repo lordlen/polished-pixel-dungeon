@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,16 +72,21 @@ public class BlacksmithSprite extends MobSprite {
 		}
 	}
 	
+	public static float fadeout = 1f;
 	@Override
 	public void onComplete( Animation anim ) {
 		super.onComplete( anim );
 		
 		if (visible && emitter != null && anim == idle) {
 			emitter.burst( Speck.factory( Speck.FORGE ), 3 );
-			if (!Music.INSTANCE.paused()) {
-				float volume = 0.2f / (Dungeon.level.distance(ch.pos, Dungeon.hero.pos));
+			if (!Music.INSTANCE.paused() && fadeout > 0) {
+				float volume = fadeout * 0.2f / (Dungeon.level.distance(ch.pos, Dungeon.hero.pos));
 				Sample.INSTANCE.play(Assets.Sounds.EVOKE, volume, volume, 0.8f);
+				fadeout -= Math.max(fadeout / 8f, 0.041f);
 			}
+		}
+		if(!visible || Music.INSTANCE.paused()) {
+			fadeout = 1f;
 		}
 	}
 

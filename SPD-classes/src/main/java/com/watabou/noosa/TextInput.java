@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,12 @@ package com.watabou.noosa;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -89,6 +92,20 @@ public class TextInput extends Component {
 					super.copy();
 					onClipBoardUpdate();
 				}
+				
+				@Override
+				protected InputListener createInputListener() {
+					return new TextAreaListener() {
+						@Override
+						public boolean keyDown(InputEvent event, int keycode) {
+							if(keycode == Input.Keys.ESCAPE) {
+								escapePressed();
+								return true;
+							}
+							return super.keyDown(event, keycode);
+						}
+					};
+				}
 			};
 		} else {
 			textField = new TextField("", style){
@@ -102,6 +119,20 @@ public class TextInput extends Component {
 				public void copy() {
 					super.copy();
 					onClipBoardUpdate();
+				}
+				
+				@Override
+				protected InputListener createInputListener() {
+					return new TextFieldClickListener() {
+						@Override
+						public boolean keyDown(InputEvent event, int keycode) {
+							if(keycode == Input.Keys.ESCAPE) {
+								escapePressed();
+								return true;
+							}
+							return super.keyDown(event, keycode);
+						}
+					};
 				}
 			};
 		}
@@ -147,6 +178,10 @@ public class TextInput extends Component {
 
 	public void enterPressed(){
 		//fires any time enter is pressed, do nothing by default
+	};
+	
+	public void escapePressed(){
+		//fires any time escape is pressed, do nothing by default
 	};
 
 	public void onChanged(){

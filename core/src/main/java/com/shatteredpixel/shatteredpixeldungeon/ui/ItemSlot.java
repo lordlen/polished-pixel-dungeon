@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,14 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -36,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Rect;
 
 public class ItemSlot extends Button {
@@ -142,14 +146,27 @@ public class ItemSlot extends Button {
 		
 		if (extra != null) {
 			extra.x = x + (width - extra.width()) - margin.right;
-			extra.y = y + margin.top;
-			PixelScene.align(extra);
-
-			if ((status.width() + extra.width()) > width){
-				extra.visible = false;
-			} else if (item != null) {
-				extra.visible = true;
+			extra.y = margin.top + y;
+			
+			if(item instanceof WealthDrop) {
+				extra.x--;
+				extra.y = margin.top + bottom() - extra.height() - 0;
+				
+				if (extra.width() > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
 			}
+			else {
+				if ((status.width() + extra.width()) > width){
+					extra.visible = false;
+				} else if (item != null) {
+					extra.visible = true;
+				}
+			}
+			
+			PixelScene.align(extra);
 		}
 
 		if (itemIcon != null){
@@ -238,16 +255,31 @@ public class ItemSlot extends Button {
 				&& ((MissileWeapon) item).durabilityLeft() <= 50f
 				&& ((MissileWeapon) item).durabilityLeft() <= ((MissileWeapon) item).durabilityPerUse()){
 			status.hardlight(WARNING);
-		} else {
+		}
+		else if (item instanceof SpiritBow) {
+			((SpiritBow) item).statusColor(status);
+		}
+		else {
 			status.resetColor();
 		}
 
-		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()))){
-			extra.text( null );
+		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
 
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
 			itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
 			add(itemIcon);
+			
+			if(item instanceof WealthDrop) {
+				extra.text( ((WealthDrop) item).dropExtra() );
+				((WealthDrop) item).dropColor(extra);
+				
+				extra.scale.set(PixelScene.align(0.9f));
+				extra.measure();
+			} else {
+				extra.text( null );
+				extra.resetColor();
+				extra.scale.set(1f);
+			}
 
 		} else if (item instanceof Weapon || item instanceof Armor) {
 
@@ -273,6 +305,7 @@ public class ItemSlot extends Button {
 		} else {
 
 			extra.text( null );
+			extra.resetColor();
 
 		}
 
@@ -284,9 +317,10 @@ public class ItemSlot extends Button {
 			level.measure();
 			if (trueLvl == buffedLvl || buffedLvl <= 0) {
 				if (buffedLvl > 0){
-					if ((item instanceof Weapon && ((Weapon) item).curseInfusionBonus)
-						|| (item instanceof Armor && ((Armor) item).curseInfusionBonus)
-							|| (item instanceof Wand && ((Wand) item).curseInfusionBonus)){
+					if ((item instanceof Wand && ((Wand) item).curseInfusionBonus)
+						|| (item instanceof Weapon && ((Weapon) item).curseInfusionBonus)
+							|| (item instanceof Armor && ((Armor) item).curseInfusion())
+								|| (item instanceof BrokenSeal && ((BrokenSeal) item).curseInfusion())) {
 						level.hardlight(CURSE_INFUSED);
 					} else {
 						level.hardlight(UPGRADED);

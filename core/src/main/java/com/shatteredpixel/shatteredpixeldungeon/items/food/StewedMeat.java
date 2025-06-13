@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,45 +35,6 @@ public class StewedMeat extends Food {
 	@Override
 	public int value() {
 		return 8 * quantity;
-	}
-	
-	public static class oneMeat extends Recipe.SimpleRecipe{
-		{
-			inputs =  new Class[]{MysteryMeat.class};
-			inQuantity = new int[]{1};
-			
-			cost = 1;
-			
-			output = StewedMeat.class;
-			outQuantity = 1;
-		}
-	}
-	
-	public static class twoMeat extends Recipe.SimpleRecipe{
-		{
-			inputs =  new Class[]{MysteryMeat.class};
-			inQuantity = new int[]{2};
-			
-			cost = 2;
-			
-			output = StewedMeat.class;
-			outQuantity = 2;
-		}
-	}
-	
-	//red meat
-	//blue meat
-	
-	public static class threeMeat extends Recipe.SimpleRecipe{
-		{
-			inputs =  new Class[]{MysteryMeat.class};
-			inQuantity = new int[]{3};
-			
-			cost = 2;
-			
-			output = StewedMeat.class;
-			outQuantity = 3;
-		}
 	}
 
 }

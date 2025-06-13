@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.journal;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -222,6 +223,10 @@ public enum Document {
 	public String title(){
 		return Messages.get( this, name() + ".title");
 	}
+
+	public String discoverHint(){
+		return Messages.get( this, name() + ".discover_hint");
+	}
 	
 	public String pageTitle( String page ){
 		return Messages.get( this, name() + "." + page + ".title");
@@ -250,81 +255,84 @@ public enum Document {
 	public static final String GUIDE_SEARCHING      = "Searching";
 
 	public static final String KING_ATTRITION       = "attrition";
-
-	//pages and default states
-	static {
-		boolean debug = DeviceCompat.isDebug();
+	
+	
+	public static void init(boolean unlock) {
 		//hero gets these when guidebook is collected
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_INTRO,          READ);
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_EXAMINING,      READ);
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_SURPRISE_ATKS,  READ);
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_IDING,          READ);
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_FOOD,           READ);
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_ALCHEMY,        READ);
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_DIEING,         READ);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_INTRO,          	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_EXAMINING,      	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_SURPRISE_ATKS,  	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_IDING,          	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_FOOD,           	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_ALCHEMY,        	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_DIEING,         	unlock ? READ : NOT_FOUND);
 		//given in sewers
-		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_SEARCHING,      READ);
-		ADVENTURERS_GUIDE.pagesStates.put("Strength",           READ);
-		ADVENTURERS_GUIDE.pagesStates.put("Upgrades",           READ);
-		ADVENTURERS_GUIDE.pagesStates.put("Looting",            READ);
-		ADVENTURERS_GUIDE.pagesStates.put("Levelling",          READ);
-		ADVENTURERS_GUIDE.pagesStates.put("Positioning",        READ);
-		ADVENTURERS_GUIDE.pagesStates.put("Magic",              READ);
+		ADVENTURERS_GUIDE.pagesStates.put(GUIDE_SEARCHING,      	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put("Strength",           	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put("Upgrades",           	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put("Looting",            	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put("Levelling",          	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put("Positioning",        	unlock ? READ : NOT_FOUND);
+		ADVENTURERS_GUIDE.pagesStates.put("Magic",              	unlock ? READ : NOT_FOUND);
 		
 		//given in sewers
-		ALCHEMY_GUIDE.pagesStates.put("Potions",                READ);
-		ALCHEMY_GUIDE.pagesStates.put("Stones",                 READ);
-		ALCHEMY_GUIDE.pagesStates.put("Energy_Food",            READ);
-		ALCHEMY_GUIDE.pagesStates.put("Exotic_Potions",         READ);
-		ALCHEMY_GUIDE.pagesStates.put("Exotic_Scrolls",         READ);
+		ALCHEMY_GUIDE.pagesStates.put("Potions",                	unlock ? READ : NOT_FOUND);
+		ALCHEMY_GUIDE.pagesStates.put("Stones",                 	unlock ? READ : NOT_FOUND);
+		ALCHEMY_GUIDE.pagesStates.put("Energy_Food",            	unlock ? READ : NOT_FOUND);
+		ALCHEMY_GUIDE.pagesStates.put("Exotic_Potions",         	unlock ? READ : NOT_FOUND);
+		ALCHEMY_GUIDE.pagesStates.put("Exotic_Scrolls",         	unlock ? READ : NOT_FOUND);
 		//given in prison
-		ALCHEMY_GUIDE.pagesStates.put("Bombs",                  READ);
-		ALCHEMY_GUIDE.pagesStates.put("Weapons",                READ);
-		ALCHEMY_GUIDE.pagesStates.put("Brews_Elixirs",          READ);
-		ALCHEMY_GUIDE.pagesStates.put("Spells",                 READ);
-
-		INTROS.pagesStates.put("Dungeon",                       READ);
-		INTROS.pagesStates.put("Sewers",                        READ);
-		INTROS.pagesStates.put("Prison",                        READ);
-		INTROS.pagesStates.put("Caves",                         READ);
-		INTROS.pagesStates.put("City",                          READ);
-		INTROS.pagesStates.put("Halls",                         READ);
-
-		SEWERS_GUARD.pagesStates.put("new_position",            READ);
-		SEWERS_GUARD.pagesStates.put("dangerous",               READ);
-		SEWERS_GUARD.pagesStates.put("crabs",                   READ);
-		SEWERS_GUARD.pagesStates.put("guild",                   READ);
-		SEWERS_GUARD.pagesStates.put("lost",                    READ);
-		SEWERS_GUARD.pagesStates.put("not_worth",               READ);
-
-		PRISON_WARDEN.pagesStates.put("journal",                READ);
-		PRISON_WARDEN.pagesStates.put("recruits",               READ);
-		PRISON_WARDEN.pagesStates.put("mines",                  READ);
-		PRISON_WARDEN.pagesStates.put("rotberry",               READ);
-		PRISON_WARDEN.pagesStates.put("no_support",             READ);
-		PRISON_WARDEN.pagesStates.put("letter",                 READ);
-
-		CAVES_EXPLORER.pagesStates.put("expedition",            READ);
-		CAVES_EXPLORER.pagesStates.put("gold",                  READ);
-		CAVES_EXPLORER.pagesStates.put("troll",                 READ);
-		CAVES_EXPLORER.pagesStates.put("city",                  READ);
-		CAVES_EXPLORER.pagesStates.put("alive",                 READ);
-		CAVES_EXPLORER.pagesStates.put("report",                READ);
-
-		CITY_WARLOCK.pagesStates.put("old_king",                READ);
-		CITY_WARLOCK.pagesStates.put("resistance",              READ);
-		CITY_WARLOCK.pagesStates.put("failure",                 READ);
-		CITY_WARLOCK.pagesStates.put("more_powerful",           READ);
-		CITY_WARLOCK.pagesStates.put("new_power",               READ);
-		CITY_WARLOCK.pagesStates.put("seen_it",                 READ);
-
-		HALLS_KING.pagesStates.put("Rejection",                 READ);
-		HALLS_KING.pagesStates.put("amulet",                    READ);
-		HALLS_KING.pagesStates.put("ritual",                    READ);
-		HALLS_KING.pagesStates.put("new_king",                  READ);
-		HALLS_KING.pagesStates.put("thing",                     READ);
-		HALLS_KING.pagesStates.put(KING_ATTRITION,              NOT_FOUND);
-
+		ALCHEMY_GUIDE.pagesStates.put("Bombs",                  	unlock ? READ : NOT_FOUND);
+		ALCHEMY_GUIDE.pagesStates.put("Weapons",                	unlock ? READ : NOT_FOUND);
+		ALCHEMY_GUIDE.pagesStates.put("Brews_Elixirs",          	unlock ? READ : NOT_FOUND);
+		ALCHEMY_GUIDE.pagesStates.put("Spells",                 	unlock ? READ : NOT_FOUND);
+		
+		INTROS.pagesStates.put("Dungeon",                       	READ);
+		INTROS.pagesStates.put("Sewers",                        	unlock ? READ : NOT_FOUND);
+		INTROS.pagesStates.put("Prison",                        	unlock ? READ : NOT_FOUND);
+		INTROS.pagesStates.put("Caves",                         	unlock ? READ : NOT_FOUND);
+		INTROS.pagesStates.put("City",                          	unlock ? READ : NOT_FOUND);
+		INTROS.pagesStates.put("Halls",                         	unlock ? READ : NOT_FOUND);
+		
+		SEWERS_GUARD.pagesStates.put("new_position",            	unlock ? READ : NOT_FOUND);
+		SEWERS_GUARD.pagesStates.put("dangerous",               	unlock ? READ : NOT_FOUND);
+		SEWERS_GUARD.pagesStates.put("crabs",                   	unlock ? READ : NOT_FOUND);
+		SEWERS_GUARD.pagesStates.put("guild",                   	unlock ? READ : NOT_FOUND);
+		SEWERS_GUARD.pagesStates.put("lost",                    	unlock ? READ : NOT_FOUND);
+		SEWERS_GUARD.pagesStates.put("not_worth",               	unlock ? READ : NOT_FOUND);
+		
+		PRISON_WARDEN.pagesStates.put("journal",                	unlock ? READ : NOT_FOUND);
+		PRISON_WARDEN.pagesStates.put("recruits",               	unlock ? READ : NOT_FOUND);
+		PRISON_WARDEN.pagesStates.put("mines",                  	unlock ? READ : NOT_FOUND);
+		PRISON_WARDEN.pagesStates.put("rotberry",               	unlock ? READ : NOT_FOUND);
+		PRISON_WARDEN.pagesStates.put("no_support",             	unlock ? READ : NOT_FOUND);
+		PRISON_WARDEN.pagesStates.put("letter",                 	unlock ? READ : NOT_FOUND);
+		
+		CAVES_EXPLORER.pagesStates.put("expedition",            	unlock ? READ : NOT_FOUND);
+		CAVES_EXPLORER.pagesStates.put("gold",                  	unlock ? READ : NOT_FOUND);
+		CAVES_EXPLORER.pagesStates.put("troll",                 	unlock ? READ : NOT_FOUND);
+		CAVES_EXPLORER.pagesStates.put("city",                  	unlock ? READ : NOT_FOUND);
+		CAVES_EXPLORER.pagesStates.put("alive",                 	unlock ? READ : NOT_FOUND);
+		CAVES_EXPLORER.pagesStates.put("report",                	unlock ? READ : NOT_FOUND);
+		
+		CITY_WARLOCK.pagesStates.put("old_king",                	unlock ? READ : NOT_FOUND);
+		CITY_WARLOCK.pagesStates.put("resistance",              	unlock ? READ : NOT_FOUND);
+		CITY_WARLOCK.pagesStates.put("failure",                 	unlock ? READ : NOT_FOUND);
+		CITY_WARLOCK.pagesStates.put("more_powerful",           	unlock ? READ : NOT_FOUND);
+		CITY_WARLOCK.pagesStates.put("new_power",               	unlock ? READ : NOT_FOUND);
+		CITY_WARLOCK.pagesStates.put("seen_it",                 	unlock ? READ : NOT_FOUND);
+		
+		HALLS_KING.pagesStates.put("Rejection",                 	unlock ? READ : NOT_FOUND);
+		HALLS_KING.pagesStates.put("amulet",                    	unlock ? READ : NOT_FOUND);
+		HALLS_KING.pagesStates.put("ritual",                    	unlock ? READ : NOT_FOUND);
+		HALLS_KING.pagesStates.put("new_king",                  	unlock ? READ : NOT_FOUND);
+		HALLS_KING.pagesStates.put("thing",                     	unlock ? READ : NOT_FOUND);
+		HALLS_KING.pagesStates.put(KING_ATTRITION,              	NOT_FOUND);
+	}
+	
+	//pages and default states
+	static {
+		init(false);
 	}
 	
 	private static final String DOCUMENTS = "documents";

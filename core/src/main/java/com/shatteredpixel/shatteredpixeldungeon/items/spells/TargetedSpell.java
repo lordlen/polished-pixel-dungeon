@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,9 +69,13 @@ public abstract class TargetedSpell extends Spell {
 				final TargetedSpell curSpell;
 				if (curItem instanceof TargetedSpell) {
 					curSpell = (TargetedSpell)curItem;
-				} else {
-					return;
 				}
+				else if(curItem instanceof WealthSpell) {
+					WealthSpell wealthSpell = (WealthSpell)curItem;
+					if(wealthSpell.item() instanceof TargetedSpell) curSpell = (TargetedSpell) wealthSpell.item();
+					else return;
+				}
+				else return;
 				
 				final Ballistica shot = new Ballistica( curUser.pos, target, curSpell.collisionProperties);
 				int cell = shot.collisionPos;
@@ -93,6 +97,7 @@ public abstract class TargetedSpell extends Spell {
 						Invisibility.dispel();
 						curSpell.updateQuickslot();
 						curUser.spendAndNext( 1f );
+
 						Catalog.countUse(curSpell.getClass());
 						if (Random.Float() < curSpell.talentChance){
 							Talent.onScrollUsed(curUser, curUser.pos, curSpell.talentFactor, curSpell.getClass());

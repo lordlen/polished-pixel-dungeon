@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.SparseArray;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public abstract class Actor implements Bundlable {
 	
@@ -61,9 +62,7 @@ public abstract class Actor implements Bundlable {
 		float partial = time % TICK;
 		if(partial < 0) partial++;
 
-		//do we wanna use spendConstant()? there might be unwanted rounding...
 		spendConstant(partial);
-		//this.time += partial;
 
 		return partial;
 	}

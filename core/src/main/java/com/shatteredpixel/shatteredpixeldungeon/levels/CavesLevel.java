@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ public class CavesLevel extends RegularLevel {
 	protected Painter painter() {
 		return new CavesPainter()
 				.setWater(feeling == Feeling.WATER ? 0.85f : 0.30f, 6)
-				.setGrass(feeling == Feeling.GRASS ? 0.65f : 0.15f, 3)
+				.setGrass(feeling == Feeling.GRASS ? 0.60f : 0.15f, 3)
 				.setTraps(nTraps(), trapClasses(), trapChances());
 	}
 	
@@ -199,6 +199,9 @@ public class CavesLevel extends RegularLevel {
 				return Messages.get(CavesLevel.class, "high_grass_name");
 			case Terrain.WATER:
 				return Messages.get(CavesLevel.class, "water_name");
+			case Terrain.REGION_DECO:
+			case Terrain.REGION_DECO_ALT:
+				return Messages.get(CavesLevel.class, "region_deco_name");
 			default:
 				return super.tileName( tile );
 		}
@@ -218,6 +221,9 @@ public class CavesLevel extends RegularLevel {
 				return Messages.get(CavesLevel.class, "wall_deco_desc");
 			case Terrain.BOOKSHELF:
 				return Messages.get(CavesLevel.class, "bookshelf_desc");
+			case Terrain.REGION_DECO:
+			case Terrain.REGION_DECO_ALT:
+				return Messages.get(CavesLevel.class, "region_deco_desc");
 			default:
 				return super.tileDesc( tile );
 		}

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.FoundItems;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
@@ -99,6 +100,18 @@ public abstract class Scroll extends Item {
 	{
 		stackable = true;
 		defaultAction = AC_READ;
+	}
+
+	@Override
+	public boolean doPickUp(Hero hero, int pos) {
+		boolean picked = super.doPickUp(hero, pos);
+
+		if(picked && Polished_toFind) {
+			FoundItems.add(getClass(), Dungeon.depth);
+			Polished_toFind = false;
+		}
+
+		return picked;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -199,7 +212,7 @@ public abstract class Scroll extends Item {
 		curUser.busy();
 		((HeroSprite)curUser.sprite).read();
 
-		if (!anonymous) {
+		if (!anonymous || Polished_wealthDrop != null) {
 			Catalog.countUse(getClass());
 			if (Random.Float() < talentChance) {
 				Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());

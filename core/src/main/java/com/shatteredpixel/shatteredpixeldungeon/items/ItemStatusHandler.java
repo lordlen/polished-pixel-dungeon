@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
@@ -193,11 +195,21 @@ public class ItemStatusHandler<T extends Item> {
 	}
 	
 	public void know( T item ) {
-		known.add( (Class<? extends T>)item.getClass() );
+		know( (Class<? extends T>)item.getClass() );
 	}
 	
 	public void know( Class<?extends T> itemCls ){
-		known.add( itemCls );
+		if(known.add( itemCls )) {
+			WealthDrop.onId();
+			
+			if(SPDSettings.Polished.removeNotes()) {
+				Notes.CustomRecord rec;
+				do {
+					rec = Notes.findCustomRecord(itemCls);
+					Notes.remove(rec);
+				} while(rec != null);
+			}
+		}
 	}
 	
 	public HashSet<Class<? extends T>> known() {

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -115,7 +116,7 @@ public class WandOfBlastWave extends DamageWand {
 			if ((ch.isAlive() || ch.flying || !Dungeon.level.pit[ch.pos])
 					&& bolt.path.size() > bolt.dist+1 && ch.pos == bolt.collisionPos) {
 				Ballistica trajectory = new Ballistica(ch.pos, bolt.path.get(bolt.dist + 1), Ballistica.MAGIC_BOLT);
-				int strength = buffedLvl() + 2;
+				int strength = 2 + buffedLvl();
 				throwChar(ch, trajectory, strength, false, true, this);
 			}
 		}
@@ -127,7 +128,7 @@ public class WandOfBlastWave extends DamageWand {
 		if (ch.properties().contains(Char.Property.BOSS)) {
 			power = (power+1)/2;
 		}
-		if(ch.buff(ChampionEnemy.AntiMagic.class) != null) {
+		if(ch.buff(ChampionEnemy.AntiMagic.class) != null && cause instanceof WandOfBlastWave) {
 			power = Math.min(power, 1);
 		}
 
@@ -177,7 +178,7 @@ public class WandOfBlastWave extends DamageWand {
 				if (finalCollided && ch.isActive()) {
 					ch.damage(Random.NormalIntRange(finalDist, 2*finalDist), new Knockback());
 					if (ch.isActive()) {
-						Paralysis.prolong(ch, Paralysis.class, 1 + finalDist/2f);
+						Buff.Polished.prolongAligned(ch, Paralysis.class, 0.75f + finalDist/2f);
 					} else if (ch == Dungeon.hero){
 						if (cause instanceof WandOfBlastWave){
 							Badges.validateDeathFromFriendlyMagic();

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,11 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.AlbinoSprite;
 import com.watabou.utils.Random;
@@ -38,6 +40,17 @@ public class Albino extends Rat {
 		
 		loot = MysteryMeat.class;
 		lootChance = 1f;
+	}
+
+	@Override
+	public float lootChance() {
+		return Dungeon.LimitedDrops.ALBINO_MEAT.count < 6 ? super.lootChance() : 0;
+	}
+
+	@Override
+	public Item createLoot(){
+		Dungeon.LimitedDrops.ALBINO_MEAT.count++;
+		return super.createLoot();
 	}
 	
 	@Override

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,11 +100,9 @@ public class WandOfFrost extends DamageWand {
 
 			if (ch.isAlive()){
 				if (Dungeon.level.water[ch.pos])
-					//Buff.Polished.affectAligned(ch, Chill.class, 4+buffedLvl());
-					Buff.affect(ch, Chill.class, 4+buffedLvl());
+					Buff.Polished.affectAligned(ch, Chill.class, 4+buffedLvl());
 				else
-					//Buff.Polished.affectAligned(ch, Chill.class, 2+buffedLvl());
-					Buff.affect(ch, Chill.class, 2+buffedLvl());
+					Buff.Polished.affectAligned(ch, Chill.class, 2+buffedLvl());
 			}
 		} else {
 			Dungeon.level.pressCell(bolt.collisionPos);
@@ -147,8 +145,7 @@ public class WandOfFrost extends DamageWand {
 					}
 
 					public boolean act() {
-						//Buff.Polished.affectAligned(target, Frost.class, Math.round(Frost.DURATION * powerMulti));
-						Buff.affect(target, Frost.class, Math.round(Frost.DURATION * powerMulti));
+						Buff.Polished.affectAligned(target, Frost.class, Math.round(Frost.DURATION * powerMulti));
 						return super.act();
 					}
 				}.attachTo(defender);

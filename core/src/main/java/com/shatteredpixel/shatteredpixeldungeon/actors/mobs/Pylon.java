@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ public class Pylon extends Mob {
 	{
 		spriteClass = PylonSprite.class;
 
-		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 80 : 50;
+		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 100 : 60;
 
 		maxLvl = -2;
 
@@ -198,8 +198,9 @@ public class Pylon extends Mob {
 	@Override
 	public void damage(int dmg, Object src) {
 		if (dmg >= 15){
-			//takes 15/16/17/18/19/20 dmg at 15/17/20/24/29/36 incoming dmg
-			dmg = 14 + (int)(Math.sqrt(8*(dmg - 14) + 1) - 1)/2;
+			//OLD: takes 15/16/17/18/19/20 dmg at 15/17/20/24/29/36 incoming dmg
+			//POLISHED: punishes big damage less (sqrt -> pow 0.75)
+			dmg = 14 + (int)Math.round((Math.pow( 2.75*(dmg - 14) + 1, 0.75 ) - 1) / 2);
 		}
 
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);

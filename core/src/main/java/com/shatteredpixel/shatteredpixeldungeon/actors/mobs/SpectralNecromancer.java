@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.NecromancerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SpectralNecromancerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
@@ -106,7 +105,7 @@ public class SpectralNecromancer extends Necromancer {
 		if (Actor.findChar(summoningPos) != null) {
 
 			//cancel if character cannot be moved, except if there's no other summon positions
-			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE) && polished.alt_pos){
+			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE) && polished.altPos){
 				summoning = false;
 				((SpectralNecromancerSprite)sprite).finishSummoning();
 				spend(-TICK);

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,8 +70,8 @@ public class PotionOfHealing extends Potion {
 	}
 
 	public static void pharmacophobiaProc( Hero hero ){
-		// harms the hero for ~40% of their max HP in poison
-		Buff.affect( hero, Poison.class).set(4 + hero.lvl/2);
+		// harms the hero for ~25% of their max HP in poison
+		Buff.affect( hero, Poison.class).set(3 + hero.lvl/2);
 	}
 	
 	public static void cure( Char ch ) {

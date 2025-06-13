@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,8 @@ import java.util.ArrayList;
 
 public class Food extends Item {
 
-	public static final float TIME_TO_EAT	= 3f;
+	public static final float TIME_TO_EAT		= 2f;
+	public static final float TIME_TO_EAT_MEAL	= 1f;
 	
 	public static final String AC_EAT	= "EAT";
 	
@@ -105,7 +106,7 @@ public class Food extends Item {
 			|| Dungeon.hero.hasTalent(Talent.INVIGORATING_MEAL)
 			|| Dungeon.hero.hasTalent(Talent.FOCUSED_MEAL)
 			|| Dungeon.hero.hasTalent(Talent.ENLIGHTENING_MEAL)){
-			return TIME_TO_EAT - 2;
+			return TIME_TO_EAT_MEAL;
 		} else {
 			return TIME_TO_EAT;
 		}

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,9 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Fireball;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
@@ -116,14 +119,15 @@ public class TitleScene extends PixelScene {
 		final Chrome.Type GREY_TR = Chrome.Type.GREY_BUTTON_TR;
 		
 		StyledButton btnPlay = new StyledButton(GREY_TR, Messages.get(this, "enter")){
+			
 			@Override
 			protected void onClick() {
 				if (GamesInProgress.checkAll().size() == 0){
 					GamesInProgress.selectedClass = null;
 					GamesInProgress.curSlot = 1;
-					ShatteredPixelDungeon.switchScene(HeroSelectScene.class);
+					ShatteredPixelDungeon.switchScene(HeroSelectScene.class, Polished_introCallback);
 				} else {
-					ShatteredPixelDungeon.switchNoFade( StartScene.class );
+					ShatteredPixelDungeon.switchNoFade( StartScene.class, Polished_introCallback );
 				}
 			}
 			
@@ -232,6 +236,11 @@ public class TitleScene extends PixelScene {
 			add(new WndVictoryCongrats());
 		}
 
+		if (DeviceCompat.isDebug()) {
+			Catalog.Polished_setSeenAll();
+			Bestiary.Polished_setSeenAll();
+		}
+
 		fadeIn();
 	}
 
@@ -243,6 +252,36 @@ public class TitleScene extends PixelScene {
 		align(fb);
 		add( fb );
 	}
+	
+	public static Game.SceneChangeCallback Polished_introCallback = new Game.SceneChangeCallback() {
+		@Override
+		public void beforeCreate() {}
+		
+		@Override
+		public void afterCreate() {
+			if(!SPDSettings.intro()) return;
+			
+			ShatteredPixelDungeon.scene().add(new WndOptions(Icons.SHPX.get(),
+					Messages.get(TitleScene.class, "experienced_title"),
+					"",
+					Messages.get(TitleScene.class, "experienced_yes"),
+					Messages.get(TitleScene.class, "experienced_no")){
+				
+				@Override
+				protected void onSelect(int index) {
+					SPDSettings.intro(index == 1);
+					
+					if(index == 0) {
+						ShatteredPixelDungeon.seamlessResetScene();
+						Document.init(true);
+					}
+				}
+				
+				@Override
+				public void onBackPressed() {}
+			});
+		}
+	};
 
 	private static class NewsButton extends StyledButton {
 

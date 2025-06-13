@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,9 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CrabSprite;
 import com.watabou.utils.Random;
@@ -41,7 +43,19 @@ public class Crab extends Mob {
 		maxLvl = 9;
 		
 		loot = MysteryMeat.class;
-		lootChance = 0.167f;
+		lootChance = 0.25f;
+	}
+
+	@Override
+	public float lootChance() {
+		if(this instanceof GreatCrab) 	return super.lootChance();
+		else 							return super.lootChance() * ((6f - Dungeon.LimitedDrops.CRAB_MEAT.count) / 6f);
+	}
+
+	@Override
+	public Item createLoot(){
+		Dungeon.LimitedDrops.CRAB_MEAT.count++;
+		return super.createLoot();
 	}
 	
 	@Override

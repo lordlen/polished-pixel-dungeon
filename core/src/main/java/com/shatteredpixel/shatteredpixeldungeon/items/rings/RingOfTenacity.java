@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,9 +69,8 @@ public class RingOfTenacity extends Ring {
 	}
 	
 	public static float damageMultiplier( Char t ){
-		float min = .15f;
-
 		//scales at 15%-100%, caps at 15% hp
+		float min = .15f;
 		float missingHP = (float)(t.HT - t.HP) / t.HT;
 		missingHP = Math.min(missingHP, 0.85f);
 		missingHP += min;
