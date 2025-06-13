@@ -90,6 +90,10 @@ public abstract class ShieldBuff extends Buff {
 		if (target != null) target.needsShieldUpdate = true;
 	}
 	
+	public void clearShield(){
+		decShield(shielding());
+	}
+	
 	//returns the amount of damage leftover
 	public int absorbDamage( int dmg ){
 		if (shielding >= dmg){

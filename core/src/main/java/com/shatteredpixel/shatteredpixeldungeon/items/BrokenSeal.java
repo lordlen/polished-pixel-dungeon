@@ -399,10 +399,6 @@ public class BrokenSeal extends Item {
 			}
 		}
 		
-		public synchronized void clearShield(){
-			decShield(shielding());
-		}
-		
 		public synchronized void berserkerRampage(float factor) {
 			int shield = Math.round(factor * maxShield());
 			incShield(shield);
