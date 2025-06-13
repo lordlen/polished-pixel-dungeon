@@ -48,6 +48,8 @@ public class GnollTrickster extends Gnoll {
 
 		HP = HT = 20;
 		defenseSkill = 5;
+		
+		baseSpeed = 5f/6;
 
 		EXP = 5;
 
@@ -78,29 +80,16 @@ public class GnollTrickster extends Gnoll {
 	public int attackProc( Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
 
-		if (combo >= 1){
+		if (combo >= 1 && enemy == Dungeon.hero) {
 			//score loss is on-hit instead of on-attack as it's tied to combo
 			Statistics.questScores[0] -= 50;
 		}
 
 		//The gnoll's attacks get more severe the more the player lets it hit them
 		combo++;
-		int effect = Random.Int(4)+combo;
 
-		if (effect > 2) {
-
-			if (effect >=6 && enemy.buff(Burning.class) == null){
-
-				if (Dungeon.level.flamable[enemy.pos]) {
-					GameScene.add(Blob.seed(enemy.pos, 4, Fire.class));
-				}
-				Buff.affect(enemy, Burning.class).reignite( enemy );
-
-			} else {
-				Buff.affect(enemy, Poison.class).set((effect - 2));
-			}
-
-		}
+		if (combo > 1) Buff.affect( enemy, Poison.class).set(combo + Random.Int(3));
+		if (combo > 3) Buff.affect(enemy, Burning.class).reignite( enemy );
 
 		if(enemy == Dungeon.hero) {
 			GameScene.Polished.queueIndicator(this);
