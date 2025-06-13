@@ -48,6 +48,8 @@ public class GnollTrickster extends Gnoll {
 
 		HP = HT = 20;
 		defenseSkill = 5;
+		
+		baseSpeed = 5f/6;
 
 		EXP = 5;
 
