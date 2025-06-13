@@ -248,19 +248,24 @@ public class Hero extends Char {
 	private ArrayList<Mob> visibleEnemies;
 
 	public static class Polished {
-		public static void Debug_UpdateStats(int newLvl) {
+		public static void Debug_UpdateStats(int newLvl, int newStr) {
+			if(!Debug.DEBUG_MODE) return;
+			
 			Hero hero = Dungeon.hero;
-			if(!Debug.DEBUG_MODE || newLvl <= hero.lvl) return;
-
-			int diff = newLvl - hero.lvl;
-			Dungeon.hero.attackSkill+=diff;
-			Dungeon.hero.defenseSkill+=diff;
-
-			hero.lvl = newLvl;
-			hero.updateHT(true);
-
-			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
-			if(bow != null) bow.Polished_resetCharges();
+			if(newLvl > hero.lvl) {
+				int diff = newLvl - hero.lvl;
+				Dungeon.hero.attackSkill+=diff;
+				Dungeon.hero.defenseSkill+=diff;
+				
+				hero.lvl = newLvl;
+				hero.updateHT(true);
+				
+				SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+				if(bow != null) bow.Polished_resetCharges();
+			}
+			
+			hero.STR = Math.max(hero.STR, newStr);
+			
 		}
 
 		public static boolean noEnemiesLast = false;

@@ -88,17 +88,17 @@ public class Debug {
         
         Starting_Bag();
         SetQuickslots();
-        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
+        
+        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
         MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
-        if(charger != null) charger.gainCharge(charger.chargeCap());
+        if(charger != null) charger.gainCharge(charger.chargeCap() - charger.charges);
         
         
     }
     public static void LoadGame() {
         if(!DEBUG_MODE || !ActOnLoad) return;
         
-        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
-        Dungeon.hero.STR = Math.max(Dungeon.hero.STR, Starting_Str);
+        //Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
         //Starting_Bag();
         
         
