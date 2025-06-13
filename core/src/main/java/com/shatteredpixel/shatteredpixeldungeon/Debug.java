@@ -3,9 +3,11 @@ package com.shatteredpixel.shatteredpixeldungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
@@ -38,13 +40,13 @@ public class Debug {
     public static final boolean DEBUG_MODE = DeviceCompat.isDebug();
 
 
-    private static final boolean DebuggingStats = true;
+    private static final boolean DebuggingStats = false;
     //                                                                  Debug  /  Default
-    public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1f;
-    public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1f;
+    public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1;
+    public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1;
 
-    public static final int Starting_Floor = DebuggingStats ?           6       : 1;
-    public static final int Starting_HeroLevel = DebuggingStats ?       11      : 1;
+    public static final int Starting_Floor = DebuggingStats ?           11      : 1;
+    public static final int Starting_HeroLevel = DebuggingStats ?       15      : 1;
     public static final int Starting_Str = DebuggingStats ?             16      : 10;
     public static final int Starting_HP = DebuggingStats ?              2000    : 20;
 
@@ -60,7 +62,7 @@ public class Debug {
 
 
 
-        if(false && DebuggingStats) {
+        if(true && DebuggingStats) {
             Starting_Items.addAll(Arrays.asList(
                 PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class,
                 ScrollOfMagicMapping.class, PhaseShift.class, ScrollOfUpgrade.class,
@@ -86,17 +88,17 @@ public class Debug {
         
         Starting_Bag();
         SetQuickslots();
-        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
+        
+        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
         MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
-        if(charger != null) charger.gainCharge(charger.chargeCap());
+        if(charger != null) charger.gainCharge(charger.chargeCap() - charger.charges);
         
         
     }
     public static void LoadGame() {
         if(!DEBUG_MODE || !ActOnLoad) return;
         
-        Hero.Polished.Debug_UpdateStats(Starting_HeroLevel);
-        Dungeon.hero.STR = Math.max(Dungeon.hero.STR, Starting_Str);
+        //Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
         //Starting_Bag();
         
         
@@ -167,7 +169,7 @@ public class Debug {
             Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
             if(waterskin != null) waterskin.detachAll(Dungeon.hero.belongings.backpack);
             
-            int index = 0;
+            int index = 1;
             for(Item item : items) {
                 Dungeon.quickslot.setSlot(index, item);
                 index++;

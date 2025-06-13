@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,13 +100,15 @@ public class Item implements Bundlable {
 
 	// whether an item can be included in heroes remains
 	public boolean bones = false;
+
+	public int customNoteID = -1;
 	
 	// for keeping track of floor records
 	public boolean Polished_toFind = false;
 	
 	// for wrapper behaviour
 	protected WealthDrop<?, ?> Polished_wealthDrop = null;
-  
+ 
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
@@ -534,15 +536,16 @@ public class Item implements Bundlable {
 		String info = "";
 
 		if (Dungeon.hero != null) {
-			Notes.CustomRecord note;
-			if (this instanceof EquipableItem) {
-				note = Notes.findCustomRecord(((EquipableItem) this).customNoteID);
-			} else {
-				note = Notes.findCustomRecord(getClass());
-			}
-			if (note != null){
+			Notes.CustomRecord note = Notes.findCustomRecord(customNoteID);
+			if (note != null) {
 				//we swap underscore(0x5F) with low macron(0x2CD) here to avoid highlighting in the item window
 				info += Messages.get(this, "custom_note", note.title().replace('_', 'ˍ')) + "\n\n";
+			} else {
+				note = Notes.findCustomRecord(getClass());
+				if (note != null) {
+					//we swap underscore(0x5F) with low macron(0x2CD) here to avoid highlighting in the item window
+					info += Messages.get(this, "custom_note_type", note.title().replace('_', 'ˍ')) + "\n\n";
+				}
 			}
 		}
 
@@ -601,6 +604,7 @@ public class Item implements Bundlable {
 	private static final String QUICKSLOT		= "quickslotpos";
 	private static final String KEPT_LOST       = "kept_lost";
 	private static final String TO_FIND       	= "to_find";
+	private static final String CUSTOM_NOTE_ID = "custom_note_id";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -614,6 +618,7 @@ public class Item implements Bundlable {
 		}
 		bundle.put( KEPT_LOST, keptThoughLostInvent );
 		bundle.put( TO_FIND, Polished_toFind);
+		if (customNoteID != -1)     bundle.put(CUSTOM_NOTE_ID, customNoteID);
 	}
 	
 	@Override
@@ -640,6 +645,7 @@ public class Item implements Bundlable {
 
 		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
 		Polished_toFind = bundle.getBoolean(TO_FIND);
+		if (bundle.contains(CUSTOM_NOTE_ID))    customNoteID = bundle.getInt(CUSTOM_NOTE_ID);
 	}
 
 	public int targetingPos( Hero user, int dst ){

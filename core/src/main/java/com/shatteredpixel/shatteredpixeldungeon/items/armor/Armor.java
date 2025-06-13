@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,11 +70,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
@@ -113,13 +115,12 @@ public class Armor extends EquipableItem {
 	
 	public Augment augment = Augment.NONE;
 	
-	private Glyph glyph;
-
+	public Glyph glyph;
+	protected BrokenSeal seal;
+	
 	public boolean glyphHardened = false;
 	public boolean curseInfusionBonus = false;
 	public boolean masteryPotionBonus = false;
-	
-	protected BrokenSeal seal;
 	
 	public int tier;
 	
@@ -252,8 +253,6 @@ public class Armor extends EquipableItem {
 
 	@Override
 	public boolean doEquip( Hero hero ) {
-		
-		detach(hero.belongings.backpack);
 
 		// 15/25% chance
 		if (hero.heroClass != HeroClass.CLERIC && hero.hasTalent(Talent.HOLY_INTUITION)
@@ -263,7 +262,10 @@ public class Armor extends EquipableItem {
 			GLog.p(Messages.get(this, "curse_detected"));
 			return false;
 		}
-
+		
+		detach(hero.belongings.backpack);
+		
+		Armor oldArmor = hero.belongings.armor;
 		if (hero.belongings.armor == null || hero.belongings.armor.doUnequip( hero, true, false )) {
 			
 			hero.belongings.armor = this;
@@ -277,7 +279,36 @@ public class Armor extends EquipableItem {
 			((HeroSprite)hero.sprite).updateArmor();
 			activate(hero);
 			Talent.onItemEquipped(hero, this);
-			hero.spendAndNext( timeToEquip( hero ) );
+			hero.spend( timeToEquip( hero ) );
+			
+			BrokenSeal oldSeal = oldArmor != null ? oldArmor.checkSeal() : null;
+			if (oldSeal != null && checkSeal() == null) {
+				GameScene.show(new WndOptions(
+						new ItemSprite(ItemSpriteSheet.SEAL),
+						Messages.titleCase(oldSeal.title()),
+						Messages.get(Armor.class, "seal_transfer"),
+						Messages.get(Armor.class, "seal_transfer_yes"),
+						Messages.get(Armor.class, "seal_transfer_no")) {
+					@Override
+					protected void onSelect(int index) {
+						super.onSelect(index);
+						if (index == 0){
+							oldArmor.detachSeal();
+							Armor.this.affixSeal(oldSeal, true);
+						}
+						
+						hero.next();
+						super.hide();
+					}
+					@Override
+					public void hide() {
+						//do nothing, must press button
+					}
+				});
+			} else {
+				hero.next();
+			}
+			
 			return true;
 			
 		} else {
@@ -297,8 +328,12 @@ public class Armor extends EquipableItem {
 	public BrokenSeal checkSeal(){
 		return seal;
 	}
-
+	
 	public void affixSeal(BrokenSeal seal) {
+		affixSeal(seal, false);
+	}
+	
+	public void affixSeal(BrokenSeal seal, boolean operate) {
 		this.seal = seal;
 		seal.armor = this;
 		
@@ -312,10 +347,25 @@ public class Armor extends EquipableItem {
 			Buff.affect(Dungeon.hero, BrokenSeal.WarriorShield.class).setArmor(this);
 		}
 		
+		if(operate) {
+			GLog.p(Messages.get(BrokenSeal.class, "affix"));
+			Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+			Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
+			
+			seal.detach(Dungeon.hero.belongings.backpack);
+		}
+		
 		Polished_updateDefaultAction();
+		updateQuickslot();
+	}
+	
+	public BrokenSeal detachSeal() {
+		return detachSeal(false);
 	}
 	
 	public BrokenSeal detachSeal(boolean operate) {
+		if(seal == null) return null;
+		
 		BrokenSeal detaching = seal;
 		seal = null;
 		detaching.armor = null;
@@ -334,6 +384,7 @@ public class Armor extends EquipableItem {
 		if(operate) {
 			GLog.i( Messages.get(Armor.class, "detach_seal") );
 			Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+			Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
 			
 			detaching.glyphChosen = false;
 			if (!detaching.collect()){
@@ -353,6 +404,7 @@ public class Armor extends EquipableItem {
 		GLog.i( Messages.get(Armor.class, "swap_glyph") );
 		Dungeon.hero.sprite.operate(Dungeon.hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
+		
 		updateQuickslot();
 	}
 	

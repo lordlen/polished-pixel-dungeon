@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	private static final int ANGER_START = 5;
 	private static final int PREPARATION_START = 3;
 	private static final int RAMPAGE_START = 8;
-	private static final int COOLDOWN_START = 100;
+	private static final int COOLDOWN_START = 120;
 
 	private int ticksLeft;
 	private int cooldown;
@@ -167,9 +167,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		if(facingEnemies() >= 3) {
 			switch (points) {
-				case 1: return 0.83f;
-				case 2: return 0.72f;
-				case 3: return 0.64f;
+				case 1: return 0.82f;
+				case 2: return 0.7f;
+				case 3: return 0.62f;
 
 				case 0: default: return 1f;
 			}
@@ -178,14 +178,22 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	public float damageFactor(){
-		int points = ((Hero)target).pointsInTalent(Talent.LAST_STAND);
-		float lastStand = -1*(resistanceFactor()-1);
-
-		return (state == State.RAMPAGING || state == State.UNDYING) ? 1.4f+lastStand : 1f;
+		if(state == State.RAMPAGING || state == State.UNDYING) {
+			int points = ((Hero)target).pointsInTalent(Talent.LAST_STAND);
+			
+			if(points > 0 && facingEnemies() >= 3 && state == State.UNDYING) {
+				return 1.35f + points * 0.05f;
+			} else {
+				return 1.3f;
+			}
+		}
+		else {
+			return 1f;
+		}
 	}
 
 	public float accuracyFactor(){
-		//Hero gets +acc while preparing, but NOT the +dmg
+		//Hero gets +acc while preparing, but NOT the damage boost
 		return (state == State.RAMPAGING || state == State.UNDYING || state == State.PREPARING) ? 2f : 1f;
 	}
 
@@ -242,8 +250,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	public void onHit() {
-		if(state == State.PREPARING)
+		if(state == State.PREPARING) {
 			startRampage();
+		}
 	}
 
 	private void startRampage(){
@@ -253,10 +262,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		WarriorShield shield = target.buff(WarriorShield.class);
 		if(shield != null) {
-			//WILL CHANGE THIS AFTER WARRIOR REWORK MERGE
-			int shieldAmount = Math.round(3*shield.Polished_reworkShield() * shieldFactor());
-			shield.supercharge(shieldAmount);
-			target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shieldAmount), FloatingText.SHIELDING );
+			shield.berserkerRampage(2 * shieldFactor());
 		}
 
 		Sample.INSTANCE.play(Assets.Sounds.BURNING, 2f, 0.75f);
@@ -287,8 +293,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		}
 
 		WarriorShield shield = target.buff(WarriorShield.class);
-		if(shield != null)
+		if(shield != null) {
 			shield.clearShield();
+		}
 
 		switchState(State.RECOVERING);
 		cooldown = COOLDOWN_START;
@@ -306,8 +313,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				&& ((Hero)target).hasTalent(Talent.UNDYING_RAGE)){
 
 			target.HP = 1;
-			if(state != State.UNDYING)
+			if(state != State.UNDYING) {
 				startRage();
+			}
 		}
 
 		return state == State.UNDYING;
@@ -357,7 +365,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	@Override
 	public Visual secondaryVisual() {
 		BitmapText txt = new BitmapText(PixelScene.pixelFont);
-		txt.text(Messages.decimalFormat("#.#", shieldFactor()) + "x");
+		txt.text(Messages.decimalFormat("#.#", 2*shieldFactor()) + "x");
 		txt.hardlight(CharSprite.POSITIVE);
 		txt.measure();
 		return txt;

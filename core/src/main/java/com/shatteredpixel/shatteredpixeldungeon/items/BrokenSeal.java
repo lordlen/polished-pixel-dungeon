@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,27 +24,34 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndUseItem;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BrokenSeal extends Item {
 
@@ -127,7 +134,8 @@ public class BrokenSeal extends Item {
 	}
 
 	public int maxShield( int armTier, int armLvl ){
-		return armTier + armLvl + Dungeon.hero.pointsInTalent(Talent.IRON_WILL);
+		// 5-15, based on equip tier and iron will
+		return 3 + 2*armTier + Dungeon.hero.pointsInTalent(Talent.IRON_WILL);
 	}
 
 	@Override
@@ -227,22 +235,14 @@ public class BrokenSeal extends Item {
 						@Override
 						protected void onSelect(int index) {
 							seal.glyphChosen = index == 1;
-
-							GLog.p(Messages.get(BrokenSeal.class, "affix"));
-							Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-							Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-							arm.affixSeal(seal);
-							seal.detach(Dungeon.hero.belongings.backpack);
+							
+							arm.affixSeal(seal, true);
 						}
 					});
 				}
 
 				else {
-					GLog.p(Messages.get(BrokenSeal.class, "affix"));
-					Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-					arm.affixSeal(seal);
-					seal.detach(Dungeon.hero.belongings.backpack);
+					arm.affixSeal(seal, true);
 				}
 			}
 		}
@@ -275,39 +275,111 @@ public class BrokenSeal extends Item {
 	public static class WarriorShield extends ShieldBuff {
 
 		{
+			type = buffType.POSITIVE;
+
 			detachesAtZero = false;
+			shieldUsePriority = 2;
 		}
 
 		private Armor armor;
-		private float partialShield;
+
+		private int cooldown = 0;
+		private int turnsSinceEnemies = 0;
+
+		private static final int COOLDOWN_START = 120;
+
+		@Override
+		public int icon() {
+			if (coolingDown() || shielding() > 0){
+				return BuffIndicator.SEAL_SHIELD;
+			} else {
+				return BuffIndicator.NONE;
+			}
+		}
+
+		@Override
+		public void tintIcon(Image icon) {
+			if (coolingDown() && shielding() == 0){
+				icon.brightness(0.3f);
+			} else {
+				icon.resetColor();
+			}
+		}
+
+		@Override
+		public float iconFadePercent() {
+			if (shielding() > 0){
+				return GameMath.gate(0, 1f - shielding()/(float)maxShield(), 1);
+			} else if (coolingDown()){
+				return GameMath.gate(0, cooldown / (float)COOLDOWN_START, 1);
+			} else {
+				return 0;
+			}
+		}
+
+		@Override
+		public String iconTextDisplay() {
+			if (shielding() > 0){
+				return Integer.toString(shielding());
+			} else if (coolingDown()){
+				return Integer.toString(cooldown);
+			} else {
+				return "";
+			}
+		}
+
+		@Override
+		public String desc() {
+			if (shielding() > 0){
+				return Messages.get(this, "desc_active", shielding(), cooldown);
+			} else {
+				return Messages.get(this, "desc_cooldown", cooldown);
+			}
+		}
 
 		@Override
 		public synchronized boolean act() {
-			if (Regeneration.regenOn() && shielding() < maxShield()) {
-				partialShield += 1/30f;
+			if (cooldown > 0 && Regeneration.regenOn()){
+				cooldown--;
+			}
+
+			if (shielding() > 0){
+				if (Dungeon.hero.visibleEnemies() == 0 && Dungeon.hero.buff(Combo.class) == null){
+					turnsSinceEnemies++;
+					if (turnsSinceEnemies >= 5){
+						if (cooldown > 0) {
+							float percentLeft = shielding() / (float)maxShield();
+							//max of 50% cooldown refund
+							cooldown = Math.max(0, (int)(cooldown - COOLDOWN_START * (percentLeft / 2f)));
+						}
+						decShield(shielding());
+					}
+				} else {
+					turnsSinceEnemies = 0;
+				}
 			}
 			
-			while (partialShield >= 1){
-				incShield();
-				partialShield--;
-			}
-			
-			if (shielding() <= 0 && maxShield() <= 0){
+			if (shielding() <= 0 && maxShield() <= 0 && cooldown == 0){
 				detach();
 			}
 			
 			spend(TICK);
 			return true;
 		}
-		
-		public synchronized void supercharge(int maxShield){
-			if (maxShield > shielding()){
-				setShield(maxShield);
-			}
+
+		public synchronized void activate() {
+			incShield(maxShield());
+			cooldown = Math.max(0, cooldown+COOLDOWN_START);
+			turnsSinceEnemies = 0;
 		}
 
-		public synchronized void clearShield(){
-			decShield(shielding());
+		public boolean coolingDown(){
+			return cooldown > 0;
+		}
+
+		public void reduceCooldown(float percentage){
+			cooldown -= Math.round(COOLDOWN_START*percentage);
+			cooldown = Math.max(cooldown, -COOLDOWN_START);
 		}
 
 		public synchronized void setArmor(Armor arm){
@@ -326,18 +398,40 @@ public class BrokenSeal extends Item {
 				return 0;
 			}
 		}
+		
+		public synchronized void berserkerRampage(float factor) {
+			int shield = Math.round(factor * maxShield());
+			incShield(shield);
+			target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING );
+			
+			float percentLeft = shielding() / (float)maxShield();
+			//max of 50% cooldown refund
+			cooldown = (int)(COOLDOWN_START - COOLDOWN_START * (percentLeft / 2f));
+			
+			//make sure it doesn't prematurely end
+			turnsSinceEnemies = -100;
+		}
 
-		//as a placeholder until Warrior rework merge
-		public synchronized int Polished_reworkShield() {
-			//metamorphed iron will logic
-			if (((Hero)target).heroClass != HeroClass.WARRIOR && ((Hero) target).hasTalent(Talent.IRON_WILL)){
-				return ((Hero) target).pointsInTalent(Talent.IRON_WILL);
-			}
+		public static final String COOLDOWN = "cooldown";
+		public static final String TURNS_SINCE_ENEMIES = "turns_since_enemies";
 
-			if (armor != null && armor.isEquipped((Hero)target) && armor.checkSeal() != null) {
-				return 2 + armor.checkSeal().maxShield(2 * armor.tier, 0);
-			} else {
-				return 0;
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(COOLDOWN, cooldown);
+			bundle.put(TURNS_SINCE_ENEMIES, turnsSinceEnemies);
+		}
+
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			if (bundle.contains(COOLDOWN)) {
+				cooldown = bundle.getInt(COOLDOWN);
+				turnsSinceEnemies = bundle.getInt(TURNS_SINCE_ENEMIES);
+
+			//if we have shield from pre-3.1, have it last a bit
+			} else if (shielding() > 0) {
+				turnsSinceEnemies = -100;
 			}
 		}
 	}

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2025 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,6 +102,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Bulk;
@@ -121,6 +122,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportat
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfPsionicBlast;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFrost;
@@ -143,6 +145,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GeyserTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GnollRockfallTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
@@ -314,6 +317,7 @@ public abstract class Char extends Actor {
 			if (Dungeon.hero.subClass == HeroSubClass.FREERUNNER){
 				Buff.affect(Dungeon.hero, Momentum.class).gainStack();
 			}
+			Dungeon.hero.justMoved = true;
 
 			Dungeon.hero.busy();
 		}
@@ -435,7 +439,7 @@ public abstract class Char extends Actor {
 					dmg += 1 + Dungeon.hero.pointsInTalent(Talent.SEARING_LIGHT);
 				}
 				if (this != Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.PRIEST){
-					enemy.damage(Dungeon.hero.lvl, GuidingLight.INSTANCE);
+					enemy.damage(5+Dungeon.hero.lvl, GuidingLight.INSTANCE);
 				}
 			}
 
@@ -443,7 +447,7 @@ public abstract class Char extends Actor {
 			if (berserk != null) dmg *= berserk.damageFactor();
 
 			if (buff( Fury.class ) != null) {
-				dmg *= 1.5f;
+				dmg *= 1.3f;
 			}
 
 			if (buff( PowerOfMany.PowerBuff.class) != null){
@@ -610,7 +614,20 @@ public abstract class Char extends Actor {
 			
 		} else {
 
-			enemy.sprite.showStatus( CharSprite.NEUTRAL, enemy.defenseVerb() );
+			if (enemy.sprite != null){
+				if (tuftDodged){
+					//dooking is a playful sound Ferrets can make, like low pitched chirping
+					// I doubt this will translate, so it's only in English
+					if (Messages.lang() == Languages.ENGLISH && Random.Int(10) == 0) {
+						enemy.sprite.showStatusWithIcon(CharSprite.NEUTRAL, "dooked", FloatingText.TUFT);
+					} else {
+						enemy.sprite.showStatusWithIcon(CharSprite.NEUTRAL, enemy.defenseVerb(), FloatingText.TUFT);
+					}
+				} else {
+					enemy.sprite.showStatus(CharSprite.NEUTRAL, enemy.defenseVerb());
+				}
+			}
+			tuftDodged = false;
 			if (visibleFight) {
 				//TODO enemy.defenseSound? currently miss plays for monks/crab even when they parry
 				Sample.INSTANCE.play(Assets.Sounds.MISS);
@@ -677,6 +694,8 @@ public abstract class Char extends Actor {
 		Berserk berserk = attacker.buff(Berserk.class);
 		if(berserk != null) acuRoll *= berserk.accuracyFactor();
 		
+		acuRoll *= accMulti;
+
 		float defRoll = Random.Float( defStat );
 		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
 		if (defender.buff(  Hex.class) != null) defRoll *= 0.75f;
@@ -693,9 +712,17 @@ public abstract class Char extends Actor {
 			// + 3%/5%
 			defRoll *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 		}
-		
-		return (acuRoll * accMulti) >= defRoll;
+
+		if (defRoll < acuRoll && (defRoll*FerretTuft.evasionMultiplier()) >= acuRoll){
+			tuftDodged = true;
+		}
+		defRoll *= FerretTuft.evasionMultiplier();
+
+		return acuRoll >= defRoll;
 	}
+
+	//TODO this is messy and hacky atm, should consider standardizing this so we can have many 'dodge reasons'
+	private static boolean tuftDodged = false;
 
 	public int attackSkill( Char target ) {
 		return 0;
@@ -886,6 +913,11 @@ public abstract class Char extends Actor {
 					ch.damage(dmg, link);
 					if (!ch.isAlive()) {
 						link.detach();
+						if (ch == Dungeon.hero){
+							Badges.validateDeathFromFriendlyMagic();
+							Dungeon.fail(src);
+							GLog.n( Messages.get(LifeLink.class, "ondeath") );
+						}
 					}
 				}
 			}
@@ -894,7 +926,7 @@ public abstract class Char extends Actor {
 		//temporarily assign to a float to avoid rounding a bunch
 		float damage = dmg;
 
-		//if dmg is from a character we already reduced it in defenseProc
+		//if dmg is from a character we already reduced it in Char.attack
 		if (!(src instanceof Char)) {
 			if (Dungeon.hero.alignment == alignment
 					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
@@ -985,25 +1017,24 @@ public abstract class Char extends Actor {
 			buff( Paralysis.class ).processDamage(dmg);
 		}
 
-		int shielded = dmg;
-		//FIXME: when I add proper damage properties, should add an IGNORES_SHIELDS property to use here.
-		if (!(src instanceof Hunger)){
-			for (ShieldBuff s : buffs(ShieldBuff.class)){
-				dmg = s.absorbDamage(dmg);
-				if (dmg == 0) break;
-			}
+		BrokenSeal.WarriorShield shield = buff(BrokenSeal.WarriorShield.class);
+		if (!(src instanceof Hunger)
+				&& dmg > 0
+				//either HP is already half or below (ignoring shield)
+				// or the hit will reduce it to half or below
+				&& (HP <= HT/2 || HP + shielding() - dmg <= HT/2)
+				&& shield != null && !shield.coolingDown()){
+			sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(buff(BrokenSeal.WarriorShield.class).maxShield()), FloatingText.SHIELDING);
+			shield.activate();
 		}
+
+		int shielded = dmg;
+		dmg = ShieldBuff.processDamage(this, dmg, src);
 		shielded -= dmg;
 		HP -= dmg;
-
+		
 		if (buff( Electrified.class ) != null) {
 			buff( Electrified.class ).processDamage(dmg + shielded, src);
-		}
-
-		if (HP > 0 && shielded > 0 && shielding() == 0){
-			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
-				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
-			}
 		}
 
 		if (HP > 0 && buff(Grim.GrimTracker.class) != null){
