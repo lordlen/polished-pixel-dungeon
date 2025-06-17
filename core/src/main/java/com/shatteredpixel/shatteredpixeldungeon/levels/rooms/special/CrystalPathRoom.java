@@ -21,7 +21,9 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.RoomLighting;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.CrystalKey;
@@ -32,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutat
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMetamorphosis;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
+import com.shatteredpixel.shatteredpixeldungeon.levels.HallsLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -44,11 +47,17 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class CrystalPathRoom extends SpecialRoom {
+	
+	static class Polished {
+		static final int forceAdjacents = 2;
+		static final boolean addLighting = false;
+	}
 
 	@Override
 	public int minWidth() { return 7; }
+	@Override
 	public int minHeight() { return 7; }
-
+	
 	@Override
 	public void paint(Level level) {
 
@@ -63,6 +72,7 @@ public class CrystalPathRoom extends SpecialRoom {
 		Point entry = new Point(entrance());
 
 		int prize1 = 0, prize2 = 0;
+		boolean horizontalPath;
 		if (entry.x == left || entry.x == right){
 
 			Painter.drawInside(level, this, entry, width() > 8 ? 5 : 3, Terrain.EMPTY);
@@ -108,6 +118,8 @@ public class CrystalPathRoom extends SpecialRoom {
 				prize1 = level.pointToCell(new Point(rooms[4].right, rooms[4].bottom));
 				prize2 = level.pointToCell(new Point(rooms[5].right, rooms[5].top));
 			}
+			
+			horizontalPath = true;
 
 		} else {
 			Painter.drawInside(level, this, entry, height() > 8 ? 5 : 3, Terrain.EMPTY);
@@ -153,6 +165,8 @@ public class CrystalPathRoom extends SpecialRoom {
 				prize1 = level.pointToCell(new Point(rooms[4].right, rooms[4].bottom));
 				prize2 = level.pointToCell(new Point(rooms[5].left, rooms[5].bottom));
 			}
+			
+			horizontalPath = false;
 
 		}
 
@@ -161,6 +175,20 @@ public class CrystalPathRoom extends SpecialRoom {
 		}
 		Painter.set(level, prize1, Terrain.PEDESTAL);
 		Painter.set(level, prize2, Terrain.PEDESTAL);
+		
+		boolean nearsighted = Dungeon.isChallenged(Challenges.DARKNESS) || level instanceof HallsLevel;
+		if(Polished.addLighting && nearsighted) {
+			RoomLighting light = (RoomLighting) level.blobs.get( RoomLighting.class );
+			if (light == null) {
+				light = new RoomLighting();
+			}
+			for (int i=top + 1; i < bottom; i++) {
+				for (int j=left + 1; j < right; j++) {
+					light.seed( level, level.pointToCell(j, i), 1 );
+				}
+			}
+			level.blobs.put(RoomLighting.class, light);
+		}
 
 		//random potion/scroll in rooms 1-4, with lower value ones going into earlier rooms
 		ArrayList<Item> potions = new ArrayList<>();
@@ -230,16 +258,45 @@ public class CrystalPathRoom extends SpecialRoom {
 				return bVal - aVal;
 			}
 		});
-
-		//least valuable items go into rooms 2&3, then rooms 0&1, and finally 4&5
+		
 		int shuffle = Random.Int(2);
-		level.drop(potions.remove(0), level.pointToCell(rooms[shuffle == 1 ? 2 : 3].center()));
-		level.drop(scrolls.remove(0), level.pointToCell(rooms[shuffle == 1 ? 3 : 2].center()));
+		
+		Point p1, s1, p2, s2;
+		boolean adj1, adj2, adj3, adj4;
+		
+		int adjacents;
+		do {
+			//least valuable items go into rooms 2&3, then rooms 0&1, then 4&5, which are reserved for prize 1&2
+			p1 = rooms[shuffle == 1 ? 2 : 3].center();
+			s1 = rooms[shuffle == 1 ? 3 : 2].center();
+			
+			p2 = rooms[shuffle == 1 ? 0 : 1].center();
+			s2 = rooms[shuffle == 1 ? 1 : 0].center();
+			
+			
+			adjacents = 0;
+			adj1 = (horizontalPath ? Point.difference(p1, entry).y : Point.difference(p1, entry).x) <= 2;
+			if(adj1) adjacents++;
+			
+			adj2 = (horizontalPath ? Point.difference(s1, entry).y : Point.difference(s1, entry).x) <= 2;
+			if(adj2) adjacents++;
+			
+			adj3 = (horizontalPath ? Point.difference(p2, entry).y : Point.difference(p2, entry).x) <= 2;
+			if(adj3) adjacents++;
+			
+			adj4 = (horizontalPath ? Point.difference(s2, entry).y : Point.difference(s2, entry).x) <= 2;
+			if(adj4) adjacents++;
+		}
+		while(adjacents != Polished.forceAdjacents && (horizontalPath ? height() : width()) >= 9);
+		
+		boolean auto = nearsighted && !Polished.addLighting;
+		level.drop(potions.remove(0), level.pointToCell(p1)).autoExplored = auto && !adj1;
+		level.drop(scrolls.remove(0), level.pointToCell(s1)).autoExplored = auto && !adj2;
 
-		level.drop(potions.remove(0), level.pointToCell(rooms[shuffle == 1 ? 0 : 1].center()));
-		level.drop(scrolls.remove(0), level.pointToCell(rooms[shuffle == 1 ? 1 : 0].center()));
+		level.drop(potions.remove(0), level.pointToCell(p2)).autoExplored = auto && !adj3;
+		level.drop(scrolls.remove(0), level.pointToCell(s2)).autoExplored = auto && !adj4;
 
-		//player can only see these if they unlock the previous doors, so don't count them for exploration
+		//player can only see these if they unlock the previous doors, so never count them for exploration
 		level.drop(potions.remove(0), shuffle == 1 ? prize1 : prize2).autoExplored = true;
 		level.drop(scrolls.remove(0), shuffle == 1 ? prize2 : prize1).autoExplored = true;
 
