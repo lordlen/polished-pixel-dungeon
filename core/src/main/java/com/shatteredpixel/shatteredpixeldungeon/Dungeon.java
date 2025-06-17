@@ -333,6 +333,7 @@ public class Dungeon {
 			SecretRoom.initForRun();
 
 			Generator.fullReset();
+			Level.Feeling.resetProbs();
 
 		Random.resetGenerators();
 		
@@ -754,6 +755,7 @@ public class Dungeon {
 			Statistics.storeInBundle( bundle );
 			Notes.storeInBundle( bundle );
 			Generator.storeInBundle( bundle );
+			Level.Feeling.storeInBundle( bundle );
 
 			int[] bundleArr = new int[generatedLevels.size()];
 			for (int i = 0; i < generatedLevels.size(); i++){
@@ -905,6 +907,7 @@ public class Dungeon {
 
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
+		Level.Feeling.restoreFromBundle( bundle );
 
 
 		Polished.afterLoad.call();
