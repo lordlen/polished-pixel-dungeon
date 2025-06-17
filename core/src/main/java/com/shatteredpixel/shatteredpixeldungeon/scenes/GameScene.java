@@ -1804,36 +1804,48 @@ public class GameScene extends PixelScene {
 				textLines.add(0, Messages.get(GameScene.class, "interact"));
 			}
 
-			//add examines before action, final text formatting
+			//add examines, final text formatting
 			if (objects.size() > 1){
 				textLines.add(0, "_" + textLines.remove(0) + ":_ " + textLines.get(0));
-				for (int i = 0; i < textLines.size()-1; i++){
-					textLines.add(i, "_" + Messages.get(GameScene.class, "examine") + ":_ " + textLines.remove(i+1));
+				
+				for (int i = 1; i < textLines.size(); i++){
+					textLines.add(!SPDSettings.flipRightClick() ? i : i-1, "_" + Messages.get(GameScene.class, "examine") + ":_ " + textLines.remove(i));
 				}
-			} else {
+			}
+			else {
 				textLines.add(0, "_" + textLines.remove(0) + "_");
-				textLines.add(0, Messages.get(GameScene.class, "examine"));
+				textLines.add(!SPDSettings.flipRightClick() ? 1 : 0, Messages.get(GameScene.class, "examine"));
 			}
 			
+			//notes
 			if (objects.size() == 1 && objects.get(0) instanceof Heap && RightClickMenu.Polished.notesAction((Heap)objects.get(0))) {
-				textLines.add(0,
-							( Notes.findCustomRecord( ((Heap)objects.get(0)).peek() ) == null ?
-							Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note") ));
+				textLines.add(!SPDSettings.flipRightClick() ? textLines.size() : 0,
+						(Notes.findCustomRecord( ((Heap)objects.get(0)).peek() ) == null ?
+								Messages.get(GameScene.class, "add_note") : Messages.get(GameScene.class, "edit_note")));
 			}
 
-			RightClickMenu menu = new RightClickMenu(image,
+			RightClickMenu menu = new RightClickMenu(
+					image,
 					title,
-					textLines.toArray(new String[0])){
+					textLines.toArray(new String[0])) {
+				
 				@Override
 				public void onSelect(int index) {
-					if (index == textLines.size()-1){
+					
+					int action	= !SPDSettings.flipRightClick() ? 0 : textLines.size() - 1;
+					int note	= !SPDSettings.flipRightClick() ? textLines.size() - 1 : 0;
+					int examine	= !SPDSettings.flipRightClick() ? index-1 : index;
+					
+					if (index == action){
 						handleCell(cell);
-					} else {
+					}
+					else {
 						if (objects.isEmpty()){
 							GameScene.show(new WndInfoCell(cell));
 						}
 						else if (objects.size() == 1 && objects.get(0) instanceof Heap && Polished.notesAction((Heap)objects.get(0))) {
-							if(index == 0) {
+							
+							if(index == note) {
 								CustomNoteButton.Polished.addNote(((Heap) objects.get(0)).peek());
 							}
 							else {
@@ -1841,11 +1853,12 @@ public class GameScene extends PixelScene {
 							}
 						}
 						else {
-							examineObject(objects.get(index));
+							examineObject(objects.get(examine));
 						}
 					}
 				}
 			};
+			
 			scene.addToFront(menu);
 			menu.camera = PixelScene.uiCamera;
 			PointF mousePos = PointerEvent.currentHoverPos();
