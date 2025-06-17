@@ -129,7 +129,7 @@ public class Potion extends Item {
 		
 		//exotic
 		canThrowPots.add(PotionOfCleansing.class);
-		mustThrowPots.add(PotionOfShroudingFog.class);
+		canThrowPots.add(PotionOfShroudingFog.class);
 		
 		//elixirs
 		canThrowPots.add(ElixirOfHoneyedHealing.class);
