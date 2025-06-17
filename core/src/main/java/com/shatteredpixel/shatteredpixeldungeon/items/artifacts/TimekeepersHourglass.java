@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
@@ -188,9 +189,7 @@ public class TimekeepersHourglass extends Artifact {
 
 				timer.detach();
 			}
-			/*for (timeDebt timer : slowTimers) {
-				timer.detach();
-			}*/
+			
 			return true;
 		} else
 			return false;
@@ -322,11 +321,6 @@ public class TimekeepersHourglass extends Artifact {
 		}
 	}
 
-	//to implement in the future
-	public class TimeParalysis extends Paralysis {
-
-	}
-
 	public class timeDebt extends ArtifactBuff {
 		{
 			type = buffType.NEGATIVE;
@@ -377,20 +371,16 @@ public class TimekeepersHourglass extends Artifact {
 		@Override
 		public void detach() {
 
-			//do we keep?
-			/*
-			Hunger hunger = Buff.affect(target, Hunger.class);
-			if (hunger != null && !hunger.isStarving()) {
-				hunger.satisfy(turnDebt);
-			}
-			 */
-
-			if(turnPenalty > 0) {
+			if(turnPenalty > 0 && target.buff(PotionOfCleansing.Cleanse.class) == null) {
 				GameScene.flash(0x80FFFFFF);
 				Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
 
 				Buff.affect(target, Slow.class, 2* (baseDebt + turnPenalty));
 				target.next();
+				
+				//shouldn't punish the player for going into debt frequently
+				Hunger hunger = Buff.affect(target, Hunger.class);
+				hunger.POLISHED_delay(baseDebt);
 			}
 
 			super.detach();
@@ -473,9 +463,7 @@ public class TimekeepersHourglass extends Artifact {
 
 				//shouldn't punish the player for going into stasis frequently
 				Hunger hunger = Buff.affect(target, Hunger.class);
-				if (!hunger.isStarving()) {
-					hunger.satisfy(5 * usedCharge);
-				}
+				hunger.POLISHED_delay(5 * usedCharge);
 
 				Invisibility.dispel();
 
