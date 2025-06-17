@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -65,10 +66,16 @@ public abstract class Plant implements Bundlable {
 		if (ch instanceof Hero){
 			((Hero) ch).interrupt();
 		}
-
-		if (Dungeon.level.heroFOV[pos] && Dungeon.hero.hasTalent(Talent.NATURES_AID) && !SPDSettings.Polished.huntress()) {
-			// 3/5 turns based on talent points spent
-			Barkskin.conditionallyAppend(Dungeon.hero, 2, 1 + 2*(Dungeon.hero.pointsInTalent(Talent.NATURES_AID)));
+		
+		int nature = Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
+		if (Dungeon.level.heroFOV[pos] && nature > 0) {
+			if(!SPDSettings.Polished.huntress()) {
+				// 3/5 turns based on talent points spent
+				Barkskin.conditionallyAppend(Dungeon.hero, 2, 2*nature);
+			}
+			else if(Dungeon.hero.heroClass != HeroClass.HUNTRESS) {
+				Barkskin.conditionallyAppend(Dungeon.hero, 2, 2*nature);
+			}
 		}
 
 		wither();

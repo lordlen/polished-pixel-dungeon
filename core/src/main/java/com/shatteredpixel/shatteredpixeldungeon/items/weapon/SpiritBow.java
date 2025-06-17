@@ -422,8 +422,9 @@ public class SpiritBow extends Weapon {
 			updateQuickslot();
 
 			int nature = Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
-			if(curCharges == 1 && nature > 0)
-				Barkskin.conditionallyAppend(Dungeon.hero, nature+1, 4);
+			if(curCharges == 1 && nature > 0) {
+				Barkskin.conditionallyAppend(Dungeon.hero, 2, 2*nature);
+			}
 		}
 		public void Polished_recharge(final Hero user) {
 			if(!SPDSettings.Polished.huntress()) return;
