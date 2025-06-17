@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
@@ -58,13 +59,15 @@ public class GrassyGraveRoom extends StandardRoom {
 		int nGraves = Math.max( w, h ) / 2;
 		
 		int index = Random.Int( nGraves );
+		Item prize = Generator.random();
+		prize.Polished_levelGen = true;
 		
 		int shift = Random.Int( 2 );
 		for (int i=0; i < nGraves; i++) {
 			int pos = w > h ?
 					left + 1 + shift + i * 2 + (top + 2 + Random.Int( h-2 )) * level.width() :
 					(left + 2 + Random.Int( w-2 )) + (top + 1 + shift + i * 2) * level.width();
-			level.drop( i == index ? Generator.random() : new Gold().random(), pos ).type = Heap.Type.TOMB;
+			level.drop( i == index ? prize : new Gold().random(), pos ).type = Heap.Type.TOMB;
 		}
 	}
 }

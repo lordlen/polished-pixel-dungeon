@@ -151,18 +151,6 @@ public class Potion extends Item {
 		defaultAction = AC_DRINK;
 	}
 
-	@Override
-	public boolean doPickUp(Hero hero, int pos) {
-		boolean picked = super.doPickUp(hero, pos);
-
-		if(picked && Polished_toFind) {
-			FoundItems.add(getClass(), Dungeon.depth);
-			Polished_toFind = false;
-		}
-
-		return picked;
-	}
-
 	@SuppressWarnings("unchecked")
 	public static void initColors() {
 		handler = new ItemStatusHandler<>( (Class<? extends Potion>[])Generator.Category.POTION.classes, colors );

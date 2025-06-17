@@ -129,6 +129,7 @@ public class LaboratoryRoom extends SpecialRoom {
 			prize = level.findPrizeItem( PotionOfStrength.class );
 			if (prize == null) {
 				prize = Generator.random(Random.oneOf(Generator.Category.POTION, Generator.Category.STONE));
+				prize.Polished_levelGen = true;
 			}
 		}
 
