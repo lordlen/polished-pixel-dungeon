@@ -62,6 +62,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.ui.Component;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class WndRanking extends WndTabbed {
@@ -343,57 +344,55 @@ public class WndRanking extends WndTabbed {
 		public ItemsTab() {
 			super();
 			
+			ArrayList<Item> exclude = new ArrayList<>();
 			Belongings stuff = Dungeon.hero.belongings;
 			if (stuff.weapon != null) {
 				addItem( stuff.weapon );
+				exclude.add( stuff.weapon );
 			}
 			if (stuff.armor != null) {
 				addItem( stuff.armor );
+				exclude.add( stuff.armor );
 			}
 			if (stuff.artifact != null) {
 				addItem( stuff.artifact );
+				exclude.add( stuff.artifact );
 			}
 			if (stuff.misc != null) {
 				addItem( stuff.misc );
+				exclude.add( stuff.misc );
 			}
 			if (stuff.ring != null) {
 				addItem( stuff.ring );
+				exclude.add( stuff.ring );
 			}
-
-			pos = 0;
-
-			int slotsActive = 0;
-			for (int i = 0; i < QuickSlot.SIZE; i++){
-				if (Dungeon.quickslot.isNonePlaceholder(i)){
-					slotsActive++;
-				}
-			}
-
+			
+			ArrayList<Item> slotItems = new ArrayList<>();
 			Trinket trinket = stuff.getItem(Trinket.class);
 			if (trinket != null){
-				slotsActive++;
+				slotItems.add(trinket);
+				exclude.add(trinket);
+			}
+			
+			for (int i = 0; i < QuickSlot.SIZE; i++){
+				Item item = Dungeon.quickslot.getItem(i);
+				if (Dungeon.quickslot.isNonePlaceholder(i) && !exclude.contains(item) && slotItems.size() < 10) {
+					slotItems.add(item);
+				}
 			}
 
-			float slotWidth = Math.min(28, ((WIDTH - slotsActive + 1) / (float)slotsActive));
+			float slotWidth = Math.min(28, ((WIDTH - slotItems.size() + 1) / (float)slotItems.size()));
+			
+			pos = 0;
+			for (Item item : slotItems) {
+				QuickSlotButton slot = new QuickSlotButton(item);
+				
+				slot.setRect( pos, 120, slotWidth, 23 );
+				PixelScene.align(slot);
 
-			for (int i = -1; i < QuickSlot.SIZE; i++){
-				Item item = null;
-				if (i == -1){
-					item = trinket;
-				} else if (Dungeon.quickslot.isNonePlaceholder(i)) {
-					item = Dungeon.quickslot.getItem(i);
-				}
-				if (item != null){
-					QuickSlotButton slot = new QuickSlotButton(item);
+				add(slot);
 
-					slot.setRect( pos, 120, slotWidth, 23 );
-					PixelScene.align(slot);
-
-					add(slot);
-
-					pos += slotWidth + 1;
-
-				}
+				pos += slotWidth + 1;
 			}
 		}
 		
@@ -497,7 +496,7 @@ public class WndRanking extends WndTabbed {
 				}
 			}
 
-			if(item instanceof WealthPotion) {
+			if(item instanceof WealthDrop) {
 				WealthDrop.backgroundColoring(bg);
 			}
 		}
@@ -569,7 +568,7 @@ public class WndRanking extends WndTabbed {
 				bg.ba = 0.1f;
 			}
 
-			if(item instanceof WealthPotion) {
+			if(item instanceof WealthDrop) {
 				WealthDrop.backgroundColoring(bg);
 			}
 		}
