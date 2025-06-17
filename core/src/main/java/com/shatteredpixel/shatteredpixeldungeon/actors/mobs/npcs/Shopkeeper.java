@@ -267,6 +267,8 @@ public class Shopkeeper extends NPC {
 							Statistics.goldCollected -= returned.value();
 							if (!returned.doPickUp(Dungeon.hero)){
 								Dungeon.level.drop(returned, Dungeon.hero.pos);
+							} else {
+								Dungeon.hero.spend(-Item.TIME_TO_PICK_UP);
 							}
 						}
 					}
