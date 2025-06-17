@@ -70,7 +70,7 @@ public class MobBuffDisplay extends Component {
     
     //cached for performance
     CharHealthIndicator healthBar;
-    LinkedHashSet<Buff> curBuffs;
+    ArrayList<Buff> curBuffs = new ArrayList<>();
     float offset = 0f;
     
     @Override
@@ -92,7 +92,12 @@ public class MobBuffDisplay extends Component {
     }
     
     private void refreshBuffs() {
-        curBuffs = ch.buffs();
+        curBuffs.clear();
+        for (Buff buff : ch.buffs()) {
+            if (buff.icon() != BuffIndicator.NONE) {
+                curBuffs.add(buff);
+            }
+        }
         
         //remove any icons no longer present
         for (Buff buff : buffIcons.keySet().toArray(new Buff[0])) {
@@ -204,6 +209,13 @@ public class MobBuffDisplay extends Component {
             }
             
             grey.scale.set(icon.width(), rounded / zoom);
+            
+            if(custom >= 1f) {
+                grey.color(0x804040);
+            }
+            else {
+                grey.resetColor();
+            }
         }
         
         @Override

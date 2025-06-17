@@ -184,7 +184,17 @@ public class Buff extends Actor {
 			float fade = -1f;
 			
 			if(buff instanceof FlavourBuff) {
-				fade = GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
+				boolean aboutToFade = 	buff.cooldown() < 1 || (buff.cooldown() == 1 && buff.actPriority > HERO_PRIO);
+				if(aboutToFade) {
+					aboutToFade = 		buff.cooldown() < buff.target.cooldown() ||
+										(buff.cooldown() == buff.target.cooldown() && buff.actPriority > MOB_PRIO);
+				}
+				
+				if (aboutToFade) {
+					fade = 1f;
+				} else {
+					fade = GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
+				}
 			}
 			else {
 				try {
@@ -193,7 +203,7 @@ public class Buff extends Actor {
 			}
 			
 			//to avoid scaling problems
-			if(fade > .995f) fade = 1.05f;
+			if(fade > .99f) fade = 1.05f;
 			return fade;
 		}
 	}
