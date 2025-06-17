@@ -756,6 +756,10 @@ public class Notes {
 		return false;
 	}
 	
+	public static boolean contains(Notes.CustomRecord rec) {
+		return records.contains(rec);
+	}
+	
 	public static <T extends Record> ArrayList<T> getRecords( Class<T> recordType ){
 		ArrayList<T> filtered = new ArrayList<>();
 		for (Record rec : records){
@@ -784,10 +788,8 @@ public class Notes {
 		if(rec != null) return rec;
 		
 		rec = findCustomRecord(item.getClass());
-		if(rec != null) return rec;
-		
-		return null;
-	}
+        return rec;
+    }
 	
 	public static CustomRecord findCustomRecord( int ID ){
 		for (Record rec : records){
