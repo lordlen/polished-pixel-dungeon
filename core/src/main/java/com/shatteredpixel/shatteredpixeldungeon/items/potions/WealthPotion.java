@@ -94,7 +94,8 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return pot.identify(byHero);
+		if(valid()) pot.identify(byHero);
+		return this;
 	}
 	@Override
 	public boolean isKnown() {

@@ -71,7 +71,8 @@ public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell>
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return spell.identify(byHero);
+		if(valid()) spell.identify(byHero);
+		return this;
 	}
 	@Override
 	public boolean isSimilar(Item item) {
