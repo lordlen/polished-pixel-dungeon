@@ -44,6 +44,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Ghoul;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
+import com.shatteredpixel.shatteredpixeldungeon.effects.AllyPath;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
@@ -351,7 +353,7 @@ public class GameScene extends PixelScene {
 				//we don't use keybindings for these as we want the user to be able to
 				// bind these keys to other actions when pressed individually
 				if (keyEvent.code == Input.Keys.SHIFT_LEFT){
-					//DirectableAlly.CHAINING = keyEvent.pressed;
+					DirectableAlly.CHAINING = keyEvent.pressed;
 				}
 				
 				return false;
@@ -1685,6 +1687,13 @@ public class GameScene extends PixelScene {
 		}
 
 		Polished.displayIndicators();
+		
+		for (Char ch : Actor.chars()){
+			if (ch instanceof DirectableAlly) {
+				((DirectableAlly) ch).updatePath();
+				((DirectableAlly) ch).drawPath();
+			}
+		}
 	}
 	
 	public static void checkKeyHold(){

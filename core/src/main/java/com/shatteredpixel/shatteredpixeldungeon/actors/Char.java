@@ -98,6 +98,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -386,7 +387,7 @@ public abstract class Char extends Actor {
 
 		if (enemy == null) return false;
 		
-		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
+		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos] || enemy instanceof DirectableAlly;
 
 		if (enemy.isInvulnerable(getClass())) {
 
@@ -1350,7 +1351,7 @@ public abstract class Char extends Actor {
 
 		pos = step;
 		
-		if (this != Dungeon.hero) {
+		if (this != Dungeon.hero && !(this instanceof DirectableAlly)) {
 			sprite.visible = Dungeon.level.heroFOV[pos];
 		}
 		
@@ -1359,6 +1360,10 @@ public abstract class Char extends Actor {
 	
 	public int distance( Char other ) {
 		return Dungeon.level.distance( pos, other.pos );
+	}
+	
+	public float trueDistance( Char other ) {
+		return Dungeon.level.trueDistance( pos, other.pos );
 	}
 
 	public boolean[] modifyPassable( boolean[] passable){

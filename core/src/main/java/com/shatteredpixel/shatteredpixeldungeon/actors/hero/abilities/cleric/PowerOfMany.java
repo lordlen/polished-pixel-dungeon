@@ -127,7 +127,7 @@ public class PowerOfMany extends ArmorAbility {
 			if (target == null){
 				return;
 			} else {
-				((LightAlly) ally).directTocell(target);
+				((LightAlly) ally).commandTo(target);
 			}
 		} else if (allyExists) {
 			GLog.w( Messages.get(this, "ally_exists"));
@@ -319,7 +319,7 @@ public class PowerOfMany extends ArmorAbility {
 
 			//moves 2 tiles at a time when returning to the hero
 			if (state == WANDERING
-					&& defendingPos == -1
+					&& commandPos == -1
 					&& Dungeon.level.distance(pos, Dungeon.hero.pos) > 1){
 				speed *= 2;
 			}

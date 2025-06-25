@@ -1427,7 +1427,8 @@ public abstract class Mob extends Char {
 			if (mob instanceof DirectableAlly
 				|| (mob.intelligentAlly && PowerOfMany.getPoweredAlly() == mob)) {
 				if (mob instanceof DirectableAlly) {
-					((DirectableAlly) mob).clearDefensingPos();
+					((DirectableAlly) mob).clearState();
+					((DirectableAlly) mob).erasePath();
 				}
 				level.mobs.remove( mob );
 				heldAllies.add(mob);
@@ -1490,7 +1491,6 @@ public abstract class Mob extends Char {
 				}
 
 				level.mobs.add(ally);
-				ally.state = ally.WANDERING;
 				
 				if (!candidatePositions.isEmpty()){
 					ally.pos = candidatePositions.remove(0);
@@ -1503,6 +1503,13 @@ public abstract class Mob extends Char {
 					ally.fieldOfView = new boolean[level.length()];
 				}
 				Dungeon.level.updateFieldOfView( ally, ally.fieldOfView );
+				
+				if(ally instanceof DirectableAlly) {
+					((DirectableAlly) ally).followHero();
+				}
+				else {
+					ally.state = ally.WANDERING;
+				}
 				
 			}
 		}

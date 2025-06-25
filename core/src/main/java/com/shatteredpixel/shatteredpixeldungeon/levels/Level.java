@@ -1403,6 +1403,15 @@ public abstract class Level implements Bundlable {
 				}
 			}
 		}
+		
+		if (c instanceof DirectableAlly ||
+			c.buff(PowerOfMany.PowerBuff.class) != null) {
+			if(!DirectableAlly.observing) {
+				BArray.or(fieldOfView, heroFOV, fieldOfView);
+				
+				GameScene.updateFog(c.pos, c.viewDistance+(int)Math.ceil(c.speed()));
+			}
+		}
 
 		//Currently only the hero can get mind vision or awareness
 		if (c.isAlive() && c == Dungeon.hero) {
@@ -1481,15 +1490,19 @@ public abstract class Level implements Bundlable {
 			}
 
 			for (Mob m : mobs){
-				if (m instanceof WandOfWarding.Ward
-						|| m instanceof WandOfRegrowth.Lotus
-						|| m instanceof SpiritHawk.HawkAlly
-						|| m.buff(PowerOfMany.PowerBuff.class) != null){
+				if (m instanceof WandOfWarding.Ward ||
+					m instanceof WandOfRegrowth.Lotus ||
+					m instanceof DirectableAlly ||
+					m.buff(PowerOfMany.PowerBuff.class) != null) {
+					
 					if (m.fieldOfView == null || m.fieldOfView.length != length()){
 						m.fieldOfView = new boolean[length()];
 						Dungeon.level.updateFieldOfView( m, m.fieldOfView );
 					}
-					BArray.or(heroMindFov, m.fieldOfView, heroMindFov);
+					if(m.viewDistance > 0) {
+						BArray.or(heroMindFov, m.fieldOfView, heroMindFov);
+					}
+					else { heroMindFov[m.pos] = true; }
 				}
 			}
 

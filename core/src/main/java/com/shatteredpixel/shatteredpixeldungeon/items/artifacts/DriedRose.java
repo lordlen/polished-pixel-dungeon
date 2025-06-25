@@ -56,7 +56,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -101,10 +100,10 @@ public class DriedRose extends Artifact {
 	}
 
 	private boolean talkedTo = false;
-	private boolean firstSummon = false;
+	private boolean firstSummon = true;
 	
-	private GhostHero ghost = null;
-	private int ghostID = 0;
+	private static GhostHero ghost = null;
+	private static int ghostID = -1;
 	
 	private MeleeWeapon weapon = null;
 	private Armor armor = null;
@@ -114,6 +113,29 @@ public class DriedRose extends Artifact {
 	public static final String AC_SUMMON = "SUMMON";
 	public static final String AC_DIRECT = "DIRECT";
 	public static final String AC_OUTFIT = "OUTFIT";
+	
+	public static GhostHero Ghost() {
+		if(ghost != null) return ghost;
+		
+		if(ghostID != -1) {
+			Actor a = Actor.findById(ghostID);
+			if (a instanceof GhostHero){
+				ghost = (GhostHero)a;
+				return ghost;
+			} else {
+				ghostID = -1;
+			}
+		}
+		
+		Char ally = Stasis.getStasisAlly();
+		if (ally instanceof GhostHero){
+			ghostID = ally.id();
+			ghost = (GhostHero)ally;
+			return ghost;
+		}
+		
+		return null;
+	}
 
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
@@ -125,10 +147,10 @@ public class DriedRose extends Artifact {
 				&& charge == chargeCap
 				&& !cursed
 				&& hero.buff(MagicImmune.class) == null
-				&& ghostID == 0) {
+				&& Ghost() == null) {
 			actions.add(AC_SUMMON);
 		}
-		if (ghostID != 0){
+		if (Ghost() != null && !Ghost().stasis()){
 			actions.add(AC_DIRECT);
 		}
 		if (isIdentified() && !cursed){
@@ -140,7 +162,7 @@ public class DriedRose extends Artifact {
 
 	@Override
 	public String defaultAction() {
-		if (ghost != null){
+		if (Ghost() != null && !Ghost().stasis()){
 			return AC_DIRECT;
 		} else {
 			return AC_SUMMON;
@@ -157,82 +179,33 @@ public class DriedRose extends Artifact {
 			if (hero.buff(MagicImmune.class) != null) return;
 
 			if (!Ghost.Quest.completed())   GameScene.show(new WndUseItem(null, this));
-			else if (ghost != null)         GLog.i( Messages.get(this, "spawned") );
+			else if (Ghost() != null)       GLog.i( Messages.get(this, "spawned") );
 			else if (!isEquipped( hero ))   GLog.i( Messages.get(Artifact.class, "need_to_equip") );
 			else if (charge != chargeCap)   GLog.i( Messages.get(this, "no_charge") );
 			else if (cursed)                GLog.i( Messages.get(this, "cursed") );
+			
 			else {
-				ArrayList<Integer> spawnPoints = new ArrayList<>();
-				for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
-					int p = hero.pos + PathFinder.NEIGHBOURS8[i];
-					if (Actor.findChar(p) == null && (Dungeon.level.passable[p] || Dungeon.level.avoid[p])) {
-						spawnPoints.add(p);
-					}
-				}
-
-				if (spawnPoints.size() > 0) {
-					ghost = new GhostHero( this );
-					ghostID = ghost.id();
-					ghost.pos = Random.element(spawnPoints);
-
-					GameScene.add(ghost, 1f);
-					Dungeon.level.occupyCell(ghost);
-					
-					CellEmitter.get(ghost.pos).start( ShaftParticle.FACTORY, 0.3f, 4 );
-					CellEmitter.get(ghost.pos).start( Speck.factory(Speck.LIGHT), 0.2f, 3 );
-
-					hero.spend(1f);
-					hero.busy();
-					hero.sprite.operate(hero.pos);
-
-					if (!firstSummon) {
-						ghost.yell( Messages.get(GhostHero.class, "hello", Messages.titleCase(Dungeon.hero.name())) );
-						Sample.INSTANCE.play( Assets.Sounds.GHOST );
-						firstSummon = true;
-						
-					} else {
-						if (BossHealthBar.isAssigned()) {
-							ghost.sayBoss();
-						} else {
-							ghost.sayAppeared();
-						}
-					}
-
-					Invisibility.dispel(hero);
-					Talent.onArtifactUsed(hero);
-					charge = 0;
-					partialCharge = 0;
-					updateQuickslot();
-
-				} else
-					GLog.i( Messages.get(this, "no_space") );
+				DirectableAlly.SummonSelector.trySummon(new GhostHero(this));
 			}
 
 		} else if (action.equals(AC_DIRECT)){
-			if (ghost == null && ghostID != 0){
-				findGhost();
+			if (Ghost() != null) {
+				ghost.command();
 			}
-			if (ghost != null && ghost != Stasis.getStasisAlly()){
-				GameScene.selectCell(ghostDirector);
-			}
-			
 		} else if (action.equals(AC_OUTFIT)){
 			GameScene.show( new WndGhostHero(this) );
 		}
 	}
-
-	private void findGhost(){
-		Actor a = Actor.findById(ghostID);
-		if (a != null){
-			ghost = (GhostHero)a;
-		} else {
-			if (Stasis.getStasisAlly() instanceof GhostHero){
-				ghost = (GhostHero) Stasis.getStasisAlly();
-				ghostID = ghost.id();
-			} else {
-				ghostID = 0;
-			}
-		}
+	
+	public void onSummon(GhostHero ghost) {
+		ghostID = ghost.id();
+		
+		Invisibility.dispel(Dungeon.hero);
+		Talent.onArtifactUsed(Dungeon.hero);
+		
+		charge = 0;
+		partialCharge = 0;
+		updateQuickslot();
 	}
 	
 	public int ghostStrength(){
@@ -290,15 +263,7 @@ public class DriedRose extends Artifact {
 
 	@Override
 	public String status() {
-		if (ghost == null && ghostID != 0){
-			try {
-				findGhost();
-			} catch ( ClassCastException e ){
-				ShatteredPixelDungeon.reportException(e);
-				ghostID = 0;
-			}
-		}
-		if (ghost == null){
+		if (Ghost() == null){
 			return super.status();
 		} else {
 			return ((ghost.HP*100) / ghost.HT) + "%";
@@ -314,7 +279,7 @@ public class DriedRose extends Artifact {
 	public void charge(Hero target, float amount) {
 		if (cursed || target.buff(MagicImmune.class) != null) return;
 
-		if (ghost == null){
+		if (Ghost() == null){
 			if (charge < chargeCap) {
 				partialCharge += 4*amount;
 				while (partialCharge >= 1f){
@@ -348,7 +313,7 @@ public class DriedRose extends Artifact {
 		//For upgrade transferring via well of transmutation
 		droppedPetals = Math.max( level(), droppedPetals );
 		
-		if (ghost != null){
+		if (Ghost() != null){
 			ghost.updateRose();
 		}
 
@@ -374,10 +339,10 @@ public class DriedRose extends Artifact {
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle(bundle);
-
+		
+		bundle.put( GHOSTID, ghostID );
 		bundle.put( TALKEDTO, talkedTo );
 		bundle.put( FIRSTSUMMON, firstSummon );
-		bundle.put( GHOSTID, ghostID );
 		bundle.put( PETALS, droppedPetals );
 		
 		if (weapon != null) bundle.put( WEAPON, weapon );
@@ -387,10 +352,17 @@ public class DriedRose extends Artifact {
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle(bundle);
-
+		
+		if(bundle.contains(GHOSTID)) {
+			ghostID = bundle.getInt( GHOSTID );
+			ghost = null;
+		} else {
+			ghostID = -1;
+			ghost = null;
+		}
+		
 		talkedTo = bundle.getBoolean( TALKEDTO );
 		firstSummon = bundle.getBoolean( FIRSTSUMMON );
-		ghostID = bundle.getInt( GHOSTID );
 		droppedPetals = bundle.getInt( PETALS );
 		
 		if (bundle.contains(WEAPON)) weapon = (MeleeWeapon)bundle.get( WEAPON );
@@ -403,17 +375,13 @@ public class DriedRose extends Artifact {
 		public boolean act() {
 			
 			spend( TICK );
-			
-			if (ghost == null && ghostID != 0){
-				findGhost();
-			}
 
-			if (ghost != null && !ghost.isAlive()){
+			if (Ghost() != null && !Ghost().isAlive()){
 				ghost = null;
 			}
 			
 			//rose does not charge while ghost hero is alive
-			if (ghost != null && !cursed && target.buff(MagicImmune.class) == null){
+			if (Ghost() != null && !cursed && target.buff(MagicImmune.class) == null){
 				
 				//heals to full over 500 turns
 				if (ghost.HP < ghost.HT && Regeneration.regenOn()) {
@@ -468,24 +436,6 @@ public class DriedRose extends Artifact {
 			return true;
 		}
 	}
-	
-	public CellSelector.Listener ghostDirector = new CellSelector.Listener(){
-		
-		@Override
-		public void onSelect(Integer cell) {
-			if (cell == null) return;
-			
-			Sample.INSTANCE.play( Assets.Sounds.GHOST );
-
-			ghost.directTocell(cell);
-
-		}
-		
-		@Override
-		public String prompt() {
-			return  "\"" + Messages.get(GhostHero.class, "direct_prompt") + "\"";
-		}
-	};
 
 	public static class Petal extends Item {
 
@@ -542,13 +492,79 @@ public class DriedRose extends Artifact {
 
 		{
 			spriteClass = GhostSprite.class;
-
-			flying = true;
 			
-			state = HUNTING;
+			flying = true;
 			
 			properties.add(Property.UNDEAD);
 			properties.add(Property.INORGANIC);
+			
+			immunities.add( CorrosiveGas.class );
+			immunities.add( Burning.class );
+			immunities.add( ScrollOfRetribution.class );
+			immunities.add( ScrollOfPsionicBlast.class );
+			immunities.add( AllyBuff.class );
+		}
+		
+		@Override
+		protected void announce() {
+			switch (command) {
+				case DEFEND:
+					if(!defendAnnounced) {
+						Sample.INSTANCE.play(Assets.Sounds.GHOST);
+						yell(Messages.get(this, "directed_position_" + Random.IntRange(1, 5)));
+						defendAnnounced = true;
+					}
+					break;
+				case ATTACK:
+					if(!attackAnnounced) {
+						Sample.INSTANCE.play(Assets.Sounds.GHOST);
+						yell(Messages.get(this, "directed_attack_" + Random.IntRange(1, 5)));
+						attackAnnounced = true;
+					}
+					break;
+				case FOLLOW:
+					if(!followAnnounced) {
+						Sample.INSTANCE.play(Assets.Sounds.GHOST);
+						yell(Messages.get(this, "directed_follow_" + Random.IntRange(1, 5)));
+						followAnnounced = true;
+					}
+					break;
+				case NONE: default:
+					if(!darkAnnounced) {
+						Sample.INSTANCE.play(Assets.Sounds.GHOST);
+						yell(Messages.get(this, "too_dark"));
+						darkAnnounced = true;
+					}
+					break;
+			}
+		}
+		
+		@Override
+		protected void onSummon() {
+			super.onSummon();
+			
+			updateRose();
+			HP = HT;
+			
+			if(rose == null) {
+				//this should realistically never happen
+				DriedRose.ghostID = id();
+				return;
+			}
+			rose.onSummon(this);
+			
+			if (rose.firstSummon) {
+				yell( Messages.get(this, "hello", Messages.titleCase(Dungeon.hero.name())) );
+				Sample.INSTANCE.play( Assets.Sounds.GHOST );
+				rose.firstSummon = false;
+			}
+			else {
+				if (BossHealthBar.isAssigned()) {
+					sayBoss();
+				} else {
+					sayAppeared();
+				}
+			}
 		}
 		
 		private DriedRose rose = null;
@@ -562,24 +578,6 @@ public class DriedRose extends Artifact {
 			this.rose = rose;
 			updateRose();
 			HP = HT;
-		}
-
-		@Override
-		public void defendPos(int cell) {
-			yell(Messages.get(this, "directed_position_" + Random.IntRange(1, 5)));
-			super.defendPos(cell);
-		}
-
-		@Override
-		public void followHero() {
-			yell(Messages.get(this, "directed_follow_" + Random.IntRange(1, 5)));
-			super.followHero();
-		}
-
-		@Override
-		public void targetChar(Char ch) {
-			yell(Messages.get(this, "directed_attack_" + Random.IntRange(1, 5)));
-			super.targetChar(ch);
 		}
 
 		private void updateRose(){
@@ -596,15 +594,13 @@ public class DriedRose extends Artifact {
 		@Override
 		protected boolean act() {
 			updateRose();
-			if (rose == null
-					|| !rose.isEquipped(Dungeon.hero)
-					|| Dungeon.hero.buff(MagicImmune.class) != null){
+			if (rose == null ||
+				!rose.isEquipped(Dungeon.hero) ||
+				Dungeon.hero.buff(MagicImmune.class) != null){
+				
 				damage(1, new NoRoseDamage());
 			}
 			
-			if (!isAlive()) {
-				return true;
-			}
 			return super.act();
 		}
 
@@ -686,9 +682,7 @@ public class DriedRose extends Artifact {
 			float speed = super.speed();
 
 			//moves 2 tiles at a time when returning to the hero
-			if (state == WANDERING
-					&& defendingPos == -1
-					&& Dungeon.level.distance(pos, Dungeon.hero.pos) > 1){
+			if (command == Command.FOLLOW) {
 				speed *= 2;
 			}
 			
@@ -756,9 +750,10 @@ public class DriedRose extends Artifact {
 			//TODO stasis?
 			if (rose != null) {
 				rose.ghost = null;
+				rose.ghostID = -1;
+				
 				rose.charge = 0;
 				rose.partialCharge = 0;
-				rose.ghostID = -1;
 			}
 			super.destroy();
 		}
@@ -841,14 +836,6 @@ public class DriedRose extends Artifact {
 			Sample.INSTANCE.play( Assets.Sounds.GHOST );
 		}
 		
-		{
-			immunities.add( CorrosiveGas.class );
-			immunities.add( Burning.class );
-			immunities.add( ScrollOfRetribution.class );
-			immunities.add( ScrollOfPsionicBlast.class );
-			immunities.add( AllyBuff.class );
-		}
-
 	}
 	
 	private static class WndGhostHero extends Window{

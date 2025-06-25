@@ -1084,6 +1084,7 @@ public class Dungeon {
 			return;
 		}
 		
+		DirectableAlly.observeAll();
 		level.updateFieldOfView(hero, level.heroFOV);
 
 		int x = hero.pos % level.width();
@@ -1216,7 +1217,12 @@ public class Dungeon {
 		if (chars) {
 			for (Char c : Actor.chars()) {
 				if (vis[c.pos]) {
-					passable[c.pos] = false;
+					
+					boolean ignore = c instanceof DirectableAlly && ch == Dungeon.hero;
+					if(!ignore) {
+						passable[c.pos] = false;
+					}
+					
 				}
 			}
 		}

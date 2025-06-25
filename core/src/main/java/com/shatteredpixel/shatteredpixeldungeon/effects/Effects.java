@@ -35,7 +35,10 @@ public class Effects {
 		ETHEREAL_CHAIN,
 		DEATH_RAY,
 		LIGHT_RAY,
-		HEALTH_RAY
+		HEALTH_RAY,
+		
+		ALLY_PATH,
+		ALLY_POINT
 	}
 	
 	public static Image get( Type type ) {
@@ -67,6 +70,13 @@ public class Effects {
 				break;
 			case HEALTH_RAY:
 				icon.frame(icon.texture.uvRect(16, 30, 32, 38));
+				break;
+			
+			case ALLY_PATH:
+				icon.frame(icon.texture.uvRect(0, 49, 16, 51));
+				break;
+			case ALLY_POINT:
+				icon.frame(icon.texture.uvRect(1, 54, 3, 56));
 				break;
 		}
 		return icon;

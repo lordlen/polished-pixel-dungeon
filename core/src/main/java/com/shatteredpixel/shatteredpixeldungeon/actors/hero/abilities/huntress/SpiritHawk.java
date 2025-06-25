@@ -89,7 +89,7 @@ public class SpiritHawk extends ArmorAbility {
 			if (target == null){
 				return;
 			} else {
-				ally.directTocell(target);
+				ally.commandTo(target);
 			}
 		} else {
 			ArrayList<Integer> spawnPoints = new ArrayList<>();
@@ -156,7 +156,6 @@ public class SpiritHawk extends ArmorAbility {
 				viewDistance = 6;
 				baseSpeed = 2f;
 			}
-			attacksAutomatically = false;
 
 			immunities.addAll(new BlobImmunity().immunities());
 			immunities.add(AllyBuff.class);

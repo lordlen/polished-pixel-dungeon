@@ -91,7 +91,7 @@ public class ShadowClone extends ArmorAbility {
 			if (target == null){
 				return;
 			} else {
-				ally.directTocell(target);
+				ally.commandTo(target);
 			}
 		} else {
 			ArrayList<Integer> spawnPoints = new ArrayList<>();
@@ -262,7 +262,7 @@ public class ShadowClone extends ArmorAbility {
 
 			//moves 2 tiles at a time when returning to the hero
 			if (state == WANDERING
-					&& defendingPos == -1
+					&& commandPos == -1
 					&& Dungeon.level.distance(pos, Dungeon.hero.pos) > 1){
 				speed *= 2;
 			}
