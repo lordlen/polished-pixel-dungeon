@@ -171,7 +171,7 @@ public class CrystalSpire extends Mob {
 
 			if (!targetedCells.isEmpty()){
 				for (int i : targetedCells.get(0)){
-					sprite.parent.add(new TargetedCell(i, 0xFF0000, now()+TICK, this));
+					sprite.parent.add(TargetedCell.timed(i, now()+TICK, this));
 				}
 			}
 
@@ -194,7 +194,7 @@ public class CrystalSpire extends Mob {
 				spend(GameMath.gate(TICK, (int)Math.ceil(Dungeon.hero.cooldown()), 3*TICK));
 
 				for (int i : targetedCells.get(0)){
-					sprite.parent.add(new TargetedCell(i, 0xFF0000, now()+cooldown(), this));
+					sprite.parent.add(TargetedCell.timed(i, now()+cooldown(), this));
 				}
 				Dungeon.hero.interrupt();
 			} else {

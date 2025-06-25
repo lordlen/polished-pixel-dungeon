@@ -276,8 +276,17 @@ public class GameScene extends PixelScene {
 		public static void displayIndicators() {
 			try {
 				for(Mob mob : indicatorsQueued.keySet()) {
-					if(!Dungeon.hero.fieldOfView[mob.pos])
-						GameScene.effectOverFog(new TargetedCell(indicatorsQueued.get(mob), 0xFFFF00, Actor.now(), mob, true));
+					if(!Dungeon.hero.fieldOfView[mob.pos]) {
+						TargetedCell targeted = new TargetedCell(indicatorsQueued.get(mob), TargetedCell.YELLOW) {
+							float time = Actor.now();
+							@Override
+							protected boolean startFade() {
+								return Actor.now() > time || Dungeon.hero.curAction != null || !mob.isAlive();
+							}
+						};
+						
+						GameScene.effectOverFog(targeted);
+					}
 				}
 				indicatorsQueued.clear();
 			} catch (Exception e) {

@@ -24,57 +24,58 @@ package com.shatteredpixel.shatteredpixeldungeon.effects;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 
 public class TargetedCell extends Image {
+	
+	public static final int RED = 0xFF0000;
+	public static final int YELLOW = 0xFFFF00;
 
 	private float alpha;
-	float time;
-	Char assigned;
-	boolean fadeOnAction;
-
+	
+	private boolean fadeOut = false;
+	protected boolean startFade() {
+		return true;
+	}
+	
+	public static TargetedCell timed( int pos, float time, Char assigned ) {
+		return new TargetedCell(pos) {
+			@Override
+			protected boolean startFade() {
+				return Actor.now() + Dungeon.hero.cooldown() > time || !assigned.isAlive();
+			}
+		};
+	}
+	
+	public TargetedCell( int pos ) {
+		this(pos, RED);
+	}
+	
 	public TargetedCell( int pos, int color ) {
-		this(pos, color, -1, null);
-	}
-	public TargetedCell( int pos, int color, float time, Char assigned ) {
-		this(pos, color, time, assigned, false);
-	}
-
-	public TargetedCell( int pos, int color, float time, Char assigned, boolean fadeOnAction ) {
 		super(Icons.get(Icons.TARGET));
 		hardlight(color);
-
+		
 		origin.set( width/2f );
-
 		point( DungeonTilemap.tileToWorld( pos ) );
-
+		
 		alpha = 1f;
 		scale.set(alpha);
-		this.time = time;
-
-		this.assigned = assigned;
-		this.fadeOnAction = fadeOnAction;
 	}
-
-	@Override
+	
 	public void update() {
 		alpha -= Game.elapsed/2f;
-
-		if(fadeOnAction && Dungeon.hero.curAction != null)
-			time = -1;
-
-		if (Actor.now() + Dungeon.hero.cooldown() <= time
-			&& ( assigned == null || assigned.isAlive()) )
-		{
-			alpha = Math.max(alpha, 0.75f);
+		
+		fadeOut = fadeOut || startFade();
+		if (!fadeOut) {
+			alpha = Math.max(0.75f, alpha);
 		}
-
+		
 		alpha( alpha );
 		scale.set( alpha );
 		if (alpha <= 0) killAndErase();
 	}
+	
 }
