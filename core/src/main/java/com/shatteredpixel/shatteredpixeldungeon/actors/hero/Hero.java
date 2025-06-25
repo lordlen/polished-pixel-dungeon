@@ -1938,11 +1938,11 @@ public class Hero extends Char {
 				int len = Dungeon.level.length();
 				boolean[] p = Dungeon.level.passable;
 				boolean[] v = Dungeon.level.visited;
-				boolean[] t = Dungeon.level.traversable;
+				boolean[] f = Dungeon.level.fogEdge;
 				boolean[] m = Dungeon.level.mapped;
 				boolean[] passable = new boolean[len];
 				for (int i = 0; i < len; i++) {
-					passable[i] = p[i] && (v[i] || m[i] || t[i]);
+					passable[i] = p[i] && (v[i] || m[i] || f[i]);
 				}
 
 				PathFinder.Path newpath = Dungeon.findPath(this, target, passable, fieldOfView, true);

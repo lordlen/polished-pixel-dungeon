@@ -61,6 +61,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.MobSpawner;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogFist;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Sheep;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.WindParticle;
@@ -151,7 +152,7 @@ public abstract class Level implements Bundlable {
 	
 	public int[] map;
 	public boolean[] visited;
-	public boolean[] traversable;
+	public boolean[] fogEdge;
 	public boolean[] mapped;
 	public boolean[] discoverable;
 
@@ -201,7 +202,7 @@ public abstract class Level implements Bundlable {
 	private static final String HEIGHT      = "height";
 	private static final String MAP			= "map";
 	private static final String VISITED		= "visited";
-	private static final String TRAVERSABLE	= "traversable";
+	private static final String FOG_EDGE 	= "traversable";
 	private static final String MAPPED		= "mapped";
 	private static final String TRANSITIONS	= "transitions";
 	private static final String LOCKED      = "locked";
@@ -328,7 +329,7 @@ public abstract class Level implements Bundlable {
 		Arrays.fill( map, feeling == Level.Feeling.CHASM ? Terrain.CHASM : Terrain.WALL );
 		
 		visited     = new boolean[length];
-		traversable = new boolean[length];
+		fogEdge 	= new boolean[length];
 		mapped      = new boolean[length];
 		
 		heroFOV     = new boolean[length];
@@ -384,8 +385,9 @@ public abstract class Level implements Bundlable {
 		map		= bundle.getIntArray( MAP );
 
 		visited	= bundle.getBooleanArray( VISITED );
-		if(bundle.contains(TRAVERSABLE))
-			traversable	= bundle.getBooleanArray( TRAVERSABLE );
+		if(bundle.contains(FOG_EDGE)) {
+			fogEdge = bundle.getBooleanArray(FOG_EDGE);
+		}
 		mapped	= bundle.getBooleanArray( MAPPED );
 
 		transitions = new ArrayList<>();
@@ -467,7 +469,7 @@ public abstract class Level implements Bundlable {
 		bundle.put( HEIGHT, height );
 		bundle.put( MAP, map );
 		bundle.put( VISITED, visited );
-		if(traversable != null) bundle.put( TRAVERSABLE, traversable );
+		if(fogEdge != null) bundle.put(FOG_EDGE, fogEdge);
 		bundle.put( MAPPED, mapped );
 		bundle.put( TRANSITIONS, transitions );
 		bundle.put( LOCKED, locked );

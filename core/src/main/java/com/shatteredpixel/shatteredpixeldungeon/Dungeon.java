@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.DivineSense;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
@@ -47,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
@@ -69,6 +71,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.PrisonLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
@@ -105,22 +108,80 @@ public class Dungeon {
 		public static boolean loading = false;
 		static Callback afterLoad = () -> {};
 		
-		private static void updateNearbyTiles(boolean[] extendedHeroFOV, int pos) {
+		static Callback delayed = () -> {};
+		static Actor actor = null;
+		
+		static boolean expertise = false;
+		
+		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
+			int l_e = Math.max( 0, l-1 );
+			int r_e = Math.min( r+1, level.width() - 1 );
+			int t_e = Math.max( 0, t-1 );
+			int b_e = Math.min( b+1, level.height() - 1 );
+			
+			for (int i = l_e; i < r_e; i++) {
+				for (int j = t_e; j < b_e; j++) {
+					int cell = level.pointToCell(i, j);
+					
+					if(!level.fogEdge[cell]) {
+						if(level.visited[cell]) {
+							level.fogEdge[cell] = true;
+						}
+						else {
+							for(int offset : PathFinder.NEIGHBOURS8) {
+								int neighbour = cell+offset;
+								if (neighbour >= 0 && neighbour < level.length() &&
+									level.visited[neighbour] && (level.passable[neighbour] || !level.solid[neighbour])) {
+									
+									level.fogEdge[cell] = true;
+									break;
+								}
+							}
+						}
+					}
+					
+					
+					expertise = Dungeon.hero.pointsInTalent(Talent.ROGUES_EXPERTISE) == 2;
+					if(expertise && level.heroFOV[cell] && level.map[cell] == Terrain.SECRET_DOOR) {
+						level.revealSecretDoor(cell);
+					}
+				}
+			}
+		}
+		
+		private static void updateNearbyTiles(int pos) {
 			for (int i = 0; i < 3; i++) {
-				int offset = pos + level.pointToCell(-1, -1+i);
+				int cell = pos + level.pointToCell(-1, -1+i);
 
-				BArray.or( level.visited, level.heroFOV, offset, 3, level.visited );
+				BArray.or( level.visited, level.heroFOV, cell, 3, level.visited );
+			}
+			
+			int topLeft = level.width()+1;
+			int botRight = level.length() - topLeft;
+			
+			for (int i : PathFinder.NEIGHBOURS25) {
+				int cell = pos+i;
+				if(cell >= topLeft && cell < botRight && !level.fogEdge[cell]) {
+					if(level.visited[cell]) {
+						level.fogEdge[cell] = true;
+					}
+					else {
+						for (int offset : PathFinder.NEIGHBOURS9) {
+							int neighbour = cell+offset;
+							if(level.visited[neighbour] && (level.passable[neighbour] || !level.solid[neighbour])) {
+								level.fogEdge[cell] = true;
+								break;
+							}
+						}
+					}
+				}
 			}
 
-			for (int i = 0; i < 5; i++) {
-				int offset = pos + level.pointToCell(-2, -2+i);
-
-				if(offset <= level.length() - 5) BArray.or( level.traversable, extendedHeroFOV, offset, 5, level.traversable );
-			}
-
-			if(Dungeon.hero.pointsInTalent(Talent.ROGUES_EXPERTISE) >= 2) {
+			if(expertise) {
 				for (int i : PathFinder.NEIGHBOURS9) {
-					level.revealSecretDoor(pos + i);
+					if(level.map[pos + i] == Terrain.SECRET_DOOR) {
+						level.revealSecretDoor(pos + i);
+					}
 				}
 			}
 		}
@@ -1038,74 +1099,35 @@ public class Dungeon {
 		int height = b - t + 1;
 		
 		int pos = l + t * level.width();
-
-		//POLISHED
-		int l_e = Math.max( 0, l-1 );
-		int r_e = Math.min( r+1, level.width() - 1 );
-		int t_e = Math.max( 0, t-1 );
-		int b_e = Math.min( b+1, level.height() - 1 );
-
-		int width_e = r_e - l_e + 1;
-		int height_e = b_e - t_e + 1;
-
-		boolean[] extension = level.heroFOV.clone();
-
-		boolean reveal = Dungeon.hero.pointsInTalent(Talent.ROGUES_EXPERTISE) >= 2;
-		for (int i = l; i < r; i++) {
-			for (int j = t; j < b; j++) {
-				int cell = level.pointToCell(i, j);
-
-				if(level.heroFOV[cell]) {
-					if (level.passable[cell]) {
-						for(int offset : PathFinder.NEIGHBOURS8) {
-							extension[cell + offset] = true;
-						}
-					} else if(reveal) {
-						level.revealSecretDoor(cell);
-					}
-				}
-			}
-		}
-
-		//
-
+		
 		for (int i = t; i <= b; i++) {
 			BArray.or( level.visited, level.heroFOV, pos, width, level.visited );
 			pos+=level.width();
 		}
-
-		//
-		if(level.traversable != null) {
-			pos = l_e + t_e * level.width();
-			for (int i = t_e; i <= b_e; i++) {
-				BArray.or( level.traversable, extension, pos, width_e, level.traversable );
-				pos+=level.width();
-			}
-		}
-		//
-
+		
 		//always visit adjacent tiles, even if they aren't seen
 		for (int i : PathFinder.NEIGHBOURS9){
 			level.visited[hero.pos+i] = true;
 		}
-	
+		
 		GameScene.updateFog(l, t, width, height);
-
+		
+		Polished.updateFogEdgeAndExpertise(l, r, t, b);
+		
 		if (hero.buff(MindVision.class) != null || hero.buff(DivineSense.DivineSenseTracker.class) != null){
 			for (Mob m : level.mobs.toArray(new Mob[0])){
 				if (m instanceof Mimic && m.alignment == Char.Alignment.NEUTRAL && ((Mimic) m).stealthy()){
 					continue;
 				}
 
-				Polished.updateNearbyTiles(extension, m.pos);
-				//updates adjacent cells too
+				Polished.updateNearbyTiles(m.pos);
 				GameScene.updateFog(m.pos, 2);
 			}
 		}
 
 		if (hero.buff(Awareness.class) != null){
 			for (Heap h : level.heaps.valueList()){
-				Polished.updateNearbyTiles(extension, h.pos);
+				Polished.updateNearbyTiles(h.pos);
 				GameScene.updateFog(h.pos, 2);
 			}
 		}
@@ -1113,27 +1135,28 @@ public class Dungeon {
 		for (TalismanOfForesight.CharAwareness c : hero.buffs(TalismanOfForesight.CharAwareness.class)){
 			Char ch = (Char) Actor.findById(c.charID);
 			if (ch == null || !ch.isAlive()) continue;
-			Polished.updateNearbyTiles(extension, ch.pos);
+			Polished.updateNearbyTiles(ch.pos);
 			GameScene.updateFog(ch.pos, 2);
 		}
 
 		for (TalismanOfForesight.HeapAwareness h : hero.buffs(TalismanOfForesight.HeapAwareness.class)){
 			if (Dungeon.depth != h.depth || Dungeon.branch != h.branch) continue;
-			Polished.updateNearbyTiles(extension, h.pos);
+			Polished.updateNearbyTiles(h.pos);
 			GameScene.updateFog(h.pos, 2);
 		}
 
 		for (RevealedArea a : hero.buffs(RevealedArea.class)){
 			if (Dungeon.depth != a.depth || Dungeon.branch != a.branch) continue;
-			Polished.updateNearbyTiles(extension, a.pos);
+			Polished.updateNearbyTiles(a.pos);
 			GameScene.updateFog(a.pos, 2);
 		}
 
 		for (Char ch : Actor.chars()){
-			if (ch instanceof WandOfWarding.Ward
-					|| ch instanceof WandOfRegrowth.Lotus
-					|| ch instanceof SpiritHawk.HawkAlly
-					|| ch.buff(PowerOfMany.PowerBuff.class) != null){
+			if (ch instanceof WandOfWarding.Ward ||
+				ch instanceof WandOfRegrowth.Lotus ||
+				ch instanceof DirectableAlly ||
+				ch.buff(PowerOfMany.PowerBuff.class) != null) {
+				
 				x = ch.pos % level.width();
 				y = ch.pos / level.width();
 
@@ -1145,41 +1168,17 @@ public class Dungeon {
 				b = Math.min( y + dist, level.height() - 1 );
 
 				width = r - l + 1;
-				height = b - t + 1;
-
-				l_e = Math.max( 0, l-1 );
-				r_e = Math.min( r+1, level.width() - 1 );
-				t_e = Math.max( 0, t-1 );
-				b_e = Math.min( b+1, level.height() - 1 );
-
-				width_e = r_e - l_e + 1;
-				height_e = b_e - t_e + 1;
 
 				pos = l + t * level.width();
 				for (int i = t; i <= b; i++) {
 					BArray.or( level.visited, level.heroFOV, pos, width, level.visited );
 					pos+=level.width();
 				}
-				//
-				if(level.traversable != null) {
-					pos = l_e + t_e * level.width();
-					for (int i = t_e; i <= b_e; i++) {
-						BArray.or( level.traversable, extension, pos, width_e, level.traversable );
-						pos+=level.width();
-					}
-				}
-				//
-
-				if(reveal) {
-					for (int i = l; i < r; i++) {
-						for (int j = t; j < b; j++) {
-							int cell = level.pointToCell(i, j);
-							if(Dungeon.level.heroFOV[cell]) level.revealSecretDoor(cell);
-						}
-					}
-				}
-
+				
 				GameScene.updateFog(ch.pos, dist);
+				
+				Polished.updateFogEdgeAndExpertise(l, r, t, b);
+				
 			}
 		}
 
@@ -1213,7 +1212,7 @@ public class Dungeon {
 		}
 
 		ch.modifyPassable(passable);
-
+		
 		if (chars) {
 			for (Char c : Actor.chars()) {
 				if (vis[c.pos]) {
