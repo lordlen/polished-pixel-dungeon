@@ -64,8 +64,12 @@ public class MobBuffDisplay extends Component {
     @Override
     public void killAndErase() {
         super.killAndErase();
+        
         healthBar = null;
-        this.ch = null;
+        ch = null;
+        
+        curBuffs.clear();
+        curBuffs = null;
     }
     
     //cached for performance
@@ -117,7 +121,7 @@ public class MobBuffDisplay extends Component {
                 } );*/
                 
                 icon.destroy();
-                remove(icon);
+                icon.killAndErase();
                 buffIcons.remove( buff );
             }
         }

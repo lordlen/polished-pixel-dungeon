@@ -162,8 +162,9 @@ public class DM300 extends Mob {
 	protected void spendConstant(float time) {
 		super.spendConstant(time);
 
-		if(POLISHED_cooldown > 0)
+		if(POLISHED_cooldown > 0) {
 			POLISHED_cooldown--;
+		}
 	}
 
 	@Override

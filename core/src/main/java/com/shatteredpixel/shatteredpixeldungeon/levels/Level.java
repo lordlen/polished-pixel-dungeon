@@ -1275,12 +1275,12 @@ public abstract class Level implements Bundlable {
 	}
 
 	public void revealSecretDoor(int cell) {
-		if(Dungeon.level.map[cell] == Terrain.SECRET_DOOR) {
-			int oldValue = Dungeon.level.map[cell];
+		if(map[cell] == Terrain.SECRET_DOOR) {
+			int oldValue = map[cell];
 
-			Dungeon.level.discover( cell );
+			discover( cell );
 
-			if(Dungeon.level.heroFOV[cell]) {
+			if(heroFOV[cell]) {
 				GameScene.discoverTile( cell, oldValue );
 				ScrollOfMagicMapping.discover( cell );
 				GLog.w( Messages.get(Hero.class, "noticed_smth") );
@@ -1299,8 +1299,8 @@ public abstract class Level implements Bundlable {
 		int cx = c.pos % width();
 		int cy = c.pos / width();
 		
-		boolean sighted = c.buff( Blindness.class ) == null && c.buff( Shadows.class ) == null
-						&& c.isAlive();
+		boolean sighted = 	c.viewDistance > 0 && c.isAlive() &&
+							c.buff( Blindness.class ) == null && c.buff( Shadows.class ) == null;
 		if (sighted) {
 			boolean[] blocking = null;
 
@@ -1309,7 +1309,7 @@ public abstract class Level implements Bundlable {
 			}
 
 			//grass is see-through by some specific entities, but not during the fungi quest
-			if (!(Dungeon.level instanceof  MiningLevel) || Blacksmith.Quest.Type() != Blacksmith.Quest.FUNGI){
+			if (!(Dungeon.level instanceof MiningLevel) || Blacksmith.Quest.Type() != Blacksmith.Quest.FUNGI){
 				if ((c instanceof Hero && ((Hero) c).subClass == HeroSubClass.WARDEN)
 						|| c instanceof YogFist.SoiledFist || c instanceof GnollGeomancer) {
 					if (blocking == null) {

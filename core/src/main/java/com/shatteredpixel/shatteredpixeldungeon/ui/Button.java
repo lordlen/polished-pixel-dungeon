@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.input.ControllerHandler;
 import com.watabou.input.GameAction;
 import com.watabou.input.KeyBindings;
@@ -127,7 +128,11 @@ public class Button extends Component {
 						Button.this.onPointerUp();
 						if (pressedButton == Button.this) {
 							pressedButton = null;
-							if (clickReady) onClick();
+							if (clickReady) {
+								GameScene.Polished.quickslotKeyPress = true;
+								onClick();
+								GameScene.Polished.quickslotKeyPress = false;
+							}
 						}
 					}
 					return true;

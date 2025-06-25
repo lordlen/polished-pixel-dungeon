@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
+import com.badlogic.gdx.Input;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
@@ -143,6 +144,7 @@ import com.watabou.utils.GameMath;
 import com.watabou.utils.Point;
 import com.watabou.utils.PointF;
 import com.watabou.utils.RectF;
+import com.watabou.utils.Signal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -316,6 +318,37 @@ public class GameScene extends PixelScene {
 			return scene != null ? scene.status : null;
 		}
 		
+		
+		public static boolean quickslotKeyPress = false;
+		public static int getSelectedCell() {
+			int cell = cellSelector.getSelectedCell(PointerEvent.currentHoverPos());
+			
+			if (Dungeon.hero.ready && !GameScene.interfaceBlockingHero()) {
+				return cell;
+			} else {
+				return -1;
+			}
+		}
+		
+		public static boolean isListenerActive(CellSelector.Listener listener) {
+			return cellSelector.listener == listener;
+		}
+		
+		public static boolean keyListenerActive = false;
+		public static Signal.Listener<KeyEvent> globalKeyListener = new Signal.Listener<KeyEvent>() {
+			@Override
+			public boolean onSignal(KeyEvent keyEvent) {
+				
+				//we don't use keybindings for these as we want the user to be able to
+				// bind these keys to other actions when pressed individually
+				if (keyEvent.code == Input.Keys.SHIFT_LEFT){
+					//DirectableAlly.CHAINING = keyEvent.pressed;
+				}
+				
+				return false;
+			}
+		};
+		
 	}
 	
 	@Override
@@ -463,9 +496,10 @@ public class GameScene extends PixelScene {
 		add( statuses );
 		
 		add( healthIndicators );
-		add( buffIndicators );
 		//always appears ontop of other health indicators
 		add( new TargetHealthIndicator() );
+		
+		add( buffIndicators );
 		
 		add( emoicons );
 		
@@ -755,6 +789,10 @@ public class GameScene extends PixelScene {
 		Journal.saveGlobal();
 		
 		super.destroy();
+		
+		//POLISHED
+		KeyEvent.removeKeyListener(Polished.globalKeyListener);
+		Polished.keyListenerActive = false;
 	}
 	
 	public static void endActorThread(){
@@ -830,6 +868,13 @@ public class GameScene extends PixelScene {
 		}
 
 		super.update();
+		
+		//POLISHED
+		//we create this here so that it is last in the scene
+		if (DeviceCompat.isDesktop() && !Polished.keyListenerActive) {
+			KeyEvent.addKeyListener(Polished.globalKeyListener);
+			Polished.keyListenerActive = true;
+		}
 
 		if (notifyDelay > 0) notifyDelay -= Game.elapsed;
 
@@ -1179,7 +1224,7 @@ public class GameScene extends PixelScene {
 	}
 
 	public static void effectOverFog( Visual effect ) {
-		scene.overFogEffects.add( effect );
+		if(scene != null) scene.overFogEffects.add( effect );
 	}
 	
 	public static Ripple ripple( int pos ) {
@@ -1605,6 +1650,8 @@ public class GameScene extends PixelScene {
 	}
 	
 	public static void ready() {
+		Dungeon.Polished.callDelayed();
+		
 		selectCell( defaultCellListener );
 		QuickSlotButton.cancel();
 		InventoryPane.cancelTargeting();

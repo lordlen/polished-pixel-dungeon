@@ -271,7 +271,7 @@ public abstract class Mob extends Char {
 		
 		if (paralysed > 0) {
 			enemySeen = false;
-			spend( TICK );
+			spendConstant( TICK );
 			return true;
 		}
 
@@ -279,13 +279,10 @@ public abstract class Mob extends Char {
 			state = FLEEING;
 		}
 		
-		//
 		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
 		if (grow != null) grow.Polished_growingHunt();
-		//
 		
 		enemy = chooseEnemy();
-		
 		boolean enemyInFOV = enemy != null && enemy.isAlive() && fieldOfView[enemy.pos] && !enemy.isStealthyTo(this);
 
 		//prevents action, but still updates enemy seen status
@@ -1294,7 +1291,7 @@ public abstract class Mob extends Char {
 					for (Char ch : recentlyAttackedBy){
 						if (ch != null && ch.isActive() && Actor.chars().contains(ch) && alignment != ch.alignment && fieldOfView[ch.pos] && !ch.isStealthyTo(Mob.this) && !isCharmedBy(ch)) {
 							if (canAttack(ch) || enemy == null || Dungeon.level.distance(pos, ch.pos) < Dungeon.level.distance(pos, enemy.pos)) {
-								enemy = ch;
+								aggro(ch);
 								target = ch.pos;
 								enemyInFOV = true;
 								swapped = true;
@@ -1331,6 +1328,7 @@ public abstract class Mob extends Char {
 						Char oldEnemy = enemy;
 						enemy = null;
 						enemy = chooseEnemy();
+						
 						if (enemy != null && enemy != oldEnemy) {
 							recursing = true;
 							boolean result = act(enemyInFOV, justAlerted);

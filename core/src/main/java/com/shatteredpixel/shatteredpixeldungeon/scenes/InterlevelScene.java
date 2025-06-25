@@ -508,6 +508,7 @@ public class InterlevelScene extends PixelScene {
 			if ((timeLeft -= Game.elapsed) <= 0) {
 				Game.switchScene( GameScene.class );
 				KeyEvent.clearListeners(); //removes potential listener for continue
+				GameScene.Polished.keyListenerActive = false;
 				thread = null;
 				error = null;
 			}

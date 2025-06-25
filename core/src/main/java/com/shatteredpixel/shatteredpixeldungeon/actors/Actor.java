@@ -58,6 +58,10 @@ public abstract class Actor implements Bundlable {
 
 	protected abstract boolean act();
 
+	protected float time() {
+		return time;
+	}
+	
 	public float Polished_alignTurnWheel( float time ) {
 		float partial = time % TICK;
 		if(partial < 0) partial++;
@@ -65,6 +69,14 @@ public abstract class Actor implements Bundlable {
 		spendConstant(partial);
 
 		return partial;
+	}
+	
+	public void Polished_timeToNow() {
+		if(all().contains(this)) {
+			time = now;
+		} else {
+			time = 0;
+		}
 	}
 
 	//Always spends exactly the specified amount of time, regardless of time-influencing factors
@@ -109,14 +121,7 @@ public abstract class Actor implements Bundlable {
 			}
 		}
 	}
-
-	public void Polished_timeToNow() {
-		if(all().contains(this)) {
-			time = now;
-		} else {
-			time = 0;
-		}
-	}
+	
 	public void timeToNow() {
 		time = now;
 	}

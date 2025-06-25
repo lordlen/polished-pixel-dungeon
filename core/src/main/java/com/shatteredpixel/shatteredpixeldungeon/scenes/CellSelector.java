@@ -93,47 +93,48 @@ public class CellSelector extends ScrollArea {
 			
 		} else {
 			
-			PointF p = Camera.main.screenToCamera( (int) event.current.x, (int) event.current.y );
-
-			//Prioritizes a sprite if it and a tile overlap, so long as that sprite isn't more than 4 pixels into another tile.
-			//The extra check prevents large sprites from blocking the player from clicking adjacent tiles
-
-			//hero first
-			if (Dungeon.hero.sprite != null && Dungeon.hero.sprite.overlapsPoint( p.x, p.y )){
-				PointF c = DungeonTilemap.tileCenterToWorld(Dungeon.hero.pos);
-				if (Math.abs(p.x - c.x) <= 12 && Math.abs(p.y - c.y) <= 12) {
-					select(Dungeon.hero.pos, event.button);
-					return;
-				}
-			}
-
-			//then mobs
-			for (Char mob : Dungeon.level.mobs.toArray(new Mob[0])){
-				if (mob.sprite != null && mob.sprite.overlapsPoint( p.x, p.y )){
-					PointF c = DungeonTilemap.tileCenterToWorld(mob.pos);
-					if (Math.abs(p.x - c.x) <= 12 && Math.abs(p.y - c.y) <= 12) {
-						select(mob.pos, event.button);
-						return;
-					}
-				}
-			}
-
-			//then heaps
-			for (Heap heap : Dungeon.level.heaps.valueList()){
-				if (heap.sprite != null && heap.sprite.overlapsPoint( p.x, p.y)){
-					PointF c = DungeonTilemap.tileCenterToWorld(heap.pos);
-					if (Math.abs(p.x - c.x) <= 12 && Math.abs(p.y - c.y) <= 12) {
-						select(heap.pos, event.button);
-						return;
-					}
-				}
-			}
+			int cell = getSelectedCell(event.current);
+			select(cell, event.button);
 			
-			select( ((DungeonTilemap)target).screenToTile(
-				(int) event.current.x,
-				(int) event.current.y,
-					true ), event.button );
 		}
+	}
+	
+	public int getSelectedCell(PointF pointer) {
+		
+		PointF p = Camera.main.screenToCamera( (int) pointer.x, (int) pointer.y );
+		
+		//Prioritizes a sprite if it and a tile overlap, so long as that sprite isn't more than 4 pixels into another tile.
+		//The extra check prevents large sprites from blocking the player from clicking adjacent tiles
+		
+		//hero first
+		if (Dungeon.hero.sprite != null && Dungeon.hero.sprite.overlapsPoint( p.x, p.y )){
+			PointF c = DungeonTilemap.tileCenterToWorld(Dungeon.hero.pos);
+			if (Math.abs(p.x - c.x) <= 12 && Math.abs(p.y - c.y) <= 12) {
+				return Dungeon.hero.pos;
+			}
+		}
+		
+		//then mobs
+		for (Char mob : Dungeon.level.mobs.toArray(new Mob[0])){
+			if (mob.sprite != null && mob.sprite.overlapsPoint( p.x, p.y )){
+				PointF c = DungeonTilemap.tileCenterToWorld(mob.pos);
+				if (Math.abs(p.x - c.x) <= 12 && Math.abs(p.y - c.y) <= 12) {
+					return mob.pos;
+				}
+			}
+		}
+		
+		//then heaps
+		for (Heap heap : Dungeon.level.heaps.valueList()){
+			if (heap.sprite != null && heap.sprite.overlapsPoint( p.x, p.y)){
+				PointF c = DungeonTilemap.tileCenterToWorld(heap.pos);
+				if (Math.abs(p.x - c.x) <= 12 && Math.abs(p.y - c.y) <= 12) {
+					return heap.pos;
+				}
+			}
+		}
+		
+		return ((DungeonTilemap)target).screenToTile( (int)pointer.x, (int)pointer.y, true );
 	}
 
 	private float zoom( float value ) {

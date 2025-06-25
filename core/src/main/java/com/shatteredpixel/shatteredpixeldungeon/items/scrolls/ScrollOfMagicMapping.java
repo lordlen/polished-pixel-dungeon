@@ -91,7 +91,8 @@ public class ScrollOfMagicMapping extends Scroll {
 	}
 	
 	public static void discover( int cell ) {
-		if(GameScene.emitter() != null)
+		if(GameScene.emitter() != null) {
 			CellEmitter.get( cell ).start( Speck.factory( Speck.DISCOVER ), 0.1f, 4 );
+		}
 	}
 }

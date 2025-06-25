@@ -101,6 +101,7 @@ public class Dungeon {
 
 	public static class Polished {
 		public static final int DEFAULT_VIEW_DISTANCE = 8;
+		
 		public static boolean loading = false;
 		static Callback afterLoad = () -> {};
 		
@@ -125,19 +126,39 @@ public class Dungeon {
 		}
 		
 		public static void runDelayed(Callback callback) {
-			Actor.add(new Actor() {
-				{
-					actPriority = VFX_PRIO;
-				}
-				
-				@Override
-				protected boolean act() {
-					callback.call();
+			
+			Callback current = delayed;
+			delayed = () -> {
+				current.call();
+				callback.call();
+			};
+			
+			if(actor == null) {
+				actor = new Actor() {
+					{
+						actPriority = VFX_PRIO+20;
+					}
 					
-					Actor.remove(this);
-					return true;
-				}
-			});
+					@Override
+					protected boolean act() {
+						callDelayed();
+						//this should already be handled but just in case
+						Actor.remove(this);
+						return true;
+					}
+				};
+				
+				Actor.add(actor);
+			}
+		}
+		public static void callDelayed() {
+			if(actor != null) {
+				delayed.call();
+				
+				Actor.remove(actor);
+				actor = null;
+			}
+			delayed = () -> {};
 		}
 		
 		public static void runAfterLoad(Callback callback) {
@@ -1116,7 +1137,7 @@ public class Dungeon {
 				x = ch.pos % level.width();
 				y = ch.pos / level.width();
 
-				//left, right, top, bottom
+				//+1 in case they just moved
 				dist = ch.viewDistance+1;
 				l = Math.max( 0, x - dist );
 				r = Math.min( x + dist, level.width() - 1 );

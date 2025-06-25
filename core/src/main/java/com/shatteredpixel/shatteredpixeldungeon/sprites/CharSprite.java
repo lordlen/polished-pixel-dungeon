@@ -348,6 +348,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		}
 		if (buffs != null) {
 			buffs.killAndErase();
+			buffs.destroy();
 			buffs = null;
 		}
 	}
@@ -775,6 +776,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		}
 		if (buffs != null) {
 			buffs.killAndErase();
+			buffs.destroy();
 			buffs = null;
 		}
 	}
