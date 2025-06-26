@@ -124,10 +124,15 @@ public class DirectableAlly extends NPC {
 	
 	public void command() {
 		if(stasis()) return;
-		int cell = GameScene.Polished.getSelectedCell();
 		
-		if(GameScene.Polished.quickslotKeyPress && DeviceCompat.isDesktop() && cell != -1) {
-			commandTo(cell);
+		if(GameScene.Polished.quickslotKeyPress && DeviceCompat.isDesktop()) {
+			int cell = GameScene.Polished.getSelectedCell();
+			if(cell != -1) {
+				commandTo(cell);
+			}
+			else {
+				GameScene.selectCell(commander);
+			}
 		}
 		else {
 			GameScene.selectCell(commander);

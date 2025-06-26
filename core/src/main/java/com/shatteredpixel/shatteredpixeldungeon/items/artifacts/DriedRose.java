@@ -76,6 +76,7 @@ import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
@@ -114,6 +115,11 @@ public class DriedRose extends Artifact {
 	public static final String AC_DIRECT = "DIRECT";
 	public static final String AC_OUTFIT = "OUTFIT";
 	
+	public static void resetGhost() {
+		ghost = null;
+		ghostID = -1;
+	}
+	
 	public static GhostHero Ghost() {
 		if(ghost != null) return ghost;
 		
@@ -129,8 +135,8 @@ public class DriedRose extends Artifact {
 		
 		Char ally = Stasis.getStasisAlly();
 		if (ally instanceof GhostHero){
-			ghostID = ally.id();
 			ghost = (GhostHero)ally;
+			ghostID = ally.id();
 			return ghost;
 		}
 		
@@ -197,9 +203,7 @@ public class DriedRose extends Artifact {
 		}
 	}
 	
-	public void onSummon(GhostHero ghost) {
-		ghostID = ghost.id();
-		
+	public void onSummon() {
 		Invisibility.dispel(Dungeon.hero);
 		Talent.onArtifactUsed(Dungeon.hero);
 		
@@ -330,7 +334,6 @@ public class DriedRose extends Artifact {
 
 	private static final String TALKEDTO =      "talkedto";
 	private static final String FIRSTSUMMON =   "firstsummon";
-	private static final String GHOSTID =       "ghostID";
 	private static final String PETALS =        "petals";
 	
 	private static final String WEAPON =        "weapon";
@@ -340,7 +343,6 @@ public class DriedRose extends Artifact {
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle(bundle);
 		
-		bundle.put( GHOSTID, ghostID );
 		bundle.put( TALKEDTO, talkedTo );
 		bundle.put( FIRSTSUMMON, firstSummon );
 		bundle.put( PETALS, droppedPetals );
@@ -353,20 +355,19 @@ public class DriedRose extends Artifact {
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle(bundle);
 		
-		if(bundle.contains(GHOSTID)) {
-			ghostID = bundle.getInt( GHOSTID );
-			ghost = null;
-		} else {
-			ghostID = -1;
-			ghost = null;
-		}
-		
 		talkedTo = bundle.getBoolean( TALKEDTO );
 		firstSummon = bundle.getBoolean( FIRSTSUMMON );
 		droppedPetals = bundle.getInt( PETALS );
 		
 		if (bundle.contains(WEAPON)) weapon = (MeleeWeapon)bundle.get( WEAPON );
 		if (bundle.contains(ARMOR))  armor = (Armor)bundle.get( ARMOR );
+		
+		Dungeon.Polished.runAfterLoad(() -> {
+            if(Ghost() != null) {
+                ghost.rose = DriedRose.this;
+				ghost.updateRose();
+            }
+        });
 	}
 
 	public class roseRecharge extends ArtifactBuff {
@@ -377,7 +378,7 @@ public class DriedRose extends Artifact {
 			spend( TICK );
 
 			if (Ghost() != null && !Ghost().isAlive()){
-				ghost = null;
+				resetGhost();
 			}
 			
 			//rose does not charge while ghost hero is alive
@@ -548,10 +549,9 @@ public class DriedRose extends Artifact {
 			
 			if(rose == null) {
 				//this should realistically never happen
-				DriedRose.ghostID = id();
 				return;
 			}
-			rose.onSummon(this);
+			rose.onSummon();
 			
 			if (rose.firstSummon) {
 				yell( Messages.get(this, "hello", Messages.titleCase(Dungeon.hero.name())) );
@@ -575,6 +575,7 @@ public class DriedRose extends Artifact {
 
 		public GhostHero(DriedRose rose){
 			super();
+			
 			this.rose = rose;
 			updateRose();
 			HP = HT;
@@ -587,8 +588,11 @@ public class DriedRose extends Artifact {
 			
 			//same dodge as the hero
 			defenseSkill = (Dungeon.hero.lvl+4);
-			if (rose == null) return;
-			HT = 20 + 8*rose.level();
+			if (rose != null) {
+				int oldHT = HT;
+				HT = 20 + 8*rose.level();
+				HP = GameMath.gate(HP, HP + (HT-oldHT), HT);
+			}
 		}
 
 		@Override
@@ -743,18 +747,24 @@ public class DriedRose extends Artifact {
 			sayDefeated();
 			super.die(cause);
 		}
-
+		
+		@Override
+		protected void onAdd() {
+			super.onAdd();
+			
+			DriedRose.ghost = this;
+			DriedRose.ghostID = id();
+		}
+		
 		@Override
 		public void destroy() {
+			DriedRose.resetGhost();
 			updateRose();
-			//TODO stasis?
 			if (rose != null) {
-				rose.ghost = null;
-				rose.ghostID = -1;
-				
 				rose.charge = 0;
 				rose.partialCharge = 0;
 			}
+			
 			super.destroy();
 		}
 		

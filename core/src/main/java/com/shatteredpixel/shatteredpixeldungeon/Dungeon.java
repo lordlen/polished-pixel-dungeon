@@ -35,7 +35,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.DivineSense;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -109,9 +108,13 @@ public class Dungeon {
 		static Callback afterLoad = () -> {};
 		
 		static Callback delayed = () -> {};
-		static Actor actor = null;
+		static Actor delayedActor = null;
 		
 		static boolean expertise = false;
+		
+		private static void reset() {
+			DriedRose.resetGhost();
+		}
 		
 		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
 			int l_e = Math.max( 0, l-1 );
@@ -194,8 +197,8 @@ public class Dungeon {
 				callback.call();
 			};
 			
-			if(actor == null) {
-				actor = new Actor() {
+			if(delayedActor == null) {
+				delayedActor = new Actor() {
 					{
 						actPriority = VFX_PRIO+20;
 					}
@@ -209,15 +212,15 @@ public class Dungeon {
 					}
 				};
 				
-				Actor.add(actor);
+				Actor.add(delayedActor);
 			}
 		}
 		public static void callDelayed() {
-			if(actor != null) {
+			if(delayedActor != null) {
 				delayed.call();
 				
-				Actor.remove(actor);
-				actor = null;
+				Actor.remove(delayedActor);
+				delayedActor = null;
 			}
 			delayed = () -> {};
 		}
@@ -396,6 +399,8 @@ public class Dungeon {
 	}
 	
 	public static void init() {
+		
+		Polished.reset();
 
 		initialVersion = version = Game.versionCode;
 		challenges = SPDSettings.challenges();
@@ -424,8 +429,12 @@ public class Dungeon {
 		quickslot.reset();
 		QuickSlotButton.reset();
 		Toolbar.swappedQuickslots = false;
-
-		depth = Debug.DEBUG_MODE ? Debug.Starting_Floor : 1;
+		
+		if(Debug.DEBUG_MODE) {
+			depth = Debug.Starting_Floor;
+		} else {
+			depth = 1;
+		}
 		branch = 0;
 		generatedLevels.clear();
 
@@ -887,6 +896,7 @@ public class Dungeon {
 	
 	public static void loadGame( int save, boolean fullLoad ) throws IOException {
 		Polished.loading = true;
+		Polished.reset();
 		
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.gameFile( save ) );
 

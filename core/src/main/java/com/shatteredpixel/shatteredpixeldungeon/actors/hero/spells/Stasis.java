@@ -170,6 +170,7 @@ public class Stasis extends ClericSpell {
 
 			if (stasisAlly instanceof DirectableAlly){
 				((DirectableAlly) stasisAlly).followHero();
+				((DirectableAlly) stasisAlly).drawPath();
 			}
 
 			if (stasisAlly.buff(LifeLink.class) != null){
