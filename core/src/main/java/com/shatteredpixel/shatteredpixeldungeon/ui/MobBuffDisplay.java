@@ -68,8 +68,10 @@ public class MobBuffDisplay extends Component {
         healthBar = null;
         ch = null;
         
-        curBuffs.clear();
-        curBuffs = null;
+        if(curBuffs != null) {
+            curBuffs.clear();
+            curBuffs = null;
+        }
     }
     
     //cached for performance

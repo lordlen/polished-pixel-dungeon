@@ -647,10 +647,6 @@ public abstract class Char extends Actor {
 	}
 
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
-		//uncomment this if you wanna make proj go on cooldown on dodges aswell.
-		//ChampionEnemy.Projecting proj = attacker.buff(ChampionEnemy.Projecting.class);
-		//boolean adjacent = Dungeon.level.adjacent(attacker.pos, defender.pos);
-		//if(proj != null && !adjacent) proj.Polished_cooldown = 2;
 
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );

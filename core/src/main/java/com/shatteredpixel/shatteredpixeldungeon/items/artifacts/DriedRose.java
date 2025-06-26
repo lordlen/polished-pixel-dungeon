@@ -121,7 +121,10 @@ public class DriedRose extends Artifact {
 	}
 	
 	public static GhostHero Ghost() {
-		if(ghost != null) return ghost;
+		if(ghost != null) {
+			if(!ghost.isAlive()) ghost = null;
+			return ghost;
+		}
 		
 		if(ghostID != -1) {
 			Actor a = Actor.findById(ghostID);
@@ -376,10 +379,6 @@ public class DriedRose extends Artifact {
 		public boolean act() {
 			
 			spend( TICK );
-
-			if (Ghost() != null && !Ghost().isAlive()){
-				resetGhost();
-			}
 			
 			//rose does not charge while ghost hero is alive
 			if (Ghost() != null && !cursed && target.buff(MagicImmune.class) == null){
@@ -503,7 +502,6 @@ public class DriedRose extends Artifact {
 			immunities.add( Burning.class );
 			immunities.add( ScrollOfRetribution.class );
 			immunities.add( ScrollOfPsionicBlast.class );
-			immunities.add( AllyBuff.class );
 		}
 		
 		@Override
@@ -537,6 +535,17 @@ public class DriedRose extends Artifact {
 						darkAnnounced = true;
 					}
 					break;
+			}
+		}
+		
+		@Override
+		public void yell( String str ) {
+			GLog.newLine();
+			if(command == Command.NONE) {
+				GLog.n( "%s: \"%s\" ", Messages.titleCase(name()), str );
+			}
+			else {
+				GLog.i( "%s: \"%s\" ", Messages.titleCase(name()), str );
 			}
 		}
 		

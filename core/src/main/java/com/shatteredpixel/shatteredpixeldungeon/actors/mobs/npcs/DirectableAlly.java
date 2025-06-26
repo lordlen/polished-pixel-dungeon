@@ -25,10 +25,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.ShadowClone;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.AllyPath;
@@ -37,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
@@ -46,6 +50,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Callback;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.PathFinder;
 
@@ -66,9 +71,10 @@ public class DirectableAlly extends NPC {
 		//we share our vision with hero
 		viewDistance = 0;
 		
-		immunities.add(Terror.class);
-		immunities.add(Dread.class);
-		immunities.add(Amok.class);
+		immunities.add( Terror.class );
+		immunities.add( Dread.class );
+		immunities.add( Amok.class );
+		immunities.add( AllyBuff.class );
 	}
 	
 	protected boolean auto = false;
@@ -471,6 +477,12 @@ public class DirectableAlly extends NPC {
 		if(DriedRose.Ghost() != null) {
 			DriedRose.Ghost().observe();
 		}
+		if(SpiritHawk.Hawk() != null) {
+			SpiritHawk.Hawk().observe();
+		}
+		if(ShadowClone.Shadow() != null) {
+			ShadowClone.Shadow().observe();
+		}
 		
 		observing = false;
 		
@@ -508,9 +520,16 @@ public class DirectableAlly extends NPC {
 		static DirectableAlly toSummon;
 		static ArrayList<Integer> candidates;
 		
+		static Callback onFinish;
+		
 		public static void trySummon(DirectableAlly ally) {
+			trySummon(ally, null);
+		}
+		
+		public static void trySummon(DirectableAlly ally, Callback callback) {
 			toSummon = ally;
 			candidates = new ArrayList<>();
+			onFinish = callback;
 			
 			boolean[] valid = validTiles(ally);
 			
@@ -537,6 +556,7 @@ public class DirectableAlly extends NPC {
 				GLog.n(Messages.get(DirectableAlly.class, "no_space"));
 				toSummon = null;
 				candidates.clear();
+				onFinish = null;
 			}
 		}
 		
@@ -551,7 +571,7 @@ public class DirectableAlly extends NPC {
 			}
 			
 			if (!ch.flying) {
-				BArray.and( valid, level.pit, valid );
+				BArray.and( valid, BArray.not(level.pit, null), valid );
 			}
 			
 			if (Char.hasProp(ch, Char.Property.LARGE)){
@@ -572,24 +592,33 @@ public class DirectableAlly extends NPC {
 			@Override
 			public void onSelect(Integer cell) {
 				if(candidates.contains(cell)) {
-					toSummon.pos = cell;
-					GameScene.add(toSummon, 1f);
-					Dungeon.level.occupyCell(toSummon);
-					
-					CellEmitter.get(toSummon.pos).start( ShaftParticle.FACTORY, 0.3f, 4 );
-					CellEmitter.get(toSummon.pos).start( Speck.factory(Speck.LIGHT), 0.2f, 3 );
-					
-					Hero hero = Dungeon.hero;
-					hero.spend(1f);
-					hero.busy();
-					hero.sprite.operate(hero.pos);
-					
-					Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
-					toSummon.onSummon();
+					Char ch = Actor.findChar(cell);
+					if(ch == null) {
+						
+						toSummon.pos = cell;
+						GameScene.add(toSummon, 1f);
+						Dungeon.level.occupyCell(toSummon);
+						Dungeon.observe();
+						
+						CellEmitter.get(toSummon.pos).start( ShaftParticle.FACTORY, 0.3f, 4 );
+						CellEmitter.get(toSummon.pos).start( Speck.factory(Speck.LIGHT), 0.2f, 3 );
+						ScrollOfTeleportation.appear(toSummon, cell);
+						Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
+						
+						Hero hero = Dungeon.hero;
+						hero.spend(1f);
+						hero.busy();
+						hero.sprite.operate(hero.pos);
+						
+						toSummon.onSummon();
+						if(onFinish != null) onFinish.call();
+						
+					}
 				}
 				
 				toSummon = null;
 				candidates.clear();
+				onFinish = null;
 			}
 			
 			@Override

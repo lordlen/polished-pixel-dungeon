@@ -1228,7 +1228,12 @@ public class Dungeon {
 			for (Char c : Actor.chars()) {
 				if (vis[c.pos]) {
 					
-					boolean ignore = c instanceof DirectableAlly && ch == Dungeon.hero;
+					//auto swap
+					boolean ignore =
+							c.alignment == Char.Alignment.ALLY &&
+							ch == Dungeon.hero &&
+							!Char.hasProp(c, Char.Property.IMMOVABLE);
+					
 					if(!ignore) {
 						passable[c.pos] = false;
 					}
