@@ -69,7 +69,7 @@ public class DirectableAlly extends NPC {
 
 		//right after hero
 		actPriority = HERO_PRIO-1;
-		//we share our vision with hero
+		//we share vision with hero
 		viewDistance = 0;
 		
 		immunities.add( Terror.class );
@@ -90,7 +90,6 @@ public class DirectableAlly extends NPC {
 	
 	@Override
 	public void aggro(Char ch) {
-		//if(!auto) return;
 		if(state == PASSIVE) return;
 		
 		enemy = ch;
@@ -138,22 +137,37 @@ public class DirectableAlly extends NPC {
 				commandTo(cell);
 			}
 			else {
-				GameScene.selectCell(commander);
+				if(GameScene.Polished.isListenerActive(commander)) {
+					//GameScene.cancelCellSelector();
+					GameScene.selectCell(commander);
+				} else {
+					GameScene.selectCell(commander);
+				}
 			}
 		}
 		else {
-			GameScene.selectCell(commander);
+			if(GameScene.Polished.isListenerActive(commander)) {
+				//GameScene.cancelCellSelector();
+				GameScene.selectCell(commander);
+			} else {
+				GameScene.selectCell(commander);
+			}
 		}
 	}
-	public CellSelector.Listener commander = new CellSelector.Listener(){
+	
+	public static class CommandListener extends CellSelector.Listener {
 		@Override
-		public void onSelect(Integer cell) {
-			commandTo(cell);
-		}
+		public void onSelect(Integer cell) {}
 		
 		@Override
 		public String prompt() {
 			return Messages.get(DirectableAlly.class, "command_prompt");
+		}
+	}
+	public CommandListener commander = new CommandListener(){
+		@Override
+		public void onSelect(Integer cell) {
+			commandTo(cell);
 		}
 	};
 	
@@ -284,7 +298,9 @@ public class DirectableAlly extends NPC {
 			case DEFEND:
 				break;
 			case ATTACK:
-				commandPos = enemy.pos;
+				if(fieldOfView[enemy.pos]) {
+					commandPos = enemy.pos;
+				}
 				break;
 			case FOLLOW:
 				commandPos = Dungeon.hero.pos;

@@ -345,6 +345,10 @@ public class GameScene extends PixelScene {
 			return cellSelector.listener == listener;
 		}
 		
+		public static boolean isListenerActive(Class<? extends CellSelector.Listener> listener) {
+			return listener.isAssignableFrom(cellSelector.listener.getClass());
+		}
+		
 		public static boolean keyListenerActive = false;
 		public static Signal.Listener<KeyEvent> globalKeyListener = new Signal.Listener<KeyEvent>() {
 			@Override

@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -105,7 +106,9 @@ public class QuickSlotButton extends Button {
 					}
 				} else {
 					Item item = select(slotNum);
-					if (Dungeon.hero.belongings.contains(item) && !GameScene.cancel() /*&& GameScene.Polished.canInput()*/) {
+					if (Dungeon.hero.belongings.contains(item) &&
+						(GameScene.Polished.isListenerActive(DirectableAlly.CommandListener.class) || !GameScene.cancel())) {
+						
 						GameScene.centerNextWndOnInvPane();
 						item.execute(Dungeon.hero);
 						if (item.usesTargeting) {
