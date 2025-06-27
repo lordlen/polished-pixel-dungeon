@@ -262,36 +262,38 @@ public class DirectableAlly extends NPC {
 	}
 	
 	protected void defaultCommand(boolean onSpawn) {
-		Mob toAttack = null;
-		for(Mob mob : Dungeon.hero.getVisibleEnemies()) {
-			if (distance(mob) <= 3 &&
-				(toAttack == null || trueDistance(toAttack) > trueDistance(mob)))
-			{
-				toAttack = mob;
+		if(onSpawn) {
+			if(Dungeon.hero.visibleEnemies() != 0) {
+				defendPos(pos);
+			} else {
+				followHero();
+			}
+			return;
+		}
+		
+		Char toAttack = null;
+		for (int i : PathFinder.NEIGHBOURS8) {
+			Char ch = Actor.findChar(pos+i);
+			if(ch != null && ch.alignment != alignment) {
+				toAttack = ch;
+				break;
 			}
 		}
 		
 		if(toAttack != null) {
-			if(auto) {
-				targetChar(toAttack);
-			}
-			else {
-				defendPos(pos);
-			}
-		}
-		else {
-			if(onSpawn) {
-				followHero();
-			}
-			else {
-				defendPos(pos);
-			}
+			targetChar(toAttack);
+		} else {
+			defendPos(pos);
 		}
 	}
 	
 	void updateTarget() {
-		if(command == Command.ATTACK && (enemy == null || !enemy.isAlive())) {
-			defaultCommand(false);
+		if(command == Command.ATTACK) {
+			if (enemy == null || !enemy.isAlive() ||
+				(!fieldOfView[enemy.pos] && pos == commandPos))
+			{
+				defaultCommand(false);
+			}
 		}
 		
 		switch (command) {
@@ -695,13 +697,10 @@ public class DirectableAlly extends NPC {
 		updateTarget();
 		boolean result = super.act();
 		
-		if(command == Command.NONE || commandPos == -1) {
-			if(auto) {
-				followHero();
-			}
-			else {
-				defendPos(pos);
-			}
+		// we delay it to prevent acting on its own,
+		// gives the player a chance to cancel the command
+		if(command == Command.NONE) {
+			defaultCommand(false);
 		}
 		
 		return result;
@@ -761,9 +760,7 @@ public class DirectableAlly extends NPC {
 	private class Hunting extends Mob.Hunting {
 		
 		{
-			// TODO POLISHED
-			// This should auto update when switching the settings
-			// Basically it prevents allies from switching aggro when their path is blocked
+			//basically it prevents allies from switching aggro when their path is blocked
 			recursing = !auto;
 		}
 
