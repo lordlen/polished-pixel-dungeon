@@ -25,13 +25,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
@@ -62,6 +60,10 @@ public class ShadowClone extends ArmorAbility {
 		baseChargeUse = 35f;
 	}
 	
+	public boolean useTargeting(){
+		return false;
+	}
+	
 	@Override
 	public float chargeUse(Hero hero) {
 		if (Shadow() == null) {
@@ -85,7 +87,7 @@ public class ShadowClone extends ArmorAbility {
 	
 	public static ShadowAlly Shadow() {
 		if(shadow != null) {
-			if(!shadow.isAlive()) shadow = null;
+			if(!shadow.isAlive()) resetShadow();
 			return shadow;
 		}
 		
@@ -193,7 +195,7 @@ public class ShadowClone extends ArmorAbility {
 					break;
 				case NONE: default:
 					if(!darkAnnounced) {
-						yell(Messages.get(this, "too_dark"));
+						GLog.n(Messages.get(this, "too_dark"));
 						darkAnnounced = true;
 					}
 					break;
@@ -212,9 +214,6 @@ public class ShadowClone extends ArmorAbility {
 		public void destroy() {
 			super.destroy();
 			ShadowClone.resetShadow();
-			
-			Dungeon.observe();
-			GameScene.updateFog();
 		}
 		
 		@Override
@@ -337,8 +336,6 @@ public class ShadowClone extends ArmorAbility {
 			}
 			appear(this, Dungeon.hero.pos);
 			appear(Dungeon.hero, curPos);
-			Dungeon.observe();
-			GameScene.updateFog();
 			return true;
 		}
 

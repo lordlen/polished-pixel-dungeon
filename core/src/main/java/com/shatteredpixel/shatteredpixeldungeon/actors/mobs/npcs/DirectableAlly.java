@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.ShadowClone;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
@@ -484,6 +485,25 @@ public class DirectableAlly extends NPC {
 			ShadowClone.Shadow().observe();
 		}
 		
+		Char ally = PowerOfMany.PoweredAlly();
+		if(ally != null) {
+			if(ally instanceof PowerOfMany.LightAlly) {
+				((PowerOfMany.LightAlly) ally).observe();
+			}
+			
+			//have to do it manually
+			else {
+				if(ally != Stasis.getStasisAlly()) {
+					Level level = Dungeon.level;
+					if(ally.fieldOfView == null || ally.fieldOfView.length != level.length()) {
+						ally.fieldOfView = new boolean[level.length()];
+					}
+					level.updateFieldOfView(ally, ally.fieldOfView);
+				}
+			}
+			
+		}
+		
 		observing = false;
 		
 	}
@@ -560,6 +580,25 @@ public class DirectableAlly extends NPC {
 			}
 		}
 		
+		public static void summon(DirectableAlly ally, int pos) {
+			ally.pos = pos;
+			GameScene.add(ally, 1f);
+			Dungeon.level.occupyCell(ally);
+			Dungeon.observe();
+			
+			CellEmitter.get(ally.pos).start( ShaftParticle.FACTORY, 0.3f, 4 );
+			CellEmitter.get(ally.pos).start( Speck.factory(Speck.LIGHT), 0.2f, 3 );
+			ScrollOfTeleportation.appear(ally, pos);
+			Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
+			
+			Hero hero = Dungeon.hero;
+			hero.spend(1f);
+			hero.busy();
+			hero.sprite.operate(hero.pos);
+			
+			ally.onSummon();
+		}
+		
 		static boolean[] validTiles(Char ch) {
 			Level level = Dungeon.level;
 			boolean[] valid = BArray.or( level.passable, level.avoid, null );
@@ -595,22 +634,7 @@ public class DirectableAlly extends NPC {
 					Char ch = Actor.findChar(cell);
 					if(ch == null) {
 						
-						toSummon.pos = cell;
-						GameScene.add(toSummon, 1f);
-						Dungeon.level.occupyCell(toSummon);
-						Dungeon.observe();
-						
-						CellEmitter.get(toSummon.pos).start( ShaftParticle.FACTORY, 0.3f, 4 );
-						CellEmitter.get(toSummon.pos).start( Speck.factory(Speck.LIGHT), 0.2f, 3 );
-						ScrollOfTeleportation.appear(toSummon, cell);
-						Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
-						
-						Hero hero = Dungeon.hero;
-						hero.spend(1f);
-						hero.busy();
-						hero.sprite.operate(hero.pos);
-						
-						toSummon.onSummon();
+						summon(toSummon, cell);
 						if(onFinish != null) onFinish.call();
 						
 					}

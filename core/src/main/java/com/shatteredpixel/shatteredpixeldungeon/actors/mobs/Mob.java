@@ -292,15 +292,7 @@ public abstract class Mob extends Char {
 			return true;
 		}
 
-		boolean result = state.act( enemyInFOV, justAlerted );
-
-		//for updating hero FOV
-		if (buff(PowerOfMany.PowerBuff.class) != null){
-			Dungeon.level.updateFieldOfView( this, fieldOfView );
-			GameScene.updateFog(pos, viewDistance+(int)Math.ceil(speed()));
-		}
-
-		return result;
+		return state.act( enemyInFOV, justAlerted );
 	}
 	
 	//FIXME this is sort of a band-aid correction for allies needing more intelligent behaviour
@@ -1426,9 +1418,9 @@ public abstract class Mob extends Char {
 	public static void holdAllies( Level level, int holdFromPos ){
 		heldAllies.clear();
 		for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-			//preserve directable allies or empowered intelligent allies no matter where they are
+			//preserve directable allies or empowered allies no matter where they are
 			if (mob instanceof DirectableAlly
-				|| (mob.intelligentAlly && PowerOfMany.getPoweredAlly() == mob)) {
+				|| (mob == PowerOfMany.PoweredAlly())) {
 				if (mob instanceof DirectableAlly) {
 					((DirectableAlly) mob).clearState();
 					((DirectableAlly) mob).erasePath();
@@ -1472,26 +1464,8 @@ public abstract class Mob extends Char {
 					}
 				});
 			}
-
-			//can only have one empowered ally at once, prioritize incoming ally
-			if (Stasis.getStasisAlly() != null){
-				for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-					if (mob.buff(PowerOfMany.PowerBuff.class) != null){
-						mob.buff(PowerOfMany.PowerBuff.class).detach();
-					}
-				}
-			}
 			
 			for (Mob ally : heldAllies) {
-
-				//can only have one empowered ally at once, prioritize incoming ally
-				if (ally.buff(PowerOfMany.PowerBuff.class) != null){
-					for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-						if (mob.buff(PowerOfMany.PowerBuff.class) != null){
-							mob.buff(PowerOfMany.PowerBuff.class).detach();
-						}
-					}
-				}
 
 				level.mobs.add(ally);
 				

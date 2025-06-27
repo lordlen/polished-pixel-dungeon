@@ -118,6 +118,7 @@ public class Dungeon {
 			DriedRose.resetGhost();
 			SpiritHawk.resetHawk();
 			ShadowClone.resetShadow();
+			PowerOfMany.resetAlly();
 		}
 		
 		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
@@ -1170,7 +1171,7 @@ public class Dungeon {
 			if (ch instanceof WandOfWarding.Ward ||
 				ch instanceof WandOfRegrowth.Lotus ||
 				ch instanceof DirectableAlly ||
-				ch.buff(PowerOfMany.PowerBuff.class) != null) {
+				ch == PowerOfMany.PoweredAlly()) {
 				
 				x = ch.pos % level.width();
 				y = ch.pos / level.width();

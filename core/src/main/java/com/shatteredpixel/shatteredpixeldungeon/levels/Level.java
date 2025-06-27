@@ -1405,10 +1405,9 @@ public abstract class Level implements Bundlable {
 		}
 		
 		if (c instanceof DirectableAlly ||
-			c.buff(PowerOfMany.PowerBuff.class) != null) {
+			c == PowerOfMany.PoweredAlly()) {
 			if(!DirectableAlly.observing) {
 				BArray.or(fieldOfView, heroFOV, fieldOfView);
-				
 				GameScene.updateFog(c.pos, c.viewDistance+(int)Math.ceil(c.speed()));
 			}
 		}
@@ -1493,7 +1492,7 @@ public abstract class Level implements Bundlable {
 				if (m instanceof WandOfWarding.Ward ||
 					m instanceof WandOfRegrowth.Lotus ||
 					m instanceof DirectableAlly ||
-					m.buff(PowerOfMany.PowerBuff.class) != null) {
+					m == PowerOfMany.PoweredAlly()) {
 					
 					if (m.fieldOfView == null || m.fieldOfView.length != length()){
 						m.fieldOfView = new boolean[length()];

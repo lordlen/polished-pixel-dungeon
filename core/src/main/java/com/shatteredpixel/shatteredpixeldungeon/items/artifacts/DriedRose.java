@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.CorrosiveGas;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
@@ -122,7 +121,7 @@ public class DriedRose extends Artifact {
 	
 	public static GhostHero Ghost() {
 		if(ghost != null) {
-			if(!ghost.isAlive()) ghost = null;
+			if(!ghost.isAlive()) resetGhost();
 			return ghost;
 		}
 		

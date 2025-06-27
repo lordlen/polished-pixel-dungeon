@@ -25,7 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlobImmunity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -51,7 +50,6 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.TextureFilm;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
-import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -60,6 +58,10 @@ public class SpiritHawk extends ArmorAbility {
 	
 	{
 		baseChargeUse = 35f;
+	}
+	
+	public boolean useTargeting(){
+		return false;
 	}
 
 	@Override
@@ -85,7 +87,7 @@ public class SpiritHawk extends ArmorAbility {
 	
 	public static HawkAlly Hawk() {
 		if(hawk != null) {
-			if(!hawk.isAlive()) hawk = null;
+			if(!hawk.isAlive()) resetHawk();
 			return hawk;
 		}
 		
@@ -183,7 +185,7 @@ public class SpiritHawk extends ArmorAbility {
 					break;
 				case NONE: default:
 					if(!darkAnnounced) {
-						yell(Messages.get(this, "too_dark"));
+						GLog.n(Messages.get(this, "too_dark"));
 						darkAnnounced = true;
 					}
 					break;
@@ -205,9 +207,6 @@ public class SpiritHawk extends ArmorAbility {
 			
 			HawkTimer timer = Dungeon.hero.buff(HawkTimer.class);
 			if(timer != null) timer.detach();
-			
-			Dungeon.observe();
-			GameScene.updateFog();
 		}
 
 		@Override

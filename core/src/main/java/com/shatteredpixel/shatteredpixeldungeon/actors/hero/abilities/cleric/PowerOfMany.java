@@ -25,7 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
@@ -39,15 +38,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BeamingRay;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.LifeLinkSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
@@ -60,18 +57,67 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 public class PowerOfMany extends ArmorAbility {
-
+	
+	{
+		baseChargeUse = 35f;
+	}
+	
+	public boolean useTargeting(){
+		return false;
+	}
+	
 	@Override
 	public float chargeUse(Hero hero) {
-		if (getPoweredAlly() instanceof LightAlly){
+		if (PoweredAlly() instanceof LightAlly){
 			return 0;
 		}
 		return super.chargeUse(hero);
 	}
+	
+	float chargeSummon(Hero hero) {
+		return super.chargeUse(hero);
+	}
+	
+	private static Char ally = null;
+	private static int allyID = -1;
+	
+	public static void resetAlly() {
+		ally = null;
+		allyID = -1;
+	}
+	
+	public static Char PoweredAlly() {
+		if(ally != null) {
+			if(!ally.isAlive()) resetAlly();
+			return ally;
+		}
+		
+		if(allyID != -1) {
+			Actor a = Actor.findById(allyID);
+			if(a instanceof Char) {
+				Char ch = (Char) a;
+				
+				if (ch.buff(PowerBuff.class) != null) {
+					ally = ch;
+					return ally;
+				}
+			}
+			allyID = -1;
+		}
+		
+		Char stasisAlly = Stasis.getStasisAlly();
+		if (stasisAlly != null) {
+			ally = stasisAlly;
+			allyID = stasisAlly.id();
+			return ally;
+		}
+		
+		return null;
+	}
 
 	@Override
 	public String targetingPrompt() {
-		Char ally = getPoweredAlly();
+		Char ally = PoweredAlly();
 
 		boolean allyExists = ally != null;
 
@@ -85,27 +131,22 @@ public class PowerOfMany extends ArmorAbility {
 			allyExists = true;
 		}
 
-		if (Stasis.getStasisAlly() != null){
-			allyExists = true;
-		}
-
 		if (ally instanceof LightAlly){
-			return Messages.get(this, "prompt_ally");
+			return null;
 		} else if (!allyExists){
 			return Messages.get(this, "prompt_default");
 		} else {
 			return null;
 		}
 	}
-
-	public boolean useTargeting(){
-		return false;
-	}
-
+	
 	@Override
 	protected void activate(ClassArmor armor, Hero hero, Integer target) {
+		
+		//to fix a weird SPD bug
+		if(!Dungeon.hero.ready) return;
 
-		Char ally = getPoweredAlly();
+		Char ally = PoweredAlly();
 
 		boolean allyExists = ally != null;
 
@@ -119,19 +160,13 @@ public class PowerOfMany extends ArmorAbility {
 			allyExists = true;
 		}
 
-		if (Stasis.getStasisAlly() != null){
-			allyExists = true;
+		if (ally instanceof LightAlly && !((LightAlly) ally).stasis()){
+			((LightAlly) ally).command();
 		}
-
-		if (ally instanceof LightAlly){
-			if (target == null){
-				return;
-			} else {
-				((LightAlly) ally).commandTo(target);
-			}
-		} else if (allyExists) {
+		else if (allyExists) {
 			GLog.w( Messages.get(this, "ally_exists"));
-		} else {
+		}
+		else {
 			if (target == null){
 				return;
 			}
@@ -141,16 +176,19 @@ public class PowerOfMany extends ArmorAbility {
 				return;
 			}
 
-			//pre-calculate as cost becomes 0 if light ally starts to exist
-			float chargeUse = chargeUse(hero);
-
 			Char ch = Actor.findChar(target);
 			if (ch != null){
+				
 				if (ch.alignment != Char.Alignment.ALLY || ch == Dungeon.hero){
 					GLog.w(Messages.get(this, "only_allies"));
 					return;
 				}
-			} else {
+				else {
+					hero.spendAndNext(Actor.TICK);
+				}
+				
+			}
+			else {
 
 				if (!Dungeon.level.passable[target] || Dungeon.level.avoid[target]){
 					GLog.w(Messages.get(ClericSpell.class, "invalid_target"));
@@ -158,22 +196,21 @@ public class PowerOfMany extends ArmorAbility {
 				}
 
 				ch = new LightAlly(hero.lvl);
-				ch.pos = target;
-				GameScene.add((Mob) ch);
-				ScrollOfTeleportation.appear(ch, ch.pos);
+				DirectableAlly.SummonSelector.summon((DirectableAlly) ch, target);
+				hero.next();
+				
 			}
 
 			Buff.affect(ch, PowerBuff.class, 100f);
 			Buff.affect(ch, Barrier.class).setShield(25);
 
-			armor.charge -= chargeUse;
-			armor.updateQuickslot();
+			armor.charge -= chargeSummon(hero);
+			Item.updateQuickslot();
 
 			hero.sprite.zap(target);
 			Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
 
 			Invisibility.dispel();
-			hero.spendAndNext(Actor.TICK);
 
 		}
 
@@ -189,11 +226,10 @@ public class PowerOfMany extends ArmorAbility {
 		return new Talent[]{Talent.BEAMING_RAY, Talent.LIFE_LINK, Talent.STASIS, Talent.HEROIC_ENERGY};
 	}
 
+	//kept for compatibility with SPD, only returns if !stasis
 	public static Char getPoweredAlly(){
-		for (Char ch : Actor.chars()){
-			if (ch.buff(PowerBuff.class) != null){
-				return ch;
-			}
+		if(PoweredAlly() != null && ally != Stasis.getStasisAlly()) {
+			return ally;
 		}
 		return null;
 	}
@@ -225,19 +261,28 @@ public class PowerOfMany extends ArmorAbility {
 
 		@Override
 		public boolean act() {
-			if (target.buff(BeamingRay.BeamingRayBoost.class) != null
-				|| target.buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null){
+			if (target.buff(BeamingRay.BeamingRayBoost.class) != null ||
+				target.buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null){
 				spend(TICK);
 				return true;
 			}
 			return super.act();
 		}
-
+		
+		@Override
+		public boolean attachTo(Char target) {
+			if(super.attachTo(target)) {
+				PowerOfMany.ally = target;
+				PowerOfMany.allyID = target.id();
+				return true;
+			}
+			return false;
+		}
+		
 		@Override
 		public void detach() {
 			super.detach();
-			Dungeon.observe();
-			GameScene.updateFog();
+			PowerOfMany.resetAlly();
 		}
 	}
 
@@ -247,8 +292,7 @@ public class PowerOfMany extends ArmorAbility {
 			spriteClass = LightAllySprite.class;
 
 			HP = HT = 80;
-
-			immunities.add(AllyBuff.class);
+			viewDistance = 3;
 
 			properties.add(Property.INORGANIC);
 		}
@@ -264,6 +308,50 @@ public class PowerOfMany extends ArmorAbility {
 			this();
 			defenseSkill = heroLevel + 4; //equal to base hero defense skill
 		}
+		
+		@Override
+		protected void announce() {
+			switch (command) {
+				case DEFEND:
+					if(!defendAnnounced) {
+						GLog.i(Messages.get(this, "direct_defend"));
+						defendAnnounced = true;
+					}
+					break;
+				case ATTACK:
+					if(!attackAnnounced) {
+						GLog.i(Messages.get(this, "direct_attack"));
+						attackAnnounced = true;
+					}
+					break;
+				case FOLLOW:
+					if(!followAnnounced) {
+						GLog.i(Messages.get(this, "direct_follow"));
+						followAnnounced = true;
+					}
+					break;
+				case NONE: default:
+					if(!darkAnnounced) {
+						GLog.n(Messages.get(this, "too_dark"));
+						darkAnnounced = true;
+					}
+					break;
+			}
+		}
+		
+		@Override
+		protected void onAdd() {
+			super.onAdd();
+			
+			PowerOfMany.ally = this;
+			PowerOfMany.allyID = id();
+		}
+		
+		@Override
+		public void destroy() {
+			super.destroy();
+			PowerOfMany.resetAlly();
+		}
 
 		@Override
 		protected boolean act() {
@@ -278,24 +366,6 @@ public class PowerOfMany extends ArmorAbility {
 				sprite.idle();
 			}
 			return result;
-		}
-
-		@Override
-		public void defendPos(int cell) {
-			GLog.i(Messages.get(this, "direct_defend"));
-			super.defendPos(cell);
-		}
-
-		@Override
-		public void followHero() {
-			GLog.i(Messages.get(this, "direct_follow"));
-			super.followHero();
-		}
-
-		@Override
-		public void targetChar(Char ch) {
-			GLog.i(Messages.get(this, "direct_attack"));
-			super.targetChar(ch);
 		}
 
 		@Override
@@ -318,9 +388,7 @@ public class PowerOfMany extends ArmorAbility {
 			float speed = super.speed();
 
 			//moves 2 tiles at a time when returning to the hero
-			if (state == WANDERING
-					&& commandPos == -1
-					&& Dungeon.level.distance(pos, Dungeon.hero.pos) > 1){
+			if (command == Command.FOLLOW){
 				speed *= 2;
 			}
 
