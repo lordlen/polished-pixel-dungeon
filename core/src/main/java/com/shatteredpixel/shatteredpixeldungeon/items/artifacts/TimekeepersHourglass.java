@@ -181,12 +181,10 @@ public class TimekeepersHourglass extends Artifact {
 				activeBuff.detach();
 				activeBuff = null;
 			}
-
-			for(Iterator<timeDebt> iterator = slowTimers.iterator(); iterator.hasNext();) {
-				timeDebt timer = iterator.next();
-				iterator.remove();
-
-				timer.detach();
+			
+			while(!slowTimers.isEmpty()) {
+				slowTimers.get(0).detach();
+				slowTimers.remove(0);
 			}
 			/*for (timeDebt timer : slowTimers) {
 				timer.detach();

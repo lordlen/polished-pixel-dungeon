@@ -180,6 +180,8 @@ public class DriedRose extends Artifact {
 	@Override
 	public void execute( Hero hero, String action ) {
 
+		//messy workaround to prevent chainCommand listener cancel, resting will get "canceled" instead
+		hero.resting = true;
 		super.execute(hero, action);
 
 		if (action.equals(AC_SUMMON)) {

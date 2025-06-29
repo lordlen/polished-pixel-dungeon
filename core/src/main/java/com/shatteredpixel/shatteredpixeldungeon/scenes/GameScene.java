@@ -45,7 +45,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
-import com.shatteredpixel.shatteredpixeldungeon.effects.AllyPath;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
@@ -1242,6 +1241,10 @@ public class GameScene extends PixelScene {
 		if(scene != null) scene.overFogEffects.add( effect );
 	}
 	
+	public static void effectOverFogToBack(Visual effect ) {
+		if(scene != null) scene.overFogEffects.addToBack( effect );
+	}
+	
 	public static Ripple ripple( int pos ) {
 		if (scene != null) {
 			Ripple ripple = (Ripple) scene.ripples.recycle(Ripple.class);
@@ -1694,8 +1697,10 @@ public class GameScene extends PixelScene {
 		
 		for (Char ch : Actor.chars()){
 			if (ch instanceof DirectableAlly) {
-				((DirectableAlly) ch).updatePath();
-				((DirectableAlly) ch).drawPath();
+				DirectableAlly ally = (DirectableAlly) ch;
+				ally.updatePath();
+				ally.drawPath();
+				ally.updateChain(true);
 			}
 		}
 	}

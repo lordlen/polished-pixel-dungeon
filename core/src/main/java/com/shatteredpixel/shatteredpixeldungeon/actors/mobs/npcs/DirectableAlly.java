@@ -46,7 +46,6 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
@@ -137,56 +136,30 @@ public class DirectableAlly extends NPC {
 				commandTo(cell);
 			}
 			else {
-				if(GameScene.Polished.isListenerActive(commander)) {
-					//GameScene.cancelCellSelector();
-					GameScene.selectCell(commander);
-				} else {
-					GameScene.selectCell(commander);
-				}
+				GameScene.selectCell(commander);
 			}
 		}
 		else {
-			if(GameScene.Polished.isListenerActive(commander)) {
-				//GameScene.cancelCellSelector();
-				GameScene.selectCell(commander);
+			if(GameScene.Polished.isListenerActive(CommandListener.class)) {
+				GameScene.selectCell(chainer);
 			} else {
 				GameScene.selectCell(commander);
 			}
 		}
 	}
 	
-	public static class CommandListener extends CellSelector.Listener {
-		@Override
-		public void onSelect(Integer cell) {}
-		
-		@Override
-		public String prompt() {
-			return Messages.get(DirectableAlly.class, "command_prompt");
-		}
-	}
-	public CommandListener commander = new CommandListener(){
-		@Override
-		public void onSelect(Integer cell) {
-			commandTo(cell);
-		}
-	};
-	
 	public void commandTo(Integer cell) {
 		if(cell == null || cell == -1) return;
-		cantReach = 0;
 		
 		if(Dungeon.level.fogEdge[cell] || Dungeon.level.mapped[cell]) {
 			Char ch = Actor.findChar(cell);
 			
-			
-			/*if(CHAIN(cell)) {
-			
+			if(CHAINING && command != Command.NONE && pos != commandPos) {
+				addToChain(cell);
+				return;
 			}
-			else*/
-			
-			
-			if (!Dungeon.level.heroFOV[cell] || ch == null ||
-				(ch != Dungeon.hero && ch.alignment != Char.Alignment.ENEMY))
+			else if (!Dungeon.level.heroFOV[cell] || ch == null ||
+					( ch != Dungeon.hero && ch.alignment != Char.Alignment.ENEMY ))
 			{
 				defendPos( cell );
 			}
@@ -196,27 +169,19 @@ public class DirectableAlly extends NPC {
 				targetChar(ch);
 			}
 			
+			cantReach = 0;
+			announce();
+			
+			eraseChain();
 			drawPath();
 		}
-		else {
+		else if(!CHAINING) {
 			clearState();
+			announce();
+			
 			erasePath();
 		}
-		
-		announce();
 	}
-	
-	public static boolean CHAINING = false;
-	//boolean TEST = false;
-	/*public static ArrayList<Integer> chainedCommands = new ArrayList<>();
-	boolean CHAIN(int cell) {
-		if(CHAINING) {
-			chainedCommands.add(cell);
-			return true;
-		}
-		
-		return false;
-	}*/
 	
 	protected void defendPos( int cell ){
 		command = Command.DEFEND;
@@ -244,10 +209,12 @@ public class DirectableAlly extends NPC {
 	
 	public void clearState() {
 		command = Command.NONE;
-		commandPos = -1;
+		commandPos = target = -1;
 		commandAggro(null);
 		
-		calculatePath();
+		path = null;
+		cantReach = 0;
+		eraseChain();
 	}
 	
 	void commandAggro(Char ch) {
@@ -262,12 +229,17 @@ public class DirectableAlly extends NPC {
 	}
 	
 	protected void defaultCommand(boolean onSpawn) {
+		
 		if(onSpawn) {
-			if(Dungeon.hero.visibleEnemies() != 0) {
-				defendPos(pos);
-			} else {
-				followHero();
+			PathFinder.buildDistanceMap(pos, BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), 8);
+			for (Mob mob : Dungeon.hero.getVisibleEnemies()) {
+				if(PathFinder.distance[mob.pos] < Integer.MAX_VALUE) {
+					defendPos(pos);
+					return;
+				}
 			}
+			
+			followHero();
 			return;
 		}
 		
@@ -397,17 +369,6 @@ public class DirectableAlly extends NPC {
 	ArrayList<AllyPath> pathDisplay = new ArrayList<>();
 	public void drawPath() {
 		erasePath();
-		
-		/*if(!chainedCommands.isEmpty()) {
-			if(path == null || pos == commandPos) {
-				commandPos = chainedCommands.get(0);
-				target = commandPos;
-				chainedCommands.remove(0);
-				
-				calculatePath();
-			}
-		}*/
-		
 		if(path == null) return;
 		
 		int start = pos;
@@ -437,16 +398,6 @@ public class DirectableAlly extends NPC {
 		if(start != end) {
 			drawStep(start, end);
 		}
-		
-		
-		/*if(!chainedCommands.isEmpty()) {
-			TEST = true;
-			for(int cell : chainedCommands) {
-				drawStep(end, cell);
-				end = cell;
-			}
-			TEST = false;
-		}*/
 	}
 	
 	void drawStep(int from, int to) {
@@ -463,15 +414,7 @@ public class DirectableAlly extends NPC {
 				break;
 		}
 		
-		/*if(TEST) {
-			color = AllyPath.CHAIN;
-		}*/
-		
-		AllyPath path = new AllyPath(
-				DungeonTilemap.tileCenterToWorld(from),
-				DungeonTilemap.tileCenterToWorld(to),
-				color);
-		
+		AllyPath path = new AllyPath(from, to, color, true);
 		pathDisplay.add(path);
 	}
 	
@@ -485,6 +428,7 @@ public class DirectableAlly extends NPC {
 	@Override
 	public void die(Object cause) {
 		super.die(cause);
+		clearState();
 		erasePath();
 	}
 	
@@ -671,6 +615,282 @@ public class DirectableAlly extends NPC {
 		
 	}
 	
+	public static class CommandListener extends CellSelector.Listener {
+		@Override
+		public void onSelect(Integer cell) {}
+		
+		@Override
+		public String prompt() {
+			return Messages.get(DirectableAlly.class, "command_prompt");
+		}
+	}
+	public CommandListener commander = new CommandListener(){
+		@Override
+		public void onSelect(Integer cell) {
+			commandTo(cell);
+		}
+	};
+	
+	private CellSelector.Listener chainer = new CellSelector.Listener() {
+		@Override
+		public void onSelect(Integer cell) {
+			CHAINING = true;
+			commandTo(cell);
+			CHAINING = false;
+		}
+		@Override
+		public String prompt() {
+			return Messages.get(DirectableAlly.class, "chain_prompt");
+		}
+	};
+	
+	public static boolean CHAINING = false;
+	private static final int MAX_CHAIN = 20;
+	ArrayList<ChainedCommand> chain = new ArrayList<>();
+	
+	private void addToChain(int cell) {
+		ChainedCommand last = !chain.isEmpty() ? chain.get(chain.size()-1) : null;
+		
+		if((last != null ? last.end() : commandPos) == cell) return;
+		if((last != null ? last.targetCommand : command) == Command.FOLLOW) return;
+		if(chain.size() >= MAX_CHAIN) return;
+		
+		Char ch = Actor.findChar(cell);
+		ChainedCommand command;
+		
+		if (( last != null && last.targetCommand == Command.DEFEND ) ||
+			!Dungeon.level.heroFOV[cell] || ch == null ||
+			( ch != Dungeon.hero && ch.alignment != Char.Alignment.ENEMY ))
+		{
+			command = new ChainedCommand(last, cell);
+		}
+		else {
+			command = new ChainedCommand(last, ch);
+		}
+		
+		if(command.valid()) {
+			chain.add(command);
+		}
+		else {
+			command.erasePath();
+		}
+	}
+	
+	public void updateChain(boolean fullUpdate) {
+		boolean destroy = false;
+		for (int i = 0; i < chain.size(); i++) {
+			ChainedCommand c = chain.get(i);
+			c.updateSeen();
+			
+			if(fullUpdate) {
+				if(!c.valid() || destroy) {
+					if(i+1 < chain.size()) {
+						chain.get(i+1).swapPrev(c.prev);
+					}
+					
+					c.erasePath();
+					chain.remove(c);
+					i--;
+					
+					if(c.cellToCell()) {
+						destroy = true;
+					}
+				}
+				else {
+					c.updatePath();
+				}
+			}
+		}
+	}
+	
+	private void eraseChain() {
+		while (!chain.isEmpty()) {
+			chain.get(0).erasePath();
+			chain.remove(0);
+		}
+	}
+	
+	private class ChainedCommand {
+		
+		//starts from prev command target
+		ChainedCommand prev;
+		
+		//its target is either a cell, or a character
+		int targetCell = -1;
+		Char targetChar = null;
+		Command targetCommand;
+		
+		//stored path
+		PathFinder.Path path = null;
+		ArrayList<AllyPath> pathDisplay = new ArrayList<>();
+		
+		ChainedCommand(ChainedCommand prev, int target) {
+			this.prev = prev;
+			this.targetCell = target;
+			this.targetCommand = Command.DEFEND;
+			
+			createPath();
+		}
+		
+		ChainedCommand(ChainedCommand prev, Char target) {
+			this.prev = prev;
+			this.targetChar = target;
+			this.targetCell = target.pos;
+			if(target == Dungeon.hero) {
+				targetCommand = Command.FOLLOW;
+			} else {
+				targetCommand = Command.ATTACK;
+			}
+			
+			createPath();
+		}
+		
+		boolean valid() {
+			if(targetCommand == Command.DEFEND) {
+				if(cellToCell()) {
+					return path != null && !path.isEmpty();
+				} else {
+					return start() != end();
+				}
+			}
+			else {
+				return targetChar != null && targetChar.isAlive();
+			}
+		}
+		
+		void swapPrev(ChainedCommand newPrev) {
+			prev = newPrev;
+			
+			if (cellToCell() && path == null) {
+				calculatePath();
+				erasePath();
+				drawPath();
+			}
+		}
+		
+		boolean cellToCell() {
+			return  targetCommand == Command.DEFEND &&
+					(prev != null ? prev.targetCommand : command) == Command.DEFEND;
+		}
+		
+		int start() {
+			return prev != null ? prev.end() : commandPos;
+		}
+		int end() {
+			return targetCell;
+		}
+		
+		void createPath() {
+			if(cellToCell()) {
+				calculatePath();
+				drawPath();
+			}
+			//otherwise just draw a simple line
+			else {
+				//make sure its reachable first
+				calculatePath(pos);
+				
+				if(path != null) {
+					path = null;
+					drawStep(start(), end());
+				}
+				else {
+					targetCell = start();
+				}
+			}
+		}
+		
+		void calculatePath() {
+			calculatePath(start());
+		}
+		void calculatePath(int from) {
+			Level level = Dungeon.level;
+			Char ch = DirectableAlly.this;
+			
+			if(fieldOfView == null || fieldOfView.length != level.length()) {
+				fieldOfView = new boolean[level.length()];
+				level.updateFieldOfView(ch, fieldOfView);
+			}
+			
+			boolean[] pass = Dungeon.findPassable(ch, level.passable, fieldOfView, false);
+			path = PathFinder.find( from, end(), pass );
+		}
+		
+		void drawPath() {
+			if(path == null) return;
+			
+			int start = start();
+			int end = start;
+			int lastDirection = -1;
+			
+			for(Integer step : path) {
+				int direction = -1;
+				for (int i : PathFinder.NEIGHBOURS8) {
+					if(step - end == i) {
+						direction = i;
+						break;
+					}
+				}
+				
+				if(direction == lastDirection || start == end) {
+					end = step;
+				}
+				else {
+					drawStep(start, end);
+					
+					start = end;
+					end = step;
+				}
+				lastDirection = direction;
+			}
+			if(start != end) {
+				drawStep(start, end);
+			}
+		}
+		
+		void drawStep(int from, int to) {
+			int color;
+			switch (targetCommand) {
+				case DEFEND: default:
+					if (cellToCell()) {
+						color = AllyPath.CHAIN;
+					} else {
+						color = AllyPath.DEFEND;
+					}
+					break;
+				case ATTACK:
+					color = AllyPath.ATTACK;
+					break;
+				case FOLLOW:
+					color = AllyPath.FOLLOW;
+					break;
+			}
+			
+			AllyPath path = new AllyPath(from, to, color, false);
+			pathDisplay.add(path);
+		}
+		
+		void updateSeen() {
+			if(targetChar != null && fieldOfView[targetChar.pos]) {
+				targetCell = targetChar.pos;
+			}
+		}
+		
+		void updatePath() {
+			if(!cellToCell() && !pathDisplay.isEmpty()) {
+				pathDisplay.get(0).updatePos(start(), end());
+			}
+		}
+		
+		void erasePath() {
+			for (AllyPath step : pathDisplay) {
+				step.killAndErase();
+			}
+			pathDisplay.clear();
+		}
+		
+	}
+	
 	private static final String COMMAND = "command";
 	private static final String COMMAND_POS = "command_pos";
 	@Override
@@ -695,6 +915,7 @@ public class DirectableAlly extends NPC {
 		}
 		
 		updateTarget();
+		updateChain(false);
 		boolean result = super.act();
 		
 		// we delay it to prevent acting on its own,
@@ -726,8 +947,6 @@ public class DirectableAlly extends NPC {
 
 				int oldPos = pos;
 				if (target != -1 && getCloser( target )) {
-					cantReach = 0;
-					
 					spend( 1 / speed() );
 					return moveSprite( oldPos, pos );
 				}
@@ -737,9 +956,9 @@ public class DirectableAlly extends NPC {
 						cantReach++;
 						if(cantReach >= 3) {
 							defendPos(pos);
+							cantReach = 0;
 						}
 					}
-					else { cantReach = 0; }
 					
 					if(time() % 1 == 0) {
 						spend( TICK );
@@ -756,7 +975,16 @@ public class DirectableAlly extends NPC {
 		}
 
 	}
-
+	
+	@Override
+	protected boolean getCloser(int target) {
+		if(super.getCloser(target)) {
+			cantReach = 0;
+			return true;
+		}
+		return false;
+	}
+	
 	private class Hunting extends Mob.Hunting {
 		
 		{

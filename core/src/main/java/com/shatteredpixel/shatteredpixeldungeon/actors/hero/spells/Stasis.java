@@ -170,6 +170,7 @@ public class Stasis extends ClericSpell {
 
 			if (stasisAlly instanceof DirectableAlly){
 				((DirectableAlly) stasisAlly).followHero();
+				//we have to call this since Stasis::act gets manually activated and doesn't lead to Gamescene::ready
 				((DirectableAlly) stasisAlly).drawPath();
 			}
 

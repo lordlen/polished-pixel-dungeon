@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.effects;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.Image;
 import com.watabou.utils.PointF;
@@ -38,15 +39,31 @@ public class AllyPath extends Group {
 	private Line line;
 	private Point point;
 	
-	public AllyPath(PointF s, PointF e, int color) {
+	public AllyPath(int from, int to, int color, boolean front) {
+		PointF s = DungeonTilemap.tileCenterToWorld(from);
+		PointF e = DungeonTilemap.tileCenterToWorld(to);
+		
 		line = new Line(s, e, color);
 		add(line);
 		
 		point = new Point(e, color);
 		add(point);
 		
-		GameScene.effectOverFog(line);
-		GameScene.effectOverFog(point);
+		if(front) {
+			GameScene.effectOverFog(line);
+			GameScene.effectOverFog(point);
+		} else {
+			GameScene.effectOverFogToBack(line);
+			GameScene.effectOverFogToBack(point);
+		}
+	}
+	
+	public void updatePos(int from, int to) {
+		PointF s = DungeonTilemap.tileCenterToWorld(from);
+		PointF e = DungeonTilemap.tileCenterToWorld(to);
+		
+		line.updatePos(s, e);
+		point.updatePos(e);
 	}
 	
 	@Override
@@ -67,6 +84,10 @@ public class AllyPath extends Group {
 			tint(color);
 			
 			origin.set( 0, height / 2 );
+			updatePos(s, e);
+		}
+		
+		private void updatePos(PointF s, PointF e) {
 			x = s.x - origin.x;
 			y = s.y - origin.y;
 			
@@ -96,6 +117,10 @@ public class AllyPath extends Group {
 			tint(color);
 			
 			origin.set( 1, height / 2 );
+			updatePos(c);
+		}
+		
+		private void updatePos(PointF c) {
 			x = c.x - origin.x;
 			y = c.y - origin.y;
 		}

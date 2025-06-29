@@ -104,7 +104,6 @@ import java.util.TimeZone;
 public class Dungeon {
 
 	public static class Polished {
-		public static final int DEFAULT_VIEW_DISTANCE = 8;
 		
 		public static boolean loading = false;
 		static Callback afterLoad = () -> {};

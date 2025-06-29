@@ -841,47 +841,43 @@ public abstract class Char extends Actor {
 	}
 
 	boolean Polished_isDamageExternal(Object src) {
-
+		
 		if(!(src instanceof Char)) {
 			//dont get def boost against debuffs, traps and such
 			return false;
 		}
-
-		else if(Dungeon.level instanceof RegularLevel) {
-			Char attacker = (Char)src;
-			RegularLevel level = (RegularLevel)Dungeon.level;
-
-			ArrayList<Integer> roomCells = new ArrayList<>();
-			Room r = (level.room(pos));
-
-			if(r != null) {
-				for (Point p : r.getPoints()){
-					roomCells.add(level.pointToCell(p));
-				}
-
-				return !roomCells.contains(attacker.pos);
-			}
-
-			else {
-				boolean enemyRoom = true;
-				for(int i : PathFinder.NEIGHBOURS9) {
-					if ( level.room( attacker.pos+i ) == null )
-						enemyRoom = false;
-				}
-
-				if(enemyRoom) {
-					return true;
-				}
-
-				else if(Dungeon.level.distance(attacker.pos, pos) <= Dungeon.Polished.DEFAULT_VIEW_DISTANCE) {
-					//if within a reasonable distance, we assume they're in the same room
-					return false;
-				}
-				else return true;
-			}
-
+		if(!(Dungeon.level instanceof RegularLevel)) {
+			return false;
 		}
-		else return false;
+		
+		Char attacker = (Char)src;
+		RegularLevel level = (RegularLevel)Dungeon.level;
+
+		ArrayList<Integer> roomCells = new ArrayList<>();
+		Room r = (level.room(pos));
+
+		if(r != null) {
+			for (Point p : r.getPoints()){
+				roomCells.add(level.pointToCell(p));
+			}
+
+			return !roomCells.contains(attacker.pos);
+		}
+		else {
+			boolean enemyRoom = true;
+			for(int i : PathFinder.NEIGHBOURS9) {
+				if (level.room( attacker.pos+i ) == null) {
+					enemyRoom = false;
+				}
+			}
+			if(enemyRoom) {
+				return true;
+			}
+            
+            //if within a reasonable distance, assume they're in the same room
+            return Dungeon.level.distance(attacker.pos, pos) > 8;
+		}
+		
 	}
 	
 	public void damage( int dmg, Object src ) {
