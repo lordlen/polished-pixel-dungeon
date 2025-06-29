@@ -236,7 +236,7 @@ public class DriedRose extends Artifact {
 			return Messages.get(this, "desc_no_quest");
 		}
 		
-		String desc = super.desc();
+		String desc = Ghost() != null ? Messages.get(this, "desc_spawned") : super.desc();
 
 		if (isEquipped( Dungeon.hero )){
 			if (!cursed){
