@@ -23,6 +23,7 @@ package com.watabou.input;
 
 import com.badlogic.gdx.Input;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.PointerArea;
 import com.watabou.noosa.ui.Cursor;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Signal;
@@ -98,6 +99,19 @@ public class PointerEvent {
 	// **********************
 	
 	private static Signal<PointerEvent> pointerSignal = new Signal<>( true );
+	
+	public static void simulateClick(PointerArea target) {
+		PointF pointer = PointerEvent.currentHoverPos();
+		PointerEvent event = new PointerEvent((int)pointer.x, (int)pointer.y, -1, Type.DOWN);
+		pointerSignal.dispatch(event);
+		
+		if(target == null || target.isEventSelected(event)) {
+			event.type = Type.UP;
+		} else {
+			event.type = Type.CANCEL;
+		}
+		pointerSignal.dispatch(event);
+	}
 	
 	public static void addPointerListener( Signal.Listener<PointerEvent> listener ){
 		pointerSignal.add(listener);

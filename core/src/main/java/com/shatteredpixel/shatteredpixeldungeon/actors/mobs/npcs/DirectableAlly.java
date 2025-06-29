@@ -130,20 +130,20 @@ public class DirectableAlly extends NPC {
 	public void command() {
 		if(stasis()) return;
 		
-		if(GameScene.Polished.quickslotKeyPress && DeviceCompat.isDesktop()) {
-			int cell = GameScene.Polished.getSelectedCell();
-			if(cell != -1) {
-				commandTo(cell);
-			}
-			else {
-				GameScene.selectCell(commander);
-			}
+		if(GameScene.Polished.isListenerActive(CommandListener.class)) {
+			GameScene.selectCell(chainer);
 		}
 		else {
-			if(GameScene.Polished.isListenerActive(CommandListener.class)) {
-				GameScene.selectCell(chainer);
-			} else {
-				GameScene.selectCell(commander);
+			GameScene.selectCell(commander);
+			
+			if(GameScene.Polished.quickslotKeyPress && DeviceCompat.isDesktop()) {
+				GameScene.Polished.simulateTilemapClick();
+				
+				/*int cell = GameScene.Polished.getSelectedCell();
+				if(cell != -1) {
+					GameScene.cancelCellSelector();
+					commandTo(cell);
+				}*/
 			}
 		}
 	}

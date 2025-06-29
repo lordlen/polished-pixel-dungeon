@@ -235,7 +235,6 @@ public class GameScene extends PixelScene {
         public static void bufferAction(GameAction action, boolean animation) {
             if(!actionQueued()) bufferedAction = action;
             else bufferedAction = null;
-            //bufferedAction = action;
 
             timer_Action = Game.realTime + (animation ? bufferPeriod_Action : 2*bufferPeriod_Action)*(long)SPDSettings.Polished.buffers();
         }
@@ -331,13 +330,20 @@ public class GameScene extends PixelScene {
 		
 		public static boolean quickslotKeyPress = false;
 		public static int getSelectedCell() {
-			int cell = cellSelector.getSelectedCell(PointerEvent.currentHoverPos());
+			PointF pointer = PointerEvent.currentHoverPos();
 			
-			if (Dungeon.hero.ready && !GameScene.interfaceBlockingHero()) {
+			int cell = cellSelector.getSelectedCell(pointer);
+			boolean hit = cellSelector.target.overlapsScreenPoint( (int)pointer.x, (int)pointer.y );
+			
+			if (hit && Dungeon.hero.ready && !GameScene.interfaceBlockingHero()) {
 				return cell;
 			} else {
 				return -1;
 			}
+		}
+		
+		public static void simulateTilemapClick() {
+			PointerEvent.simulateClick(cellSelector);
 		}
 		
 		public static boolean isListenerActive(CellSelector.Listener listener) {

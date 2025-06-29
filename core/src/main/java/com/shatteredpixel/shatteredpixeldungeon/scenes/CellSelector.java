@@ -161,8 +161,9 @@ public class CellSelector extends ScrollArea {
 	}
 	
 	public void select( int cell, int button ) {
-		if (enabled && Dungeon.hero.ready && !GameScene.interfaceBlockingHero() && GameScene.Polished.canInput()
-				&& listener != null && cell != -1) {
+		if (enabled && Dungeon.hero.ready &&
+			listener != null && cell != -1 &&
+			!GameScene.interfaceBlockingHero() && GameScene.Polished.canInput()) {
 
 			switch (button){
 				default:
@@ -176,7 +177,9 @@ public class CellSelector extends ScrollArea {
 			
 		} else {
 
-			if(GameScene.Polished.canInput() && Dungeon.hero.curAction == null) GameScene.Polished.bufferCell(cell);
+			if(GameScene.Polished.canInput()) {
+				GameScene.Polished.bufferCell(cell);
+			}
 			GameScene.cancel();
 			
 		}
@@ -412,8 +415,9 @@ public class CellSelector extends ScrollArea {
 
 		if (Dungeon.hero == null || !Dungeon.hero.ready || !GameScene.Polished.canInput()){
 			//GameAction movement = actionFromDirection(direction);
-			if(GameScene.Polished.canInput() && !direction.isZero())
+			if(GameScene.Polished.canInput() && !direction.isZero()) {
 				GameScene.Polished.bufferMovement(direction);
+			}
 
 			return false;
 		}
