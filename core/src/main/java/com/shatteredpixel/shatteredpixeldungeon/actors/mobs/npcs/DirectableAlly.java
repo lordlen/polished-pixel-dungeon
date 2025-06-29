@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
@@ -46,7 +47,11 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
+import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
@@ -138,13 +143,18 @@ public class DirectableAlly extends NPC {
 			
 			if(GameScene.Polished.quickslotKeyPress && DeviceCompat.isDesktop()) {
 				GameScene.Polished.simulateTilemapClick();
-				
-				/*int cell = GameScene.Polished.getSelectedCell();
-				if(cell != -1) {
-					GameScene.cancelCellSelector();
-					commandTo(cell);
-				}*/
 			}
+		}
+	}
+	
+	public void chainCommand() {
+		if(!chainAnnounced) {
+			chainAnnounced = true;
+			WndMessage msg = new WndMessage(Messages.get(this, "chain_info"));
+			Game.runOnRenderThread(() -> GameScene.show(msg));
+		}
+		else {
+			GameScene.selectCell(chainer);
 		}
 	}
 	
@@ -656,6 +666,7 @@ public class DirectableAlly extends NPC {
 		}
 	};
 	
+	boolean chainAnnounced = false;
 	private CellSelector.Listener chainer = new CellSelector.Listener() {
 		@Override
 		public void onSelect(Integer cell) {

@@ -112,6 +112,7 @@ public class DriedRose extends Artifact {
 
 	public static final String AC_SUMMON = "SUMMON";
 	public static final String AC_DIRECT = "DIRECT";
+	public static final String AC_CHAIN = "CHAIN";
 	public static final String AC_OUTFIT = "OUTFIT";
 	
 	public static void resetGhost() {
@@ -160,6 +161,7 @@ public class DriedRose extends Artifact {
 		}
 		if (Ghost() != null && !Ghost().stasis()){
 			actions.add(AC_DIRECT);
+			actions.add(AC_CHAIN);
 		}
 		if (isIdentified() && !cursed){
 			actions.add(AC_OUTFIT);
@@ -198,11 +200,18 @@ public class DriedRose extends Artifact {
 				DirectableAlly.SummonSelector.trySummon(new GhostHero(this));
 			}
 
-		} else if (action.equals(AC_DIRECT)){
+		}
+		else if (action.equals(AC_DIRECT)){
 			if (Ghost() != null) {
 				ghost.command();
 			}
-		} else if (action.equals(AC_OUTFIT)){
+		}
+		else if (action.equals(AC_CHAIN)){
+			if (Ghost() != null) {
+				ghost.chainCommand();
+			}
+		}
+		else if (action.equals(AC_OUTFIT)){
 			GameScene.show( new WndGhostHero(this) );
 		}
 	}
