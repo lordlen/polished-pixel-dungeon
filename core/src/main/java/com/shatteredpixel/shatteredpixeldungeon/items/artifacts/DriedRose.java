@@ -609,7 +609,7 @@ public class DriedRose extends Artifact {
 			defenseSkill = (Dungeon.hero.lvl+4);
 			if (rose != null) {
 				int oldHT = HT;
-				HT = 20 + 8*rose.level();
+				HT = 25 + 10*rose.level();
 				HP = GameMath.gate(HP, HP + (HT-oldHT), HT);
 			}
 		}
