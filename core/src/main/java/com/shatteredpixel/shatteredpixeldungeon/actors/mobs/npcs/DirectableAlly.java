@@ -284,6 +284,31 @@ public class DirectableAlly extends NPC {
 				break;
 		}
 		
+		while(pos == commandPos && !chain.isEmpty()) {
+			ChainedCommand chained = chain.get(0);
+			
+			if(chained.valid()) {
+				switch (chained.targetCommand) {
+					case DEFEND: default:
+						defendPos(chained.targetCell);
+						break;
+					case ATTACK:
+						targetChar(chained.targetChar);
+						commandPos = chained.targetCell;
+						break;
+					case FOLLOW:
+						followHero();
+						break;
+				}
+			}
+			
+			if(chain.size() > 1) {
+				chain.get(1).swapPrev(null);
+			}
+			chain.remove(chained);
+			chained.erasePath();
+		}
+		
 		target = commandPos;
 	}
 	
@@ -656,23 +681,23 @@ public class DirectableAlly extends NPC {
 		if(chain.size() >= MAX_CHAIN) return;
 		
 		Char ch = Actor.findChar(cell);
-		ChainedCommand command;
+		ChainedCommand chained;
 		
 		if (( last != null && last.targetCommand == Command.DEFEND ) ||
 			!Dungeon.level.heroFOV[cell] || ch == null ||
 			( ch != Dungeon.hero && ch.alignment != Char.Alignment.ENEMY ))
 		{
-			command = new ChainedCommand(last, cell);
+			chained = new ChainedCommand(last, cell);
 		}
 		else {
-			command = new ChainedCommand(last, ch);
+			chained = new ChainedCommand(last, ch);
 		}
 		
-		if(command.valid()) {
-			chain.add(command);
+		if(chained.valid()) {
+			chain.add(chained);
 		}
 		else {
-			command.erasePath();
+			chained.erasePath();
 		}
 	}
 	
@@ -914,8 +939,8 @@ public class DirectableAlly extends NPC {
 			return true;
 		}
 		
-		updateTarget();
 		updateChain(false);
+		updateTarget();
 		boolean result = super.act();
 		
 		// we delay it to prevent acting on its own,
