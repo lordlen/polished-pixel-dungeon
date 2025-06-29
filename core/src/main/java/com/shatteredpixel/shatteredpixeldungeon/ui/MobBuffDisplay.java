@@ -72,6 +72,9 @@ public class MobBuffDisplay extends Component {
             curBuffs.clear();
             curBuffs = null;
         }
+        
+        buffIcons.clear();
+        buffIcons = null;
     }
     
     //cached for performance

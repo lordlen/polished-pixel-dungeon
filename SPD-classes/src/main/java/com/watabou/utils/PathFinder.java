@@ -75,11 +75,7 @@ public class PathFinder {
 									-1*width-2, -1*width-1, -1*width, -1*width+1, -1*width+2,
 									-2, -1, 0, +1, +2,
 									+1*width-2, +1*width-1, +1*width, +1*width+1, +1*width+2,
-									+2*width-2, +2*width-1, +2*width, +2*width+1, +2*width+2,
-				
-				
-				
-				-1, 0, +1, +width-1, +width, +width+1};
+									+2*width-2, +2*width-1, +2*width, +2*width+1, +2*width+2	};
 
 		CIRCLE4 = new int[]{-width, +1, +width, -1};
 		CIRCLE8 = new int[]{-width-1, -width, -width+1, +1, +width+1, +width, +width-1, -1};
