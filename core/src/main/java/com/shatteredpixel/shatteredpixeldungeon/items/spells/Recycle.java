@@ -39,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Reflection;
@@ -66,6 +67,10 @@ public class Recycle extends InventorySpell {
 	@Override
 	protected void onItemSelected(Item item) {
 		onUse();
+		
+		if(Dungeon.hero.belongings.contains(curItem)) {
+			GameScene.selectItem(itemSelector);
+		}
 		
 		Item result;
 		do {

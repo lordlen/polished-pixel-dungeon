@@ -169,14 +169,16 @@ public class CurseInfusion extends InventorySpell {
 				curseEnchant( (BrokenSeal) item );
 			}
 		}
-		else if (item instanceof Wand){
+		else {
 			item.cursed = true;
-			((Wand) item).curseInfusionBonus = true;
-			((Wand) item).updateLevel();
-		}
-		else if (item instanceof RingOfMight){
-			item.cursed = true;
-			curUser.updateHT(false);
+			
+			if (item instanceof Wand){
+				((Wand) item).curseInfusionBonus = true;
+				((Wand) item).updateLevel();
+			}
+			else if (item instanceof RingOfMight){
+				curUser.updateHT(false);
+			}
 		}
 		
 		CellEmitter.get(curUser.pos).burst(ShadowParticle.UP, 5);

@@ -23,7 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -44,9 +44,10 @@ import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
-public class Alchemize extends Spell {
+public class Alchemize extends InventorySpell {
 	
 	{
+		preferredBag = Belongings.Backpack.class;
 		image = ItemSpriteSheet.ALCHEMIZE;
 
 		talentChance = 1/(float)Recipe.OUT_QUANTITY;
@@ -55,19 +56,13 @@ public class Alchemize extends Spell {
 	private static WndBag parentWnd;
 	
 	@Override
-	protected void onCast(Hero hero) {
-		parentWnd = GameScene.selectItem( itemSelector );
-	}
-	
-	@Override
 	public int value() {
-		//lower value, as it's very cheap to make (and also sold at shops)
-		return (int)(12 * (quantity/(float)Recipe.OUT_QUANTITY));
+		return (int)(15 * (quantity/(float)Recipe.OUT_QUANTITY));
 	}
 
 	@Override
 	public int energyVal() {
-		return (int)(3 * (quantity/(float)Recipe.OUT_QUANTITY));
+		return (int)(4 * (quantity/(float)Recipe.OUT_QUANTITY));
 	}
 
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe {
@@ -97,42 +92,41 @@ public class Alchemize extends Spell {
 			return new Alchemize().quantity(OUT_QUANTITY);
 		}
 	}
-
-	private static WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
-		@Override
-		public String textPrompt() {
-			return Messages.get(Alchemize.class, "prompt");
+	
+	@Override
+	protected void onItemSelected(Item item) {
+		if (parentWnd != null) {
+			parentWnd = GameScene.selectItem(itemSelector);
 		}
-
-		@Override
-		public boolean itemSelectable(Item item) {
-			return !(item instanceof Alchemize)
-					&& (Shopkeeper.canSell(item) || item.energyVal() > 0);
+		GameScene.show( new WndAlchemizeItem( item ) );
+	}
+	
+	@Override
+	protected boolean usableOnItem(Item item) {
+		return Shopkeeper.canSell(item) || item.energyVal() > 0;
+	}
+	
+	@Override
+	public void onUse(){
+		super.onUse();
+		curUser.spend(-1f);
+		
+		if(Dungeon.hero.belongings.contains(curItem)) {
+			GameScene.selectItem(itemSelector);
 		}
-
-		@Override
-		public void onSelect( Item item ) {
-			if (item != null) {
-				if (parentWnd != null) {
-					parentWnd = GameScene.selectItem(itemSelector);
-				}
-				GameScene.show( new WndAlchemizeItem( item, parentWnd ) );
-			}
+		
+		if (parentWnd != null) {
+			parentWnd.hide();
 		}
-	};
-
-
-	public static class WndAlchemizeItem extends WndInfoItem {
+	}
+	
+	public class WndAlchemizeItem extends WndInfoItem {
 
 		private static final float GAP		= 2;
 		private static final int BTN_HEIGHT	= 18;
 
-		private WndBag owner;
-
-		public WndAlchemizeItem(Item item, WndBag owner) {
+		public WndAlchemizeItem(Item item) {
 			super(item);
-
-			this.owner = owner;
 
 			float pos = height;
 
@@ -144,7 +138,7 @@ public class Alchemize extends Spell {
 						protected void onClick() {
 							WndTradeItem.sell(item);
 							hide();
-							consumeAlchemize();
+							onUse();
 						}
 					};
 					btnSell.setRect(0, pos + GAP, width, BTN_HEIGHT);
@@ -161,7 +155,7 @@ public class Alchemize extends Spell {
 						protected void onClick() {
 							WndTradeItem.sellOne(item);
 							hide();
-							consumeAlchemize();
+							onUse();
 						}
 					};
 					btnSell1.setRect(0, pos + GAP, width, BTN_HEIGHT);
@@ -172,7 +166,7 @@ public class Alchemize extends Spell {
 						protected void onClick() {
 							WndTradeItem.sell(item);
 							hide();
-							consumeAlchemize();
+							onUse();
 						}
 					};
 					btnSellAll.setRect(0, btnSell1.bottom() + 1, width, BTN_HEIGHT);
@@ -192,7 +186,7 @@ public class Alchemize extends Spell {
 						protected void onClick() {
 							WndEnergizeItem.energizeAll(item);
 							hide();
-							consumeAlchemize();
+							onUse();
 						}
 					};
 					btnEnergize.setRect(0, pos + GAP, width, BTN_HEIGHT);
@@ -209,7 +203,7 @@ public class Alchemize extends Spell {
 						protected void onClick() {
 							WndEnergizeItem.energizeOne(item);
 							hide();
-							consumeAlchemize();
+							onUse();
 						}
 					};
 					btnEnergize1.setRect(0, pos + GAP, width, BTN_HEIGHT);
@@ -220,7 +214,7 @@ public class Alchemize extends Spell {
 						protected void onClick() {
 							WndEnergizeItem.energizeAll(item);
 							hide();
-							consumeAlchemize();
+							onUse();
 						}
 					};
 					btnEnergizeAll.setRect(0, btnEnergize1.bottom() + 1, width, BTN_HEIGHT);
@@ -235,26 +229,11 @@ public class Alchemize extends Spell {
 			resize( width, (int)pos );
 
 		}
-
-		private void consumeAlchemize(){
-			Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
-			if (curItem.quantity() <= 1){
-				curItem.detachAll(Dungeon.hero.belongings.backpack);
-				if (owner != null) {
-					owner.hide();
-				}
-			} else {
-				curItem.detach(Dungeon.hero.belongings.backpack);
-				if (owner != null){
-					owner.hide();
-				}
-				GameScene.selectItem(itemSelector);
-			}
-			Catalog.countUse(getClass());
-			if (curItem instanceof Alchemize && Random.Float() < ((Alchemize)curItem).talentChance){
-				Talent.onScrollUsed(curUser, curUser.pos, ((Alchemize) curItem).talentFactor, curItem.getClass());
-			}
+		
+		@Override
+		public void onBackPressed() {
+			super.onBackPressed();
+			GameScene.selectItem(itemSelector);
 		}
-
 	}
 }

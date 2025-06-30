@@ -137,12 +137,12 @@ public class WndEnergizeItem extends WndInfoItem {
 			}
 
 		} else {
-
-			//energizing items doesn't spend time
-			hero.spend(-hero.cooldown());
+			
 			new EnergyCrystal(item.energyVal()).doPickUp(hero);
+			hero.spend(-Item.TIME_TO_PICK_UP);
+			
 			item.identify();
-			GLog.h("You energized: " + item.name());
+			GLog.h(Messages.get(WndEnergizeItem.class, "used", item.title()));
 
 		}
 	}
