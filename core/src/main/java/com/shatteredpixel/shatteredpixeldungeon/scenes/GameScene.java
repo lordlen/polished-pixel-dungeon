@@ -634,31 +634,24 @@ public class GameScene extends PixelScene {
 			switch (Dungeon.level.feeling) {
 				case CHASM:
 					GLog.w(Dungeon.level.feeling.desc());
-					Notes.add(Notes.Landmark.CHASM_FLOOR);
 					break;
 				case WATER:
 					GLog.w(Dungeon.level.feeling.desc());
-					Notes.add(Notes.Landmark.WATER_FLOOR);
 					break;
 				case GRASS:
 					GLog.w(Dungeon.level.feeling.desc());
-					Notes.add(Notes.Landmark.GRASS_FLOOR);
 					break;
 				case DARK:
 					GLog.w(Dungeon.level.feeling.desc());
-					Notes.add(Notes.Landmark.DARK_FLOOR);
 					break;
 				case LARGE:
 					GLog.w(Dungeon.level.feeling.desc());
-					Notes.add(Notes.Landmark.LARGE_FLOOR);
 					break;
 				case TRAPS:
 					GLog.w(Dungeon.level.feeling.desc());
-					Notes.add(Notes.Landmark.TRAPS_FLOOR);
 					break;
 				case SECRETS:
 					GLog.w(Dungeon.level.feeling.desc());
-					Notes.add(Notes.Landmark.SECRETS_FLOOR);
 					break;
 			}
 

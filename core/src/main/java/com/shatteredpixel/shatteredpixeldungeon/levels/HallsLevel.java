@@ -119,6 +119,9 @@ public class HallsLevel extends RegularLevel {
 	public void create() {
 		addItemToSpawn( new Torch() );
 		addItemToSpawn( new Torch() );
+		if (feeling == Feeling.LARGE){
+			addItemToSpawn( new Torch() );
+		}
 		super.create();
 	}
 	
