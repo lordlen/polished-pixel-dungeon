@@ -248,7 +248,6 @@ public class ShopRoom extends SpecialRoom {
 			itemsToSpawn.add( new PlateArmor().identify(false) );
 			itemsToSpawn.add( new Torch() );
 			itemsToSpawn.add( new Torch() );
-			itemsToSpawn.add( new Torch() );
 			break;
 		}
 		w.enchant(null);
