@@ -196,16 +196,10 @@ public class MiningLevel extends CavesLevel {
 			map[cell] = Terrain.GRASS;
 			losBlocking[cell] = false;
 		}
-		drop( Generator.randomUsingDefaults(Generator.Category.FOOD), cell );
-		if (Blacksmith.Quest.Type() == Blacksmith.Quest.GNOLL){
-			//drop a second ration for the gnoll quest type, more mining required!
-			cell = randomDropCell();
-			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
-				map[cell] = Terrain.GRASS;
-				losBlocking[cell] = false;
-			}
-			drop( Generator.randomUsingDefaults(Generator.Category.FOOD), cell );
-		}
+		
+		Item food = Generator.randomUsingDefaults(Generator.Category.FOOD);
+		food.Polished_levelGen=true;
+		drop( food, cell );
 
 		if (Dungeon.isChallenged(Challenges.DARKNESS)){
 			cell = randomDropCell();
@@ -213,7 +207,10 @@ public class MiningLevel extends CavesLevel {
 				map[cell] = Terrain.GRASS;
 				losBlocking[cell] = false;
 			}
-			drop( new Torch(), cell );
+			
+			Torch torch = new Torch();
+			torch.Polished_levelGen=true;
+			drop( torch, cell );
 		}
 	}
 

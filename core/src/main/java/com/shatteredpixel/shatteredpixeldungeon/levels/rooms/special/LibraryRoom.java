@@ -72,6 +72,7 @@ public class LibraryRoom extends SpecialRoom {
 			prize = level.findPrizeItem( Scroll.class );
 			if (prize == null) {
 				prize = Generator.random( Generator.Category.SCROLL );
+				prize.Polished_levelGen = true;
 			}
 		}
 		

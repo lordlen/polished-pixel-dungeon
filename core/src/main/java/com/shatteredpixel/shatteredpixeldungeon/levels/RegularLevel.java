@@ -388,7 +388,7 @@ public abstract class RegularLevel extends Level {
 
 			Item toDrop = Generator.random();
 			if (toDrop == null) continue;
-			toDrop.Polished_toFind = true;
+			toDrop.Polished_levelGen = true;
 
 			int cell = randomDropCell();
 			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
@@ -449,7 +449,7 @@ public abstract class RegularLevel extends Level {
 			
 		}
 		
-		//these are already flagged as "toFind"
+		//these are already flagged as Polished_levelGen
 		for (Item item : itemsToSpawn) {
 			int cell = randomDropCell();
 			if (item instanceof TrinketCatalyst){
@@ -479,7 +479,10 @@ public abstract class RegularLevel extends Level {
 					map[cell] = Terrain.GRASS;
 					losBlocking[cell] = false;
 				}
-				drop( new Torch(), cell );
+				Torch torch = new Torch();
+				torch.Polished_levelGen=true;
+				drop( torch, cell );
+				
 				//add a second torch to help with the larger floor
 				if (feeling == Feeling.LARGE){
 					cell = randomDropCell();
@@ -487,7 +490,9 @@ public abstract class RegularLevel extends Level {
 						map[cell] = Terrain.GRASS;
 						losBlocking[cell] = false;
 					}
-					drop( new Torch(), cell );
+					torch = new Torch();
+					torch.Polished_levelGen=true;
+					drop( torch, cell );
 				}
 			}
 		Random.popGenerator();

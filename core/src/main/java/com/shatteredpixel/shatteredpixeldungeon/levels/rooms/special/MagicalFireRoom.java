@@ -122,12 +122,14 @@ public class MagicalFireRoom extends SpecialRoom {
 				return prize;
 		}
 
-		return Generator.random( Random.oneOf(
+		Item prize = Generator.random( Random.oneOf(
 				Generator.Category.POTION,
 				Generator.Category.SCROLL,
 				Generator.Category.FOOD,
 				Generator.Category.GOLD
 		) );
+		prize.Polished_levelGen = true;
+		return prize;
 	}
 
 	@Override

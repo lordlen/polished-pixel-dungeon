@@ -101,18 +101,6 @@ public abstract class Scroll extends Item {
 		stackable = true;
 		defaultAction = AC_READ;
 	}
-
-	@Override
-	public boolean doPickUp(Hero hero, int pos) {
-		boolean picked = super.doPickUp(hero, pos);
-
-		if(picked && Polished_toFind) {
-			FoundItems.add(getClass(), Dungeon.depth);
-			Polished_toFind = false;
-		}
-
-		return picked;
-	}
 	
 	@SuppressWarnings("unchecked")
 	public static void initLabels() {
