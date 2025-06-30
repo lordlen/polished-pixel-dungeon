@@ -65,6 +65,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Surprise;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Wound;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArmband;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
@@ -1000,6 +1001,7 @@ public abstract class Mob extends Char {
 	
 	public void rollToDropLoot(){
 		if (Dungeon.hero.lvl > maxLvl + 2) return;
+		boolean dropped = false;
 
 		MasterThievesArmband.StolenTracker stolen = buff(MasterThievesArmband.StolenTracker.class);
 		if (stolen == null || !stolen.itemWasStolen()) {
@@ -1007,6 +1009,7 @@ public abstract class Mob extends Char {
 				Item loot = createLoot();
 				if (loot != null) {
 					Dungeon.level.drop(loot, pos).sprite.drop();
+					dropped=true;
 				}
 			}
 		}
@@ -1020,6 +1023,7 @@ public abstract class Mob extends Char {
 			if (bonus != null && !bonus.isEmpty()) {
 				for (Item b : bonus) Dungeon.level.drop(b, pos).sprite.drop();
 				RingOfWealth.showFlareForBonusDrop(sprite);
+				dropped=true;
 			}
 		}
 		
@@ -1027,6 +1031,7 @@ public abstract class Mob extends Char {
 		if (buff(Lucky.LuckProc.class) != null){
 			Dungeon.level.drop(buff(Lucky.LuckProc.class).genLoot(), pos).sprite.drop();
 			Lucky.showFlare(sprite);
+			dropped=true;
 		}
 
 		//soul eater talent
@@ -1034,6 +1039,9 @@ public abstract class Mob extends Char {
 				Random.Int(10) < Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)){
 			Talent.onFoodEaten(Dungeon.hero, 0, null);
 		}
+		
+		Heap heap = Dungeon.level.heaps.get(pos);
+		if(dropped && heap != null && Dungeon.level.visited[pos]) heap.seen = true;
 
 	}
 	
