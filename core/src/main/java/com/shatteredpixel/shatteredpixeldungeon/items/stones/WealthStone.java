@@ -102,7 +102,8 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone, Weal
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return stone.identify(byHero);
+		if(valid()) stone.identify(byHero);
+		return this;
 	}
 	@Override
 	public boolean isSimilar(Item item) {

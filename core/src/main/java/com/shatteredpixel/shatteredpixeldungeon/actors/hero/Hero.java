@@ -214,7 +214,7 @@ public class Hero extends Char {
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
-	private static final float HUNGER_FOR_SEARCH	= 5f;
+	private static final float HUNGER_FOR_SEARCH	= 4f;
 	
 	public HeroClass heroClass = HeroClass.ROGUE;
 	public HeroSubClass subClass = HeroSubClass.NONE;
@@ -2662,10 +2662,10 @@ public class Hero extends Char {
 					searchTime++;
 					searchHunger *= 2;
 				}
+				searchHunger = Math.max(0, searchHunger-searchTime);
 				searchHunger *= SaltCube.hungerGainMultiplier();
-				searchHunger = Math.min(searchHunger-searchTime, 0);
 
-				Buff.affect(this, Hunger.class).affectHunger(searchHunger);
+				Buff.affect(this, Hunger.class).affectHunger(-searchHunger);
 			}
 
 			if (cursed) GLog.n(Messages.get(this, "search_distracted"));

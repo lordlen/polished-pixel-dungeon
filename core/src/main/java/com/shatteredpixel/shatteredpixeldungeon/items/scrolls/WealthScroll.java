@@ -71,7 +71,8 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return scroll.identify(byHero);
+		if(valid()) scroll.identify(byHero);
+		return this;
 	}
 	@Override
 	public boolean isKnown() {

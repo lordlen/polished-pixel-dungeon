@@ -195,7 +195,7 @@ public class Waterskin extends Item {
 
 	@Override
 	public String status() {
-		return Messages.format( TXT_STATUS, volume, MAX_VOLUME );
+		return quantity != 0 ? Messages.format( TXT_STATUS, volume, MAX_VOLUME ) : null;
 	}
 
 }

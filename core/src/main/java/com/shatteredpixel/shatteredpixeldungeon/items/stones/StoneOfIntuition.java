@@ -131,6 +131,7 @@ public class StoneOfIntuition extends InventoryStone {
 					}
 					if(Polished_wealthDrop != null) {
 						curItem.detach(curUser.belongings.backpack);
+						Catalog.countUse(StoneOfIntuition.class);
 						Talent.onRunestoneUsed(curUser, curUser.pos, StoneOfIntuition.class);
 					}
 					else if (!anonymous) {
