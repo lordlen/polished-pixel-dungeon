@@ -44,16 +44,21 @@ public abstract class EquipableItem extends Item {
 
 	{
 		bones = true;
-		defaultAction = AC_EQUIP;
-		
-		Dungeon.Polished.runAfterLoad(this::Polished_updateDefaultAction);
 	}
 	
-	public void Polished_updateDefaultAction() {
-		if(isEquipped(Dungeon.hero) && (defaultAction == null || defaultAction.matches(AC_EQUIP))) defaultAction = AC_UNEQUIP;
-		if(!isEquipped(Dungeon.hero) && (defaultAction == null || defaultAction.matches(AC_UNEQUIP))) defaultAction = AC_EQUIP;
+	@Override
+	public String defaultAction() {
+		if(!isEquipped(Dungeon.hero)) {
+			return AC_EQUIP;
+		}
+		else if(defaultAction == null) {
+			return AC_UNEQUIP;
+		}
+		else {
+			return defaultAction;
+		}
 	}
-
+	
 	@Override
 	public ArrayList<String> actions(Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
@@ -159,7 +164,6 @@ public abstract class EquipableItem extends Item {
 		}
 		keptThoughLostInvent = wasKept;
 		
-		Dungeon.Polished.runDelayed(this::Polished_updateDefaultAction);
 		return true;
 	}
 
@@ -167,8 +171,6 @@ public abstract class EquipableItem extends Item {
 		return doUnequip( hero, collect, true );
 	}
 
-	public void activate( Char ch ) {
-		Dungeon.Polished.runAfterLoad(this::Polished_updateDefaultAction);
-	}
+	public void activate( Char ch ) {}
 
 }
