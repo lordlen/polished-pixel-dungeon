@@ -58,21 +58,16 @@ public class SecretLarderRoom extends SecretRoom {
 		
 		level.plant(new BlandfruitBush.Seed(), level.pointToCell(c));
 		
-		HoneyedMeat honeyed = new HoneyedMeat();
-		int foodPos;
-		do {
-			foodPos = level.pointToCell(random());
-		} while (level.map[foodPos] != Terrain.EMPTY_SP || level.heaps.get(foodPos) != null);
-		level.drop(honeyed, foodPos);
-		
-		int extraMeat = Random.NormalIntRange(0, 1);
+		int extraMeat = 2;
 		boolean chargrilled = Random.Int(2) == 0;
+		
 		for(int i = 0; i < extraMeat; i++) {
-			Food meat = chargrilled ? new ChargrilledMeat() : new FrozenCarpaccio();
-			
+			int foodPos;
 			do {
 				foodPos = level.pointToCell(random());
 			} while (level.map[foodPos] != Terrain.EMPTY_SP || level.heaps.get(foodPos) != null);
+			
+			Food meat = chargrilled ? new ChargrilledMeat() : new FrozenCarpaccio();
 			level.drop(meat, foodPos);
 		}
 		
