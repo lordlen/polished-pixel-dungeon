@@ -109,13 +109,17 @@ public class UnstableBrew extends Brew {
 	
 	@Override
 	public void shatter(int cell) {
+		//Don't allow this to roll, useless in combat.
+		potionChances.put(PotionOfPurity.class, 0f);
+		
 		Potion p = Reflection.newInstance(Random.chances(potionChances));
-
+		
 		//reroll the potion if it wasn't a good potion to throw
 		while (!mustThrowPots.contains(p.getClass()) && !canThrowPots.contains(p.getClass())){
 			p = Reflection.newInstance(Random.chances(potionChances));
 		}
-
+		potionChances.put(PotionOfPurity.class, 2f);
+		
 		p.anonymize();
 		curItem = p;
 		p.shatter(cell);
