@@ -118,10 +118,7 @@ public class HallsLevel extends RegularLevel {
 	@Override
 	public void create() {
 		addItemToSpawn( new Torch() );
-		addItemToSpawn( new Torch() );
-		if (feeling == Feeling.LARGE){
-			addItemToSpawn( new Torch() );
-		}
+		//spawn more torches depending on conditions, check RegularLevel::createItems
 		super.create();
 	}
 	

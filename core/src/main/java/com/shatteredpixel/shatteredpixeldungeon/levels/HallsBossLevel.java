@@ -39,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -218,6 +219,24 @@ public class HallsBossLevel extends Level {
 				}
 			}
 		Random.popGenerator();
+		
+		ArrayList<Integer> candidates = new ArrayList<>();
+		for (int offset : PathFinder.NEIGHBOURS8) {
+			int cell = entrance() + offset;
+			
+			if(passable[cell] && heaps.get(cell) == null) {
+				candidates.add(cell);
+			}
+		}
+		
+		Torch torch = new Torch();
+		torch.Polished_levelGen=true;
+		if(!candidates.isEmpty()) {
+			drop( torch, Random.element(candidates) );
+		}
+		else {
+			drop( torch, entrance() );
+		}
 	}
 
 	@Override

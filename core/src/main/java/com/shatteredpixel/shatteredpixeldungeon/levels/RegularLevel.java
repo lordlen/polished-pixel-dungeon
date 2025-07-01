@@ -473,7 +473,32 @@ public abstract class RegularLevel extends Level {
 		//we can use a random long for these as they will be the same longs every time
 
 		Random.pushGenerator( Random.Long() );
-			if (Dungeon.isChallenged(Challenges.DARKNESS) && !(this instanceof HallsLevel)){
+			boolean darkness = Dungeon.isChallenged(Challenges.DARKNESS);
+			boolean halls = this instanceof HallsLevel;
+			int torches = 0;
+			
+			if(darkness && !halls) {
+				torches++;
+				
+				//add a second torch to help with the larger floor
+				if (feeling == Feeling.LARGE){
+					torches++;
+				}
+			}
+			
+			else if(halls) {
+				//halls gets -1 torch on darkness
+				if(!darkness) {
+					torches++;
+				}
+				
+				//add a second torch to help with the larger floor
+				if (feeling == Feeling.LARGE){
+					torches++;
+				}
+			}
+			
+			for(int i = 0; i < torches; i++) {
 				int cell = randomDropCell();
 				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
 					map[cell] = Terrain.GRASS;
@@ -482,18 +507,6 @@ public abstract class RegularLevel extends Level {
 				Torch torch = new Torch();
 				torch.Polished_levelGen=true;
 				drop( torch, cell );
-				
-				//add a second torch to help with the larger floor
-				if (feeling == Feeling.LARGE){
-					cell = randomDropCell();
-					if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
-						map[cell] = Terrain.GRASS;
-						losBlocking[cell] = false;
-					}
-					torch = new Torch();
-					torch.Polished_levelGen=true;
-					drop( torch, cell );
-				}
 			}
 		Random.popGenerator();
 
