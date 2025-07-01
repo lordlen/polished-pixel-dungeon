@@ -26,8 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Camouflaged;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CamouflagedBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -126,7 +125,7 @@ public class Dagger extends MeleeWeapon {
 		}
 
 		wep.beforeAbilityUsed(hero, null);
-		Buff.prolong(hero, Camouflaged.class, camoTurns);
+		Buff.prolong(hero, CamouflagedBuff.class, camoTurns);
 
 		Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, target);
 		Dungeon.hero.pos = target;

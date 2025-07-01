@@ -30,7 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
-public class Shadows extends Invisibility {
+public class Shadows extends CamouflagedBuff {
 	
 	protected float left;
 	
@@ -56,15 +56,8 @@ public class Shadows extends Invisibility {
 	
 	@Override
 	public boolean attachTo( Char target ) {
-		if (Dungeon.level != null) {
-			for (Mob m : Dungeon.level.mobs) {
-				if (Dungeon.level.adjacent(m.pos, target.pos) && m.alignment != target.alignment) {
-					return false;
-				}
-			}
-		}
-		if (super.attachTo( target )) {
-			if (Dungeon.level != null) {
+		if (target.buff(ShadowsImmunity.class) == null && super.attachTo( target )) {
+			if (!Dungeon.Polished.loading) {
 				Sample.INSTANCE.play( Assets.Sounds.MELD );
 				Dungeon.observe();
 			}
@@ -80,6 +73,11 @@ public class Shadows extends Invisibility {
 		Dungeon.observe();
 	}
 	
+	public void dispel() {
+		Buff.prolong(target, ShadowsImmunity.class, 3f);
+		detach();
+	}
+	
 	@Override
 	public boolean act() {
 		if (target.isAlive()) {
@@ -93,13 +91,6 @@ public class Shadows extends Invisibility {
 			if (--left <= 0) {
 				detach();
 				return true;
-			}
-
-			for (Mob m : Dungeon.level.mobs){
-				if (Dungeon.level.adjacent(m.pos, target.pos) && m.alignment != target.alignment){
-					detach();
-					return true;
-				}
 			}
 			
 		} else {
@@ -129,4 +120,9 @@ public class Shadows extends Invisibility {
 	public String desc() {
 		return Messages.get(this, "desc");
 	}
+	
+	public static class ShadowsImmunity extends FlavourBuff {
+		{ actPriority = HERO_PRIO+1; }
+	}
+	
 }
