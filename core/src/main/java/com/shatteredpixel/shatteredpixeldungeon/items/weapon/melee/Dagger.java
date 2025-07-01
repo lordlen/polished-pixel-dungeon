@@ -90,7 +90,7 @@ public class Dagger extends MeleeWeapon {
 
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
-		sneakAbility(hero, target, 2, 2+buffedLvl(), this);
+		sneakAbility(hero, target, 3, 2+buffedLvl(), this);
 	}
 
 	@Override

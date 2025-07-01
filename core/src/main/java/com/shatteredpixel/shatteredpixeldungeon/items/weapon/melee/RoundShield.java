@@ -73,21 +73,21 @@ public class RoundShield extends MeleeWeapon {
 
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
-		RoundShield.guardAbility(hero, 2 * (5+buffedLvl()),3 + buffedLvl(), this);
+		RoundShield.guardAbility(hero, 8 + 2*buffedLvl(),3 + buffedLvl(), this);
 	}
 
 	@Override
 	public String abilityInfo() {
 		if (levelKnown){
-			return Messages.get(this, "ability_desc", 5+buffedLvl());
+			return Messages.get(this, "ability_desc", 3 + buffedLvl(), 8 + 2*buffedLvl());
 		} else {
-			return Messages.get(this, "typical_ability_desc", 5);
+			return Messages.get(this, "typical_ability_desc", 3, 8);
 		}
 	}
 
 	@Override
 	public String upgradeAbilityStat(int level) {
-		return Integer.toString(5 + level);
+		return (3 + level) + ", " + (8 + 2*level);
 	}
 
 	public static void guardAbility(Hero hero, int duration, int totalBlocks, MeleeWeapon wep){
