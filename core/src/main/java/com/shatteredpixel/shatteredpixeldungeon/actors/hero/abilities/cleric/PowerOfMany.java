@@ -160,8 +160,13 @@ public class PowerOfMany extends ArmorAbility {
 			allyExists = true;
 		}
 
-		if (ally instanceof LightAlly && !((LightAlly) ally).stasis()){
-			((LightAlly) ally).command();
+		if (ally instanceof LightAlly){
+			if (((LightAlly) ally).stasis()) {
+				GLog.w( Messages.get(this, "spawned"));
+			}
+			else {
+				((LightAlly) ally).command();
+			}
 		}
 		else if (allyExists) {
 			GLog.w( Messages.get(this, "ally_exists"));

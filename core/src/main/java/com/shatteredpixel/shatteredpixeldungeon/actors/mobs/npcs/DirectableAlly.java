@@ -148,6 +148,8 @@ public class DirectableAlly extends NPC {
 	}
 	
 	public void chainCommand() {
+		if(stasis()) return;
+		
 		if(!chainAnnounced) {
 			chainAnnounced = true;
 			WndMessage msg = new WndMessage(Messages.get(this, "chain_info"));

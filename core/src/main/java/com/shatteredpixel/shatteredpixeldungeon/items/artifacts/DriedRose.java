@@ -172,10 +172,17 @@ public class DriedRose extends Artifact {
 
 	@Override
 	public String defaultAction() {
-		if (Ghost() != null && !Ghost().stasis()){
-			return AC_DIRECT;
-		} else {
+		if(!isEquipped(Dungeon.hero)) {
+			return super.defaultAction();
+		}
+		else if (Ghost() == null) {
 			return AC_SUMMON;
+		}
+		else if (!Ghost().stasis()){
+			return AC_DIRECT;
+		}
+		else {
+			return super.defaultAction();
 		}
 	}
 
