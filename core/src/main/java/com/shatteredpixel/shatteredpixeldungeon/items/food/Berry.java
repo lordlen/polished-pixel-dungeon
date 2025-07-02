@@ -36,10 +36,10 @@ public class Berry extends Food {
 	{
 		image = ItemSpriteSheet.BERRY;
 		
-		energy = SPDSettings.Polished.huntress() ?
-				Hunger.HUNGRY/3f //100 food value
-				: Hunger.HUNGRY/3f; //100 food value
-
+		energy = Hunger.HUNGRY/3f; //100 food value
+		if(SPDSettings.Polished.huntress()) {
+			//energy = Hunger.HUNGRY/2f; //150 food value
+		}
 		bones = false;
 	}
 
