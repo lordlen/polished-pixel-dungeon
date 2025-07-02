@@ -512,14 +512,15 @@ public enum Talent {
 	}
 
 	public String desc(boolean metamorphed){
-		if (this == NATURES_AID && SPDSettings.Polished.huntress()) {
+		if (SPDSettings.Polished.huntress() && (this == NATURES_AID || this == DURABLE_PROJECTILES)) {
+			
 			String desc = Messages.get(this, name() + ".polished_desc");
 			String metaDesc = Messages.get(this, name() + ".polished_meta_desc");
 			
-			if(metamorphed) {
-				return desc + "\n\n" + metaDesc;
+			if(metamorphed && !metaDesc.equals(Messages.NO_TEXT_FOUND)) {
+				desc += "\n\n" + metaDesc;
 			}
-			else return desc;
+			return desc;
 		}
 
 		if (metamorphed){
@@ -620,6 +621,11 @@ public enum Talent {
 		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null) {
 			if(Armor.runic == 1) BrokenSeal.armor.transfer();
 			BrokenSeal.armor.Polished_updateDefaultAction();
+		}
+		
+		if(talent == DURABLE_PROJECTILES && hero.pointsInTalent(talent) == 2 && SPDSettings.Polished.huntress()) {
+			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+			if(bow != null) bow.Polished_resetCharges();
 		}
 	}
 
