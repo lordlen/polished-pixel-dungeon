@@ -86,27 +86,34 @@ public class HighGrass {
 						naturalismLevel = -1;
 					}
 				}
-
+				
 				//berries try to drop on floors 2/3/4/6/7/8, to a max of 4/6
 				if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.NATURES_BOUNTY)){
+					
 					int berriesAvailable = 2 + 2*((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
+					//if(SPDSettings.Polished.huntress()) berriesAvailable--; // 5/3
+					
+					int targetFloor = berriesAvailable;
 
 					Talent.NatureBerriesDropped dropped = Buff.affect(ch, Talent.NatureBerriesDropped.class);
 					berriesAvailable -= dropped.count();
+					
+					targetFloor -= berriesAvailable;
+					targetFloor += (targetFloor >= 5) ? 3 : 2;
 
 					if (berriesAvailable > 0) {
-						int targetFloor = 2 + 2 * ((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
-						targetFloor -= berriesAvailable;
-						targetFloor += (targetFloor >= 5) ? 3 : 2;
-
-						//If we're behind: 1/10, if we're on page: 1/30, if we're ahead: 1/90
-						boolean droppingBerry = false;
-						if (Dungeon.depth > targetFloor) droppingBerry = Random.Int(10) == 0;
-						else if (Dungeon.depth == targetFloor) droppingBerry = Random.Int(30) == 0;
-						else if (Dungeon.depth < targetFloor) droppingBerry = Random.Int(90) == 0;
-
-						if (droppingBerry) {
+						
+						Talent.NatureBerriesProgress progress = Buff.affect(ch, Talent.NatureBerriesProgress.class);
+						
+						//If we're behind: ~8 tramples; if we're on page: ~25 tramples, if we're ahead: ~67 tramples
+						if (Dungeon.depth > targetFloor) progress.countUp(Random.NormalIntRange(10, 15));
+						else if (Dungeon.depth == targetFloor) progress.countUp(Random.NormalIntRange(3, 5));
+						else if (Dungeon.depth < targetFloor) progress.countUp(Random.NormalIntRange(1, 2));
+						
+						if(progress.count() >= 100) {
+							progress.setCount(0);
 							dropped.countUp(1);
+							
 							level.drop(new Berry(), pos).sprite.drop();
 							trampledItems++;
 						}
@@ -168,12 +175,13 @@ public class HighGrass {
 			if (Dungeon.level.heroFOV[pos]) Dungeon.observe();
 		}
 
-		if (ch instanceof Hero && SPDSettings.Polished.autoPickup()
-				&& Hero.Polished.noEnemiesSeen() && Hero.Polished.noEnemiesLast) {
+		if (ch instanceof Hero && SPDSettings.Polished.autoPickup() &&
+			Hero.Polished.noEnemiesSeen() && Hero.Polished.noEnemiesLast)
+		{
 			Hero.Polished.trampledItemsLast = trampledItems;
-		} else {
-			if(ch instanceof Hero)
-				Hero.Polished.trampledItemsLast = 0;
+		}
+		else if(ch instanceof Hero) {
+			Hero.Polished.trampledItemsLast = 0;
 		}
 	}
 }

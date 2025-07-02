@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.food;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CounterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
@@ -34,7 +35,10 @@ public class Berry extends Food {
 
 	{
 		image = ItemSpriteSheet.BERRY;
-		energy = Hunger.HUNGRY/3f; //100 food value
+		
+		energy = SPDSettings.Polished.huntress() ?
+				Hunger.HUNGRY/3f //100 food value
+				: Hunger.HUNGRY/3f; //100 food value
 
 		bones = false;
 	}
@@ -62,7 +66,6 @@ public class Berry extends Food {
 			counter.detach();
 		} else {
 			Dungeon.level.drop(Generator.randomUsingDefaults(Generator.Category.SEED), hero.pos).sprite.drop();
-			counter.detach();
 		}
 	}
 

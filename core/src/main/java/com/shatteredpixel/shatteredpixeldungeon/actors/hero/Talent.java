@@ -512,7 +512,8 @@ public enum Talent {
 	}
 
 	public String desc(boolean metamorphed){
-		if (SPDSettings.Polished.huntress() && (this == NATURES_AID || this == DURABLE_PROJECTILES)) {
+		if (SPDSettings.Polished.huntress() &&
+			(this == NATURES_AID || this == DURABLE_PROJECTILES || this == NATURES_BOUNTY)) {
 			
 			String desc = Messages.get(this, name() + ".polished_desc");
 			String metaDesc = Messages.get(this, name() + ".polished_meta_desc");
@@ -631,6 +632,7 @@ public enum Talent {
 
 	public static class CachedRationsDropped extends CounterBuff{{revivePersists = true;}};
 	public static class NatureBerriesDropped extends CounterBuff{{revivePersists = true;}};
+	public static class NatureBerriesProgress extends CounterBuff{{revivePersists = true;}};
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){
 		boolean snack = foodSource instanceof HornOfPlenty && foodVal <= HornOfPlenty.getSatietyPerCharge();
