@@ -597,10 +597,10 @@ public class SpiritBow extends Weapon {
 	
 	public static class ArrowCounter extends CounterBuff {
 		
-		int start = 8;
+		int start = 7;
 		public static int start() {
-			// 8/6
-			return 10 - 2*Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
+			// 7/5
+			return 9 - 2*Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
 		}
 		
 		{
