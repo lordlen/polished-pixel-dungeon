@@ -480,6 +480,10 @@ public class Item implements Bundlable {
 	public boolean isEquipped( Hero hero ) {
 		return false;
 	}
+	
+	public boolean canBeEquipped() {
+		return false;
+	}
 
 	public final Item identify(){
 		return identify(true);
