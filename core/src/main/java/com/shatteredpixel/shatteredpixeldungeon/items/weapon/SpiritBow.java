@@ -122,6 +122,11 @@ public class SpiritBow extends Weapon {
 	}
 	
 	@Override
+	public boolean canBeEquipped() {
+		return false;
+	}
+	
+	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
 		actions.remove(AC_EQUIP);
