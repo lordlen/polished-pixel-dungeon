@@ -87,27 +87,26 @@ public class HighGrass {
 					}
 				}
 				
-				//berries try to drop on floors 2/3/4/6/7/8, to a max of 4/6
+				//berries try to drop on floors 2/3/4/5/6/7, to a max of 4/6
 				if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.NATURES_BOUNTY)){
 					
 					int berriesAvailable = 2 + 2*((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
 					//if(SPDSettings.Polished.huntress()) berriesAvailable--; // 5/3
 					
-					int targetFloor = berriesAvailable;
+					int targetFloor = 2 + berriesAvailable;
 
 					Talent.NatureBerriesDropped dropped = Buff.affect(ch, Talent.NatureBerriesDropped.class);
 					berriesAvailable -= dropped.count();
 					
 					targetFloor -= berriesAvailable;
-					targetFloor += (targetFloor >= 5) ? 3 : 2;
 
 					if (berriesAvailable > 0) {
 						
 						Talent.NatureBerriesProgress progress = Buff.affect(ch, Talent.NatureBerriesProgress.class);
 						
-						//If we're behind: ~8 tramples; if we're on page: ~25 tramples, if we're ahead: ~67 tramples
-						if (Dungeon.depth > targetFloor) progress.countUp(Random.NormalIntRange(10, 15));
-						else if (Dungeon.depth == targetFloor) progress.countUp(Random.NormalIntRange(3, 5));
+						//If we're behind: ~7 tramples; if we're on page: ~20 tramples, if we're ahead: ~67 tramples
+						if (Dungeon.depth > targetFloor) progress.countUp(Random.NormalIntRange(12, 16));
+						else if (Dungeon.depth == targetFloor) progress.countUp(Random.NormalIntRange(4, 6));
 						else if (Dungeon.depth < targetFloor) progress.countUp(Random.NormalIntRange(1, 2));
 						
 						if(progress.count() >= 100) {
