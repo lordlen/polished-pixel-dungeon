@@ -1815,11 +1815,17 @@ public class Hero extends Char {
 		}
 
 		Char lastTarget = QuickSlotButton.lastTarget;
-		if (target != null && (lastTarget == null ||
-							!lastTarget.isAlive() || !lastTarget.isActive() ||
-							lastTarget.alignment == Alignment.ALLY ||
-							!fieldOfView[lastTarget.pos])){
-			QuickSlotButton.target(target);
+		if (target != null && target != lastTarget) {
+			if (!QuickSlotButton.targetLock || lastTarget == null ||
+				!lastTarget.isAlive() || !lastTarget.isActive() ||
+				lastTarget.alignment == Alignment.ALLY ||
+				!fieldOfView[lastTarget.pos] ||
+				( distance(lastTarget) > 6 && QuickSlotButton.autoAim(lastTarget) == -1 ))
+			{
+				QuickSlotButton.target(target);
+				//its a soft target, meaning it wont lock in until we actually shoot it
+				QuickSlotButton.targetLock = false;
+			}
 		}
 		
 		if (newMob) {
