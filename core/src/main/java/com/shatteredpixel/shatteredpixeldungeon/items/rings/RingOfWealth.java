@@ -103,6 +103,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndQuickBag;
 import com.watabou.noosa.BitmapText;
+import com.watabou.noosa.Game;
 import com.watabou.noosa.Visual;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -163,7 +164,7 @@ public class RingOfWealth extends Ring {
 		
 		if(action.equals(AC_OPEN)) {
 			if(!getWealthDrops().isEmpty()) {
-				GameScene.show( new WndQuickBag( this ) );
+				Game.runOnRenderThread(() -> GameScene.show( new WndQuickBag( this ) ));
 			}
 			else {
 				GLog.i(Messages.get(this, "no_drops"));
