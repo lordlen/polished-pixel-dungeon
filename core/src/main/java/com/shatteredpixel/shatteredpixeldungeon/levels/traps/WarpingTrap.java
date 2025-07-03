@@ -46,14 +46,11 @@ public class WarpingTrap extends TeleportationTrap {
 
 	@Override
 	public void activate() {
-		if (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2){
-			Buff.affect(Dungeon.hero, Disoriented.class, scalingDepth() <= 5 ? Disoriented.DURATION : 2*Disoriented.DURATION);
+		if (Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
+			Disoriented.applyToHero(scalingDepth() <= 5 ? Disoriented.DURATION : 2*Disoriented.DURATION);
 		}
 
 		super.activate();
-
-		GameScene.updateFog(); //just in case hero wasn't moved
-		Dungeon.observe();
 
 	}
 
@@ -66,80 +63,131 @@ public class WarpingTrap extends TeleportationTrap {
 
 		@Override
 		public int icon() {
-			return BuffIndicator.DISORIENTED;
+			return active ? BuffIndicator.DISORIENTED : BuffIndicator.NONE;
 		}
 
 		@Override
 		public float iconFadePercent() {
 			return (DURATION - cooldown()) / DURATION;
 		}
+		
+		boolean active = true;
+		int depth = -1;
+		int branch = -1;
 
-		public int depth = Dungeon.depth;
-		public int branch = Dungeon.branch;
-
-		boolean[] visited = null;
-		boolean[] mapped = null;
-
-		@Override
-		public boolean attachTo(Char target) {
-			if(target == Dungeon.hero) {
-				Level level = Dungeon.level;
-				visited = level.visited.clone();
-				mapped = level.mapped.clone();
-
-				BArray.setFalse(level.visited);
-				BArray.setFalse(level.mapped);
-			}
-
-			return super.attachTo(target);
-		}
-
-		@Override
-		public void detach() {
-			if (target == Dungeon.hero && visited != null && mapped != null) {
-				boolean thisLevel = Dungeon.depth == depth && Dungeon.branch == branch;
-
-				Level level = thisLevel ? Dungeon.level : Dungeon.Polished.getLevel(depth, branch);
-
-				if(level != null && level.length() == visited.length) {
-					BArray.or(level.visited, visited, level.visited);
-					BArray.or(level.mapped, mapped, level.mapped);
-
-					if(thisLevel) {
-						GameScene.updateFog();
-						Dungeon.observe();
-					} else {
-						Dungeon.Polished.replaceLevel(depth, branch, level);
-					}
+		boolean[] visited;
+		boolean[] mapped;
+		
+		public static void applyToHero(float duration) {
+			for (Disoriented applied : Dungeon.hero.buffs(Disoriented.class)) {
+				if(applied.currentLevel()) {
+					
+					applied.postpone(duration);
+					applied.removeVision();
+					return;
 				}
 			}
-
-			super.detach();
+			
+			Buff.affect(Dungeon.hero, Disoriented.class, duration);
 		}
-
+		
+		public void onLevelSwitch() {
+			if(!active && currentLevel()) {
+				detach();
+			}
+		}
+		
+		@Override
+		public boolean attachTo(Char target) {
+			if(Dungeon.Polished.loading) {
+				return super.attachTo(target);
+			}
+			else if(target == Dungeon.hero && super.attachTo(target)) {
+				removeVision();
+				return true;
+			}
+			else return false;
+		}
+		
+		@Override
+		public void detach() {
+			if(currentLevel()) {
+				restoreVision();
+				super.detach();
+			}
+			else {
+				spendConstant(Float.POSITIVE_INFINITY);
+				active = false;
+			}
+		}
+		
+		void removeVision() {
+			depth = Dungeon.depth;
+			branch = Dungeon.branch;
+			
+			Level level = Dungeon.level;
+			if(visited == null || visited.length != level.length()) {
+				visited = level.visited.clone();
+				mapped = level.mapped.clone();
+			}
+			else {
+				BArray.or(visited, level.visited, visited);
+				BArray.or(mapped, level.mapped, mapped);
+			}
+			
+			BArray.setFalse(level.visited);
+			BArray.setFalse(level.mapped);
+			
+			GameScene.updateFog();
+			Dungeon.observe();
+		}
+		
+		void restoreVision() {
+			Level level = Dungeon.level;
+			if (level != null && level.length() == visited.length) {
+				
+				BArray.or(level.visited, visited, level.visited);
+				BArray.or(level.mapped, mapped, level.mapped);
+				
+				GameScene.updateFog();
+				Dungeon.observe();
+				
+			}
+		}
+		
+		boolean currentLevel() {
+			return depth == Dungeon.depth && branch == Dungeon.branch;
+		}
+		
+		private static final String ACTIVE 	= "active";
+		private static final String DEPTH 	= "depth";
+		private static final String BRANCH 	= "branch";
+		
 		private static final String VISITED = "visited";
-		private static final String MAPPED = "mapped";
-		private static final String DEPTH = "depth";
-		private static final String BRANCH = "branch";
+		private static final String MAPPED 	= "mapped";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
-			bundle.put(VISITED, visited);
-			bundle.put(MAPPED, mapped);
-
+			bundle.put(ACTIVE, active);
 			bundle.put(DEPTH, depth);
 			bundle.put(BRANCH, branch);
+			
+			bundle.put(VISITED, visited);
+			bundle.put(MAPPED, mapped);
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
-			visited = bundle.getBooleanArray(VISITED);
-			mapped = bundle.getBooleanArray(MAPPED);
-
+			if(bundle.contains(ACTIVE)) {
+				active = bundle.getBoolean(ACTIVE);
+			}
 			depth = bundle.getInt(DEPTH);
 			branch = bundle.getInt(BRANCH);
+			
+			visited = bundle.getBooleanArray(VISITED);
+			mapped = bundle.getBooleanArray(MAPPED);
 		}
 	}
 }

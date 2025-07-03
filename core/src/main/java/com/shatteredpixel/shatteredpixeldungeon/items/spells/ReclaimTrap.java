@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
@@ -76,9 +77,17 @@ public class ReclaimTrap extends TargetedSpell {
 			storedTrap = this.storedTrap;
 			this.storedTrap = null;
 		} else {
-			if (hero.buff(ReclaimedTrap.class) != null){
-				storedTrap = hero.buff(ReclaimedTrap.class).trap;
-				hero.buff(ReclaimedTrap.class).detach();
+			ReclaimedTrap reclaimed;
+			if(Polished_wealthDrop != null) {
+				reclaimed = hero.buff(WealthReclaimedTrap.class);
+			}
+			else {
+				reclaimed = hero.buff(ReclaimedTrap.class);
+			}
+			
+			if (reclaimed != null){
+				storedTrap = reclaimed.trap;
+				reclaimed.detach();
 			}
 		}
 		if (storedTrap == null) {
@@ -89,7 +98,13 @@ public class ReclaimTrap extends TargetedSpell {
 				
 				Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
 				ScrollOfRecharging.charge(hero);
-				Buff.affect(hero, ReclaimedTrap.class).trap = t.getClass();
+				
+				if(Polished_wealthDrop != null) {
+					Buff.affect(hero, WealthReclaimedTrap.class).trap = t.getClass();
+				}
+				else {
+					Buff.affect(hero, ReclaimedTrap.class).trap = t.getClass();
+				}
 				Bestiary.setSeen(t.getClass());
 				
 			} else {
@@ -110,10 +125,21 @@ public class ReclaimTrap extends TargetedSpell {
 	@Override
 	public String desc() {
 		String desc = super.desc();
+		
+		ReclaimedTrap reclaimed = null;
+		if(Dungeon.hero != null) {
+			if(Polished_wealthDrop != null) {
+				reclaimed = Dungeon.hero.buff(WealthReclaimedTrap.class);
+			}
+			else {
+				reclaimed = Dungeon.hero.buff(ReclaimedTrap.class);
+			}
+		}
+		
 		if (storedTrap != null){
 			desc += "\n\n" + Messages.get(this, "desc_trap", Messages.get(storedTrap, "name"));
-		} else if ( Dungeon.hero != null && Dungeon.hero.buff(ReclaimedTrap.class) != null) {
-			desc += "\n\n" + Messages.get(this, "desc_trap", Messages.get(Dungeon.hero.buff(ReclaimedTrap.class).trap, "name"));
+		} else if (reclaimed != null) {
+			desc += "\n\n" + Messages.get(this, "desc_trap", Messages.get(reclaimed.trap, "name"));
 		}
 		return desc;
 	}
@@ -132,10 +158,20 @@ public class ReclaimTrap extends TargetedSpell {
 	
 	@Override
 	public ItemSprite.Glowing glowing() {
+		ReclaimedTrap reclaimed = null;
+		if(Dungeon.hero != null) {
+			if(Polished_wealthDrop != null) {
+				reclaimed = Dungeon.hero.buff(WealthReclaimedTrap.class);
+			}
+			else {
+				reclaimed = Dungeon.hero.buff(ReclaimedTrap.class);
+			}
+		}
+		
 		if (storedTrap != null){
 			return COLORS[Reflection.newInstance(storedTrap).color];
-		} else if (Dungeon.hero != null && Dungeon.hero.buff(ReclaimedTrap.class) != null){
-			return COLORS[Reflection.newInstance(Dungeon.hero.buff(ReclaimedTrap.class).trap).color];
+		} else if (reclaimed != null){
+			return COLORS[Reflection.newInstance(reclaimed.trap).color];
 		}
 		return null;
 	}
@@ -184,14 +220,14 @@ public class ReclaimTrap extends TargetedSpell {
 			return super.brew(ingredients);
 		}
 	}
-
+	
 	public static class ReclaimedTrap extends Buff {
 
 		{
 			revivePersists = true;
 		}
 
-		private Class<?extends Trap> trap;
+		protected Class<?extends Trap> trap;
 
 		private static final String TRAP = "trap";
 
@@ -207,5 +243,7 @@ public class ReclaimTrap extends TargetedSpell {
 			trap = bundle.getClass(TRAP);
 		}
 	}
+	
+	public static class WealthReclaimedTrap extends ReclaimedTrap {}
 	
 }

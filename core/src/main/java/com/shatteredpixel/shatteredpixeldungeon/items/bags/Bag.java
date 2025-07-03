@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndQuickBag;
+import com.watabou.noosa.Game;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 
@@ -75,7 +76,7 @@ public class Bag extends Item implements Iterable<Item> {
 
 		if (action.equals( AC_OPEN ) && !items.isEmpty()) {
 			
-			GameScene.show( new WndQuickBag( this ) );
+			Game.runOnRenderThread(() -> GameScene.show( new WndQuickBag( this ) ));
 			
 		}
 	}

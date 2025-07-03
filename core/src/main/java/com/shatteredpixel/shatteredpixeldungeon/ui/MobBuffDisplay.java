@@ -79,7 +79,7 @@ public class MobBuffDisplay extends Component {
     
     //cached for performance
     CharHealthIndicator healthBar;
-    LinkedHashSet<Buff> curBuffs;
+    ArrayList<Buff> curBuffs = new ArrayList<>();
     float offset = 0f;
     
     @Override
@@ -93,7 +93,7 @@ public class MobBuffDisplay extends Component {
                 refreshBuffs();
             }
             
-            if(curBuffs != null && !curBuffs.isEmpty()) {
+            if(!curBuffs.isEmpty()) {
                 visible = true;
                 layout();
             }
@@ -101,29 +101,17 @@ public class MobBuffDisplay extends Component {
     }
     
     private void refreshBuffs() {
-        curBuffs = ch.buffs();
+        curBuffs.clear();
+        for (Buff buff : ch.buffs()) {
+            if (buff.icon() != BuffIndicator.NONE) {
+                curBuffs.add(buff);
+            }
+        }
         
         //remove any icons no longer present
         for (Buff buff : buffIcons.keySet().toArray(new Buff[0])) {
             if (!curBuffs.contains(buff)){
                 GrayedIcon icon = buffIcons.get( buff );
-                
-                /*Image fading = icon.icon;
-                fading.originToCenter();
-                fading.alpha(0.6f);
-                add( fading );
-                add( new AlphaTweener( fading, 0, 0.6f ) {
-                    @Override
-                    protected void updateValues( float progress ) {
-                        super.updateValues( progress );
-                        image.scale.set( 1 + 5 * progress );
-                    }
-                    
-                    @Override
-                    protected void onComplete() {
-                        image.killAndErase();
-                    }
-                } );*/
                 
                 icon.destroy();
                 icon.killAndErase();
@@ -213,6 +201,13 @@ public class MobBuffDisplay extends Component {
             }
             
             grey.scale.set(icon.width(), rounded / zoom);
+            
+            if(custom >= 1f) {
+                grey.color(0x804040);
+            }
+            else {
+                grey.resetColor();
+            }
         }
         
         @Override

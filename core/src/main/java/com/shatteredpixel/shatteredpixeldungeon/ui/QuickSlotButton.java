@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -56,6 +57,7 @@ public class QuickSlotButton extends Button {
 	
 	public static int targetingSlot = -1;
 	public static Char lastTarget = null;
+	public static boolean targetLock = false;
 	
 	public QuickSlotButton( int slotNum ) {
 		super();
@@ -156,6 +158,11 @@ public class QuickSlotButton extends Button {
 				} else {
 					return super.hoverText();
 				}
+			}
+			
+			@Override
+			protected boolean quickslotButton() {
+				return true;
 			}
 		};
 		slot.showExtraInfo( false );
@@ -429,8 +436,11 @@ public class QuickSlotButton extends Button {
 	}
 	
 	public static void target( Char target ) {
-		if (target != null && target.alignment != Char.Alignment.ALLY) {
+		if (target != null && target.alignment != Char.Alignment.ALLY &&
+			!(target instanceof Mimic && target.alignment == Char.Alignment.NEUTRAL)) {
+			
 			lastTarget = target;
+			targetLock = true;
 			
 			TargetHealthIndicator.instance.target( target );
 			InventoryPane.lastTarget = target;

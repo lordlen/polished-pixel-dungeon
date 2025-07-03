@@ -37,6 +37,9 @@ public class ToxicImbue extends Buff {
 	{
 		type = buffType.POSITIVE;
 		announced = true;
+		
+		immunities.add( ToxicGas.class );
+		immunities.add( Poison.class );
 	}
 
 	public static final float DURATION	= 50f;
@@ -68,31 +71,30 @@ public class ToxicImbue extends Buff {
 
 	@Override
 	public boolean act() {
-		if (left > 0) {
-			//spreads 54 units of gas total
-			int centerVolume = 6;
-			for (int i : PathFinder.NEIGHBOURS8) {
-				if (!Dungeon.level.solid[target.pos + i]) {
-					GameScene.add(Blob.seed(target.pos + i, 6, ToxicGas.class));
-				} else {
-					centerVolume += 6;
-				}
+		//spreads 54 units of gas total
+		int centerVolume = 6;
+		for (int i : PathFinder.NEIGHBOURS8) {
+			if (!Dungeon.level.solid[target.pos + i]) {
+				GameScene.add(Blob.seed(target.pos + i, 6, ToxicGas.class));
+			} else {
+				centerVolume += 6;
 			}
-			GameScene.add(Blob.seed(target.pos, centerVolume, ToxicGas.class));
 		}
+		GameScene.add(Blob.seed(target.pos, centerVolume, ToxicGas.class));
 
 		spend(TICK);
 		left -= TICK;
-		if (left <= -5){
+		
+		if (left <= 0){
+			Buff.affect(target, ToxicImmunity.class, ToxicImmunity.DURATION);
 			detach();
 		}
-
 		return true;
 	}
 
 	@Override
 	public int icon() {
-		return left > 0 ? BuffIndicator.IMBUE : BuffIndicator.NONE;
+		return BuffIndicator.IMBUE;
 	}
 
 	@Override
@@ -115,11 +117,6 @@ public class ToxicImbue extends Buff {
 		return Messages.get(this, "desc", dispTurns(left));
 	}
 
-	{
-		immunities.add( ToxicGas.class );
-		immunities.add( Poison.class );
-	}
-
 	@Override
 	public boolean attachTo(Char target) {
 		if (super.attachTo(target)){
@@ -127,6 +124,42 @@ public class ToxicImbue extends Buff {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	public static class ToxicImmunity extends FlavourBuff {
+		{
+			type = buffType.POSITIVE;
+			
+			immunities.add( ToxicGas.class );
+			immunities.add( Poison.class );
+		}
+		
+		public static final float DURATION	= 5f;
+		
+		@Override
+		public boolean attachTo(Char target) {
+			if (super.attachTo(target)){
+				Buff.detach(target, Poison.class);
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		@Override
+		public int icon() {
+			return BuffIndicator.IMMUNITY;
+		}
+		
+		@Override
+		public void tintIcon(Image icon) {
+			icon.hardlight(1f, 1.5f, 0f);
+		}
+		
+		@Override
+		public float iconFadePercent() {
+			return Math.max(0, (DURATION - visualcooldown()) / DURATION);
 		}
 	}
 }

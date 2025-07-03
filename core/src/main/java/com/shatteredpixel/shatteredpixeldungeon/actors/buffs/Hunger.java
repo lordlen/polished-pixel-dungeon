@@ -63,10 +63,10 @@ public class Hunger extends Buff implements Hero.Doom {
 	@Override
 	public boolean act() {
 
-		if (Dungeon.level.locked
-				|| target.buff(WellFed.class) != null
+		if (  	Dungeon.level.locked
 				|| SPDSettings.intro()
-				|| target.buff(ScrollOfChallenge.ChallengeArena.class) != null){
+				|| target.buff(WellFed.class) != null
+				|| target.buff(ScrollOfChallenge.ChallengeArena.class) != null) {
 			spend(TICK);
 			return true;
 		}
@@ -97,8 +97,6 @@ public class Hunger extends Buff implements Hero.Doom {
 				if (newLevel >= STARVING) {
 
 					GLog.n( Messages.get(this, "onstarving") );
-					//POLISHED: get rid of this so Warlock doesn't constantly take damage from soulmark restoration
-					//hero.damage( 1, this );
 
 					hero.interrupt();
 					newLevel = STARVING;
@@ -168,7 +166,6 @@ public class Hunger extends Buff implements Hero.Doom {
 			GLog.w( Messages.get(this, "onhungry") );
 		} else if (oldLevel < STARVING && level >= STARVING){
 			GLog.n( Messages.get(this, "onstarving") );
-			//target.damage( 1, this );
 		}
 
 		BuffIndicator.refreshHero();

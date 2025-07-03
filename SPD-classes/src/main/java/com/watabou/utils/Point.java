@@ -87,6 +87,12 @@ public class Point {
 		return (float)Math.sqrt( dx * dx + dy * dy );
 	}
 	
+	public static Point difference( Point a, Point b ) {
+		int x = Math.abs(a.x - b.x);
+		int y = Math.abs(a.y - b.y);
+		return new Point(x, y);
+	}
+	
 	@Override
 	public boolean equals( Object obj ) {
 		if (obj instanceof Point) {

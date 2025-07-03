@@ -128,7 +128,7 @@ public class Artifact extends KindofMisc {
 
 	@Override
 	public int visiblyUpgraded() {
-		return levelKnown ? Math.round((level()*10)/(float)levelCap): 0;
+		return levelKnown ? Math.round(level() * (10f/levelCap)): 0;
 	}
 
 	@Override
@@ -245,7 +245,6 @@ public class Artifact extends KindofMisc {
 		}
 		return price;
 	}
-
 
 	protected ArtifactBuff passiveBuff() {
 		return null;

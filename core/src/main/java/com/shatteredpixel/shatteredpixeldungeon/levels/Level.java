@@ -120,11 +120,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 public abstract class Level implements Bundlable {
 	
-	public static enum Feeling {
+	public enum Feeling {
 		NONE,
+		
 		CHASM,
 		WATER,
 		GRASS,
@@ -132,15 +134,77 @@ public abstract class Level implements Bundlable {
 		LARGE,
 		TRAPS,
 		SECRETS;
-
+		
+		public static final LinkedHashMap<Feeling, Float> defaultProbs = new LinkedHashMap<>();
+		public static final LinkedHashMap<Feeling, Float> probs;
+		static {
+			defaultProbs.put(CHASM, 	3f);
+			defaultProbs.put(WATER, 	3f);
+			defaultProbs.put(GRASS, 	3f);
+			defaultProbs.put(DARK, 		3f);
+			defaultProbs.put(LARGE, 	3f);
+			defaultProbs.put(TRAPS, 	3f);
+			defaultProbs.put(SECRETS,	3f);
+			
+			probs = (LinkedHashMap<Feeling, Float>) defaultProbs.clone();
+		}
+		
+		public static void resetProbs(){
+			for (Feeling feel : probs.keySet()) {
+				probs.put( feel, defaultProbs.get(feel) );
+			}
+		}
+		
+		public static Feeling random() {
+			Feeling feel = Random.chances(probs);
+			if (feel == null) {
+				resetProbs();
+				feel = Random.chances(probs);
+			}
+			
+			probs.put(feel, probs.get(feel)-1);
+			return feel;
+		}
+		
+		
+		private static final String FEELING_PROBS = "feeling_probs";
+		
+		public static void storeInBundle(Bundle bundle) {
+			Float[] feelProbs = probs.values().toArray(new Float[0]);
+			float[] storeProbs = new float[feelProbs.length];
+			
+			for (int i = 0; i < storeProbs.length; i++){
+				storeProbs[i] = feelProbs[i];
+			}
+			
+			bundle.put( FEELING, storeProbs);
+		}
+		
+		public static void restoreFromBundle(Bundle bundle) {
+			resetProbs();
+			
+			if (bundle.contains(FEELING_PROBS)) {
+				float[] feelProbs = bundle.getFloatArray(FEELING_PROBS);
+				
+				if (feelProbs.length == probs.size()) {
+					Feeling[] feelings = probs.keySet().toArray(new Feeling[0]);
+					
+					for (int i = 0; i < probs.size(); i++) {
+						probs.put(feelings[i], feelProbs[i]);
+					}
+				}
+			}
+		}
+		
+		
 		public String title(){
 			return Messages.get(this, name()+"_title");
 		}
-
 		public String desc() {
 			return Messages.get(this, name()+"_desc");
 		}
 	}
+	
 
 	protected int width;
 	protected int height;
@@ -256,42 +320,47 @@ public abstract class Level implements Bundlable {
 			}
 			
 			if (Dungeon.depth > 1) {
-				//50% chance of getting a level feeling
-				//~7.15% chance for each feeling
-				switch (Random.Int( 14 )) {
-					case 0:
-						feeling = Feeling.CHASM;
+				
+				if(Random.Int(2) == 0) {
+					feeling = Feeling.random();
+				}
+				else {
+					//if-else statements are fine here as only one chance can be above 0 at a time
+					if (Random.Float() < MossyClump.overrideNormalLevelChance()){
+						feeling = MossyClump.getNextFeeling();
+					} else if (Random.Float() < TrapMechanism.overrideNormalLevelChance()) {
+						feeling = TrapMechanism.getNextFeeling();
+					} else {
+						feeling = Feeling.NONE;
+					}
+				}
+				
+				switch (feeling) {
+					case CHASM:
+						Notes.add(Notes.Landmark.CHASM_FLOOR);
 						break;
-					case 1:
-						feeling = Feeling.WATER;
+					case WATER:
+						Notes.add(Notes.Landmark.WATER_FLOOR);
 						break;
-					case 2:
-						feeling = Feeling.GRASS;
+					case GRASS:
+						Notes.add(Notes.Landmark.GRASS_FLOOR);
 						break;
-					case 3:
-						feeling = Feeling.DARK;
-						viewDistance = Math.round(5*viewDistance/8f);
+					case DARK:
+						Notes.add(Notes.Landmark.DARK_FLOOR);
+						viewDistance = Math.max(2, Math.round(viewDistance * 2/3f));
 						break;
-					case 4:
-						feeling = Feeling.LARGE;
+					case LARGE:
+						Notes.add(Notes.Landmark.LARGE_FLOOR);
 						addItemToSpawn(Generator.random(Generator.Category.FOOD));
 						break;
-					case 5:
-						feeling = Feeling.TRAPS;
+					case TRAPS:
+						Notes.add(Notes.Landmark.TRAPS_FLOOR);
 						break;
-					case 6:
-						feeling = Feeling.SECRETS;
+					case SECRETS:
+						Notes.add(Notes.Landmark.SECRETS_FLOOR);
 						break;
-					default:
-						//if-else statements are fine here as only one chance can be above 0 at a time
-						if (Random.Float() < MossyClump.overrideNormalLevelChance()){
-							feeling = MossyClump.getNextFeeling();
-						} else if (Random.Float() < TrapMechanism.overrideNormalLevelChance()) {
-							feeling = TrapMechanism.getNextFeeling();
-						} else {
-							feeling = Feeling.NONE;
-						}
 				}
+				
 			}
 		}
 		
@@ -444,7 +513,7 @@ public abstract class Level implements Bundlable {
 
 		feeling = bundle.getEnum( FEELING, Feeling.class );
 		if (feeling == Feeling.DARK) {
-			viewDistance = Math.round(5 * viewDistance / 8f);
+			viewDistance = Math.max(2, Math.round(viewDistance * 2/3f));
 		}
 
 		if (bundle.contains( "mobs_to_spawn" )) {
@@ -737,10 +806,13 @@ public abstract class Level implements Bundlable {
 				//respawn time is 5/5/10/15/20/25/25, etc.
 				cooldown = Math.round(GameMath.gate( TIME_TO_RESPAWN/10f, Dungeon.level.mobCount() * (TIME_TO_RESPAWN / 10f), TIME_TO_RESPAWN / 2f));
 			}
-		} else if (Dungeon.level.feeling == Feeling.DARK){
-			cooldown = 2*TIME_TO_RESPAWN/3f;
-		} else {
+		}
+		else {
 			cooldown = TIME_TO_RESPAWN;
+		}
+		
+		if (Dungeon.level.feeling == Feeling.DARK){
+			cooldown *= 2/3f;
 		}
 
 		cooldown /= DimensionalSundial.spawnMultiplierAtCurrentTime();
@@ -749,7 +821,8 @@ public abstract class Level implements Bundlable {
 			if(Debug.Respawn_Multiplier == 0) cooldown = Float.MAX_VALUE;
 			else cooldown /= Debug.Respawn_Multiplier;
 		}
-		return cooldown;
+		
+		return Math.round(cooldown);
 	}
 
 	public boolean spawnMob(int disLimit){
@@ -765,7 +838,7 @@ public abstract class Level implements Bundlable {
 			tries--;
 		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] <= disLimit) && tries > 0);
 
-		if (Dungeon.hero.isAlive() && mob.pos != -1 && PathFinder.distance[mob.pos] >= disLimit) {
+		if (Dungeon.hero.isAlive() && mob.pos != -1 && PathFinder.distance[mob.pos] > disLimit) {
 			GameScene.add( mob );
 			if (!mob.buffs(ChampionEnemy.class).isEmpty()) {
 				for (ChampionEnemy champ : mob.buffs(ChampionEnemy.class)) {
@@ -808,7 +881,7 @@ public abstract class Level implements Bundlable {
 	
 	public void addItemToSpawn( Item item ) {
 		if (item != null) {
-			item.Polished_toFind = true;
+			item.Polished_levelGen = true;
 			itemsToSpawn.add( item );
 		}
 	}

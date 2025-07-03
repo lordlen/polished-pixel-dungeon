@@ -76,6 +76,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WarpingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
@@ -241,25 +242,6 @@ public class Dungeon {
 				callback.call();
 			};
 		}
-    
-		public static void replaceLevel( int depth, int branch, Level replacement ) {
-			try {
-				Bundle bundle = new Bundle();
-				bundle.put( LEVEL, replacement );
-	
-				FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
-			} catch (IOException e) { return; }
-		}
-		
-		public static Level getLevel(int depth, int branch) {
-			Level level;
-			try {
-				Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ));
-				level = (Level)bundle.get( LEVEL );
-			} catch (Exception e) { level = null; }
-	
-			return level;
-		}
   
 	}
 
@@ -424,6 +406,7 @@ public class Dungeon {
 			SecretRoom.initForRun();
 
 			Generator.fullReset();
+			Level.Feeling.resetProbs();
 
 		Random.resetGenerators();
 		
@@ -656,6 +639,9 @@ public class Dungeon {
 		if (hero.buff(AscensionChallenge.class) != null){
 			hero.buff(AscensionChallenge.class).onLevelSwitch();
 		}
+		for (WarpingTrap.Disoriented disoriented : hero.buffs(WarpingTrap.Disoriented.class)) {
+			disoriented.onLevelSwitch();
+		}
 
 		Mob.restoreAllies( level, pos );
 
@@ -849,6 +835,7 @@ public class Dungeon {
 			Statistics.storeInBundle( bundle );
 			Notes.storeInBundle( bundle );
 			Generator.storeInBundle( bundle );
+			Level.Feeling.storeInBundle( bundle );
 
 			int[] bundleArr = new int[generatedLevels.size()];
 			for (int i = 0; i < generatedLevels.size(); i++){
@@ -1001,6 +988,7 @@ public class Dungeon {
 
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
+		Level.Feeling.restoreFromBundle( bundle );
 
 
 		Polished.afterLoad.call();
@@ -1010,7 +998,7 @@ public class Dungeon {
 		Debug.LoadGame();
 	}
 	
-	public static Level loadLevel( int save ) throws IOException {
+	public static synchronized Level loadLevel( int save ) throws IOException {
 		
 		Dungeon.level = null;
 		Actor.clear();
@@ -1024,6 +1012,32 @@ public class Dungeon {
 		} else {
 			return level;
 		}
+	}
+	
+	public static synchronized Level getLevel( int depth, int branch ) throws IOException {
+		if(Dungeon.depth == depth && Dungeon.branch == branch) {
+			return Dungeon.level;
+		}
+		
+		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ));
+		Level level = (Level)bundle.get( LEVEL );
+		
+		if (level == null){
+			throw new IOException();
+		} else {
+			return level;
+		}
+	}
+	
+	public static synchronized void replaceLevel( int depth, int branch, Level replacement ) throws IOException {
+		if(Dungeon.depth == depth && Dungeon.branch == branch) {
+			return;
+		}
+		
+		Bundle bundle = new Bundle();
+		bundle.put( LEVEL, replacement );
+		
+		FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
 	}
 	
 	public static void deleteGame( int save, boolean deleteLevels ) {

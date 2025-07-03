@@ -104,10 +104,10 @@ public class Item implements Bundlable {
 	public int customNoteID = -1;
 	
 	// for keeping track of floor records
-	public boolean Polished_toFind = false;
+	public boolean Polished_levelGen = false;
 	
 	// for wrapper behaviour
-	protected WealthDrop<?, ?> Polished_wealthDrop = null;
+	protected WealthDrop<?> Polished_wealthDrop = null;
  
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
@@ -138,6 +138,12 @@ public class Item implements Bundlable {
 			GameScene.pickUp( this, pos );
 			Sample.INSTANCE.play( Assets.Sounds.ITEM );
 			hero.spendAndNext( TIME_TO_PICK_UP );
+			
+			if(Polished_levelGen) {
+				FoundItems.add(getClass(), Dungeon.depth);
+				Polished_levelGen = false;
+			}
+			
 			return true;
 			
 		} else {
@@ -207,6 +213,7 @@ public class Item implements Bundlable {
 		Heap heap = Dungeon.level.drop( this, cell );
 		if (!heap.isEmpty()) {
 			heap.sprite.drop( cell );
+			heap.seen = true;
 		}
 	}
 	
@@ -473,6 +480,10 @@ public class Item implements Bundlable {
 	public boolean isEquipped( Hero hero ) {
 		return false;
 	}
+	
+	public boolean canBeEquipped() {
+		return false;
+	}
 
 	public final Item identify(){
 		return identify(true);
@@ -617,7 +628,7 @@ public class Item implements Bundlable {
 			bundle.put( QUICKSLOT, Dungeon.quickslot.getSlot(this) );
 		}
 		bundle.put( KEPT_LOST, keptThoughLostInvent );
-		bundle.put( TO_FIND, Polished_toFind);
+		bundle.put( TO_FIND, Polished_levelGen);
 		if (customNoteID != -1)     bundle.put(CUSTOM_NOTE_ID, customNoteID);
 	}
 	
@@ -644,7 +655,7 @@ public class Item implements Bundlable {
 		}
 
 		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
-		Polished_toFind = bundle.getBoolean(TO_FIND);
+		Polished_levelGen = bundle.getBoolean(TO_FIND);
 		if (bundle.contains(CUSTOM_NOTE_ID))    customNoteID = bundle.getInt(CUSTOM_NOTE_ID);
 	}
 

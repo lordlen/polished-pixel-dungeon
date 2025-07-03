@@ -78,7 +78,15 @@ public class CloakOfShadows extends Artifact {
 		}
 		return actions;
 	}
-
+	
+	@Override
+	public String defaultAction() {
+		if (Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.LIGHT_CLOAK)) {
+			return AC_STEALTH;
+		}
+		else return super.defaultAction();
+	}
+	
 	@Override
 	public void execute( Hero hero, String action ) {
 

@@ -48,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sickle;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -582,7 +583,8 @@ public abstract class YogFist extends Mob {
 				enemy.damage( Random.NormalIntRange(10, 20), new DarkBolt() );
 
 				Light l = enemy.buff(Light.class);
-				if (l != null){
+				boolean cleanse = enemy.buff(PotionOfCleansing.Cleanse.class) != null;
+				if (l != null && !cleanse){
 					l.weaken(50);
 				}
 
@@ -609,7 +611,8 @@ public abstract class YogFist extends Mob {
 			if (isAlive() && beforeHP > HT/2 && HP < HT/2){
 				HP = HT/2;
 				Light l = Dungeon.hero.buff(Light.class);
-				if (l != null){
+				boolean cleanse = Dungeon.hero.buff(PotionOfCleansing.Cleanse.class) != null;
+				if (l != null && !cleanse){
 					l.detach();
 				}
 				int i;

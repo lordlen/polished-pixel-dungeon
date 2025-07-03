@@ -131,6 +131,7 @@ public class StoneOfIntuition extends InventoryStone {
 					}
 					if(Polished_wealthDrop != null) {
 						curItem.detach(curUser.belongings.backpack);
+						Catalog.countUse(StoneOfIntuition.class);
 						Talent.onRunestoneUsed(curUser, curUser.pos, StoneOfIntuition.class);
 					}
 					else if (!anonymous) {
@@ -145,6 +146,10 @@ public class StoneOfIntuition extends InventoryStone {
 					}
 					curGuess = null;
 					hide();
+					
+					if(Dungeon.hero.belongings.contains(curItem)) {
+						GameScene.selectItem(itemSelector);
+					}
 				}
 			};
 			guess.visible = false;
@@ -226,6 +231,14 @@ public class StoneOfIntuition extends InventoryStone {
 			resize(WIDTH, 100);
 			
 		}
-
+		
+		@Override
+		public void onBackPressed() {
+			super.onBackPressed();
+			
+			if(Dungeon.hero.belongings.contains(curItem)) {
+				GameScene.selectItem(itemSelector);
+			}
+		}
 	}
 }

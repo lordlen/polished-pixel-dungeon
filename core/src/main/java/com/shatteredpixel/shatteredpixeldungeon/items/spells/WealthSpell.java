@@ -29,7 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
 
-public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell> {
+public class WealthSpell extends Spell implements WealthDrop<Spell> {
 
 	{
 		image = ItemSpriteSheet.SPELL_HOLDER;
@@ -68,10 +68,20 @@ public class WealthSpell extends Spell implements WealthDrop<Spell, WealthSpell>
 	public void setItem(Spell item) {
 		this.spell = item;
 	}
+	
+	Decay decay = null;
+	@Override
+	public Decay decay() {
+		return decay;
+	}
+	public void setDecay(Decay decay) {
+		this.decay = decay;
+	}
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return spell.identify(byHero);
+		if(valid()) spell.identify(byHero);
+		return this;
 	}
 	@Override
 	public boolean isSimilar(Item item) {

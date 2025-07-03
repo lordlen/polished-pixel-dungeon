@@ -240,9 +240,9 @@ public abstract class RegularLevel extends Level {
 
 		boolean[] entranceWalkable = BArray.not(solid, null);
 
-		//doors within the entrance room are ignored for this walk, but doors on the edge are not
-		for (int y = roomEntrance.top+1; y < roomEntrance.bottom; y++){
-			for (int x = roomEntrance.left+1; x < roomEntrance.right; x++){
+		//all doors within the entrance room are ignored for this walk
+		for (int y = roomEntrance.top; y <= roomEntrance.bottom; y++){
+			for (int x = roomEntrance.left; x <= roomEntrance.right; x++){
 				int cell = x + y*width();
 				if (passable[cell]){
 					entranceWalkable[cell] = true;
@@ -388,7 +388,7 @@ public abstract class RegularLevel extends Level {
 
 			Item toDrop = Generator.random();
 			if (toDrop == null) continue;
-			toDrop.Polished_toFind = true;
+			toDrop.Polished_levelGen = true;
 
 			int cell = randomDropCell();
 			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
@@ -449,7 +449,7 @@ public abstract class RegularLevel extends Level {
 			
 		}
 		
-		//these are already flagged as "toFind"
+		//these are already flagged as Polished_levelGen
 		for (Item item : itemsToSpawn) {
 			int cell = randomDropCell();
 			if (item instanceof TrinketCatalyst){
@@ -473,22 +473,40 @@ public abstract class RegularLevel extends Level {
 		//we can use a random long for these as they will be the same longs every time
 
 		Random.pushGenerator( Random.Long() );
-			if (Dungeon.isChallenged(Challenges.DARKNESS)){
+			boolean darkness = Dungeon.isChallenged(Challenges.DARKNESS);
+			boolean halls = this instanceof HallsLevel;
+			int torches = 0;
+			
+			if(darkness && !halls) {
+				torches++;
+				
+				//add a second torch to help with the larger floor
+				if (feeling == Feeling.LARGE){
+					torches++;
+				}
+			}
+			
+			else if(halls) {
+				//halls gets -1 torch on darkness
+				if(!darkness) {
+					torches++;
+				}
+				
+				//add a second torch to help with the larger floor
+				if (feeling == Feeling.LARGE){
+					torches++;
+				}
+			}
+			
+			for(int i = 0; i < torches; i++) {
 				int cell = randomDropCell();
 				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
 					map[cell] = Terrain.GRASS;
 					losBlocking[cell] = false;
 				}
-				drop( new Torch(), cell );
-				//add a second torch to help with the larger floor
-				if (feeling == Feeling.LARGE){
-					cell = randomDropCell();
-					if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
-						map[cell] = Terrain.GRASS;
-						losBlocking[cell] = false;
-					}
-					drop( new Torch(), cell );
-				}
+				Torch torch = new Torch();
+				torch.Polished_levelGen=true;
+				drop( torch, cell );
 			}
 		Random.popGenerator();
 

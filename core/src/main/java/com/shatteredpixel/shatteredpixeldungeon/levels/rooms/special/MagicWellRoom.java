@@ -35,6 +35,8 @@ public class MagicWellRoom extends SpecialRoom {
 
 	public static final Class<?>[] WATERS =
 		{WaterOfAwareness.class, WaterOfHealth.class, WaterOfChange.class};
+	public static final float[] chances =
+		{40, 40, 20};
 	
 	public Class<?extends WellWater> overrideWater = null;
 	
@@ -50,7 +52,7 @@ public class MagicWellRoom extends SpecialRoom {
 		Class<? extends WellWater> waterClass =
 			overrideWater != null ?
 			overrideWater :
-			(Class<? extends WellWater>)WATERS[Random.chances(new float[]{4, 4, 2})];
+			(Class<? extends WellWater>)WATERS[Random.chances(chances)];
 		
 		WellWater.seed(c.x + level.width() * c.y, 1, waterClass, level);
 		

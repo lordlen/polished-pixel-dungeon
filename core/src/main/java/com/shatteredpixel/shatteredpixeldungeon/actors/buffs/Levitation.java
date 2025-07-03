@@ -37,7 +37,7 @@ public class Levitation extends FlavourBuff {
 		type = buffType.POSITIVE;
 	}
 
-	public static final float DURATION	= 20f;
+	public static final float DURATION	= 25f;
 	
 	@Override
 	public boolean attachTo( Char target ) {

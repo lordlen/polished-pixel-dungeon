@@ -92,12 +92,14 @@ public class PitRoom extends SpecialRoom {
 	}
 	
 	private static Item prize( Level level ) {
-		return Generator.randomUsingDefaults( Random.oneOf(
-			Generator.Category.POTION,
-			Generator.Category.SCROLL,
-			Generator.Category.FOOD,
-			Generator.Category.GOLD
+		Item prize = Generator.randomUsingDefaults( Random.oneOf(
+				Generator.Category.POTION,
+				Generator.Category.SCROLL,
+				Generator.Category.FOOD,
+				Generator.Category.GOLD
 		) );
+		prize.Polished_levelGen = true;
+		return prize;
 	}
 	
 	@Override

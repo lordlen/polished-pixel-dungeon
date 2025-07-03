@@ -26,11 +26,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CounterBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -96,7 +98,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.WealthStone;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndQuickBag;
+import com.watabou.noosa.BitmapText;
+import com.watabou.noosa.Game;
 import com.watabou.noosa.Visual;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -111,9 +118,84 @@ public class RingOfWealth extends Ring {
 		icon = ItemSpriteSheet.Icons.RING_WEALTH;
 		buffClass = Wealth.class;
 	}
-
-	private float triesToDrop = Float.MIN_VALUE;
-	private int dropsToRare = Integer.MIN_VALUE;
+	
+	public static final String AC_OPEN = "OPEN";
+	public Item quickUseItem;
+	
+	public static ArrayList<Item> getWealthDrops() {
+		ArrayList<Item> drops = new ArrayList<>();
+		for (Item item : Dungeon.hero.belongings) {
+			if(item instanceof WealthDrop) drops.add(item);
+		}
+		
+		return drops;
+	}
+	
+	@Override
+	public int targetingPos(Hero user, int dst) {
+		if (quickUseItem != null){
+			return quickUseItem.targetingPos(user, dst);
+		} else {
+			return super.targetingPos(user, dst);
+		}
+	}
+	
+	@Override
+	public ArrayList<String> actions(Hero hero) {
+		ArrayList<String> actions = super.actions(hero);
+		if(isKnown()) {
+			actions.add(AC_OPEN);
+		}
+		return actions;
+	}
+	
+	@Override
+	public String defaultAction() {
+		if(isKnown()) {
+			return AC_OPEN;
+		}
+		else return super.defaultAction();
+	}
+	
+	@Override
+	public void execute(Hero hero, String action) {
+		quickUseItem = null;
+		super.execute(hero, action);
+		
+		if(action.equals(AC_OPEN)) {
+			if(!getWealthDrops().isEmpty()) {
+				Game.runOnRenderThread(() -> GameScene.show( new WndQuickBag( this ) ));
+			}
+			else {
+				GLog.i(Messages.get(this, "no_drops"));
+			}
+		}
+	}
+	
+	public static void setExtra(BitmapText extra) {
+		WealthDrop.Decay latest = null;
+		
+		if(Dungeon.hero != null) {
+			for(WealthDrop.Decay decay : Dungeon.hero.buffs(WealthDrop.Decay.class)) {
+				if(latest == null || latest.cooldown() > decay.cooldown()) {
+					latest = decay;
+				}
+			}
+		}
+		
+		if(latest == null) {
+			extra.text( null );
+			extra.resetColor();
+		}
+		else {
+			extra.text(latest.iconTextDisplay());
+			extra.measure();
+			
+			//we use a simplified version to not call buff() on render thread a bunch, assume max is 200
+			float percent = latest.cooldown() / latest.max;
+			extra.hardlight(1f, percent, percent);
+		}
+	}
 	
 	public String statsInfo() {
 		if (isIdentified()){
@@ -140,25 +222,8 @@ public class RingOfWealth extends Ring {
 		return Messages.decimalFormat("#.##", dropGenRate(level+1)) + "x";
 	}
 
-	private static final String TRIES_TO_DROP = "tries_to_drop";
-	private static final String DROPS_TO_RARE = "drops_to_rare";
-
 	@Override
-	public void storeInBundle(Bundle bundle) {
-		super.storeInBundle(bundle);
-		bundle.put(TRIES_TO_DROP, triesToDrop);
-		bundle.put(DROPS_TO_RARE, dropsToRare);
-	}
-
-	@Override
-	public void restoreFromBundle(Bundle bundle) {
-		super.restoreFromBundle(bundle);
-		triesToDrop = bundle.getFloat(TRIES_TO_DROP);
-		dropsToRare = bundle.getInt(DROPS_TO_RARE);
-	}
-
-	@Override
-	protected RingBuff buff( ) {
+	protected RingBuff buff() {
 		return new Wealth();
 	}
 	
@@ -170,66 +235,6 @@ public class RingOfWealth extends Ring {
 	public static float dropGenRate(int buffedLvl) {
 		return 1f + .25f * (buffedLvl-1);
 	}
-
-	/*private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
-	static{
-		potionChances.put(UnstableBrew.class,       	5f);
-
-		potionChances.put(PotionOfToxicGas.class,       4f);
-		potionChances.put(PotionOfStormClouds.class,    4f);
-
-		potionChances.put(CausticBrew.class,    		3f);
-		potionChances.put(PotionOfLevitation.class,     3f);
-		potionChances.put(AquaBrew.class,    			3f);
-
-		potionChances.put(PotionOfPurity.class,         2f);
-		potionChances.put(ShockingBrew.class,    		2f);
-		potionChances.put(PotionOfLiquidFlame.class,    2f);
-		potionChances.put(PotionOfFrost.class,          2f);
-
-		potionChances.put(InfernalBrew.class,    		1f);
-		potionChances.put(BlizzardBrew.class,			1f);
-		potionChances.put(PotionOfMagicalSight.class,   1f);
-		potionChances.put(PotionOfInvisibility.class,   1f);
-	}
-
-	private static HashMap<Class<? extends Scroll>, Float> scrollChances = new HashMap<>();
-	static{
-		scrollChances.put(ScrollOfMirrorImage.class,    4f);
-		scrollChances.put(ScrollOfChallenge.class,    	3f);
-
-		scrollChances.put(ScrollOfTeleportation.class,  2f);
-
-		scrollChances.put(ScrollOfTerror.class,     	1f);
-		scrollChances.put(ScrollOfAntiMagic.class,   	1f);
-	}
-
-	private static HashMap<Class<? extends Spell>, Float> spellChances = new HashMap<>();
-	static{
-		spellChances.put(UnstableSpell.class,    		4f);
-
-		spellChances.put(TelekineticGrab.class,    		3f);
-		spellChances.put(ReclaimTrap.class,    			3f);
-
-		spellChances.put(BeaconOfReturning.class,    	2f);
-
-		spellChances.put(PhaseShift.class,    			1f);
-	}
-
-	private static HashMap<Class<? extends Runestone>, Float> stoneChances = new HashMap<>();
-	static{
-		stoneChances.put(StoneOfFlock.class,    		3f);
-		stoneChances.put(StoneOfFear.class,    			1f);
-		stoneChances.put(StoneOfBlink.class,    		1f);
-	}
-
-	private static HashMap<Class<? extends Item>, Float> typeChances = new HashMap<>();
-	static{
-		typeChances.put(Potion.class,    				50f);
-		typeChances.put(Scroll.class,    				20f);
-		typeChances.put(Spell.class,    				15f);
-		typeChances.put(Runestone.class,    			15f);
-	}*/
 
 	private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
 	static{
@@ -252,8 +257,8 @@ public class RingOfWealth extends Ring {
 		potionChances.put(PotionOfHaste.class,   		2f);
 		potionChances.put(PotionOfPurity.class,         2f);
 
-		potionChances.put(InfernalBrew.class,    		1f);
-		potionChances.put(BlizzardBrew.class,			1f);
+		potionChances.put(ElixirOfDragonsBlood.class,	1f);
+		potionChances.put(ElixirOfIcyTouch.class,		1f);
 		potionChances.put(PotionOfInvisibility.class,   1f);
 		potionChances.put(PotionOfStamina.class,   		1f);
 		potionChances.put(PotionOfParalyticGas.class,   1f);
@@ -342,16 +347,14 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(BeaconOfReturning.class,    	2);
 		itemRarities.put(PhaseShift.class,    			2);
 		itemRarities.put(UnstableSpell.class,    		2);
-
-
-
-		itemRarities.put(InfernalBrew.class,    		3);
-		itemRarities.put(BlizzardBrew.class,			3);
+		
+		
+		
+		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
+		itemRarities.put(ElixirOfIcyTouch.class,   		3);
 		itemRarities.put(PotionOfInvisibility.class,   	3);
 		itemRarities.put(PotionOfStamina.class,   		3);
 		itemRarities.put(PotionOfParalyticGas.class,   	3);
-		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
-		itemRarities.put(ElixirOfIcyTouch.class,   		3);
 
 		itemRarities.put(ScrollOfTerror.class,   		3);
 		itemRarities.put(ScrollOfRetribution.class, 	3);
@@ -379,7 +382,7 @@ public class RingOfWealth extends Ring {
 		else if(type == Runestone.class) {
 			return randomStone();
 		}
-		else return Reflection.newInstance(Gold.class);
+		else return Reflection.newInstance(Gold.class).quantity(1);
 	}
 
 	public static WealthPotion randomPotion() {
@@ -413,22 +416,13 @@ public class RingOfWealth extends Ring {
 		if (bonus <= 0) return null;
 
 		int max = Math.round(30f / dropGenRate(bonus));
-
-		CounterBuff triesToDrop = target.buff(TriesToDropTracker.class);
-		if (triesToDrop == null){
-			triesToDrop = Buff.affect(target, TriesToDropTracker.class);
-			triesToDrop.countUp( Random.NormalIntRange(1, max) );
-		}
-		CounterBuff alchemizeLeft = target.buff(AlchemizeLeft.class);
-		if (alchemizeLeft == null){
-			alchemizeLeft = Buff.affect(target, AlchemizeLeft.class);
-			alchemizeLeft.countUp( 2 );
-		}
-		CounterBuff alchemizeCounter = target.buff(AlchemizeCounter.class);
-		if (alchemizeCounter == null){
-			alchemizeCounter = Buff.affect(target, AlchemizeCounter.class);
-			alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
-		}
+		CounterBuff triesToDrop = 		Buff.count(target, TriesToDropTracker.class,
+										Random.NormalIntRange(1, max));
+		
+		CounterBuff alchemizeLeft = 	Buff.count(target, AlchemizeLeft.class, 2);
+		
+		CounterBuff alchemizeCounter = 	Buff.count(target, AlchemizeCounter.class,
+										Random.NormalIntRange(5, 7));
 
 		//now handle reward logic
 		ArrayList<Item> drops = new ArrayList<>();
@@ -571,9 +565,7 @@ public class RingOfWealth extends Ring {
 			alchemizeLeft.countUp(1);
 	}
 
-	public class Wealth extends RingBuff {
-
-	}
+	public class Wealth extends RingBuff {}
 
 	public static class TriesToDropTracker extends CounterBuff {
 		{

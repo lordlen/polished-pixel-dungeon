@@ -76,7 +76,7 @@ public class BlobImmunity extends FlavourBuff {
 		immunities.add( ToxicGas.class );
 		immunities.add( Web.class );
 
-		immunities.add(Tengu.FireAbility.FireBlob.class);
+		immunities.add( Tengu.FireAbility.FireBlob.class );
 		//rockfall immunity
 		immunities.add( DelayedRockFall.class );
 	}

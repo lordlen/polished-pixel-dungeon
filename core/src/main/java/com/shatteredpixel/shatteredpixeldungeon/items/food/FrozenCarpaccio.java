@@ -50,14 +50,14 @@ public class FrozenCarpaccio extends Food {
 	}
 	
 	public int value() {
-		return 10 * quantity;
+		return 15 * quantity;
 	}
 
 	public static void effect(Hero hero){
 		switch (Random.Int( 4 )) {
 			case 0:
 				GLog.i( Messages.get(FrozenCarpaccio.class, "invis") );
-				Buff.affect( hero, Invisibility.class, Invisibility.DURATION );
+				Buff.affect( hero, Invisibility.class, 0.75f * Invisibility.DURATION );
 				break;
 			case 1:
 				GLog.i( Messages.get(FrozenCarpaccio.class, "hard") );

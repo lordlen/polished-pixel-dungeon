@@ -31,7 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
 
-public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPotion> {
+public class WealthPotion extends Potion implements WealthDrop<Potion> {
 
 	{
 		image = ItemSpriteSheet.MYSTERY_POTION;
@@ -91,10 +91,20 @@ public class WealthPotion extends Potion implements WealthDrop<Potion, WealthPot
 	public void setItem(Potion item) {
 		this.pot = item;
 	}
-
+	
+	Decay decay = null;
+	@Override
+	public Decay decay() {
+		return decay;
+	}
+	public void setDecay(Decay decay) {
+		this.decay = decay;
+	}
+	
 	@Override
 	public Item identify( boolean byHero ) {
-		return pot.identify(byHero);
+		if(valid()) pot.identify(byHero);
+		return this;
 	}
 	@Override
 	public boolean isKnown() {

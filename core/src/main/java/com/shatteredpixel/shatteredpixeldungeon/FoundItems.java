@@ -1,9 +1,14 @@
 package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.Pasty;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 
@@ -17,14 +22,32 @@ public class FoundItems {
         for(Class<?> cls : Generator.Category.POTION.classes) {
             floors.put(cls, new Pair());
         }
-        
         for(Class<?> cls : Generator.Category.SCROLL.classes) {
             floors.put(cls, new Pair());
         }
+        
+        floors.put(Food.class, new Pair());
+        floors.put(Torch.class, new Pair());
+    }
+    static Class<?> getEquivalent(Class<?> cls) {
+        if(floors.containsKey(cls)) {
+            return cls;
+        }
+        else if(ExoticPotion.exoToReg.containsKey(cls)) {
+            return ExoticPotion.exoToReg.get(cls);
+        }
+        else if(ExoticScroll.exoToReg.containsKey(cls)) {
+            return ExoticScroll.exoToReg.get(cls);
+        }
+        else if(cls == Pasty.class) {
+            return Food.class;
+        }
+        
+        return cls;
     }
 
     public static void add(Class<?> cls, int floor) {
-        Pair pair = floors.get(cls);
+        Pair pair = floors.get(getEquivalent(cls));
         if(pair == null) return;
 
         if(pair.first == 0) {
@@ -34,18 +57,13 @@ public class FoundItems {
             pair.second = floor;
         }
         else {
-            pair.second = pair.first;
-            pair.first = floor;
+            pair.first = pair.second;
+            pair.second = floor;
         }
     }
 
-    public static SimpleEntry<Integer, Integer> getEntry(Class<?> cls) {
-        if(floors.get(cls) == null) return null;
-        return new SimpleEntry<>(floors.get(cls).first, floors.get(cls).second);
-    }
-
     public static String getDesc(Class<?> cls) {
-        Pair pair = floors.get(cls);
+        Pair pair = floors.get(getEquivalent(cls));
         if(pair == null) return "";
 
         if (Scroll.class.isAssignableFrom(cls)
@@ -53,10 +71,10 @@ public class FoundItems {
             return "";
 
         if(pair.first != 0 && pair.second != 0) {
-            return "\n\nThis item was last found on _floors " + pair.first + " and " + pair.second + "_.";
+            return "\n\nThis item type was last found on _floors " + pair.first + " and " + pair.second + "_.";
         }
         else if(pair.first != 0) {
-            return "\n\nThis item was last found on _floor " + pair.first + "_.";
+            return "\n\nThis item type was last found on _floor " + pair.first + "_.";
         }
         else return "";
     }

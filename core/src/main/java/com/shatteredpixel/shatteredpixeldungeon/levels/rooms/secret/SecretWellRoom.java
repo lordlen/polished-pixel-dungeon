@@ -27,13 +27,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WellWater;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicWellRoom;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 public class SecretWellRoom extends SecretRoom {
 	
-	private static final Class<?>[] WATERS =
-			{WaterOfAwareness.class, WaterOfHealth.class};
+	private static final Class<?>[] WATERS = MagicWellRoom.WATERS;
+	public static final float[] chances = MagicWellRoom.chances;
 	
 	@Override
 	public boolean canConnect(Point p) {
@@ -62,7 +63,7 @@ public class SecretWellRoom extends SecretRoom {
 		Painter.set( level, well, Terrain.WELL );
 		
 		@SuppressWarnings("unchecked")
-		Class<? extends WellWater> waterClass = (Class<? extends WellWater>) Random.element( WATERS );
+		Class<? extends WellWater> waterClass = (Class<? extends WellWater>)WATERS[Random.chances(chances)];
 		
 		WellWater.seed(well.x + level.width() * well.y, 1, waterClass, level);
 		

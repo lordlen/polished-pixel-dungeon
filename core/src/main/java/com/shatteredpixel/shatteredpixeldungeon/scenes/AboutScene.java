@@ -70,17 +70,17 @@ public class AboutScene extends PixelScene {
 		ppd.setRect((w - fullWidth)/2f, 10, 120, 0);
 		content.add(ppd);
 
-		CreditsBlock zrp = new CreditsBlock(false, Window.POLISHED_COLOR_PURPLE,"Shared code", new Image(Icons.ZRP200.get()),"Zrp200",null,null);
+		CreditsBlock zrp = new CreditsBlock(false, Window.POLISHED_COLOR_PURPLE,"Shared code", new Image(Icons.ZRP200.get()),"Zrp200","github.com/RKPD2","https://github.com/Zrp200/rkpd2");
 		zrp.setSize(colWidth/2, 0);
 		if (landscape()){
-			zrp.setPos(ppd.right(), ppd.top() + (ppd.height() - zrp.height())/2f);
+			zrp.setPos(ppd.right() + 5, ppd.top() + (ppd.height() - zrp.height())/2f);
 		} else {
 			zrp.setPos(w/2f - colWidth/2f, ppd.bottom()+5);
 		}
 		content.add(zrp);
 
 		CreditsBlock boby = new CreditsBlock(false, Window.POLISHED_COLOR_PURPLE, "Shared code",new Image(Icons.BOBY.get()),"Trashbox\nBobylev","trashboxbobylev.itch.io","https://trashboxbobylev.itch.io");
-		boby.setRect(zrp.right(), zrp.top(), colWidth/2f, 0);
+		boby.setRect(zrp.right() + 5, zrp.top(), colWidth/2f, 0);
 		content.add(boby);
 
 
@@ -105,7 +105,7 @@ public class AboutScene extends PixelScene {
 				"https://akomitov.artstation.com/");
 		alex.setSize(colWidth/2f, 0);
 		if (landscape()){
-			alex.setPos(shpx.right(), shpx.top() + (shpx.height() - alex.height())/2f);
+			alex.setPos(shpx.right() + 5, shpx.top() + (shpx.height() - alex.height())/2f);
 		} else {
 			alex.setPos(w/2f - 3f/4f * colWidth, shpx.bottom()+5);
 		}
@@ -117,7 +117,7 @@ public class AboutScene extends PixelScene {
 				"Celesti",
 				"s9menine.itch.io",
 				"https://s9menine.itch.io");
-		charlie.setRect(alex.right(), alex.top(), colWidth/2f, 0);
+		charlie.setRect(alex.right() + 5, alex.top(), colWidth/2f, 0);
 		content.add(charlie);
 
 		CreditsBlock kristjan = new CreditsBlock(false, Window.SHPX_COLOR,
@@ -126,7 +126,7 @@ public class AboutScene extends PixelScene {
 				"Kristjan Haaristo",
 				"youtube.com/@kristjan...",
 				"https://www.youtube.com/@kristjanthomashaaristo");
-		kristjan.setRect(charlie.right(), charlie.top(), colWidth/2f, 0);
+		kristjan.setRect(charlie.right() + 5, charlie.top(), colWidth/2f, 0);
 		content.add(kristjan);
 
 		//*** Pixel Dungeon Credits ***
@@ -155,7 +155,7 @@ public class AboutScene extends PixelScene {
 				null);
 		cube.setSize(colWidth/2f, 0);
 		if (landscape()){
-			cube.setPos(wata.right() + colWidth/4f, wata.top() + (wata.height() - cube.height())/2f);
+			cube.setPos(wata.right() + colWidth/4f + 5, wata.top() + (wata.height() - cube.height())/2f);
 		} else {
 			cube.setPos(w/2f-cube.width()/2f, wata.bottom()+5);
 		}
@@ -188,7 +188,7 @@ public class AboutScene extends PixelScene {
 				"https://mastodon.gamedev.place/@arcnor");
 		arcnor.setSize(colWidth/2f, 0);
 		if (landscape()){
-			arcnor.setPos(gdx.right(), gdx.top() + (gdx.height() - arcnor.height())/2f);
+			arcnor.setPos(gdx.right() + 5, gdx.top() + (gdx.height() - arcnor.height())/2f);
 		} else {
 			arcnor.setPos(w/2f - colWidth / 2f, gdx.bottom()+5);
 		}
@@ -200,7 +200,7 @@ public class AboutScene extends PixelScene {
 				"Kevin MacMartin",
 				"github.com/prurigro",
 				"https://github.com/prurigro/");
-		purigro.setRect(arcnor.right()+2, arcnor.top(), colWidth/2f, 0);
+		purigro.setRect(arcnor.right() + 8, arcnor.top(), colWidth/2f, 0);
 		content.add(purigro);
 
 		//*** Transifex Credits ***
@@ -372,7 +372,7 @@ public class AboutScene extends PixelScene {
 
 				if (avatar != null){
 					body.maxWidth((int)(width() - avatar.width - 1));
-					float fullAvHeight = Math.max(avatar.height(), 16);
+					float fullAvHeight = Math.max(16, avatar.height());
 
 					body.setPos( x + ( width() - body.width() + avatar.width() ) / 2f, topY + (fullAvHeight - body.height())/2f);
 					PixelScene.align(body);
@@ -398,7 +398,12 @@ public class AboutScene extends PixelScene {
 			}
 
 			if (link != null){
-				topY += 1;
+				//yes this is ugly
+				if(body != null && body.text().matches("Zrp200")) {
+					topY += 0.0001f;
+				}
+				
+				topY++;
 				link.maxWidth((int)width());
 				link.setPos( x + (width() - link.width())/2f, topY);
 				topY += link.height() + (large ? 2 : 1);

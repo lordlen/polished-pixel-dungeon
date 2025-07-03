@@ -196,16 +196,13 @@ public class Armor extends EquipableItem {
 	}
 	
 	@Override
-	public void Polished_updateDefaultAction() {
+	public String defaultAction() {
 		if(seal != null && Armor.runic == 1) {
-			defaultAction = AC_SWAP_GLYPH;
+			return AC_SWAP_GLYPH;
 		}
-		else {
-			defaultAction = null;
-			super.Polished_updateDefaultAction();
-		}
+		else return super.defaultAction();
 	}
-
+	
 	@Override
 	public void execute(Hero hero, String action) {
 
@@ -355,7 +352,6 @@ public class Armor extends EquipableItem {
 			seal.detach(Dungeon.hero.belongings.backpack);
 		}
 		
-		Polished_updateDefaultAction();
 		updateQuickslot();
 	}
 	
@@ -392,9 +388,7 @@ public class Armor extends EquipableItem {
 			}
 		}
 		
-		Polished_updateDefaultAction();
 		updateQuickslot();
-		
 		return detaching;
 	}
 	

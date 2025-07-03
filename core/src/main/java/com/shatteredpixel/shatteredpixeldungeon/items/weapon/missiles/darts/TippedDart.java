@@ -146,11 +146,10 @@ public abstract class TippedDart extends Dart {
 			}
 			Dungeon.level.drop( d, enemy.pos ).sprite.drop();
 		}
-
-		if (Dungeon.hero.hasTalent(Talent.NATURES_AID) && SPDSettings.Polished.huntress()
-			&& Dungeon.hero.heroClass != HeroClass.HUNTRESS) {
-			// 3/5 turns based on talent points spent
-			Barkskin.conditionallyAppend(Dungeon.hero, 2, 1 + 2*(Dungeon.hero.pointsInTalent(Talent.NATURES_AID)));
+		
+		int nature = Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
+		if (nature > 0 && Dungeon.hero.heroClass != HeroClass.HUNTRESS && SPDSettings.Polished.huntress()) {
+			Barkskin.conditionallyAppend(Dungeon.hero, 2, 2*nature);
 		}
 	}
 

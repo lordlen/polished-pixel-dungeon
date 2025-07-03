@@ -213,7 +213,7 @@ public class Hero extends Char {
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
-	private static final float HUNGER_FOR_SEARCH	= 5f;
+	private static final float HUNGER_FOR_SEARCH	= 4f;
 	
 	public HeroClass heroClass = HeroClass.ROGUE;
 	public HeroSubClass subClass = HeroSubClass.NONE;
@@ -664,7 +664,7 @@ public class Hero extends Char {
 
 		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
 		if (guardTracker != null){
-			guardTracker.blockLeft--;
+			guardTracker.blocksLeft--;
 			return INFINITE_EVASION;
 		}
 		
@@ -709,7 +709,7 @@ public class Hero extends Char {
 		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
 		if (guardTracker != null){
 			guardTracker.hasBlocked = true;
-			if(guardTracker.blockLeft == 0) {
+			if(guardTracker.blocksLeft == 0) {
 				guardTracker.detach();
 			}
 			BuffIndicator.refreshHero();
@@ -1823,11 +1823,17 @@ public class Hero extends Char {
 		}
 
 		Char lastTarget = QuickSlotButton.lastTarget;
-		if (target != null && (lastTarget == null ||
-							!lastTarget.isAlive() || !lastTarget.isActive() ||
-							lastTarget.alignment == Alignment.ALLY ||
-							!fieldOfView[lastTarget.pos])){
-			QuickSlotButton.target(target);
+		if (target != null && target != lastTarget) {
+			if (!QuickSlotButton.targetLock || lastTarget == null ||
+				!lastTarget.isAlive() || !lastTarget.isActive() ||
+				lastTarget.alignment == Alignment.ALLY ||
+				!fieldOfView[lastTarget.pos] ||
+				( distance(lastTarget) > 6 && QuickSlotButton.autoAim(lastTarget) == -1 ))
+			{
+				QuickSlotButton.target(target);
+				//its a soft target, meaning it wont lock in until we actually shoot it
+				QuickSlotButton.targetLock = false;
+			}
 		}
 		
 		if (newMob) {
@@ -2409,9 +2415,11 @@ public class Hero extends Char {
 	@Override
 	public boolean isAlive() {
 		
-		if (HP <= 0){
-			if (berserk == null) berserk = buff(Berserk.class);
-			return berserk != null && berserk.raging();
+		if (HP <= 0 && subClass == HeroSubClass.BERSERKER){
+			if (berserk == null) {
+				berserk = Buff.affect(this, Berserk.class);
+			}
+			return berserk.raging();
 		} else {
 			berserk = null;
 			return super.isAlive();
@@ -2675,10 +2683,10 @@ public class Hero extends Char {
 					searchTime++;
 					searchHunger *= 2;
 				}
+				searchHunger = Math.max(0, searchHunger-searchTime);
 				searchHunger *= SaltCube.hungerGainMultiplier();
-				searchHunger = Math.min(searchHunger-searchTime, 0);
 
-				Buff.affect(this, Hunger.class).affectHunger(searchHunger);
+				Buff.affect(this, Hunger.class).affectHunger(-searchHunger);
 			}
 
 			if (cursed) GLog.n(Messages.get(this, "search_distracted"));

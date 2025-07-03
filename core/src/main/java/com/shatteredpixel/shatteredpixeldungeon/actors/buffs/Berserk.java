@@ -215,8 +215,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		int enemies = 0;
 		for(Mob mob : hero.getVisibleEnemies()) {
-			if(mob.distance(target) <= 8 && mob.isTargeting(target))
+			if(mob.distance(target) <= 8 && mob.isTargeting(target)) {
 				enemies++;
+			}
 		}
 
 		return enemies;
@@ -562,8 +563,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		@Override
 		public boolean act() {
-			Berserk berserk = target.buff(Berserk.class);
-			if(berserk != null) active = berserk.facingEnemies() >= 3 && ((Hero)target).hasTalent(Talent.LAST_STAND);
+			Berserk berserk = Buff.affect(target, Berserk.class);
+			active = berserk.facingEnemies() >= 3 && ((Hero)target).hasTalent(Talent.LAST_STAND);
 
 			spend(target.cooldown());
 			return true;

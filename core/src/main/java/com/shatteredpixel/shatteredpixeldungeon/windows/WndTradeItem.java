@@ -230,10 +230,8 @@ public class WndTradeItem extends WndInfoItem {
 		}
 		item.detachAll( hero.belongings.backpack );
 
-		//selling items in the sell interface doesn't spend time
-		hero.spend(-hero.cooldown());
-
 		new Gold( item.value() ).doPickUp( hero );
+		hero.spend(-Item.TIME_TO_PICK_UP);
 
 		if (shop != null){
 			shop.buybackItems.add(item);
@@ -257,10 +255,8 @@ public class WndTradeItem extends WndInfoItem {
 			
 			item = item.detach( hero.belongings.backpack );
 
-			//selling items in the sell interface doesn't spend time
-			hero.spend(-hero.cooldown());
-
 			new Gold( item.value() ).doPickUp( hero );
+			hero.spend(-Item.TIME_TO_PICK_UP);
 
 			if (shop != null){
 				shop.buybackItems.add(item);

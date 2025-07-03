@@ -21,30 +21,20 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Shadows;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
-import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
-import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.levels.HallsLevel;
+import com.watabou.noosa.audio.Sample;
 
-public class Foliage extends Blob {
-
-	@Override
-	public Notes.Landmark landmark() {
-		return Notes.Landmark.GARDEN;
-	}
+public class RoomLighting extends Blob {
 
 	@Override
 	protected void evolve() {
-
-		int[] map = Dungeon.level.map;
-		
-		boolean seen = false;
 
 		int cell;
 		for (int i = area.left; i < area.right; i++) {
@@ -55,13 +45,6 @@ public class Foliage extends Blob {
 					off[cell] = cur[cell];
 					volume += off[cell];
 
-					if (map[cell] == Terrain.EMBERS) {
-						map[cell] = Terrain.GRASS;
-						GameScene.updateMap(cell);
-					}
-
-					seen = seen || Dungeon.level.visited[cell];
-
 				} else {
 					off[cell] = 0;
 				}
@@ -70,18 +53,29 @@ public class Foliage extends Blob {
 		
 		Hero hero = Dungeon.hero;
 		if (hero.isAlive() && cur[hero.pos] > 0) {
-			Buff.affect( hero, Shadows.class ).prolong();
+			if((Dungeon.isChallenged(Challenges.DARKNESS) || Dungeon.level instanceof HallsLevel)) {
+				
+				boolean update = hero.buff(Light.class) == null;
+				Buff.Polished.prolongAligned(hero, Light.class, 1f);
+				
+				if(update) {
+					Sample.INSTANCE.play( Assets.Sounds.BURNING );
+					Dungeon.observe();
+				}
+			}
 		}
 	}
 	
+	// do we add visuals?
 	@Override
 	public void use( BlobEmitter emitter ) {
 		super.use( emitter );
-		emitter.start( ShaftParticle.FACTORY, 0.9f, 0 );
+		//emitter.start( ShaftParticle.FACTORY, 0.9f, 0 );
 	}
 	
 	@Override
 	public String tileDesc() {
-		return Messages.get(this, "desc");
+		return super.tileDesc();
+		//return Messages.get(this, "desc");
 	}
 }

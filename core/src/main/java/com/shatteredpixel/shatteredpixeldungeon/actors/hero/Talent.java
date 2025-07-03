@@ -55,6 +55,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
@@ -511,14 +512,16 @@ public enum Talent {
 	}
 
 	public String desc(boolean metamorphed){
-		if (this == NATURES_AID && SPDSettings.Polished.huntress()) {
+		if (SPDSettings.Polished.huntress() &&
+			(this == NATURES_AID || this == DURABLE_PROJECTILES || this == NATURES_BOUNTY)) {
+			
 			String desc = Messages.get(this, name() + ".polished_desc");
 			String metaDesc = Messages.get(this, name() + ".polished_meta_desc");
 			
-			if(metamorphed) {
-				return desc + "\n\n" + metaDesc;
+			if(metamorphed && !metaDesc.equals(Messages.NO_TEXT_FOUND)) {
+				desc += "\n\n" + metaDesc;
 			}
-			else return desc;
+			return desc;
 		}
 
 		if (metamorphed){
@@ -618,12 +621,17 @@ public enum Talent {
 		Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
 		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null) {
 			if(Armor.runic == 1) BrokenSeal.armor.transfer();
-			BrokenSeal.armor.Polished_updateDefaultAction();
+		}
+		
+		if(talent == DURABLE_PROJECTILES && hero.pointsInTalent(talent) == 2 && SPDSettings.Polished.huntress()) {
+			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+			if(bow != null) bow.Polished_resetCharges();
 		}
 	}
 
 	public static class CachedRationsDropped extends CounterBuff{{revivePersists = true;}};
 	public static class NatureBerriesDropped extends CounterBuff{{revivePersists = true;}};
+	public static class NatureBerriesProgress extends CounterBuff{{revivePersists = true;}};
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){
 		boolean snack = foodSource instanceof HornOfPlenty && foodVal <= HornOfPlenty.getSatietyPerCharge();
@@ -868,10 +876,13 @@ public enum Talent {
 	}
 
 	public static void onRunestoneUsed( Hero hero, int pos, Class<?extends Item> cls ){
+		boolean wealthDrop = WealthDrop.class.isAssignableFrom(cls);
+		
 		if (hero.hasTalent(RECALL_INSCRIPTION) && Runestone.class.isAssignableFrom(cls)){
 			if (hero.heroClass == HeroClass.CLERIC){
 				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 50 : 10).item = cls;
-			} else {
+			}
+			else if(!wealthDrop) {
 
 				//don't trigger on 1st intuition use
 				if (cls.equals(StoneOfIntuition.class) && hero.buff(StoneOfIntuition.IntuitionUseTracker.class) != null){

@@ -73,6 +73,8 @@ public class PotionOfCleansing extends ExoticPotion {
 	}
 
 	public static void cleanse(Char ch, float duration){
+		Buff.prolong(ch, Cleanse.class, duration);
+		
 		for (Buff b : ch.buffs()){
 			if (b.type == Buff.buffType.NEGATIVE
 					&& !(b instanceof AllyBuff)
@@ -83,7 +85,6 @@ public class PotionOfCleansing extends ExoticPotion {
 				((Hunger) b).satisfy(Hunger.STARVING);
 			}
 		}
-		Buff.prolong(ch, Cleanse.class, duration);
 	}
 
 	public static class Cleanse extends FlavourBuff {

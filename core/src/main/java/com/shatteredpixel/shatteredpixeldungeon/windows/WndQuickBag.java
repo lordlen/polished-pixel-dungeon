@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HolyTome;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -45,43 +46,48 @@ import java.util.Comparator;
 
 public class WndQuickBag extends Window {
 
-	private static Item bag;
-
-	public WndQuickBag(Bag bag){
+	private static Item container;
+	
+	public WndQuickBag(Item container){
 		super(0, 0, Chrome.get(Chrome.Type.TOAST_TR));
 
 		if( WndBag.INSTANCE != null ){
 			WndBag.INSTANCE.hide();
 		}
 		WndBag.INSTANCE = this;
+		
+		WndQuickBag.container = container;
+		ArrayList<Item> items = new ArrayList<>();
+		
+		if(container instanceof RingOfWealth) {
+			items = RingOfWealth.getWealthDrops();
+		}
+		else {
+			for (Item i : container instanceof Bag ? (Bag)container : Dungeon.hero.belongings){
+				if (i.defaultAction() == null){
+					continue;
+				}
+				if (i instanceof Bag) {
+					continue;
+				}
+				if (i instanceof Artifact
+						&& !i.isEquipped(Dungeon.hero)
+						&& (!(i instanceof CloakOfShadows) || !Dungeon.hero.hasTalent(Talent.LIGHT_CLOAK))
+						&& (!(i instanceof HolyTome) || !Dungeon.hero.hasTalent(Talent.LIGHT_READING))){
+					continue;
+				}
+				items.add(i);
+			}
+		}
 
-		WndQuickBag.bag = bag;
-
+		Collections.sort(items, quickBagComparator);
+		
+		
 		float width = 0, height = 0;
 		int maxWidth = PixelScene.landscape() ? 240 : 135;
 		int left = 0;
 		int top = 10;
-
-		ArrayList<Item> items = new ArrayList<>();
-
-		for (Item i : bag == null ? Dungeon.hero.belongings : bag){
-			if (i.defaultAction() == null){
-				continue;
-			}
-			if (i instanceof Bag) {
-				continue;
-			}
-			if (i instanceof Artifact
-					&& !i.isEquipped(Dungeon.hero)
-					&& (!(i instanceof CloakOfShadows) || !Dungeon.hero.hasTalent(Talent.LIGHT_CLOAK))
-					&& (!(i instanceof HolyTome) || !Dungeon.hero.hasTalent(Talent.LIGHT_READING))){
-				continue;
-			}
-			items.add(i);
-		}
-
-		Collections.sort(items, quickBagComparator);
-
+		
 		int btnWidth = 16;
 		int btnHeight = 20;
 
@@ -105,11 +111,17 @@ public class WndQuickBag extends Window {
 
 					hide();
 					item.execute(Dungeon.hero);
-					if (item.usesTargeting && bag != null){
-						int idx = Dungeon.quickslot.getSlot(WndQuickBag.bag);
+					if (item.usesTargeting && container != null){
+						int idx = Dungeon.quickslot.getSlot(WndQuickBag.container);
 						if (idx != -1){
 							QuickSlotButton.useTargeting(idx);
-							bag.quickUseItem = item;
+							
+							if(container instanceof Bag) {
+								((Bag) container).quickUseItem = item;
+							}
+							else if(container instanceof RingOfWealth) {
+								((RingOfWealth) container).quickUseItem = item;
+							}
 						}
 					}
 				}
@@ -125,7 +137,7 @@ public class WndQuickBag extends Window {
 					return null; //no tooltips here
  				}
 			};
-			slot.showExtraInfo(false);
+			slot.showExtraInfo(container instanceof RingOfWealth);
 			slot.setRect(left, top, btnWidth, btnHeight);
 			add(slot);
 

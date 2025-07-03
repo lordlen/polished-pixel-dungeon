@@ -175,7 +175,7 @@ public class RingOfForce extends Ring {
 
 	@Override
 	public String defaultAction() {
-		if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.DUELIST){
+		if (isEquipped(Dungeon.hero) && Dungeon.hero.heroClass == HeroClass.DUELIST){
 			return AC_ABILITY;
 		} else {
 			return super.defaultAction();

@@ -55,7 +55,7 @@ public abstract class InventorySpell extends Spell {
 	
 	public void onUse() {
 		//WndUpgrade already handles this logic
-		if(!(this instanceof MagicalInfusion)) curItem = detach(curUser.belongings.backpack);
+		if(!(this instanceof MagicalInfusion)) detach(curUser.belongings.backpack);
 		
 		curUser.spend(1f);
 		curUser.busy();

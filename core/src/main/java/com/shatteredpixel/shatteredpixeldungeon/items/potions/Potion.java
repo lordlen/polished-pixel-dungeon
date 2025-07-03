@@ -129,7 +129,7 @@ public class Potion extends Item {
 		
 		//exotic
 		canThrowPots.add(PotionOfCleansing.class);
-		mustThrowPots.add(PotionOfShroudingFog.class);
+		canThrowPots.add(PotionOfShroudingFog.class);
 		
 		//elixirs
 		canThrowPots.add(ElixirOfHoneyedHealing.class);
@@ -149,18 +149,6 @@ public class Potion extends Item {
 	{
 		stackable = true;
 		defaultAction = AC_DRINK;
-	}
-
-	@Override
-	public boolean doPickUp(Hero hero, int pos) {
-		boolean picked = super.doPickUp(hero, pos);
-
-		if(picked && Polished_toFind) {
-			FoundItems.add(getClass(), Dungeon.depth);
-			Polished_toFind = false;
-		}
-
-		return picked;
 	}
 
 	@SuppressWarnings("unchecked")

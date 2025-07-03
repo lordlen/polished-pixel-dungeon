@@ -32,7 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
 
-public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScroll> {
+public class WealthScroll extends Scroll implements WealthDrop<Scroll> {
 
 	{
 		image = ItemSpriteSheet.MYSTERY_SCROLL;
@@ -68,10 +68,20 @@ public class WealthScroll extends Scroll implements WealthDrop<Scroll, WealthScr
 	public void setItem(Scroll item) {
 		this.scroll = item;
 	}
+	
+	Decay decay = null;
+	@Override
+	public Decay decay() {
+		return decay;
+	}
+	public void setDecay(Decay decay) {
+		this.decay = decay;
+	}
 
 	@Override
 	public Item identify( boolean byHero ) {
-		return scroll.identify(byHero);
+		if(valid()) scroll.identify(byHero);
+		return this;
 	}
 	@Override
 	public boolean isKnown() {

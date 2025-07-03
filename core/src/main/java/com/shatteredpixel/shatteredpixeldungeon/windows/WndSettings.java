@@ -63,7 +63,7 @@ public class WndSettings extends WndTabbed {
 	private DisplayTab  display;
 	private UITab       ui;
 	private InputTab    input;
-	private DataTab     data;
+	private PolishedTab ppd;
 	private AudioTab    audio;
 	private LangsTab    langs;
 
@@ -126,16 +126,16 @@ public class WndSettings extends WndTabbed {
 			});
 		}
 
-		data = new DataTab();
-		data.setSize(width, 0);
-		height = Math.max(height, data.height());
-		add( data );
+		ppd = new PolishedTab();
+		ppd.setSize(width, 0);
+		height = Math.max(height, ppd.height());
+		add(ppd);
 
 		add( new IconTab(Icons.get(Icons.PPD)){
 			@Override
 			protected void select(boolean value) {
 				super.select(value);
-				data.visible = data.active = value;
+				ppd.visible = ppd.active = value;
 				if (value) last_index = 3;
 			}
 		});
@@ -416,6 +416,7 @@ public class WndSettings extends WndTabbed {
 		ColorBlock sep2;
 		CheckBox chkFont;
 		CheckBox chkVibrate;
+		CheckBox chkFlipRightClick;
 
 		@Override
 		protected void createChildren() {
@@ -684,6 +685,18 @@ public class WndSettings extends WndTabbed {
 				chkVibrate.checked(SPDSettings.vibration());
 			}
 			add(chkVibrate);
+			
+			if(DeviceCompat.isDesktop()) {
+				chkFlipRightClick = new CheckBox(Messages.get(this, "flip_right_click")){
+					@Override
+					protected void onClick() {
+						super.onClick();
+						SPDSettings.flipRightClick(checked());
+					}
+				};
+				chkFlipRightClick.checked(SPDSettings.flipRightClick());
+				add(chkFlipRightClick);
+			}
 		}
 
 		@Override
@@ -713,9 +726,27 @@ public class WndSettings extends WndTabbed {
 			if (btnToolbarSettings != null) {
 				btnToolbarSettings.setRect(0, height + GAP, width, BTN_HEIGHT);
 				height = btnToolbarSettings.bottom();
+				
+				if(chkFlipRightClick != null) {
+					chkFlipRightClick.setRect(0, height + GAP, width, BTN_HEIGHT);
+					height = chkFlipRightClick.bottom();
+				}
 			} else {
-				chkFlipTags.setRect(0, height + GAP, width, BTN_HEIGHT);
-				height = chkFlipTags.bottom();
+				if(chkFlipRightClick != null) {
+					if(width > 200) {
+						chkFlipTags.setRect(0, height + GAP, width/2-1, BTN_HEIGHT);
+						chkFlipRightClick.setRect(chkFlipTags.right()+2, chkFlipTags.top(), width/2-1, BTN_HEIGHT);
+					}
+					else {
+						chkFlipTags.setRect(0, height + GAP, width, BTN_HEIGHT);
+						chkFlipRightClick.setRect(0, chkFlipTags.bottom() + GAP, width, BTN_HEIGHT);
+					}
+					height = chkFlipRightClick.bottom();
+				}
+				else {
+					chkFlipTags.setRect(0, height + GAP, width, BTN_HEIGHT);
+					height = chkFlipTags.bottom();
+				}
 			}
 
 			sep2.size(width, 1);
@@ -725,7 +756,6 @@ public class WndSettings extends WndTabbed {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width/2-1, BTN_HEIGHT);
 				chkVibrate.setRect(chkFont.right()+2, chkFont.top(), width/2-1, BTN_HEIGHT);
 				height = chkVibrate.bottom();
-
 			} else {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
 				chkVibrate.setRect(0, chkFont.bottom() + GAP, width, BTN_HEIGHT);
@@ -856,7 +886,7 @@ public class WndSettings extends WndTabbed {
 		}
 	}
 
-	private static class DataTab extends Component{
+	private static class PolishedTab extends Component{
 
 		RenderedTextBlock title;
 		ColorBlock sep1;
