@@ -40,7 +40,8 @@ public class Debug {
     public static final boolean DEBUG_MODE = DeviceCompat.isDebug();
 
 
-    private static final boolean DebuggingStats = false;
+    private static final boolean DebuggingStats = false
+    ;
     //                                                                  Debug  /  Default
     public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1;
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1;
@@ -62,7 +63,7 @@ public class Debug {
 
 
 
-        if(true && DebuggingStats) {
+        if(DebuggingStats && true) {
             Starting_Items.addAll(Arrays.asList(
                 PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class,
                 ScrollOfMagicMapping.class, PhaseShift.class, ScrollOfUpgrade.class,

@@ -345,7 +345,15 @@ public class Hero extends Char {
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
 		
-		HT = STARTING_HP + 5*(lvl-1) + HTBoost;
+		if (Debug.DEBUG_MODE &&
+			Debug.Starting_HP >= 1000 && curHT < 900) {
+			//avoid messing up regular save files
+			HT = 20 + 5*(lvl-1) + HTBoost;
+		}
+		else {
+			HT = STARTING_HP + 5*(lvl-1) + HTBoost;
+		}
+		
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 		
