@@ -111,9 +111,6 @@ public class RingOfWealth extends Ring {
 		icon = ItemSpriteSheet.Icons.RING_WEALTH;
 		buffClass = Wealth.class;
 	}
-
-	private float triesToDrop = Float.MIN_VALUE;
-	private int dropsToRare = Integer.MIN_VALUE;
 	
 	public String statsInfo() {
 		if (isIdentified()){
@@ -140,25 +137,8 @@ public class RingOfWealth extends Ring {
 		return Messages.decimalFormat("#.##", dropGenRate(level+1)) + "x";
 	}
 
-	private static final String TRIES_TO_DROP = "tries_to_drop";
-	private static final String DROPS_TO_RARE = "drops_to_rare";
-
 	@Override
-	public void storeInBundle(Bundle bundle) {
-		super.storeInBundle(bundle);
-		bundle.put(TRIES_TO_DROP, triesToDrop);
-		bundle.put(DROPS_TO_RARE, dropsToRare);
-	}
-
-	@Override
-	public void restoreFromBundle(Bundle bundle) {
-		super.restoreFromBundle(bundle);
-		triesToDrop = bundle.getFloat(TRIES_TO_DROP);
-		dropsToRare = bundle.getInt(DROPS_TO_RARE);
-	}
-
-	@Override
-	protected RingBuff buff( ) {
+	protected RingBuff buff() {
 		return new Wealth();
 	}
 	
@@ -379,7 +359,7 @@ public class RingOfWealth extends Ring {
 		else if(type == Runestone.class) {
 			return randomStone();
 		}
-		else return Reflection.newInstance(Gold.class);
+		else return Reflection.newInstance(Gold.class).quantity(1);
 	}
 
 	public static WealthPotion randomPotion() {
@@ -414,21 +394,14 @@ public class RingOfWealth extends Ring {
 
 		int max = Math.round(30f / dropGenRate(bonus));
 
-		CounterBuff triesToDrop = target.buff(TriesToDropTracker.class);
-		if (triesToDrop == null){
-			triesToDrop = Buff.affect(target, TriesToDropTracker.class);
-			triesToDrop.countUp( Random.NormalIntRange(1, max) );
-		}
-		CounterBuff alchemizeLeft = target.buff(AlchemizeLeft.class);
-		if (alchemizeLeft == null){
-			alchemizeLeft = Buff.affect(target, AlchemizeLeft.class);
-			alchemizeLeft.countUp( 2 );
-		}
-		CounterBuff alchemizeCounter = target.buff(AlchemizeCounter.class);
-		if (alchemizeCounter == null){
-			alchemizeCounter = Buff.affect(target, AlchemizeCounter.class);
-			alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
-		}
+		
+		CounterBuff triesToDrop = 		Buff.count(target, TriesToDropTracker.class,
+										Random.NormalIntRange(1, max));
+		
+		CounterBuff alchemizeLeft = 	Buff.count(target, AlchemizeLeft.class, 2);
+		
+		CounterBuff alchemizeCounter = 	Buff.count(target, AlchemizeCounter.class,
+										Random.NormalIntRange(5, 7));
 
 		//now handle reward logic
 		ArrayList<Item> drops = new ArrayList<>();
