@@ -100,7 +100,9 @@ public interface WealthDrop<T extends Item> {
     }
 
     default String dropName() {
-        return item().trueName() + Messages.get(WealthDrop.class, "suffix");
+        return valid() ?
+                item().trueName() + Messages.get(WealthDrop.class, "suffix") :
+                Messages.get(WealthDrop.class, "name_default");
     }
 
     default String dropDesc() {
