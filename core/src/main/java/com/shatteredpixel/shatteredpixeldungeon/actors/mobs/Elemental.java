@@ -324,7 +324,7 @@ public abstract class Elemental extends Mob {
 
 					for (int i : PathFinder.NEIGHBOURS9){
 						if (!Dungeon.level.solid[targetingPos + i]) {
-							sprite.parent.addToBack(new TargetedCell(targetingPos + i, 0xFF0000, now()+cooldown(), this));
+							sprite.parent.addToBack(TargetedCell.timed(targetingPos + i, now()+cooldown(), this));
 						}
 					}
 

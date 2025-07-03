@@ -25,100 +25,111 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlobImmunity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.TextureFilm;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
-import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
 public class SpiritHawk extends ArmorAbility {
-
-	@Override
-	public String targetingPrompt() {
-		if (getHawk() == null) {
-			return super.targetingPrompt();
-		} else {
-			return Messages.get(this, "prompt");
-		}
+	
+	{
+		baseChargeUse = 35f;
 	}
-
-	@Override
+	
 	public boolean useTargeting(){
 		return false;
 	}
 
-	{
-		baseChargeUse = 35f;
-	}
-
 	@Override
 	public float chargeUse(Hero hero) {
-		if (getHawk() == null) {
+		if (Hawk() == null) {
 			return super.chargeUse(hero);
 		} else {
 			return 0;
 		}
 	}
-
-	@Override
-	protected void activate(ClassArmor armor, Hero hero, Integer target) {
-		HawkAlly ally = getHawk();
-
-		if (ally != null){
-			if (target == null){
-				return;
+	
+	float chargeSummon(Hero hero) {
+		return super.chargeUse(hero);
+	}
+	
+	private static HawkAlly hawk = null;
+	private static int hawkID = -1;
+	
+	public static void resetHawk() {
+		hawk = null;
+		hawkID = -1;
+	}
+	
+	public static HawkAlly Hawk() {
+		if(hawk != null) {
+			if(!hawk.isAlive()) resetHawk();
+			return hawk;
+		}
+		
+		if(hawkID != -1) {
+			Actor a = Actor.findById(hawkID);
+			if (a instanceof HawkAlly){
+				hawk = (HawkAlly) a;
+				return hawk;
 			} else {
-				ally.directTocell(target);
-			}
-		} else {
-			ArrayList<Integer> spawnPoints = new ArrayList<>();
-			for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
-				int p = hero.pos + PathFinder.NEIGHBOURS8[i];
-				if (Actor.findChar(p) == null && (Dungeon.level.passable[p] || Dungeon.level.avoid[p])) {
-					spawnPoints.add(p);
-				}
-			}
-
-			if (!spawnPoints.isEmpty()){
-				armor.charge -= chargeUse(hero);
-				armor.updateQuickslot();
-
-				ally = new HawkAlly();
-				ally.pos = Random.element(spawnPoints);
-				GameScene.add(ally);
-
-				ScrollOfTeleportation.appear(ally, ally.pos);
-				Dungeon.observe();
-
-				Invisibility.dispel();
-				hero.spendAndNext(Actor.TICK);
-
-			} else {
-				GLog.w(Messages.get(this, "no_space"));
+				hawkID = -1;
 			}
 		}
-
+		
+		Char ally = Stasis.getStasisAlly();
+		if (ally instanceof HawkAlly){
+			hawk = (HawkAlly) ally;
+			hawkID = ally.id();
+			return hawk;
+		}
+		
+		return null;
+	}
+	
+	@Override
+	protected void activate(ClassArmor armor, Hero hero, Integer target) {
+		if (Hawk() != null){
+			if(hawk.stasis()) {
+				GLog.i( Messages.get(this, "spawned") );
+			}
+			else {
+				hawk.command();
+			}
+		}
+		else {
+			DirectableAlly.SummonSelector.trySummon(new HawkAlly(), () -> {
+				armor.charge -= chargeSummon(hero);
+				Item.updateQuickslot();
+				Invisibility.dispel();
+				
+				Buff.affect(Dungeon.hero, HawkTimer.class, HawkTimer.DURATION);
+            });
+		}
 	}
 
 	@Override
@@ -131,15 +142,6 @@ public class SpiritHawk extends ArmorAbility {
 		return new Talent[]{Talent.EAGLE_EYE, Talent.GO_FOR_THE_EYES, Talent.SWIFT_SPIRIT, Talent.HEROIC_ENERGY};
 	}
 
-	private static HawkAlly getHawk(){
-		for (Char ch : Actor.chars()){
-			if (ch instanceof HawkAlly){
-				return (HawkAlly) ch;
-			}
-		}
-		return null;
-	}
-
 	public static class HawkAlly extends DirectableAlly {
 
 		{
@@ -150,16 +152,61 @@ public class SpiritHawk extends ArmorAbility {
 
 			flying = true;
 			if (Dungeon.hero != null) {
-				viewDistance = (int) GameMath.gate(6, 6 + Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE), 8);
+				viewDistance = GameMath.gate(6, 6 + Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE), 8);
 				baseSpeed = 2f + Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT) / 2f;
 			} else {
 				viewDistance = 6;
 				baseSpeed = 2f;
 			}
-			attacksAutomatically = false;
 
 			immunities.addAll(new BlobImmunity().immunities());
-			immunities.add(AllyBuff.class);
+		}
+		
+		@Override
+		protected void announce() {
+			switch (command) {
+				case DEFEND:
+					if(!defendAnnounced) {
+						GLog.i(Messages.get(this, "direct_defend"));
+						defendAnnounced = true;
+					}
+					break;
+				case ATTACK:
+					if(!attackAnnounced) {
+						GLog.i(Messages.get(this, "direct_attack"));
+						attackAnnounced = true;
+					}
+					break;
+				case FOLLOW:
+					if(!followAnnounced) {
+						GLog.i(Messages.get(this, "direct_follow"));
+						followAnnounced = true;
+					}
+					break;
+				case NONE: default:
+					if(!darkAnnounced) {
+						GLog.n(Messages.get(this, "too_dark"));
+						darkAnnounced = true;
+					}
+					break;
+			}
+		}
+		
+		@Override
+		protected void onAdd() {
+			super.onAdd();
+			
+			SpiritHawk.hawk = this;
+			SpiritHawk.hawkID = id();
+		}
+		
+		@Override
+		public void destroy() {
+			super.destroy();
+			SpiritHawk.resetHawk();
+			
+			HawkTimer timer = Dungeon.hero.buff(HawkTimer.class);
+			if(timer != null) timer.detach();
 		}
 
 		@Override
@@ -168,7 +215,6 @@ public class SpiritHawk extends ArmorAbility {
 		}
 
 		private int dodgesUsed = 0;
-		private float timeRemaining = 100f;
 
 		@Override
 		public int defenseSkill(Char enemy) {
@@ -212,17 +258,9 @@ public class SpiritHawk extends ArmorAbility {
 
 		@Override
 		protected boolean act() {
-			if (timeRemaining <= 0){
-				die(null);
-				Dungeon.hero.interrupt();
-				return true;
-			}
 			viewDistance = 6+Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE);
 			baseSpeed = 2f + Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT)/2f;
-			boolean result = super.act();
-			Dungeon.level.updateFieldOfView( this, fieldOfView );
-			GameScene.updateFog(pos, viewDistance+(int)Math.ceil(speed()));
-			return result;
+			return super.act();
 		}
 
 		@Override
@@ -232,41 +270,9 @@ public class SpiritHawk extends ArmorAbility {
 		}
 
 		@Override
-		protected void spend(float time) {
-			super.spend(time);
-			timeRemaining -= time;
-		}
-
-		@Override
-		public void destroy() {
-			super.destroy();
-			Dungeon.observe();
-			GameScene.updateFog();
-		}
-
-		@Override
-		public void defendPos(int cell) {
-			GLog.i(Messages.get(this, "direct_defend"));
-			super.defendPos(cell);
-		}
-
-		@Override
-		public void followHero() {
-			GLog.i(Messages.get(this, "direct_follow"));
-			super.followHero();
-		}
-
-		@Override
-		public void targetChar(Char ch) {
-			GLog.i(Messages.get(this, "direct_attack"));
-			super.targetChar(ch);
-		}
-
-		@Override
 		public String description() {
-			String message = Messages.get(this, "desc", (int)timeRemaining);
+			String message = Messages.get(this, "desc");
 			if (Actor.chars().contains(this)){
-				message += "\n\n" + Messages.get(this, "desc_remaining", (int)timeRemaining);
 				if (dodgesUsed < 2*Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT)){
 					message += "\n" + Messages.get(this, "desc_dodges", (2*Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT) - dodgesUsed));
 				}
@@ -275,21 +281,49 @@ public class SpiritHawk extends ArmorAbility {
 		}
 
 		private static final String DODGES_USED     = "dodges_used";
-		private static final String TIME_REMAINING  = "time_remaining";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
 			bundle.put(DODGES_USED, dodgesUsed);
-			bundle.put(TIME_REMAINING, timeRemaining);
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 			dodgesUsed = bundle.getInt(DODGES_USED);
-			timeRemaining = bundle.getFloat(TIME_REMAINING);
 		}
+	}
+	
+	public static class HawkTimer extends FlavourBuff {
+		
+		{
+			type=buffType.POSITIVE;
+			revivePersists = true;
+		}
+		
+		public static final float DURATION = 100f;
+		
+		@Override
+		public int icon() {
+			return BuffIndicator.SPIRIT_HAWK;
+		}
+		
+		@Override
+		public float iconFadePercent() {
+			return (DURATION - cooldown()) / DURATION;
+		}
+		
+		@Override
+		public void detach() {
+			super.detach();
+			
+			if(SpiritHawk.Hawk() != null) {
+				SpiritHawk.hawk.die(null);
+				Dungeon.hero.interrupt();
+			}
+		}
+		
 	}
 
 	public static class HawkSprite extends MobSprite {

@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.StormCloud;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
@@ -488,6 +489,8 @@ public class PrisonBossLevel extends Level {
 				
 				Dungeon.hero.interrupt();
 				
+				Mob.holdAllies(this);
+				Mob.restoreAllies(this, Dungeon.hero.pos, Dungeon.hero.pos + width());
 				clearEntities( pauseSafeArea );
 				
 				setMapArena();
@@ -537,6 +540,10 @@ public class PrisonBossLevel extends Level {
 					} while (findMob(m.pos) != null || m.pos == Dungeon.hero.pos);
 					if (m.sprite != null) m.sprite.place(m.pos);
 					mobs.add(m);
+					
+					if(m instanceof DirectableAlly) {
+						Dungeon.Polished.runDelayed(((DirectableAlly) m)::followHero);
+					}
 				}
 				
 				tengu.die(Dungeon.hero);

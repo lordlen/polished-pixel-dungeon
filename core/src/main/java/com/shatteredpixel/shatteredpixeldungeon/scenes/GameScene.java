@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
+import com.badlogic.gdx.Input;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
@@ -43,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Ghoul;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
@@ -143,6 +145,7 @@ import com.watabou.utils.GameMath;
 import com.watabou.utils.Point;
 import com.watabou.utils.PointF;
 import com.watabou.utils.RectF;
+import com.watabou.utils.Signal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -232,7 +235,6 @@ public class GameScene extends PixelScene {
         public static void bufferAction(GameAction action, boolean animation) {
             if(!actionQueued()) bufferedAction = action;
             else bufferedAction = null;
-            //bufferedAction = action;
 
             timer_Action = Game.realTime + (animation ? bufferPeriod_Action : 2*bufferPeriod_Action)*(long)SPDSettings.Polished.buffers();
         }
@@ -274,8 +276,17 @@ public class GameScene extends PixelScene {
 		public static void displayIndicators() {
 			try {
 				for(Mob mob : indicatorsQueued.keySet()) {
-					if(!Dungeon.hero.fieldOfView[mob.pos])
-						GameScene.effectOverFog(new TargetedCell(indicatorsQueued.get(mob), 0xFFFF00, Actor.now(), mob, true));
+					if(!Dungeon.hero.fieldOfView[mob.pos]) {
+						TargetedCell targeted = new TargetedCell(indicatorsQueued.get(mob), TargetedCell.YELLOW) {
+							float time = Actor.now();
+							@Override
+							protected boolean startFade() {
+								return Actor.now() > time || Dungeon.hero.curAction != null || !mob.isAlive();
+							}
+						};
+						
+						GameScene.effectOverFog(targeted);
+					}
 				}
 				indicatorsQueued.clear();
 			} catch (Exception e) {
@@ -315,6 +326,48 @@ public class GameScene extends PixelScene {
 		public static StatusPane statPane() {
 			return scene != null ? scene.status : null;
 		}
+		
+		
+		public static boolean quickslotKeyPress = false;
+		public static int getSelectedCell() {
+			PointF pointer = PointerEvent.currentHoverPos();
+			
+			int cell = cellSelector.getSelectedCell(pointer);
+			boolean hit = cellSelector.target.overlapsScreenPoint( (int)pointer.x, (int)pointer.y );
+			
+			if (hit && Dungeon.hero.ready && !GameScene.interfaceBlockingHero()) {
+				return cell;
+			} else {
+				return -1;
+			}
+		}
+		
+		public static void simulateTilemapClick() {
+			PointerEvent.simulateClick(cellSelector);
+		}
+		
+		public static boolean isListenerActive(CellSelector.Listener listener) {
+			return cellSelector.listener == listener;
+		}
+		
+		public static boolean isListenerActive(Class<? extends CellSelector.Listener> listener) {
+			return listener.isAssignableFrom(cellSelector.listener.getClass());
+		}
+		
+		public static boolean keyListenerActive = false;
+		public static Signal.Listener<KeyEvent> globalKeyListener = new Signal.Listener<KeyEvent>() {
+			@Override
+			public boolean onSignal(KeyEvent keyEvent) {
+				
+				//we don't use keybindings for these as we want the user to be able to
+				// bind these keys to other actions when pressed individually
+				if (keyEvent.code == Input.Keys.SHIFT_LEFT){
+					DirectableAlly.CHAINING = keyEvent.pressed;
+				}
+				
+				return false;
+			}
+		};
 		
 	}
 	
@@ -463,9 +516,10 @@ public class GameScene extends PixelScene {
 		add( statuses );
 		
 		add( healthIndicators );
-		add( buffIndicators );
 		//always appears ontop of other health indicators
 		add( new TargetHealthIndicator() );
+		
+		add( buffIndicators );
 		
 		add( emoicons );
 		
@@ -748,6 +802,10 @@ public class GameScene extends PixelScene {
 		Journal.saveGlobal();
 		
 		super.destroy();
+		
+		//POLISHED
+		KeyEvent.removeKeyListener(Polished.globalKeyListener);
+		Polished.keyListenerActive = false;
 	}
 	
 	public static void endActorThread(){
@@ -823,6 +881,13 @@ public class GameScene extends PixelScene {
 		}
 
 		super.update();
+		
+		//POLISHED
+		//we create this here so that it is last in the scene
+		if (DeviceCompat.isDesktop() && !Polished.keyListenerActive) {
+			KeyEvent.addKeyListener(Polished.globalKeyListener);
+			Polished.keyListenerActive = true;
+		}
 
 		if (notifyDelay > 0) notifyDelay -= Game.elapsed;
 
@@ -1172,7 +1237,11 @@ public class GameScene extends PixelScene {
 	}
 
 	public static void effectOverFog( Visual effect ) {
-		scene.overFogEffects.add( effect );
+		if(scene != null) scene.overFogEffects.add( effect );
+	}
+	
+	public static void effectOverFogToBack(Visual effect ) {
+		if(scene != null) scene.overFogEffects.addToBack( effect );
 	}
 	
 	public static Ripple ripple( int pos ) {
@@ -1429,7 +1498,7 @@ public class GameScene extends PixelScene {
 		if (scene != null) {
 			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
 				if (mob.sprite != null) {
-					if (mob instanceof Mimic && mob.state == mob.PASSIVE && ((Mimic) mob).stealthy() && Dungeon.level.visited[mob.pos]){
+					if (mob instanceof Mimic && mob.state == mob.PASSIVE && Dungeon.level.visited[mob.pos]) {
 						//mimics stay visible in fog of war after being first seen
 						mob.sprite.visible = true;
 					} else {
@@ -1598,6 +1667,8 @@ public class GameScene extends PixelScene {
 	}
 	
 	public static void ready() {
+		Dungeon.Polished.callDelayed();
+		
 		selectCell( defaultCellListener );
 		QuickSlotButton.cancel();
 		InventoryPane.cancelTargeting();
@@ -1622,6 +1693,15 @@ public class GameScene extends PixelScene {
 		}
 
 		Polished.displayIndicators();
+		
+		for (Char ch : Actor.chars()){
+			if (ch instanceof DirectableAlly) {
+				DirectableAlly ally = (DirectableAlly) ch;
+				ally.updatePath();
+				ally.drawPath();
+				ally.updateChain(true);
+			}
+		}
 	}
 	
 	public static void checkKeyHold(){

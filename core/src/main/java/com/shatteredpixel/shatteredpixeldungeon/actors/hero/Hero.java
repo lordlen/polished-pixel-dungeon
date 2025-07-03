@@ -85,6 +85,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Swarm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Wraith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -207,8 +208,8 @@ public class Hero extends Char {
 	
 	public static final int MAX_LEVEL = 30;
 
-	public static final int STARTING_STR = Debug.DEBUG_MODE ? Debug.Starting_Str : 10;
-	public static final int STARTING_HP  = Debug.DEBUG_MODE ? Debug.Starting_HP : 20;
+	public static final int STARTING_STR = Debug.DEBUG_MODE ? Debug.Starting_Str 	: 10;
+	public static final int STARTING_HP  = Debug.DEBUG_MODE ? Debug.Starting_HP 	: 20;
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
@@ -344,7 +345,15 @@ public class Hero extends Char {
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
 		
-		HT = STARTING_HP + 5*(lvl-1) + HTBoost;
+		if (Debug.DEBUG_MODE &&
+			Debug.Starting_HP >= 1000 && curHT < 900) {
+			//avoid messing up regular save files
+			HT = 20 + 5*(lvl-1) + HTBoost;
+		}
+		else {
+			HT = STARTING_HP + 5*(lvl-1) + HTBoost;
+		}
+		
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 		
@@ -943,6 +952,7 @@ public class Hero extends Char {
 			if (!resting || buff(MindVision.class) != null || buff(Awareness.class) != null) {
 				Dungeon.observe();
 			} else {
+				DirectableAlly.observeAll();
 				//otherwise just directly re-calculate FOV
 				Dungeon.level.updateFieldOfView(this, fieldOfView);
 			}
@@ -1942,11 +1952,11 @@ public class Hero extends Char {
 				int len = Dungeon.level.length();
 				boolean[] p = Dungeon.level.passable;
 				boolean[] v = Dungeon.level.visited;
-				boolean[] t = Dungeon.level.traversable;
+				boolean[] f = Dungeon.level.fogEdge;
 				boolean[] m = Dungeon.level.mapped;
 				boolean[] passable = new boolean[len];
 				for (int i = 0; i < len; i++) {
-					passable[i] = p[i] && (v[i] || m[i] || t[i]);
+					passable[i] = p[i] && (v[i] || m[i] || f[i]);
 				}
 
 				PathFinder.Path newpath = Dungeon.findPath(this, target, passable, fieldOfView, true);
@@ -1982,6 +1992,11 @@ public class Hero extends Char {
 				}
 				canSelfTrample = false;
 				return false;
+			}
+			
+			Char ally = Actor.findChar(step);
+			if (ally instanceof DirectableAlly) {
+				return ally.interact(this);
 			}
 
 			if (buff(GreaterHaste.class) != null){

@@ -64,8 +64,17 @@ public class MobBuffDisplay extends Component {
     @Override
     public void killAndErase() {
         super.killAndErase();
+        
         healthBar = null;
-        this.ch = null;
+        ch = null;
+        
+        if(curBuffs != null) {
+            curBuffs.clear();
+            curBuffs = null;
+        }
+        
+        buffIcons.clear();
+        buffIcons = null;
     }
     
     //cached for performance
@@ -105,7 +114,7 @@ public class MobBuffDisplay extends Component {
                 GrayedIcon icon = buffIcons.get( buff );
                 
                 icon.destroy();
-                remove(icon);
+                icon.killAndErase();
                 buffIcons.remove( buff );
             }
         }

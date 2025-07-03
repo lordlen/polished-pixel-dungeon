@@ -53,7 +53,8 @@ public class BuffIndicator extends Component {
 	public static final int BRITTLE 	= POLISHED + 1;
 	public static final int LAST_STAND 	= POLISHED + 2;
 	public static final int DISORIENTED = POLISHED + 3;
-	public static final int NATURES_AID = POLISHED + 4;
+	public static final int SPIRIT_HAWK = POLISHED + 4;
+	public static final int NATURES_AID = POLISHED + 5;
 	
 	
 	//FIXME this is becoming a mess, should do a big cleaning pass on all of these

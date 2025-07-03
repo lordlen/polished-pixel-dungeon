@@ -162,8 +162,9 @@ public class DM300 extends Mob {
 	protected void spendConstant(float time) {
 		super.spendConstant(time);
 
-		if(POLISHED_cooldown > 0)
+		if(POLISHED_cooldown > 0) {
 			POLISHED_cooldown--;
+		}
 	}
 
 	@Override
@@ -470,7 +471,7 @@ public class DM300 extends Mob {
 			}
 		}
 		for (int i : rockCells){
-			sprite.parent.add(new TargetedCell(i, 0xFF0000));
+			sprite.parent.add(new TargetedCell(i));
 		}
 		//don't want to overly punish players with slow move or attack speed
 		Buff.append(this, FallingRockBuff.class, GameMath.gate(TICK, (int)Math.ceil(target.cooldown()), 3*TICK)).setRockPositions(rockCells);

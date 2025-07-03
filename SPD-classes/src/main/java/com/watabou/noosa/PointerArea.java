@@ -53,6 +53,10 @@ public class PointerArea extends Visual implements Signal.Listener<PointerEvent>
 		PointerEvent.addPointerListener( this );
 	}
 	
+	public boolean isEventSelected(PointerEvent event) {
+		return curEvent == event;
+	}
+	
 	@Override
 	public boolean onSignal( PointerEvent event ) {
 

@@ -98,6 +98,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -386,7 +387,7 @@ public abstract class Char extends Actor {
 
 		if (enemy == null) return false;
 		
-		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
+		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos] || enemy instanceof DirectableAlly;
 
 		if (enemy.isInvulnerable(getClass())) {
 
@@ -646,10 +647,6 @@ public abstract class Char extends Actor {
 	}
 
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
-		//uncomment this if you wanna make proj go on cooldown on dodges aswell.
-		//ChampionEnemy.Projecting proj = attacker.buff(ChampionEnemy.Projecting.class);
-		//boolean adjacent = Dungeon.level.adjacent(attacker.pos, defender.pos);
-		//if(proj != null && !adjacent) proj.Polished_cooldown = 2;
 
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
@@ -844,47 +841,43 @@ public abstract class Char extends Actor {
 	}
 
 	boolean Polished_isDamageExternal(Object src) {
-
+		
 		if(!(src instanceof Char)) {
 			//dont get def boost against debuffs, traps and such
 			return false;
 		}
-
-		else if(Dungeon.level instanceof RegularLevel) {
-			Char attacker = (Char)src;
-			RegularLevel level = (RegularLevel)Dungeon.level;
-
-			ArrayList<Integer> roomCells = new ArrayList<>();
-			Room r = (level.room(pos));
-
-			if(r != null) {
-				for (Point p : r.getPoints()){
-					roomCells.add(level.pointToCell(p));
-				}
-
-				return !roomCells.contains(attacker.pos);
-			}
-
-			else {
-				boolean enemyRoom = true;
-				for(int i : PathFinder.NEIGHBOURS9) {
-					if ( level.room( attacker.pos+i ) == null )
-						enemyRoom = false;
-				}
-
-				if(enemyRoom) {
-					return true;
-				}
-
-				else if(Dungeon.level.distance(attacker.pos, pos) <= Dungeon.Polished.DEFAULT_VIEW_DISTANCE) {
-					//if within a reasonable distance, we assume they're in the same room
-					return false;
-				}
-				else return true;
-			}
-
+		if(!(Dungeon.level instanceof RegularLevel)) {
+			return false;
 		}
-		else return false;
+		
+		Char attacker = (Char)src;
+		RegularLevel level = (RegularLevel)Dungeon.level;
+
+		ArrayList<Integer> roomCells = new ArrayList<>();
+		Room r = (level.room(pos));
+
+		if(r != null) {
+			for (Point p : r.getPoints()){
+				roomCells.add(level.pointToCell(p));
+			}
+
+			return !roomCells.contains(attacker.pos);
+		}
+		else {
+			boolean enemyRoom = true;
+			for(int i : PathFinder.NEIGHBOURS9) {
+				if (level.room( attacker.pos+i ) == null) {
+					enemyRoom = false;
+				}
+			}
+			if(enemyRoom) {
+				return true;
+			}
+            
+            //if within a reasonable distance, assume they're in the same room
+            return Dungeon.level.distance(attacker.pos, pos) > 8;
+		}
+		
 	}
 	
 	public void damage( int dmg, Object src ) {
@@ -1350,7 +1343,7 @@ public abstract class Char extends Actor {
 
 		pos = step;
 		
-		if (this != Dungeon.hero) {
+		if (this != Dungeon.hero && !(this instanceof DirectableAlly)) {
 			sprite.visible = Dungeon.level.heroFOV[pos];
 		}
 		
@@ -1359,6 +1352,10 @@ public abstract class Char extends Actor {
 	
 	public int distance( Char other ) {
 		return Dungeon.level.distance( pos, other.pos );
+	}
+	
+	public float trueDistance( Char other ) {
+		return Dungeon.level.trueDistance( pos, other.pos );
 	}
 
 	public boolean[] modifyPassable( boolean[] passable){

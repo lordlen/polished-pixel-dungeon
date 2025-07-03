@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
@@ -107,7 +108,9 @@ public class QuickSlotButton extends Button {
 					}
 				} else {
 					Item item = select(slotNum);
-					if (Dungeon.hero.belongings.contains(item) && !GameScene.cancel() /*&& GameScene.Polished.canInput()*/) {
+					if (Dungeon.hero.belongings.contains(item) &&
+						(GameScene.Polished.isListenerActive(DirectableAlly.CommandListener.class) || !GameScene.cancel())) {
+						
 						GameScene.centerNextWndOnInvPane();
 						item.execute(Dungeon.hero);
 						if (item.usesTargeting) {
@@ -397,13 +400,15 @@ public class QuickSlotButton extends Button {
 		if (item.targetingPos(Dungeon.hero, target.pos) == target.pos) {
 			return target.pos;
 		}
-
-		//Otherwise pick nearby tiles to try and 'angle' the shot, auto-aim basically.
-		PathFinder.buildDistanceMap( target.pos, BArray.not( new boolean[Dungeon.level.length()], null ), 2 );
-		for (int i = 0; i < PathFinder.distance.length; i++) {
-			if (PathFinder.distance[i] < Integer.MAX_VALUE
-					&& item.targetingPos(Dungeon.hero, i) == target.pos)
-				return i;
+		
+		for(int offset : PathFinder.NEIGHBOURS25) {
+			int cell = target.pos + offset;
+			
+			if (cell >= 0 && cell < Dungeon.level.length() && cell != target.pos &&
+				item.targetingPos(Dungeon.hero, cell) == target.pos) {
+				
+				return cell;
+			}
 		}
 
 		//couldn't find a cell, give up.

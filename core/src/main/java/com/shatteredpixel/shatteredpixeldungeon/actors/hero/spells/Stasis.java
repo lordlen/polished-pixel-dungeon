@@ -104,6 +104,11 @@ public class Stasis extends ClericSpell {
 			}
 		}
 		ally.clearTime();
+		
+		if(ally instanceof DirectableAlly) {
+			((DirectableAlly) ally).clearState();
+			((DirectableAlly) ally).erasePath();
+		}
 
 		Buff.prolong(hero, StasisBuff.class, 20 + 20*hero.pointsInTalent(Talent.STASIS)).stasisAlly = (Mob)ally;
 		Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
@@ -164,7 +169,9 @@ public class Stasis extends ClericSpell {
 			GameScene.add(stasisAlly);
 
 			if (stasisAlly instanceof DirectableAlly){
-				((DirectableAlly) stasisAlly).clearDefensingPos();
+				((DirectableAlly) stasisAlly).followHero();
+				//we have to call this since Stasis::act gets manually activated and doesn't lead to Gamescene::ready
+				((DirectableAlly) stasisAlly).drawPath();
 			}
 
 			if (stasisAlly.buff(LifeLink.class) != null){

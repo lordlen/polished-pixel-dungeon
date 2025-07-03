@@ -156,14 +156,14 @@ public class BeamingRay extends TargetedClericSpell {
 
 		if (chTarget != null) {
 			if (ally instanceof DirectableAlly) {
-				((DirectableAlly) ally).targetChar(chTarget);
+				((DirectableAlly) ally).aggro(chTarget);
 			} else if (ally instanceof Mob) {
 				((Mob) ally).aggro(chTarget);
 			}
 			FlavourBuff.prolong(ally, BeamingRayBoost.class, BeamingRayBoost.DURATION).object = chTarget.id();
 		} else {
 			if (ally instanceof DirectableAlly) {
-				((DirectableAlly) ally).clearDefensingPos();
+				((DirectableAlly) ally).clearState();
 			}
 			//just the buff with no target
 			FlavourBuff.prolong(ally, BeamingRayBoost.class, BeamingRayBoost.DURATION);

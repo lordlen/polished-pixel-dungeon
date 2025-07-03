@@ -61,6 +61,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.MobSpawner;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogFist;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Sheep;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.WindParticle;
@@ -215,7 +216,7 @@ public abstract class Level implements Bundlable {
 	
 	public int[] map;
 	public boolean[] visited;
-	public boolean[] traversable;
+	public boolean[] fogEdge;
 	public boolean[] mapped;
 	public boolean[] discoverable;
 
@@ -265,7 +266,7 @@ public abstract class Level implements Bundlable {
 	private static final String HEIGHT      = "height";
 	private static final String MAP			= "map";
 	private static final String VISITED		= "visited";
-	private static final String TRAVERSABLE	= "traversable";
+	private static final String FOG_EDGE 	= "traversable";
 	private static final String MAPPED		= "mapped";
 	private static final String TRANSITIONS	= "transitions";
 	private static final String LOCKED      = "locked";
@@ -397,7 +398,7 @@ public abstract class Level implements Bundlable {
 		Arrays.fill( map, feeling == Level.Feeling.CHASM ? Terrain.CHASM : Terrain.WALL );
 		
 		visited     = new boolean[length];
-		traversable = new boolean[length];
+		fogEdge 	= new boolean[length];
 		mapped      = new boolean[length];
 		
 		heroFOV     = new boolean[length];
@@ -453,8 +454,9 @@ public abstract class Level implements Bundlable {
 		map		= bundle.getIntArray( MAP );
 
 		visited	= bundle.getBooleanArray( VISITED );
-		if(bundle.contains(TRAVERSABLE))
-			traversable	= bundle.getBooleanArray( TRAVERSABLE );
+		if(bundle.contains(FOG_EDGE)) {
+			fogEdge = bundle.getBooleanArray(FOG_EDGE);
+		}
 		mapped	= bundle.getBooleanArray( MAPPED );
 
 		transitions = new ArrayList<>();
@@ -536,7 +538,7 @@ public abstract class Level implements Bundlable {
 		bundle.put( HEIGHT, height );
 		bundle.put( MAP, map );
 		bundle.put( VISITED, visited );
-		if(traversable != null) bundle.put( TRAVERSABLE, traversable );
+		if(fogEdge != null) bundle.put(FOG_EDGE, fogEdge);
 		bundle.put( MAPPED, mapped );
 		bundle.put( TRANSITIONS, transitions );
 		bundle.put( LOCKED, locked );
@@ -1348,12 +1350,12 @@ public abstract class Level implements Bundlable {
 	}
 
 	public void revealSecretDoor(int cell) {
-		if(Dungeon.level.map[cell] == Terrain.SECRET_DOOR) {
-			int oldValue = Dungeon.level.map[cell];
+		if(map[cell] == Terrain.SECRET_DOOR) {
+			int oldValue = map[cell];
 
-			Dungeon.level.discover( cell );
+			discover( cell );
 
-			if(Dungeon.level.heroFOV[cell]) {
+			if(heroFOV[cell]) {
 				GameScene.discoverTile( cell, oldValue );
 				ScrollOfMagicMapping.discover( cell );
 				GLog.w( Messages.get(Hero.class, "noticed_smth") );
@@ -1372,8 +1374,8 @@ public abstract class Level implements Bundlable {
 		int cx = c.pos % width();
 		int cy = c.pos / width();
 		
-		boolean sighted = c.buff( Blindness.class ) == null && c.buff( Shadows.class ) == null
-						&& c.isAlive();
+		boolean sighted = 	c.viewDistance > 0 && c.isAlive() &&
+							c.buff( Blindness.class ) == null && c.buff( Shadows.class ) == null;
 		if (sighted) {
 			boolean[] blocking = null;
 
@@ -1382,7 +1384,7 @@ public abstract class Level implements Bundlable {
 			}
 
 			//grass is see-through by some specific entities, but not during the fungi quest
-			if (!(Dungeon.level instanceof  MiningLevel) || Blacksmith.Quest.Type() != Blacksmith.Quest.FUNGI){
+			if (!(Dungeon.level instanceof MiningLevel) || Blacksmith.Quest.Type() != Blacksmith.Quest.FUNGI){
 				if ((c instanceof Hero && ((Hero) c).subClass == HeroSubClass.WARDEN)
 						|| c instanceof YogFist.SoiledFist || c instanceof GnollGeomancer) {
 					if (blocking == null) {
@@ -1474,6 +1476,14 @@ public abstract class Level implements Bundlable {
 				}
 			}
 		}
+		
+		if (c instanceof DirectableAlly ||
+			c == PowerOfMany.PoweredAlly()) {
+			if(!DirectableAlly.observing) {
+				BArray.or(fieldOfView, heroFOV, fieldOfView);
+				GameScene.updateFog(c.pos, c.viewDistance+(int)Math.ceil(c.speed()));
+			}
+		}
 
 		//Currently only the hero can get mind vision or awareness
 		if (c.isAlive() && c == Dungeon.hero) {
@@ -1552,15 +1562,19 @@ public abstract class Level implements Bundlable {
 			}
 
 			for (Mob m : mobs){
-				if (m instanceof WandOfWarding.Ward
-						|| m instanceof WandOfRegrowth.Lotus
-						|| m instanceof SpiritHawk.HawkAlly
-						|| m.buff(PowerOfMany.PowerBuff.class) != null){
+				if (m instanceof WandOfWarding.Ward ||
+					m instanceof WandOfRegrowth.Lotus ||
+					m instanceof DirectableAlly ||
+					m == PowerOfMany.PoweredAlly()) {
+					
 					if (m.fieldOfView == null || m.fieldOfView.length != length()){
 						m.fieldOfView = new boolean[length()];
 						Dungeon.level.updateFieldOfView( m, m.fieldOfView );
 					}
-					BArray.or(heroMindFov, m.fieldOfView, heroMindFov);
+					if(m.viewDistance > 0) {
+						BArray.or(heroMindFov, m.fieldOfView, heroMindFov);
+					}
+					else { heroMindFov[m.pos] = true; }
 				}
 			}
 

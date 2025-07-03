@@ -25,15 +25,15 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CityLevel;
@@ -56,70 +56,78 @@ import java.util.ArrayList;
 
 public class ShadowClone extends ArmorAbility {
 
-	@Override
-	public String targetingPrompt() {
-		if (getShadowAlly() == null) {
-			return super.targetingPrompt();
-		} else {
-			return Messages.get(this, "prompt");
-		}
-	}
-
-	@Override
-	public boolean useTargeting(){
-		return false;
-	}
-
 	{
 		baseChargeUse = 35f;
 	}
-
+	
+	public boolean useTargeting(){
+		return false;
+	}
+	
 	@Override
 	public float chargeUse(Hero hero) {
-		if (getShadowAlly() == null) {
+		if (Shadow() == null) {
 			return super.chargeUse(hero);
 		} else {
 			return 0;
 		}
 	}
-
-	@Override
-	protected void activate(ClassArmor armor, Hero hero, Integer target) {
-		ShadowAlly ally = getShadowAlly();
-
-		if (ally != null){
-			if (target == null){
-				return;
+	
+	float chargeSummon(Hero hero) {
+		return super.chargeUse(hero);
+	}
+	
+	private static ShadowAlly shadow = null;
+	private static int shadowID = -1;
+	
+	public static void resetShadow() {
+		shadow = null;
+		shadowID = -1;
+	}
+	
+	public static ShadowAlly Shadow() {
+		if(shadow != null) {
+			if(!shadow.isAlive()) resetShadow();
+			return shadow;
+		}
+		
+		if(shadowID != -1) {
+			Actor a = Actor.findById(shadowID);
+			if (a instanceof ShadowAlly){
+				shadow = (ShadowAlly) a;
+				return shadow;
 			} else {
-				ally.directTocell(target);
-			}
-		} else {
-			ArrayList<Integer> spawnPoints = new ArrayList<>();
-			for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
-				int p = hero.pos + PathFinder.NEIGHBOURS8[i];
-				if (Actor.findChar(p) == null && Dungeon.level.passable[p]) {
-					spawnPoints.add(p);
-				}
-			}
-
-			if (!spawnPoints.isEmpty()){
-				armor.charge -= chargeUse(hero);
-				armor.updateQuickslot();
-
-				ally = new ShadowAlly(hero.lvl);
-				ally.pos = Random.element(spawnPoints);
-				GameScene.add(ally);
-
-				ShadowAlly.appear(ally, ally.pos);
-
-				Invisibility.dispel();
-				hero.spendAndNext(Actor.TICK);
-
-			} else {
-				GLog.w(Messages.get(SpiritHawk.class, "no_space"));
+				shadowID = -1;
 			}
 		}
-
+		
+		Char ally = Stasis.getStasisAlly();
+		if (ally instanceof ShadowAlly){
+			shadow = (ShadowAlly) ally;
+			shadowID = ally.id();
+			return shadow;
+		}
+		
+		return null;
+	}
+	
+	@Override
+	protected void activate(ClassArmor armor, Hero hero, Integer target) {
+		if (Shadow() != null){
+			if(shadow.stasis()) {
+				GLog.i( Messages.get(this, "spawned") );
+			}
+			else {
+				shadow.command();
+			}
+		}
+		else {
+			DirectableAlly.SummonSelector.trySummon(new ShadowAlly(hero.lvl), () -> {
+				armor.charge -= chargeSummon(hero);
+				Item.updateQuickslot();
+				Invisibility.dispel();
+			});
+		}
 	}
 
 	@Override
@@ -132,23 +140,13 @@ public class ShadowClone extends ArmorAbility {
 		return new Talent[]{Talent.SHADOW_BLADE, Talent.CLONED_ARMOR, Talent.PERFECT_COPY, Talent.HEROIC_ENERGY};
 	}
 
-	private static ShadowAlly getShadowAlly(){
-		for (Char ch : Actor.chars()){
-			if (ch instanceof ShadowAlly){
-				return (ShadowAlly) ch;
-			}
-		}
-		return null;
-	}
-
 	public static class ShadowAlly extends DirectableAlly {
 
 		{
 			spriteClass = ShadowSprite.class;
 
 			HP = HT = 80;
-
-			immunities.add(AllyBuff.class);
+			viewDistance = 3;
 
 			properties.add(Property.INORGANIC);
 		}
@@ -167,7 +165,57 @@ public class ShadowClone extends ArmorAbility {
 			}
 			defenseSkill = heroLevel + 4; //equal to base hero defense skill
 		}
-
+		
+		@Override
+		protected void onSummon() {
+			super.onSummon();
+			appear(this, pos);
+		}
+		
+		@Override
+		protected void announce() {
+			switch (command) {
+				case DEFEND:
+					if(!defendAnnounced) {
+						GLog.i(Messages.get(this, "direct_defend"));
+						defendAnnounced = true;
+					}
+					break;
+				case ATTACK:
+					if(!attackAnnounced) {
+						GLog.i(Messages.get(this, "direct_attack"));
+						attackAnnounced = true;
+					}
+					break;
+				case FOLLOW:
+					if(!followAnnounced) {
+						GLog.i(Messages.get(this, "direct_follow"));
+						followAnnounced = true;
+					}
+					break;
+				case NONE: default:
+					if(!darkAnnounced) {
+						GLog.n(Messages.get(this, "too_dark"));
+						darkAnnounced = true;
+					}
+					break;
+			}
+		}
+		
+		@Override
+		protected void onAdd() {
+			super.onAdd();
+			
+			ShadowClone.shadow = this;
+			ShadowClone.shadowID = id();
+		}
+		
+		@Override
+		public void destroy() {
+			super.destroy();
+			ShadowClone.resetShadow();
+		}
+		
 		@Override
 		protected boolean act() {
 			int oldPos = pos;
@@ -177,24 +225,6 @@ public class ShadowClone extends ArmorAbility {
 				sprite.idle();
 			}
 			return result;
-		}
-
-		@Override
-		public void defendPos(int cell) {
-			GLog.i(Messages.get(this, "direct_defend"));
-			super.defendPos(cell);
-		}
-
-		@Override
-		public void followHero() {
-			GLog.i(Messages.get(this, "direct_follow"));
-			super.followHero();
-		}
-
-		@Override
-		public void targetChar(Char ch) {
-			GLog.i(Messages.get(this, "direct_attack"));
-			super.targetChar(ch);
 		}
 
 		@Override
@@ -262,7 +292,7 @@ public class ShadowClone extends ArmorAbility {
 
 			//moves 2 tiles at a time when returning to the hero
 			if (state == WANDERING
-					&& defendingPos == -1
+					&& commandPos == -1
 					&& Dungeon.level.distance(pos, Dungeon.hero.pos) > 1){
 				speed *= 2;
 			}
@@ -306,8 +336,6 @@ public class ShadowClone extends ArmorAbility {
 			}
 			appear(this, Dungeon.hero.pos);
 			appear(Dungeon.hero, curPos);
-			Dungeon.observe();
-			GameScene.updateFog();
 			return true;
 		}
 

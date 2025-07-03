@@ -272,7 +272,7 @@ public abstract class Mob extends Char {
 		
 		if (paralysed > 0) {
 			enemySeen = false;
-			spend( TICK );
+			spendConstant( TICK );
 			return true;
 		}
 
@@ -280,13 +280,10 @@ public abstract class Mob extends Char {
 			state = FLEEING;
 		}
 		
-		//
 		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
 		if (grow != null) grow.Polished_growingHunt();
-		//
 		
 		enemy = chooseEnemy();
-		
 		boolean enemyInFOV = enemy != null && enemy.isAlive() && fieldOfView[enemy.pos] && !enemy.isStealthyTo(this);
 
 		//prevents action, but still updates enemy seen status
@@ -296,15 +293,7 @@ public abstract class Mob extends Char {
 			return true;
 		}
 
-		boolean result = state.act( enemyInFOV, justAlerted );
-
-		//for updating hero FOV
-		if (buff(PowerOfMany.PowerBuff.class) != null){
-			Dungeon.level.updateFieldOfView( this, fieldOfView );
-			GameScene.updateFog(pos, viewDistance+(int)Math.ceil(speed()));
-		}
-
-		return result;
+		return state.act( enemyInFOV, justAlerted );
 	}
 	
 	//FIXME this is sort of a band-aid correction for allies needing more intelligent behaviour
@@ -1148,38 +1137,42 @@ public abstract class Mob extends Char {
 			}
 
 			//can be awoken by the least stealthy hostile present, not necessarily just our target
-			if (enemyInFOV || (enemy != null && enemy.isStealthy())) {
-
-				float closestHostileDist = Float.POSITIVE_INFINITY;
-
-				for (Char ch : Actor.chars()){
-					if (fieldOfView[ch.pos] && !ch.isStealthy() && ch.alignment != alignment && ch.alignment != Alignment.NEUTRAL){
-						float chDist = ch.stealth() + distance(ch);
-						//silent steps rogue talent, which also applies to rogue's shadow clone
-						if ((ch instanceof Hero || ch instanceof ShadowClone.ShadowAlly)
-								&& Dungeon.hero.hasTalent(Talent.SILENT_STEPS)){
-							if (distance(ch) >= 4 - Dungeon.hero.pointsInTalent(Talent.SILENT_STEPS)) {
-								chDist = Float.POSITIVE_INFINITY;
-							}
-						}
-						//flying characters are naturally stealthy
-						if (ch.flying && distance(ch) >= 2){
+			float closestHostileDist = Float.POSITIVE_INFINITY;
+			Char closest = null;
+			
+			for (Char ch : Actor.chars()){
+				if (fieldOfView[ch.pos] && !ch.isStealthy() && ch.alignment != alignment && ch.alignment != Alignment.NEUTRAL){
+					float chDist = ch.stealth() + distance(ch);
+					//silent steps rogue talent, which also applies to rogue's shadow clone
+					if ((ch instanceof Hero || ch instanceof ShadowClone.ShadowAlly)
+							&& Dungeon.hero.hasTalent(Talent.SILENT_STEPS)){
+						if (distance(ch) >= 4 - Dungeon.hero.pointsInTalent(Talent.SILENT_STEPS)) {
 							chDist = Float.POSITIVE_INFINITY;
 						}
-						if (chDist < closestHostileDist){
-							closestHostileDist = chDist;
-						}
+					}
+					
+					boolean naturalStealth = ch.flying || ch.buff(Corruption.class) != null;
+					if (naturalStealth && distance(ch) >= 2){
+						chDist = Float.POSITIVE_INFINITY;
+					}
+					if (chDist < closestHostileDist){
+						closestHostileDist = chDist;
+						closest = ch;
 					}
 				}
-
-				if (Random.Float( closestHostileDist ) < 1) {
-					awaken(enemyInFOV);
-					if (state == SLEEPING){
-						spend(TICK); //wait if we can't wake up for some reason
-					}
-					return true;
+			}
+			
+			if (Random.Float( closestHostileDist ) < 1) {
+				if(closest != null) {
+					aggro(closest);
+					enemyInFOV = true;
 				}
-
+				
+				awaken(enemyInFOV);
+				if (state == SLEEPING){
+					spend(TICK); //wait if we can't wake up for some reason
+				}
+				return true;
 			}
 
 			enemySeen = false;
@@ -1200,8 +1193,8 @@ public abstract class Mob extends Char {
 				target = ((Mob.Wandering)WANDERING).randomDestination();
 			}
       
-			if (alignment == Alignment.ENEMY && Dungeon.isChallenged(Challenges.SWARM_INTELLIGENCE)
-					&& enemy != null && enemy.buff(Corruption.class) == null) {
+			if (alignment == Alignment.ENEMY && Dungeon.isChallenged(Challenges.SWARM_INTELLIGENCE) &&
+				enemy != null && enemy.buff(Corruption.class) == null) {
         
 				for (Mob mob : Dungeon.level.mobs) {
 					if (mob.paralysed <= 0
@@ -1302,7 +1295,7 @@ public abstract class Mob extends Char {
 					for (Char ch : recentlyAttackedBy){
 						if (ch != null && ch.isActive() && Actor.chars().contains(ch) && alignment != ch.alignment && fieldOfView[ch.pos] && !ch.isStealthyTo(Mob.this) && !isCharmedBy(ch)) {
 							if (canAttack(ch) || enemy == null || Dungeon.level.distance(pos, ch.pos) < Dungeon.level.distance(pos, enemy.pos)) {
-								enemy = ch;
+								aggro(ch);
 								target = ch.pos;
 								enemyInFOV = true;
 								swapped = true;
@@ -1433,11 +1426,12 @@ public abstract class Mob extends Char {
 	public static void holdAllies( Level level, int holdFromPos ){
 		heldAllies.clear();
 		for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-			//preserve directable allies or empowered intelligent allies no matter where they are
+			//preserve directable allies or empowered allies no matter where they are
 			if (mob instanceof DirectableAlly
-				|| (mob.intelligentAlly && PowerOfMany.getPoweredAlly() == mob)) {
+				|| (mob == PowerOfMany.PoweredAlly())) {
 				if (mob instanceof DirectableAlly) {
-					((DirectableAlly) mob).clearDefensingPos();
+					((DirectableAlly) mob).clearState();
+					((DirectableAlly) mob).erasePath();
 				}
 				level.mobs.remove( mob );
 				heldAllies.add(mob);
@@ -1478,29 +1472,10 @@ public abstract class Mob extends Char {
 					}
 				});
 			}
-
-			//can only have one empowered ally at once, prioritize incoming ally
-			if (Stasis.getStasisAlly() != null){
-				for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-					if (mob.buff(PowerOfMany.PowerBuff.class) != null){
-						mob.buff(PowerOfMany.PowerBuff.class).detach();
-					}
-				}
-			}
 			
 			for (Mob ally : heldAllies) {
 
-				//can only have one empowered ally at once, prioritize incoming ally
-				if (ally.buff(PowerOfMany.PowerBuff.class) != null){
-					for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-						if (mob.buff(PowerOfMany.PowerBuff.class) != null){
-							mob.buff(PowerOfMany.PowerBuff.class).detach();
-						}
-					}
-				}
-
 				level.mobs.add(ally);
-				ally.state = ally.WANDERING;
 				
 				if (!candidatePositions.isEmpty()){
 					ally.pos = candidatePositions.remove(0);
@@ -1513,6 +1488,13 @@ public abstract class Mob extends Char {
 					ally.fieldOfView = new boolean[level.length()];
 				}
 				Dungeon.level.updateFieldOfView( ally, ally.fieldOfView );
+				
+				if(ally instanceof DirectableAlly) {
+					((DirectableAlly) ally).followHero();
+				}
+				else {
+					ally.state = ally.WANDERING;
+				}
 				
 			}
 		}
