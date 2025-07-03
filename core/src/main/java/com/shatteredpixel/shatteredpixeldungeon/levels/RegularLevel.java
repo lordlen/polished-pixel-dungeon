@@ -240,9 +240,9 @@ public abstract class RegularLevel extends Level {
 
 		boolean[] entranceWalkable = BArray.not(solid, null);
 
-		//doors within the entrance room are ignored for this walk, but doors on the edge are not
-		for (int y = roomEntrance.top+1; y < roomEntrance.bottom; y++){
-			for (int x = roomEntrance.left+1; x < roomEntrance.right; x++){
+		//all doors within the entrance room are ignored for this walk
+		for (int y = roomEntrance.top; y <= roomEntrance.bottom; y++){
+			for (int x = roomEntrance.left; x <= roomEntrance.right; x++){
 				int cell = x + y*width();
 				if (passable[cell]){
 					entranceWalkable[cell] = true;

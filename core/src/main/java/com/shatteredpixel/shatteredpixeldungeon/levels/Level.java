@@ -819,7 +819,8 @@ public abstract class Level implements Bundlable {
 			if(Debug.Respawn_Multiplier == 0) cooldown = Float.MAX_VALUE;
 			else cooldown /= Debug.Respawn_Multiplier;
 		}
-		return cooldown;
+		
+		return Math.round(cooldown);
 	}
 
 	public boolean spawnMob(int disLimit){
