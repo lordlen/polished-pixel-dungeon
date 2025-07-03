@@ -633,7 +633,7 @@ public class SpiritBow extends Weapon {
 		
 		@Override
 		public int icon() {
-			return BuffIndicator.NATURE_POWER;
+			return BuffIndicator.NATURES_AID;
 		}
 	}
 	
