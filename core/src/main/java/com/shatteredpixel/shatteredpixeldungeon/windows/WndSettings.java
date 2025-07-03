@@ -63,7 +63,7 @@ public class WndSettings extends WndTabbed {
 	private DisplayTab  display;
 	private UITab       ui;
 	private InputTab    input;
-	private DataTab     data;
+	private PolishedTab ppd;
 	private AudioTab    audio;
 	private LangsTab    langs;
 
@@ -126,16 +126,16 @@ public class WndSettings extends WndTabbed {
 			});
 		}
 
-		data = new DataTab();
-		data.setSize(width, 0);
-		height = Math.max(height, data.height());
-		add( data );
+		ppd = new PolishedTab();
+		ppd.setSize(width, 0);
+		height = Math.max(height, ppd.height());
+		add(ppd);
 
 		add( new IconTab(Icons.get(Icons.PPD)){
 			@Override
 			protected void select(boolean value) {
 				super.select(value);
-				data.visible = data.active = value;
+				ppd.visible = ppd.active = value;
 				if (value) last_index = 3;
 			}
 		});
@@ -886,7 +886,7 @@ public class WndSettings extends WndTabbed {
 		}
 	}
 
-	private static class DataTab extends Component{
+	private static class PolishedTab extends Component{
 
 		RenderedTextBlock title;
 		ColorBlock sep1;
