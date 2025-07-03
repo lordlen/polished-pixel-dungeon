@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -97,6 +98,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Visual;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -110,6 +112,40 @@ public class RingOfWealth extends Ring {
 	{
 		icon = ItemSpriteSheet.Icons.RING_WEALTH;
 		buffClass = Wealth.class;
+	}
+	
+	public static ArrayList<Item> getWealthDrops() {
+		ArrayList<Item> drops = new ArrayList<>();
+		for (Item item : Dungeon.hero.belongings) {
+			if(item instanceof WealthDrop) drops.add(item);
+		}
+		
+		return drops;
+	}
+	
+	public static void setExtra(BitmapText extra) {
+		WealthDrop.Decay latest = null;
+		
+		if(Dungeon.hero != null) {
+			for(WealthDrop.Decay decay : Dungeon.hero.buffs(WealthDrop.Decay.class)) {
+				if(latest == null || latest.cooldown() > decay.cooldown()) {
+					latest = decay;
+				}
+			}
+		}
+		
+		if(latest == null) {
+			extra.text( null );
+			extra.resetColor();
+		}
+		else {
+			extra.text(latest.iconTextDisplay());
+			extra.measure();
+			
+			//we use a simplified version to not call buff() on render thread a bunch, assume max is 200
+			float percent = Math.min(latest.cooldown() / 200, 1f);
+			extra.hardlight(1f, percent, percent);
+		}
 	}
 	
 	public String statsInfo() {
