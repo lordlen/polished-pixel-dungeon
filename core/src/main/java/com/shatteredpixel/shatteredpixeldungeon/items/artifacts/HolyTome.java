@@ -76,7 +76,15 @@ public class HolyTome extends Artifact {
 		}
 		return actions;
 	}
-
+	
+	@Override
+	public String defaultAction() {
+		if (Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.LIGHT_READING)) {
+			return AC_CAST;
+		}
+		else return super.defaultAction();
+	}
+	
 	@Override
 	public void execute( Hero hero, String action ) {
 
