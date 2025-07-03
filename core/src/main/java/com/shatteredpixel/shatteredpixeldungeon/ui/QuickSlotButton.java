@@ -393,13 +393,15 @@ public class QuickSlotButton extends Button {
 		if (item.targetingPos(Dungeon.hero, target.pos) == target.pos) {
 			return target.pos;
 		}
-
-		//Otherwise pick nearby tiles to try and 'angle' the shot, auto-aim basically.
-		PathFinder.buildDistanceMap( target.pos, BArray.not( new boolean[Dungeon.level.length()], null ), 2 );
-		for (int i = 0; i < PathFinder.distance.length; i++) {
-			if (PathFinder.distance[i] < Integer.MAX_VALUE
-					&& item.targetingPos(Dungeon.hero, i) == target.pos)
-				return i;
+		
+		for(int offset : PathFinder.NEIGHBOURS25) {
+			int cell = target.pos + offset;
+			
+			if (cell >= 0 && cell < Dungeon.level.length() && cell != target.pos &&
+				item.targetingPos(Dungeon.hero, cell) == target.pos) {
+				
+				return cell;
+			}
 		}
 
 		//couldn't find a cell, give up.
