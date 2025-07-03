@@ -77,6 +77,7 @@ public interface WealthDrop<T extends Item> {
         if(!Dungeon.Polished.loading && Dungeon.hero != null && this instanceof Item) {
             setDecay(Buff.append(Dungeon.hero, Decay.class, decayTimer()));
             decay().item = th();
+            decay().max = (int)decay().cooldown();
         }
         return true;
     }
@@ -118,7 +119,7 @@ public interface WealthDrop<T extends Item> {
 
     default void dropColor(BitmapText text) {
         if(decay() != null) {
-            float percent = decay().cooldown() / decayTimer();
+            float percent = decay().cooldown() / decay().max;
             text.hardlight(1f, percent, percent);
         }
     }
@@ -187,9 +188,11 @@ public interface WealthDrop<T extends Item> {
             revivePersists = true;
         }
 
-        public boolean warning = true;
+        //unused for now
+        boolean warning = true;
 
         Item item = null;
+        public int max = 200;
 
         @Override
         public boolean act() {
@@ -209,23 +212,26 @@ public interface WealthDrop<T extends Item> {
             }
         }
 
-        private static final String ITEM = "item";
+        private static final String ITEM    = "item";
+        private static final String MAX     = "max";
 
         @Override
         public void storeInBundle( Bundle bundle ) {
             super.storeInBundle( bundle );
             if(item != null) bundle.put( ITEM, item );
+            bundle.put( MAX, max );
         }
 
         @Override
         public void restoreFromBundle( Bundle bundle ) {
             super.restoreFromBundle( bundle );
+            max = bundle.getInt( MAX );
             
-            if(bundle.get(ITEM) != null) {
+            if(bundle.get( ITEM ) != null) {
                 Dungeon.Polished.runAfterLoad(() -> {
                     
                     for(Item i : Dungeon.hero.belongings) {
-                        if(i.isSimilar( (Item) bundle.get(ITEM) )) {
+                        if(i.isSimilar( (Item) bundle.get( ITEM ) )) {
                             item = i;
                             ((WealthDrop<?>) item).setDecay(this);
                             break;

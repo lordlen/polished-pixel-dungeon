@@ -143,7 +143,7 @@ public class RingOfWealth extends Ring {
 			extra.measure();
 			
 			//we use a simplified version to not call buff() on render thread a bunch, assume max is 200
-			float percent = Math.min(latest.cooldown() / 200, 1f);
+			float percent = latest.cooldown() / latest.max;
 			extra.hardlight(1f, percent, percent);
 		}
 	}
