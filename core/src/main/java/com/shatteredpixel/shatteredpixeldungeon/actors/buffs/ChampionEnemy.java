@@ -175,7 +175,7 @@ public abstract class ChampionEnemy extends Buff {
 			public boolean cooldown;
 			Actor timer = null;
 			{
-				initCooldown(baseCooldown+1f);
+				initCooldown();
 			}
 
 			void initCooldown() {
@@ -223,9 +223,9 @@ public abstract class ChampionEnemy extends Buff {
 				polished.timer.restoreFromBundle(bundle.getBundle(Polished.TIMER));
 			} else {
 				//get rid of the spawn timer since we're loading
-				polished.cooldown = false;
 				Actor.remove(polished.timer);
 				polished.timer = null;
+				polished.cooldown = false;
 			}
 		}
 
@@ -348,8 +348,8 @@ public abstract class ChampionEnemy extends Buff {
 			rays = 6;
 		}
 
-		//POLISHED: base 19%->30%
-		private float multiplier = 1.3f + .00001f;
+		//POLISHED: base 19%->25%
+		private float multiplier = 1.25f + .00001f;
 
 		public boolean Polished_huntThreshold() {
 			return multiplier >= 2f;
@@ -379,7 +379,7 @@ public abstract class ChampionEnemy extends Buff {
 			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
 				//-10 turns
 				multiplier -= 0.04f;
-				multiplier = Math.max(multiplier, 1.3f + .00001f);
+				multiplier = Math.max(multiplier, 1.25f + .00001f);
 				
 				Sample.INSTANCE.play(Assets.Sounds.BURNING);
 				if(!Polished_weakenNoti) {

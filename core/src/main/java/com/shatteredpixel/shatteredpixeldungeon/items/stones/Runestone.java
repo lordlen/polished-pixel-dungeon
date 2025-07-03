@@ -53,7 +53,7 @@ public abstract class Runestone extends Item {
 				(Dungeon.level.pit[cell] && Actor.findChar(cell) == null)){
 			if (!anonymous) super.onThrow( cell );
 		} else {
-			if (!anonymous) {
+			if (!anonymous || Polished_wealthDrop != null) {
 				Catalog.countUse(getClass());
 				Talent.onRunestoneUsed(curUser, cell, getClass());
 			}

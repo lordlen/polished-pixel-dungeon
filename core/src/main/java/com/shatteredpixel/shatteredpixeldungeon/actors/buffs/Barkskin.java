@@ -63,7 +63,7 @@ public class Barkskin extends Buff {
 		if (level <= value) {
 			level = value;
 			interval = time;
-			spend(time - cooldown() - 1);
+			spend(time - cooldown());
 		}
 	}
 

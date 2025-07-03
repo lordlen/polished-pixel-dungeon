@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CounterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -50,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.RankingsScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndRanking;
@@ -82,6 +84,7 @@ public class SpiritBow extends Weapon {
 
 	private int curCharges = Polished_getMaxCharge();
 	private int Polished_getMaxCharge() {
+		/*
 		double augFactor;
 		switch (augment) {
 			case DAMAGE:
@@ -96,9 +99,23 @@ public class SpiritBow extends Weapon {
 
 		int max = (int)Math.ceil((5.0f + level()/3f) * augFactor);
 		if(augment == Augment.DAMAGE) max++;
-
 		return max;
+		 */
+		
+		int extra = 0;
+		if(Dungeon.hero != null && Dungeon.hero.pointsInTalent(Talent.DURABLE_PROJECTILES) == 2) {
+			extra++;
+		}
+		switch (augment) {
+			case DAMAGE:
+				return 5 + extra;
+			case SPEED:
+				return 8 + extra;
+			default:
+				return 6 + extra;
+		}
 	}
+	
 	public void Polished_resetCharges() {
 		if(SPDSettings.Polished.huntress())
 			curCharges = Math.max(curCharges, Polished_getMaxCharge());
@@ -425,16 +442,33 @@ public class SpiritBow extends Weapon {
 
 			return sniperSpecial && SpiritBow.this.augment != Augment.NONE ? 2 : 1;
 		}
+		
 		private void Polished_spendCharges() {
 			if(!SPDSettings.Polished.huntress()) return;
 
 			curCharges -= Polished_chargeCost();
 			updateQuickslot();
 
+			
 			int nature = Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
-			if(curCharges == 1 && nature > 0)
-				Barkskin.conditionallyAppend(Dungeon.hero, nature+1, 4);
+			if(nature > 0) {
+				ArrowCounter counter = Buff.count(Dungeon.hero, ArrowCounter.class, -1);
+				BuffIndicator.refreshHero();
+				
+				if(counter.count() <= 0) {
+					counter.detach();
+					Buff.count(Dungeon.hero, ArrowCounter.class, ArrowCounter.start());
+					
+					Barkskin.conditionallyAppend(Dungeon.hero, 2, 3);
+				}
+			}
+			else {
+				//in case of a metamorph
+				ArrowCounter counter = Dungeon.hero.buff(ArrowCounter.class);
+				if(counter != null) counter.detach();
+			}
 		}
+		
 		public void Polished_recharge(final Hero user) {
 			if(!SPDSettings.Polished.huntress()) return;
 
@@ -568,6 +602,38 @@ public class SpiritBow extends Weapon {
 		@Override
 		public void cast(final Hero user, final int dst) {
 			Polished_cast(user, dst);
+		}
+	}
+	
+	public static class ArrowCounter extends CounterBuff {
+		
+		int start = 7;
+		public static int start() {
+			// 7/5
+			return 9 - 2*Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
+		}
+		
+		{
+			Dungeon.Polished.runAfterLoad(() -> start = start());
+		}
+		
+		@Override
+		public String desc() {
+			return Messages.get(this, "desc", (int)count());
+		}
+		
+		@Override
+		public String iconTextDisplay() {
+			return Integer.toString((int)count());
+		}
+		
+		public float iconFadePercent() {
+			return Math.max(0, count() / start);
+		}
+		
+		@Override
+		public int icon() {
+			return BuffIndicator.NATURE_POWER;
 		}
 	}
 	

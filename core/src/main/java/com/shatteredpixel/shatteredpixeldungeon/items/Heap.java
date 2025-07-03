@@ -212,7 +212,7 @@ public class Heap implements Bundlable {
 		if(type != Type.HEAP || isEmpty()) return;
 		
 		for (Item item : items.toArray( new Item[0] )) {
-			if (!item.unique && (item.isUpgradable() || item instanceof EquipableItem)) {
+			if (!item.unique && item.level() < 3 && (item.isUpgradable() || item instanceof EquipableItem)) {
 				items.remove(item);
 			}
 		}

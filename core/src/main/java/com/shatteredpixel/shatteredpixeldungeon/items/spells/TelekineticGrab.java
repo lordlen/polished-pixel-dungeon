@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DwarfKing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
@@ -126,7 +127,16 @@ public class TelekineticGrab extends TargetedSpell {
 		}
 
 	}
-
+	
+	@Override
+	public String desc() {
+		if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.HUNTRESS
+			&& SPDSettings.Polished.huntress()) {
+			return super.desc() + Messages.get(this, "huntress_desc");
+		}
+		else return super.desc();
+	}
+	
 	@Override
 	public int value() {
 		return (int)(50 * (quantity/(float)Recipe.OUT_QUANTITY));

@@ -236,66 +236,6 @@ public class RingOfWealth extends Ring {
 		return 1f + .25f * (buffedLvl-1);
 	}
 
-	/*private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
-	static{
-		potionChances.put(UnstableBrew.class,       	5f);
-
-		potionChances.put(PotionOfToxicGas.class,       4f);
-		potionChances.put(PotionOfStormClouds.class,    4f);
-
-		potionChances.put(CausticBrew.class,    		3f);
-		potionChances.put(PotionOfLevitation.class,     3f);
-		potionChances.put(AquaBrew.class,    			3f);
-
-		potionChances.put(PotionOfPurity.class,         2f);
-		potionChances.put(ShockingBrew.class,    		2f);
-		potionChances.put(PotionOfLiquidFlame.class,    2f);
-		potionChances.put(PotionOfFrost.class,          2f);
-
-		potionChances.put(InfernalBrew.class,    		1f);
-		potionChances.put(BlizzardBrew.class,			1f);
-		potionChances.put(PotionOfMagicalSight.class,   1f);
-		potionChances.put(PotionOfInvisibility.class,   1f);
-	}
-
-	private static HashMap<Class<? extends Scroll>, Float> scrollChances = new HashMap<>();
-	static{
-		scrollChances.put(ScrollOfMirrorImage.class,    4f);
-		scrollChances.put(ScrollOfChallenge.class,    	3f);
-
-		scrollChances.put(ScrollOfTeleportation.class,  2f);
-
-		scrollChances.put(ScrollOfTerror.class,     	1f);
-		scrollChances.put(ScrollOfAntiMagic.class,   	1f);
-	}
-
-	private static HashMap<Class<? extends Spell>, Float> spellChances = new HashMap<>();
-	static{
-		spellChances.put(UnstableSpell.class,    		4f);
-
-		spellChances.put(TelekineticGrab.class,    		3f);
-		spellChances.put(ReclaimTrap.class,    			3f);
-
-		spellChances.put(BeaconOfReturning.class,    	2f);
-
-		spellChances.put(PhaseShift.class,    			1f);
-	}
-
-	private static HashMap<Class<? extends Runestone>, Float> stoneChances = new HashMap<>();
-	static{
-		stoneChances.put(StoneOfFlock.class,    		3f);
-		stoneChances.put(StoneOfFear.class,    			1f);
-		stoneChances.put(StoneOfBlink.class,    		1f);
-	}
-
-	private static HashMap<Class<? extends Item>, Float> typeChances = new HashMap<>();
-	static{
-		typeChances.put(Potion.class,    				50f);
-		typeChances.put(Scroll.class,    				20f);
-		typeChances.put(Spell.class,    				15f);
-		typeChances.put(Runestone.class,    			15f);
-	}*/
-
 	private static HashMap<Class<? extends Potion>, Float> potionChances = new HashMap<>();
 	static{
 		potionChances.put(UnstableBrew.class,       	4f);
@@ -317,8 +257,8 @@ public class RingOfWealth extends Ring {
 		potionChances.put(PotionOfHaste.class,   		2f);
 		potionChances.put(PotionOfPurity.class,         2f);
 
-		potionChances.put(InfernalBrew.class,    		1f);
-		potionChances.put(BlizzardBrew.class,			1f);
+		potionChances.put(ElixirOfDragonsBlood.class,	1f);
+		potionChances.put(ElixirOfIcyTouch.class,		1f);
 		potionChances.put(PotionOfInvisibility.class,   1f);
 		potionChances.put(PotionOfStamina.class,   		1f);
 		potionChances.put(PotionOfParalyticGas.class,   1f);
@@ -407,16 +347,14 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(BeaconOfReturning.class,    	2);
 		itemRarities.put(PhaseShift.class,    			2);
 		itemRarities.put(UnstableSpell.class,    		2);
-
-
-
-		itemRarities.put(InfernalBrew.class,    		3);
-		itemRarities.put(BlizzardBrew.class,			3);
+		
+		
+		
+		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
+		itemRarities.put(ElixirOfIcyTouch.class,   		3);
 		itemRarities.put(PotionOfInvisibility.class,   	3);
 		itemRarities.put(PotionOfStamina.class,   		3);
 		itemRarities.put(PotionOfParalyticGas.class,   	3);
-		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
-		itemRarities.put(ElixirOfIcyTouch.class,   		3);
 
 		itemRarities.put(ScrollOfTerror.class,   		3);
 		itemRarities.put(ScrollOfRetribution.class, 	3);
@@ -627,9 +565,7 @@ public class RingOfWealth extends Ring {
 			alchemizeLeft.countUp(1);
 	}
 
-	public class Wealth extends RingBuff {
-
-	}
+	public class Wealth extends RingBuff {}
 
 	public static class TriesToDropTracker extends CounterBuff {
 		{

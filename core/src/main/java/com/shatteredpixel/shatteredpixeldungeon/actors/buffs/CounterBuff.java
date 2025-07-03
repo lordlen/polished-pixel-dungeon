@@ -39,6 +39,10 @@ public class CounterBuff extends Buff {
 	public float count(){
 		return count;
 	}
+	
+	public void setCount( float amount ){
+		count = amount;
+	}
 
 	private static final String COUNT = "count";
 
