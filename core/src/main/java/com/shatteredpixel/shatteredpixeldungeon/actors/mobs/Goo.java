@@ -108,12 +108,10 @@ public class Goo extends Mob {
 
 		if (!flying && Dungeon.level.water[pos] && HP < HT) {
 			
-			int healingCap = HP*2 <= HT ? HT / 2 : HT;
-			int heal = Math.min(healInc, healingCap - HP);
-			
+			int heal = Math.min(healInc, HT - HP);
 			HP += heal;
+			
 			Statistics.qualifiedForBossChallengeBadge = false;
-
 			LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
 			if (lock != null){
 				if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.removeTime(heal);
