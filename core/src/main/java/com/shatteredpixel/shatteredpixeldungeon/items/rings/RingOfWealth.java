@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CounterBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
@@ -97,7 +98,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.WealthStone;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndQuickBag;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Visual;
 import com.watabou.utils.Bundle;
@@ -114,6 +118,9 @@ public class RingOfWealth extends Ring {
 		buffClass = Wealth.class;
 	}
 	
+	public static final String AC_OPEN = "OPEN";
+	public Item quickUseItem;
+	
 	public static ArrayList<Item> getWealthDrops() {
 		ArrayList<Item> drops = new ArrayList<>();
 		for (Item item : Dungeon.hero.belongings) {
@@ -121,6 +128,47 @@ public class RingOfWealth extends Ring {
 		}
 		
 		return drops;
+	}
+	
+	@Override
+	public int targetingPos(Hero user, int dst) {
+		if (quickUseItem != null){
+			return quickUseItem.targetingPos(user, dst);
+		} else {
+			return super.targetingPos(user, dst);
+		}
+	}
+	
+	@Override
+	public ArrayList<String> actions(Hero hero) {
+		ArrayList<String> actions = super.actions(hero);
+		if(isKnown()) {
+			actions.add(AC_OPEN);
+		}
+		return actions;
+	}
+	
+	@Override
+	public String defaultAction() {
+		if(isKnown()) {
+			return AC_OPEN;
+		}
+		else return super.defaultAction();
+	}
+	
+	@Override
+	public void execute(Hero hero, String action) {
+		quickUseItem = null;
+		super.execute(hero, action);
+		
+		if(action.equals(AC_OPEN)) {
+			if(!getWealthDrops().isEmpty()) {
+				GameScene.show( new WndQuickBag( this ) );
+			}
+			else {
+				GLog.i(Messages.get(this, "no_drops"));
+			}
+		}
 	}
 	
 	public static void setExtra(BitmapText extra) {
