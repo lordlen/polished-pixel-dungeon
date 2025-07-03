@@ -393,8 +393,6 @@ public class RingOfWealth extends Ring {
 		if (bonus <= 0) return null;
 
 		int max = Math.round(30f / dropGenRate(bonus));
-
-		
 		CounterBuff triesToDrop = 		Buff.count(target, TriesToDropTracker.class,
 										Random.NormalIntRange(1, max));
 		

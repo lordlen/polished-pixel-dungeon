@@ -12,26 +12,27 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Callback;
 import com.watabou.utils.Reflection;
 
-public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
+public interface WealthDrop<T extends Item> {
     T item();
     void setItem(T item);
+    
+    //we cache this for performance
+    Decay decay();
+    void setDecay(Decay decay);
 
-    default C set(Class<? extends T> type) {
+    default void set(Class<? extends T> type) {
         setItem(Reflection.newInstance(type));
-        if(!valid()) return null;
-
         item().Polished_wealthDrop = this;
+        
         updateStats();
         updateVisuals();
-
-        return (C)this;
     }
 
     default boolean valid() {
@@ -46,8 +47,8 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         return
                 valid()
                 && item.getClass() == getClass()
-                && ((WealthDrop<?, ?>) item).valid()
-                && ((WealthDrop<?, ?>) item).item().isSimilar(item())
+                && ((WealthDrop<?>) item).valid()
+                && ((WealthDrop<?>) item).item().isSimilar(item())
                 ;
     }
 
@@ -73,19 +74,10 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
     default boolean afterCollect(boolean collected) {
         if(!collected) return false;
 
-        if(Dungeon.hero != null) {
-            if(valid() && Dungeon.hero.belongings.contains(th())) {
-                Buff.append(Dungeon.hero, Decay.class, decayTimer()).item = th();
-            }
-        }/* else {
-            Callback callback = () -> {
-                if(valid() && Dungeon.hero.belongings.contains((Item)WealthDrop.this)) {
-                    Buff.append(Dungeon.hero, Decay.class, 200f).item = (Item)WealthDrop.this;
-                }
-            };
-            Dungeon.runAfterLoad(callback);
-        }*/
-
+        if(!Dungeon.Polished.loading && Dungeon.hero != null && this instanceof Item) {
+            setDecay(Buff.append(Dungeon.hero, Decay.class, decayTimer()));
+            decay().item = th();
+        }
         return true;
     }
     default void afterDetach() {
@@ -105,13 +97,6 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         if(valid() && item().quantity() <= 1 && !(this instanceof WealthPotion)) {
             th().detach(container);
         }
-    }
-
-    default Decay decay() {
-        for(Decay decay : Dungeon.hero.buffs(Decay.class)) {
-            if(decay.item == this) return decay;
-        }
-        return null;
     }
 
     default String dropName() {
@@ -145,7 +130,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
     }
 
     static int decayTimer() {
-        int lvl = Math.max(Ring.getBuffedBonus(Dungeon.hero, RingOfWealth.Wealth.class) - 1, 0);
+        int lvl = Math.max(0, Ring.getBuffedBonus(Dungeon.hero, RingOfWealth.Wealth.class) - 1);
         return 200 + 50*lvl;
     }
 
@@ -153,15 +138,15 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         if(Dungeon.level == null || Dungeon.hero == null) return;
 
         for(Item item : Dungeon.hero.belongings) {
-            if(item instanceof WealthDrop<?, ?>) {
-                ((WealthDrop<?, ?>) item).updateVisuals();
+            if(item instanceof WealthDrop<?>) {
+                ((WealthDrop<?>) item).updateVisuals();
             }
         }
 
         for(Heap heap : Dungeon.level.heaps.valueList()) {
             for(Item item : heap.items) {
-                if(item instanceof WealthDrop<?, ?>) {
-                    ((WealthDrop<?, ?>) item).updateVisuals();
+                if(item instanceof WealthDrop<?>) {
+                    ((WealthDrop<?>) item).updateVisuals();
                 }
             }
         }
@@ -179,20 +164,23 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
     }
 
     static void refreshIndicators() {
-        for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
-            if (decay.cooldown() <= 25 && decay.warning && decay.item != null) {
-
-                decay.warning = false;
-                //disabled for now
-                //GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
-            }
+        if(Dungeon.hero.buff(Decay.class) != null) {
             Item.updateQuickslot();
         }
+        
+        //disabled for now
+        /*for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
+            if (decay.cooldown() <= 25 && decay.warning && decay.item != null) {
+                decay.warning = false;
+                GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
+            }
+            Item.updateQuickslot();
+        }*/
     }
 
     class Decay extends FlavourBuff {
+        
         {
-            type = buffType.NEUTRAL;
             actPriority = HERO_PRIO+1;
             revivePersists = true;
         }
@@ -203,6 +191,8 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
 
         @Override
         public boolean act() {
+            if(item == null) return super.act();
+            
             int slot = Dungeon.quickslot.getSlot(item);
             item.detach(Dungeon.hero.belongings.backpack);
             vanishVFX(Dungeon.hero.pos);
@@ -217,7 +207,7 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
             }
         }
 
-        private static final String ITEM	= "item";
+        private static final String ITEM = "item";
 
         @Override
         public void storeInBundle( Bundle bundle ) {
@@ -228,18 +218,19 @@ public interface WealthDrop<T extends Item, C extends WealthDrop<T, C>> {
         @Override
         public void restoreFromBundle( Bundle bundle ) {
             super.restoreFromBundle( bundle );
-
+            
             if(bundle.get(ITEM) != null) {
-                Callback callback = () -> {
-                    for(Item item : Dungeon.hero.belongings) {
-                        if(item.isSimilar((Item)bundle.get(ITEM))) {
-                            Decay.this.item = item;
+                Dungeon.Polished.runAfterLoad(() -> {
+                    
+                    for(Item i : Dungeon.hero.belongings) {
+                        if(i.isSimilar( (Item) bundle.get(ITEM) )) {
+                            item = i;
+                            ((WealthDrop<?>) item).setDecay(this);
                             break;
                         }
                     }
-                };
-
-                Dungeon.Polished.runAfterLoad(callback);
+                    
+                });
             }
         }
     }

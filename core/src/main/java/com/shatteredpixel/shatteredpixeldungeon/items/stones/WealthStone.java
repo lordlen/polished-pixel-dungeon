@@ -37,7 +37,7 @@ import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
 
-public class WealthStone extends Runestone implements WealthDrop<Runestone, WealthStone> {
+public class WealthStone extends Runestone implements WealthDrop<Runestone> {
 
 	{
 		image = ItemSpriteSheet.STONE_HOLDER;
@@ -98,6 +98,15 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone, Weal
 	@Override
 	public void setItem(Runestone item) {
 		this.stone = item;
+	}
+	
+	Decay decay = null;
+	@Override
+	public Decay decay() {
+		return decay;
+	}
+	public void setDecay(Decay decay) {
+		this.decay = decay;
 	}
 
 	@Override
