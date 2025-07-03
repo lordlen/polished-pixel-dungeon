@@ -2400,9 +2400,11 @@ public class Hero extends Char {
 	@Override
 	public boolean isAlive() {
 		
-		if (HP <= 0){
-			if (berserk == null) berserk = buff(Berserk.class);
-			return berserk != null && berserk.raging();
+		if (HP <= 0 && subClass == HeroSubClass.BERSERKER){
+			if (berserk == null) {
+				berserk = Buff.affect(this, Berserk.class);
+			}
+			return berserk.raging();
 		} else {
 			berserk = null;
 			return super.isAlive();

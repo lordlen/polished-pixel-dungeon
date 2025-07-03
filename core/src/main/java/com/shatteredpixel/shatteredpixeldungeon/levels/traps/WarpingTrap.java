@@ -102,15 +102,11 @@ public class WarpingTrap extends TeleportationTrap {
 			if(Dungeon.Polished.loading) {
 				return super.attachTo(target);
 			}
-			
-			else if(target == Dungeon.hero) {
-				if(super.attachTo(target)) {
-					removeVision();
-					return true;
-				}
+			else if(target == Dungeon.hero && super.attachTo(target)) {
+				removeVision();
+				return true;
 			}
-			
-			return false;
+			else return false;
 		}
 		
 		@Override
