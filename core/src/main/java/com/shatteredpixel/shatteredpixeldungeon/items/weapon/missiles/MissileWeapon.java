@@ -406,7 +406,7 @@ abstract public class MissileWeapon extends Weapon {
 				damage += Hero.heroDamageIntRange( 0, exStr );
 			}
 			if (owner.buff(Momentum.class) != null && owner.buff(Momentum.class).freerunning()) {
-				damage = Math.round(damage * (1f + 0.15f * ((Hero) owner).pointsInTalent(Talent.PROJECTILE_MOMENTUM)));
+				damage = Math.round(damage * (1f + 0.10f * ((Hero) owner).pointsInTalent(Talent.PROJECTILE_MOMENTUM)));
 			}
 		}
 		
