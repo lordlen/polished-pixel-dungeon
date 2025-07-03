@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -264,7 +265,7 @@ public class ItemSlot extends Button {
 		}
 
 		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
-
+			
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
 			itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
 			add(itemIcon);
@@ -275,7 +276,8 @@ public class ItemSlot extends Button {
 				
 				extra.scale.set(PixelScene.align(0.9f));
 				extra.measure();
-			} else {
+			}
+			else {
 				extra.text( null );
 				extra.resetColor();
 				extra.scale.set(1f);
@@ -312,7 +314,10 @@ public class ItemSlot extends Button {
 		int trueLvl = item.visiblyUpgraded();
 		int buffedLvl = item.buffedVisiblyUpgraded();
 
-		if (trueLvl != 0 || buffedLvl != 0) {
+		if(item instanceof RingOfWealth && quickslotButton()) {
+			RingOfWealth.setExtra(level);
+		}
+		else if (trueLvl != 0 || buffedLvl != 0) {
 			level.text( Messages.format( TXT_LEVEL, buffedLvl ) );
 			level.measure();
 			if (trueLvl == buffedLvl || buffedLvl <= 0) {
@@ -355,6 +360,10 @@ public class ItemSlot extends Button {
 		extra.alpha( alpha );
 		level.alpha( alpha );
 		if (itemIcon != null) itemIcon.alpha( alpha );
+	}
+	
+	protected boolean quickslotButton() {
+		return false;
 	}
 
 	public void showExtraInfo( boolean show ){

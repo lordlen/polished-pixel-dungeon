@@ -156,6 +156,11 @@ public class QuickSlotButton extends Button {
 					return super.hoverText();
 				}
 			}
+			
+			@Override
+			protected boolean quickslotButton() {
+				return true;
+			}
 		};
 		slot.showExtraInfo( false );
 		add( slot );

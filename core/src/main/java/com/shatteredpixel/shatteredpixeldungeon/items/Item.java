@@ -107,7 +107,7 @@ public class Item implements Bundlable {
 	public boolean Polished_levelGen = false;
 	
 	// for wrapper behaviour
-	protected WealthDrop<?, ?> Polished_wealthDrop = null;
+	protected WealthDrop<?> Polished_wealthDrop = null;
  
 	
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
