@@ -150,7 +150,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
@@ -165,7 +164,6 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.MiningLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.WeakFloorRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
@@ -657,7 +655,7 @@ public class Hero extends Char {
 
 		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
 		if (guardTracker != null){
-			guardTracker.blockLeft--;
+			guardTracker.blocksLeft--;
 			return INFINITE_EVASION;
 		}
 		
@@ -702,7 +700,7 @@ public class Hero extends Char {
 		RoundShield.GuardTracker guardTracker = buff(RoundShield.GuardTracker.class);
 		if (guardTracker != null){
 			guardTracker.hasBlocked = true;
-			if(guardTracker.blockLeft == 0) {
+			if(guardTracker.blocksLeft == 0) {
 				guardTracker.detach();
 			}
 			BuffIndicator.refreshHero();
