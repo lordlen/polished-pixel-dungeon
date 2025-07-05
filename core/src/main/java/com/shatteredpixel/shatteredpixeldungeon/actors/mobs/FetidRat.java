@@ -29,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.StenchGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
-import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.FetidRatSprite;
 import com.watabou.utils.PathFinder;
@@ -65,11 +64,10 @@ public class FetidRat extends Rat {
 	@Override
 	public int attackProc( Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
-		if (Random.Int(3) == 0 && !Dungeon.level.water[enemy.pos]) {
+		if (Random.Int(3) == 0) {
 			Buff.affect(enemy, Ooze.class).set( Ooze.DURATION );
-			
 			//score loss is on-hit instead of on-attack because it's tied to ooze
-			if (enemy == Dungeon.hero){
+			if (enemy == Dungeon.hero && !Dungeon.level.water[enemy.pos]){
 				Statistics.questScores[0] -= 50;
 			}
 		}
@@ -80,7 +78,7 @@ public class FetidRat extends Rat {
 	@Override
 	public int defenseProc( Char enemy, int damage ) {
 
-		GameScene.add(Blob.seed(pos, 40, StenchGas.class));
+		GameScene.add(Blob.seed(pos, 20, StenchGas.class));
 
 		return super.defenseProc(enemy, damage);
 	}

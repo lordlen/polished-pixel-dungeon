@@ -26,10 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Foliage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfAwareness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfChange;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfHealth;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DemonSpawner;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
@@ -40,25 +38,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
-import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.LostBackpack;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.BeaconOfReturning;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
-import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.MassGraveRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretChestChasmRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicalFireRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.PoolRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SentryRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.StorageRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.ToxicGasRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.TrapsRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.WeakFloorRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -78,7 +62,6 @@ import com.watabou.noosa.Image;
 import com.watabou.noosa.Visual;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.PathFinder;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
@@ -138,23 +121,12 @@ public class Notes {
 		TRAPS_FLOOR,
 		SECRETS_FLOOR,
 
-		RED_SENTRY,
-		TRAPS_ROOM,
-		CHASM_ROOM,
-		MAGICAL_FIRE,
-		POOL_ROOM,
-		BARRICADE,
-		BARRICADE_QUEST,
-		TOXIC_GAS_ROOM,
-		CHASM_ROOM_SECRET,
-
 		SHOP,
 		ALCHEMY,
 		GARDEN,
 		DISTANT_WELL,
 		WELL_OF_HEALTH,
 		WELL_OF_AWARENESS,
-		WELL_OF_CHANGE,
 		SACRIFICIAL_FIRE,
 		STATUE,
 
@@ -167,9 +139,7 @@ public class Notes {
 		TROLL,
 		IMP,
 
-		DEMON_SPAWNER,
-
-		INVALID
+		DEMON_SPAWNER;
 	}
 	
 	public static class LandmarkRecord extends Record {
@@ -203,23 +173,6 @@ public class Notes {
 				case SECRETS_FLOOR:
 					return Icons.STAIRS_SECRETS.get();
 
-				case RED_SENTRY:
-					return Icons.RED_SENTRY.get();
-				case TRAPS_ROOM:
-					return Icons.TRAPS_ROOM.get();
-				case CHASM_ROOM:
-					return Icons.CHASM_ROOM.get();
-				case MAGICAL_FIRE:
-					return Icons.MAGICAL_FIRE.get();
-				case POOL_ROOM:
-					return Icons.POOL_ROOM.get();
-				case BARRICADE: case BARRICADE_QUEST:
-					return Icons.BARRICADE.get();
-				case TOXIC_GAS_ROOM:
-					return Icons.TOXIC_GAS_ROOM.get();
-				case CHASM_ROOM_SECRET:
-					return Icons.CHASM_ROOM_SECRET.get();
-
 				case SHOP:
 					if (depth == 20)    return new Image(new ImpSprite());
 					else                return new Image(new ShopkeeperSprite());
@@ -233,8 +186,6 @@ public class Notes {
 					return Icons.get(Icons.WELL_HEALTH);
 				case WELL_OF_AWARENESS:
 					return Icons.get(Icons.WELL_AWARENESS);
-				case WELL_OF_CHANGE:
-					return Icons.get(Icons.WELL_CHANGE);
 				case SACRIFICIAL_FIRE:
 					return Icons.get(Icons.SACRIFICE_ALTAR);
 				case STATUE:
@@ -261,50 +212,6 @@ public class Notes {
 			}
 		}
 
-		public static class Polished {
-			
-			public static void updateOnContainerOpen(int pos, Heap.Type type) {
-				if(!(Dungeon.level instanceof RegularLevel)) return;
-				Room room = ((RegularLevel)Dungeon.level).room(pos);
-	
-				switch (type) {
-					case CHEST:
-						if (room instanceof SentryRoom) Notes.remove(Landmark.RED_SENTRY);
-						else if (room instanceof TrapsRoom) {
-							Notes.remove(Landmark.TRAPS_ROOM);
-							Notes.remove(Landmark.CHASM_ROOM);
-						} else if (room instanceof PoolRoom) Notes.remove(Landmark.POOL_ROOM);
-						else if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
-						break;
-	
-					case SKELETON:
-						if (room instanceof ToxicGasRoom) Notes.remove(Landmark.TOXIC_GAS_ROOM);
-						break;
-	
-					case LOCKED_CHEST:
-						if (room instanceof SecretChestChasmRoom)
-							Notes.remove(Landmark.CHASM_ROOM_SECRET);
-						break;
-				}
-			}
-			
-			public static void updateOnBarricade(int pos) {
-				if(!(Dungeon.level instanceof RegularLevel)) return;
-	
-				for (int i : PathFinder.NEIGHBOURS9) {
-					Room room = ((RegularLevel)Dungeon.level).room(pos+i);
-					if(room instanceof StorageRoom) {
-						Notes.remove(Landmark.BARRICADE);
-						return;
-					}
-					else if(room instanceof MassGraveRoom) {
-						Notes.remove(Landmark.BARRICADE_QUEST);
-						return;
-					}
-				}
-			}
-		}
-		
 		@Override
 		public String title() {
 			switch (landmark) {
@@ -335,15 +242,6 @@ public class Notes {
 				case TRAPS_FLOOR:   return Messages.get(Level.Feeling.class, "traps_desc");
 				case SECRETS_FLOOR: return Messages.get(Level.Feeling.class, "secrets_desc");
 
-				case RED_SENTRY: return Messages.get(SentryRoom.Sentry.class, "desc");
-				case TRAPS_ROOM: return Messages.get(Landmark.class, "traps_room_desc");
-				case CHASM_ROOM: return Messages.get(Level.class, "chasm_desc");
-				case MAGICAL_FIRE: return Messages.get(MagicalFireRoom.EternalFire.class, "desc");
-				case POOL_ROOM: return Messages.get(Piranha.class, "desc");
-				case BARRICADE: case BARRICADE_QUEST: return Messages.get(Level.class, "barricade_desc");
-				case TOXIC_GAS_ROOM: return Messages.get(ToxicGasRoom.ToxicVent.class, "desc");
-				case CHASM_ROOM_SECRET: return Messages.get(Level.class, "chasm_desc");
-
 				case SHOP:
 					if (depth == 20)    return Messages.get(ImpShopkeeper.class, "desc");
 					else                return Messages.get(Shopkeeper.class, "desc");
@@ -352,7 +250,6 @@ public class Notes {
 				case DISTANT_WELL:      return Messages.get(WeakFloorRoom.HiddenWell.class, "desc");
 				case WELL_OF_HEALTH:    return Messages.get(WaterOfHealth.class, "desc");
 				case WELL_OF_AWARENESS: return Messages.get(WaterOfAwareness.class, "desc");
-				case WELL_OF_CHANGE:    return Messages.get(WaterOfChange.class, "desc");
 				case SACRIFICIAL_FIRE:  return Messages.get(SacrificialFire.class, "desc");
 				case STATUE:            return Messages.get(Statue.class, "desc");
 
@@ -386,11 +283,7 @@ public class Notes {
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
-			try{
-				landmark = Landmark.valueOf(bundle.getString(LANDMARK));
-			} catch (IllegalArgumentException invalid) {
-				landmark = Landmark.INVALID;
-			}
+			landmark = Landmark.valueOf(bundle.getString(LANDMARK));
 		}
 		
 		@Override
@@ -756,10 +649,6 @@ public class Notes {
 		return false;
 	}
 	
-	public static boolean contains(Notes.CustomRecord rec) {
-		return records.contains(rec);
-	}
-	
 	public static <T extends Record> ArrayList<T> getRecords( Class<T> recordType ){
 		ArrayList<T> filtered = new ArrayList<>();
 		for (Record rec : records){
@@ -782,15 +671,7 @@ public class Notes {
 
 		return filtered;
 	}
-	
-	public static CustomRecord findCustomRecord( Item item ){
-		CustomRecord rec = findCustomRecord(item.customNoteID);
-		if(rec != null) return rec;
-		
-		rec = findCustomRecord(item.getClass());
-        return rec;
-    }
-	
+
 	public static CustomRecord findCustomRecord( int ID ){
 		for (Record rec : records){
 			if (rec instanceof CustomRecord && ((CustomRecord) rec).ID == ID) {
@@ -810,23 +691,9 @@ public class Notes {
 		}
 		return null;
 	}
-	
-	public static CustomRecord Polished_generateRecord(Item item) {
-		Notes.CustomRecord custom = null;
-		if (item instanceof EquipableItem || item instanceof Wand || item instanceof Trinket) {
-			custom = new Notes.CustomRecord(item, "", "");
-			custom.assignID();
-			item.customNoteID = custom.ID();
-		} else if(item != null) {
-			custom = new Notes.CustomRecord(item.getClass(), "", "");
-			custom.assignID();
-		}
-		
-		return custom;
-	}
 
 	public static int customRecordLimit(){
-		return 10;
+		return 5;
 	}
 
 	private static final Comparator<Record> comparator = new Comparator<Record>() {

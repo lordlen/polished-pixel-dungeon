@@ -26,7 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CamouflagedBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -62,7 +62,7 @@ public class Dagger extends MeleeWeapon {
 	public int damageRoll(Char owner) {
 		if (owner instanceof Hero) {
 			Hero hero = (Hero)owner;
-			Char enemy = hero.enemy();
+			Char enemy = hero.attackTarget();
 			if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)) {
 				//deals 75% toward max to max on surprise, instead of min to max.
 				int diff = max() - min();
@@ -90,7 +90,7 @@ public class Dagger extends MeleeWeapon {
 
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
-		sneakAbility(hero, target, 3, 2+buffedLvl(), this);
+		sneakAbility(hero, target, 5, 2+buffedLvl(), this);
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class Dagger extends MeleeWeapon {
 		return Integer.toString(2+level);
 	}
 
-	public static void sneakAbility(Hero hero, Integer target, int maxDist, int camoTurns, MeleeWeapon wep){
+	public static void sneakAbility(Hero hero, Integer target, int maxDist, int invisTurns, MeleeWeapon wep){
 		if (target == null) {
 			return;
 		}
@@ -125,7 +125,7 @@ public class Dagger extends MeleeWeapon {
 		}
 
 		wep.beforeAbilityUsed(hero, null);
-		Buff.prolong(hero, CamouflagedBuff.class, camoTurns);
+		Buff.prolong(hero, Invisibility.class, invisTurns-1); //1 fewer turns as ability is instant
 
 		Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, target);
 		Dungeon.hero.pos = target;
@@ -133,7 +133,6 @@ public class Dagger extends MeleeWeapon {
 		Dungeon.observe();
 		GameScene.updateFog();
 		Dungeon.hero.checkVisibleMobs();
-		Dungeon.hero.spend(1);
 
 		Dungeon.hero.sprite.place( Dungeon.hero.pos );
 		CellEmitter.get( Dungeon.hero.pos ).burst( Speck.factory( Speck.WOOL ), 6 );

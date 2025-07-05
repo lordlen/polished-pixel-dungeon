@@ -23,7 +23,6 @@ package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
-import com.shatteredpixel.shatteredpixeldungeon.Debug;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -220,7 +219,6 @@ public abstract class RegularLevel extends Level {
 	protected void createMobs() {
 		//on floor 1, 8 pre-set mobs are created so the player can get level 2.
 		int mobsToSpawn = Dungeon.depth == 1 ? 8 : mobLimit();
-		if(Debug.DEBUG_MODE) mobsToSpawn = Math.round(mobsToSpawn * Debug.Spawn_Multiplier);
 
 		ArrayList<Room> stdRooms = new ArrayList<>();
 		for (Room room : rooms) {
@@ -233,16 +231,16 @@ public abstract class RegularLevel extends Level {
 		Random.shuffle(stdRooms);
 		Iterator<Room> stdRoomIter = stdRooms.iterator();
 
-		//enemies cannot be within a 10-tile FOV or 10-tile open space walk from the entrance
+		//enemies cannot be within a 8-tile FOV or 8-tile open space walk from the entrance
 		boolean[] entranceFOV = new boolean[length()];
 		Point c = cellToPoint(entrance());
-		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 10);
+		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 8);
 
 		boolean[] entranceWalkable = BArray.not(solid, null);
 
-		//all doors within the entrance room are ignored for this walk
-		for (int y = roomEntrance.top; y <= roomEntrance.bottom; y++){
-			for (int x = roomEntrance.left; x <= roomEntrance.right; x++){
+		//doors within the entrance room are ignored for this walk, but doors on the edge are not
+		for (int y = roomEntrance.top+1; y < roomEntrance.bottom; y++){
+			for (int x = roomEntrance.left+1; x < roomEntrance.right; x++){
 				int cell = x + y*width();
 				if (passable[cell]){
 					entranceWalkable[cell] = true;
@@ -250,7 +248,7 @@ public abstract class RegularLevel extends Level {
 			}
 		}
 
-		PathFinder.buildDistanceMap(entrance(), entranceWalkable, 10);
+		PathFinder.buildDistanceMap(entrance(), entranceWalkable, 8);
 
 		Mob mob = null;
 		while (mobsToSpawn > 0) {
@@ -388,7 +386,6 @@ public abstract class RegularLevel extends Level {
 
 			Item toDrop = Generator.random();
 			if (toDrop == null) continue;
-			toDrop.Polished_levelGen = true;
 
 			int cell = randomDropCell();
 			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
@@ -448,8 +445,7 @@ public abstract class RegularLevel extends Level {
 			}
 			
 		}
-		
-		//these are already flagged as Polished_levelGen
+
 		for (Item item : itemsToSpawn) {
 			int cell = randomDropCell();
 			if (item instanceof TrinketCatalyst){
@@ -473,40 +469,22 @@ public abstract class RegularLevel extends Level {
 		//we can use a random long for these as they will be the same longs every time
 
 		Random.pushGenerator( Random.Long() );
-			boolean darkness = Dungeon.isChallenged(Challenges.DARKNESS);
-			boolean halls = this instanceof HallsLevel;
-			int torches = 0;
-			
-			if(darkness && !halls) {
-				torches++;
-				
-				//add a second torch to help with the larger floor
-				if (feeling == Feeling.LARGE){
-					torches++;
-				}
-			}
-			
-			else if(halls) {
-				//halls gets -1 torch on darkness
-				if(!darkness) {
-					torches++;
-				}
-				
-				//add a second torch to help with the larger floor
-				if (feeling == Feeling.LARGE){
-					torches++;
-				}
-			}
-			
-			for(int i = 0; i < torches; i++) {
+			if (Dungeon.isChallenged(Challenges.DARKNESS)){
 				int cell = randomDropCell();
 				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
 					map[cell] = Terrain.GRASS;
 					losBlocking[cell] = false;
 				}
-				Torch torch = new Torch();
-				torch.Polished_levelGen=true;
-				drop( torch, cell );
+				drop( new Torch(), cell );
+				//add a second torch to help with the larger floor
+				if (feeling == Feeling.LARGE){
+					cell = randomDropCell();
+					if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+						map[cell] = Terrain.GRASS;
+						losBlocking[cell] = false;
+					}
+					drop( new Torch(), cell );
+				}
 			}
 		Random.popGenerator();
 

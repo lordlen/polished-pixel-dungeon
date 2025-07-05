@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -29,15 +28,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.HolyDart;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
@@ -78,18 +71,15 @@ public abstract class ChampionEnemy extends Buff {
 		return false;
 	}
 
-	public float meleeDamageFactor(boolean adjacent) {
+	public float meleeDamageFactor(){
 		return 1f;
 	}
 
-	public float damageTakenFactor(boolean externalAttack){
+	public float damageTakenFactor(){
 		return 1f;
 	}
 
-	public float accuracyFactor(){
-		return 1f;
-	}
-	public float evasionFactor(boolean surpriseAttack){
+	public float evasionAndAccuracyFactor(){
 		return 1f;
 	}
 
@@ -150,7 +140,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float meleeDamageFactor(boolean adjacent) {
+		public float meleeDamageFactor() {
 			return 1.25f;
 		}
 
@@ -166,81 +156,14 @@ public abstract class ChampionEnemy extends Buff {
 			rays = 4;
 		}
 
-		public class Polished {
-
-			private static final String COOLDOWN = "cooldown";
-			private static final String TIMER = "timer";
-
-			final static float baseCooldown = 1f;
-			public boolean cooldown;
-			Actor timer = null;
-			{
-				initCooldown();
-			}
-
-			void initCooldown() {
-				initCooldown(baseCooldown);
-			}
-			void initCooldown(float cd) {
-				cooldown = true;
-
-				//this should realistically never happen
-				if(timer != null) return;
-				timer = new Actor() {
-
-					{
-						actPriority = LAST_PRIO;
-					}
-
-					@Override
-					protected boolean act() {
-						cooldown = false;
-						timer = null;
-
-						Actor.remove(this);
-						return true;
-					}
-				};
-				Actor.addDelayed(timer, cd);
-			}
-		}
-		Polished polished = new Polished();
-
 		@Override
-		public void storeInBundle(Bundle bundle) {
-			super.storeInBundle(bundle);
-			bundle.put(Polished.COOLDOWN, polished.cooldown);
-			if(polished.timer != null) bundle.put(Polished.TIMER, polished.timer);
-		}
-		@Override
-		public void restoreFromBundle(Bundle bundle) {
-			super.restoreFromBundle(bundle);
-
-			if(bundle.contains(Polished.COOLDOWN))
-				polished.cooldown = bundle.getBoolean(Polished.COOLDOWN);
-			if(bundle.contains(Polished.TIMER)) {
-				if (polished.timer == null) polished.initCooldown();
-				polished.timer.restoreFromBundle(bundle.getBundle(Polished.TIMER));
-			} else {
-				//get rid of the spawn timer since we're loading
-				Actor.remove(polished.timer);
-				polished.timer = null;
-				polished.cooldown = false;
-			}
-		}
-
-
-		@Override
-		public float meleeDamageFactor(boolean adjacent) {
-			polished.initCooldown();
+		public float meleeDamageFactor() {
 			return 1.25f;
 		}
 
 		@Override
 		public boolean canAttackWithExtraReach(Char enemy) {
-			int range = polished.cooldown ? 1 : 4;
-
-			if (Dungeon.level.distance( target.pos, enemy.pos ) > range) {
+			if (Dungeon.level.distance( target.pos, enemy.pos ) > 4){
 				return false;
 			} else {
 				boolean[] passable = BArray.not(Dungeon.level.solid, null);
@@ -264,24 +187,12 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float damageTakenFactor(boolean externalAttack) {
-			return 0.6f;
+		public float damageTakenFactor() {
+			return 0.5f;
 		}
 
 		{
 			immunities.addAll(com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic.RESISTS);
-
-			immunities.remove(HolyBomb.HolyDamage.class);
-			immunities.remove(HolyDart.class);
-
-			immunities.remove( Weakness.class );
-			immunities.remove( Vulnerable.class );
-			immunities.remove( Brittle.class );
-			immunities.remove( Hex.class );
-			immunities.remove( Degrade.class );
-
-			immunities.remove( Blazing.class );
-			immunities.remove( Shocking.class );
 		}
 
 	}
@@ -295,13 +206,8 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float meleeDamageFactor(boolean adjacent) {
-			return adjacent ? 1f : 1.25f;
-		}
-
-		@Override
-		public float damageTakenFactor(boolean externalAttack) {
-			return externalAttack ? 0.2f : 0.5f;
+		public float damageTakenFactor() {
+			return 0.2f;
 		}
 
 		@Override
@@ -329,15 +235,9 @@ public abstract class ChampionEnemy extends Buff {
 			rays = 6;
 		}
 
-		//Check Char::hit()
 		@Override
-		public float accuracyFactor() {
-			return 5f;
-		}
-
-		@Override
-		public float evasionFactor(boolean surpriseAttack) {
-			return 3f;
+		public float evasionAndAccuracyFactor() {
+			return 4f;
 		}
 	}
 
@@ -348,75 +248,33 @@ public abstract class ChampionEnemy extends Buff {
 			rays = 6;
 		}
 
-		//POLISHED: base 19%->25%
-		private float multiplier = 1.25f + .00001f;
-
-		public boolean Polished_huntThreshold() {
-			return multiplier >= 2f;
-		}
-		
-		private boolean Polished_huntNoti = false;
-		public void Polished_growingHunt() {
-			if(target.buff(MagicalSleep.class) != null) {
-				Polished_huntNoti = false;
-				return;
-			}
-			
-			Mob mob = (Mob) target;
-			if(Polished_huntThreshold() && !Dungeon.hero.isStealthyTo(target) && !(mob.state == mob.FLEEING)) {
-				mob.aggro(Dungeon.hero);
-				mob.target=Dungeon.hero.pos;
-				
-				if(!Polished_huntNoti) {
-					GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
-					Polished_huntNoti = true;
-				}
-			}
-		}
-		
-		private boolean Polished_weakenNoti = false;
-		public void Polished_weaken(Mob src) {
-			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
-				//-10 turns
-				multiplier -= 0.04f;
-				multiplier = Math.max(multiplier, 1.25f + .00001f);
-				
-				Sample.INSTANCE.play(Assets.Sounds.BURNING);
-				if(!Polished_weakenNoti) {
-					GLog.p(Messages.get(ChampionEnemy.Growing.class, "weaken"));
-					Polished_weakenNoti = true;
-				}
-			}
-		}
+		private float multiplier = 1.19f;
 
 		@Override
 		public boolean act() {
-			//POLISHED: .25%->.4%
-			if(!Polished_huntThreshold()) multiplier += 0.02f;
-			spend(5*TICK);
+			multiplier += 0.01f;
+			spend(4*TICK);
 			return true;
 		}
 
 		@Override
-		public float meleeDamageFactor(boolean adjacent) {
+		public float meleeDamageFactor() {
 			return multiplier;
 		}
 
 		@Override
-		public float damageTakenFactor(boolean externalAttack) {
+		public float damageTakenFactor() {
 			return 1f/multiplier;
 		}
 
 		@Override
-		public float accuracyFactor() {
+		public float evasionAndAccuracyFactor() {
 			return multiplier;
 		}
 
 		@Override
 		public String desc() {
-			String desc = Messages.get(this, "desc", (int)(100*(multiplier-1)), (int)(100*(1 - 1f/multiplier)));
-			if(Polished_huntThreshold()) desc += "\n\n" + Messages.get(this, "hunt_desc");
-			return desc;
+			return Messages.get(this, "desc", (int)(100*(multiplier-1)), (int)(100*(1 - 1f/multiplier)));
 		}
 
 		private static final String MULTIPLIER = "multiplier";

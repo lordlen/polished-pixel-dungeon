@@ -593,7 +593,6 @@ public class GnollGeomancer extends Mob {
 						throwingRocksFromPos = new int[]{-1, -1, -1};
 						throwingRockToPos = aim.collisionPos;
 
-						float cooldown = GameMath.gate(TICK, (int)Math.ceil(enemy.cooldown()), 3*TICK);
 						//do up to 3 thrown rock attacks at once, depending on HP
 						for (int i = 0; i < 3 - curbracket; i++){
 							if (aim == null) break;
@@ -602,23 +601,19 @@ public class GnollGeomancer extends Mob {
 
 							Ballistica warnPath = new Ballistica(aim.sourcePos, aim.collisionPos, Ballistica.STOP_SOLID);
 							for (int j : warnPath.subPath(0, warnPath.dist)){
-								sprite.parent.add(TargetedCell.timed(j, now()+cooldown, GnollGeomancer.this));
+								sprite.parent.add(new TargetedCell(j, 0xFF0000));
 							}
 
 							aim = GnollGeomancer.prepRockThrowAttack(enemy, GnollGeomancer.this);
 						}
-      
-						abilityCooldown = Random.NormalIntRange(3, 5);
-						spend(cooldown);
 
 						Dungeon.hero.interrupt();
-            			GameScene.Polished.blockInput(.75f);
+						abilityCooldown = Random.NormalIntRange(3, 5);
+						spend(GameMath.gate(TICK, (int)Math.ceil(enemy.cooldown()), 3*TICK));
 						return true;
 					} else if (GnollGeomancer.prepRockFallAttack(enemy, GnollGeomancer.this, 6-2*curbracket, true)) {
 						lastAbilityWasRockfall = true;
 						Dungeon.hero.interrupt();
-						GameScene.Polished.blockInput(.75f);
-
 						spend(GameMath.gate(TICK, (int)Math.ceil(enemy.cooldown()), 3*TICK));
 						abilityCooldown = Random.NormalIntRange(3, 5);
 						return true;
@@ -794,13 +789,11 @@ public class GnollGeomancer extends Mob {
 				pos++;
 			}
 		}
-
-		float cooldown = GameMath.gate(TICK, (int)Math.ceil(target.cooldown()), 3*TICK);
 		for (int i : rockCells){
-			source.sprite.parent.add(new TargetedCell(i));
+			source.sprite.parent.add(new TargetedCell(i, 0xFF0000));
 		}
 		//don't want to overly punish players with slow move or attack speed
-		Buff.append(source, GnollRockFall.class, cooldown).setRockPositions(rockCells);
+		Buff.append(source, GnollRockFall.class, GameMath.gate(TICK, (int)Math.ceil(target.cooldown()), 3*TICK)).setRockPositions(rockCells);
 
 		source.sprite.attack(target.pos, new Callback() {
 			@Override
@@ -817,18 +810,15 @@ public class GnollGeomancer extends Mob {
 
 		@Override
 		public void affectChar(Char ch) {
-			if(!ch.isImmune(this.getClass())) {
-				if (ch == Dungeon.hero){
-					Statistics.questScores[2] -= 100;
-				}
-				
-				ch.damage(Random.NormalIntRange(6, 12), this);
-				if (ch.isAlive()) {
-					Buff.prolong(ch, Paralysis.class, ch instanceof GnollGuard ? 10 : 3);
-				} else if (ch == Dungeon.hero){
-					Dungeon.fail( target );
-					GLog.n( Messages.get( GnollGeomancer.class, "rockfall_kill") );
-				}
+			ch.damage(Random.NormalIntRange(6, 12), this);
+			if (ch == Dungeon.hero){
+				Statistics.questScores[2] -= 100;
+			}
+			if (ch.isAlive()) {
+				Buff.prolong(ch, Paralysis.class, ch instanceof GnollGuard ? 10 : 3);
+			} else if (ch == Dungeon.hero){
+				Dungeon.fail( target );
+				GLog.n( Messages.get( GnollGeomancer.class, "rockfall_kill") );
 			}
 		}
 

@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
@@ -31,10 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -208,42 +207,9 @@ public class BrokenSeal extends Item {
 
 		@Override
 		public void onSelect( Item item ) {
-			BrokenSeal seal = (BrokenSeal) curItem;
 			if (item instanceof Armor) {
-				Armor arm = (Armor)item;
-
-				if(Armor.runic == 1) {
-					String armorGlyph;
-					if(!arm.cursedKnown && (arm.glyph() == null || arm.glyph().curse())) {
-						armorGlyph = Messages.get(Stylus.class, "unknown");
-					}
-					else if(arm.glyph() != null) {
-						armorGlyph = arm.glyph().name();
-					}
-					else {
-						armorGlyph = Messages.get(Stylus.class, "none");
-					}
-					String sealGlyph = seal.glyph() != null ? seal.glyph().name() : Messages.get(Stylus.class, "none");
-
-					GameScene.show(new WndOptions(
-							new ItemSprite(seal),
-							Messages.get(BrokenSeal.class, "choose_title"),
-							Messages.get(BrokenSeal.class, "choose_desc"),
-							"Armor: " + armorGlyph,
-							"Seal: " + sealGlyph) {
-
-						@Override
-						protected void onSelect(int index) {
-							seal.glyphChosen = index == 1;
-							
-							arm.affixSeal(seal, true);
-						}
-					});
-				}
-
-				else {
-					arm.affixSeal(seal, true);
-				}
+				BrokenSeal seal = (BrokenSeal) curItem;
+				seal.affixToArmor((Armor)item, seal);
 			}
 		}
 	};
@@ -342,21 +308,10 @@ public class BrokenSeal extends Item {
 			if (cooldown > 0 && Regeneration.regenOn()){
 				cooldown--;
 			}
-
-			if (shielding() > 0){
-				if (Dungeon.hero.visibleEnemies() == 0 && Dungeon.hero.buff(Combo.class) == null){
-					turnsSinceEnemies++;
-					if (turnsSinceEnemies >= 5){
-						if (cooldown > 0) {
-							float percentLeft = shielding() / (float)maxShield();
-							//max of 50% cooldown refund
-							cooldown = Math.max(0, (int)(cooldown - COOLDOWN_START * (percentLeft / 2f)));
-						}
-						decShield(shielding());
-					}
-				} else {
-					turnsSinceEnemies = 0;
-				}
+			
+			while (partialShield >= 1){
+				incShield();
+				partialShield--;
 			}
 			
 			if (shielding() <= 0 && maxShield() <= 0 && cooldown == 0){

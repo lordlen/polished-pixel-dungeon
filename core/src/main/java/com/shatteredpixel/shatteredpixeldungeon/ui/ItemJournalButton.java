@@ -51,8 +51,12 @@ public class ItemJournalButton extends IconButton {
 	}
 
 	private void customNote(){
-		Notes.CustomRecord note = Notes.findCustomRecord(item);
-		
+		Notes.CustomRecord note = null;
+		if (item instanceof EquipableItem || item instanceof Wand || item instanceof Trinket){
+			note = Notes.findCustomRecord(item.customNoteID);
+		} else {
+			note = Notes.findCustomRecord(item.getClass());
+		}
 		if (note == null){
 			if (Notes.getRecords(Notes.CustomRecord.class).size() >= Notes.customRecordLimit()){
 				GameScene.show(new WndTitledMessage(Icons.INFO.get(),
@@ -90,12 +94,11 @@ public class ItemJournalButton extends IconButton {
 				if (positive && !text.isEmpty()){
 					Notes.add(note);
 					note.editText(text, "");
-					
 					if (parentWindow != null) {
 						parentWindow.hide();
 					}
+
 					hide();
-					
 					if (parentWindow instanceof WndUseItem){
 						GameScene.show(new WndUseItem(((WndUseItem) parentWindow).owner, ((WndUseItem) parentWindow).item));
 					}
