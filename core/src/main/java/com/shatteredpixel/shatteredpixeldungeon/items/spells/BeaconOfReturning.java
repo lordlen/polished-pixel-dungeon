@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
+import com.badlogic.gdx.utils.Null;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -90,8 +91,8 @@ public class BeaconOfReturning extends Spell {
 	
 	@Override
 	protected void onThrow(int cell) {
-		if (Dungeon.hero.belongings.getItem(getClass()) == null && Polished_wealthDrop == null){
-			Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
+		if (Dungeon.hero.belongings.getItem(getClass()) == null){
+			removeLandmark();
 		}
 		
 		returnDepth = -1;
@@ -100,17 +101,20 @@ public class BeaconOfReturning extends Spell {
 	
 	@Override
 	public void doDrop(Hero hero) {
-		Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
+		removeLandmark();
 		
 		returnDepth = -1;
 		super.doDrop(hero);
 	}
 	
-	private void setBeacon(Hero hero ){
+	private void setBeacon(Hero hero){
+		removeLandmark();
+		
 		returnDepth = Dungeon.depth;
 		returnBranch = Dungeon.branch;
 		returnPos = hero.pos;
 		
+		//prevent wealth beacons from messing with landmarks
 		if(Polished_wealthDrop == null) {
 			Notes.add(Notes.Landmark.BEACON_LOCATION, returnDepth);
 		}
@@ -185,14 +189,21 @@ public class BeaconOfReturning extends Spell {
 			Game.switchScene( InterlevelScene.class );
 		}
 
-		if (quantity == 1 && Polished_wealthDrop == null){
-			Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
+		if (quantity == 1){
+			removeLandmark();
 		}
 		
 		detach(hero.belongings.backpack);
 		Catalog.countUse(getClass());
 		if (Random.Float() < talentChance){
 			Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
+		}
+	}
+	
+	void removeLandmark() {
+		//prevent wealth beacons from messing with landmarks
+		if(Polished_wealthDrop == null && returnDepth != -1) {
+			Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
 		}
 	}
 	

@@ -210,6 +210,7 @@ public class WelcomeScene extends PixelScene {
 				//message += "\n" + Messages.get(this, "patch_translations");
 
 			}
+
 		} else {
 			message = Messages.get(this, "what_msg");
 		}
