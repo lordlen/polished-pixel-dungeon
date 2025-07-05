@@ -26,7 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -46,22 +45,11 @@ import java.util.LinkedHashMap;
 
 public class BuffIndicator extends Component {
 	
-	public static final int POLISHED		= 112;
-	public static final int POLISHED_small	= 144;
-	
-	public static final int ELECTRIFIED	= POLISHED + 0;
-	public static final int BRITTLE 	= POLISHED + 1;
-	public static final int LAST_STAND 	= POLISHED + 2;
-	public static final int DISORIENTED = POLISHED + 3;
-	public static final int SPIRIT_HAWK = POLISHED + 4;
-	public static final int NATURES_AID = POLISHED + 5;
-	
-	
+	//transparent icon
+	public static final int NONE    = 127;
+
 	//FIXME this is becoming a mess, should do a big cleaning pass on all of these
 	//and think about tinting options
-	
-	//transparent icon
-	public static final int NONE    	= POLISHED-1;
 	public static final int MIND_VISION = 0;
 	public static final int LEVITATION  = 1;
 	public static final int FIRE        = 2;
@@ -147,7 +135,7 @@ public class BuffIndicator extends Component {
 	public static final int TRINITY_FORM= 82;
 	public static final int MANY_POWER  = 83;
 	public static final int SEAL_SHIELD = 84;
-	
+
 	public static final int SIZE_SMALL  = 7;
 	public static final int SIZE_LARGE  = 16;
 	
@@ -157,7 +145,7 @@ public class BuffIndicator extends Component {
 	private LinkedHashMap<Buff, BuffButton> buffButtons = new LinkedHashMap<>();
 	private boolean needsRefresh;
 	private Char ch;
-	
+
 	private boolean large = false;
 	
 	public BuffIndicator( Char ch, boolean large ) {
@@ -178,7 +166,7 @@ public class BuffIndicator extends Component {
 			heroInstance = null;
 		}
 	}
-	
+
 	@Override
 	public synchronized void update() {
 		super.update();
@@ -187,21 +175,21 @@ public class BuffIndicator extends Component {
 			layout();
 		}
 	}
-	
+
 	private boolean buffsHidden = false;
-	
+
 	@Override
 	protected void layout() {
-		
+
 		ArrayList<Buff> newBuffs = new ArrayList<>();
 		for (Buff buff : ch.buffs()) {
 			if (buff.icon() != NONE) {
 				newBuffs.add(buff);
 			}
 		}
-		
+
 		int size = large ? SIZE_LARGE : SIZE_SMALL;
-		
+
 		//remove any icons no longer present
 		for (Buff buff : buffButtons.keySet().toArray(new Buff[0])){
 			if (!newBuffs.contains(buff)){
@@ -246,21 +234,21 @@ public class BuffIndicator extends Component {
 			icon.setRect(x + pos * (size + 1), y, size + 1, size + (large ? 0 : 5));
 			PixelScene.align(icon);
 			pos++;
-			
+
 			icon.visible = icon.left() <= right();
 			lastIconLeft = icon.left();
 		}
-		
+
 		buffsHidden = false;
 		//squish buff icons together if there isn't enough room
 		float excessWidth = lastIconLeft - right();
 		if (excessWidth > 0) {
 			float leftAdjust = excessWidth/(buffButtons.size()-1);
-			//can't squish by more than 45% on large and 32% on small
-			if (large && leftAdjust >= size*0.45f) leftAdjust = size*0.45f;
-			if (!large && leftAdjust >= size*0.32f) leftAdjust = size*0.32f;
+			//can't squish by more than 50% on large and 62% on small
+			if (large && leftAdjust >= size*0.48f) leftAdjust = size*0.5f;
+			if (!large && leftAdjust >= size*0.62f) leftAdjust = size*0.65f;
 			float cumulativeAdjust = leftAdjust * (buffButtons.size()-1);
-			
+
 			ArrayList<BuffButton> buttons = new ArrayList<>(buffButtons.values());
 			Collections.reverse(buttons);
 			for (BuffButton icon : buttons) {
@@ -278,39 +266,39 @@ public class BuffIndicator extends Component {
 			Badges.validateManyBuffs();
 		}
 	}
-	
+
 	public boolean allBuffsVisible(){
 		return !buffsHidden;
 	}
-	
+
 	private static class BuffButton extends IconButton {
-		
+
 		private Buff buff;
-		
+
 		private boolean large;
-		
+
 		public Image grey; //only for small
 		public BitmapText text; //only for large
-		
+
 		public BuffButton( Buff buff, boolean large ){
 			super( new BuffIcon(buff, large));
 			this.buff = buff;
 			this.large = large;
-			
+
 			bringToFront(grey);
 			bringToFront(text);
 		}
-		
+
 		@Override
 		protected void createChildren() {
 			super.createChildren();
 			grey = new Image( TextureCache.createSolid(0xCC666666));
 			add( grey );
-			
+
 			text = new BitmapText(PixelScene.pixelFont);
 			add( text );
 		}
-		
+
 		public void updateIcon(){
 			((BuffIcon)icon).refresh(buff);
 			//round up to the nearest pixel if <50% faded, otherwise round down
@@ -330,21 +318,18 @@ public class BuffIndicator extends Component {
 				if (buff.type == Buff.buffType.POSITIVE)        text.hardlight(CharSprite.POSITIVE);
 				else if (buff.type == Buff.buffType.NEGATIVE)   text.hardlight(CharSprite.NEGATIVE);
 				text.alpha(0.7f);
-				
+
 				text.text(buff.iconTextDisplay());
-				if(buff instanceof Hunger) {
-					((Hunger) buff).statusColor(text);
-				}
 				text.measure();
 			}
 		}
-		
+
 		@Override
 		protected void layout() {
 			super.layout();
 			grey.x = icon.x = this.x + (large ? 0 : 1);
 			grey.y = icon.y = this.y + (large ? 0 : 2);
-			
+
 			if (text.width > width()){
 				text.scale.set(PixelScene.align(0.5f));
 			} else {
@@ -353,23 +338,23 @@ public class BuffIndicator extends Component {
 			text.x = this.x + width() - text.width() - 1;
 			text.y = this.y + width() - text.baseLine() - 2;
 		}
-		
+
 		@Override
 		protected void onClick() {
 			if (buff.icon() != NONE) GameScene.show(new WndInfoBuff(buff));
 		}
-		
+
 		@Override
 		protected void onPointerDown() {
 			//don't affect buff color
 			Sample.INSTANCE.play( Assets.Sounds.CLICK );
 		}
-		
+
 		@Override
 		protected void onPointerUp() {
 			//don't affect buff color
 		}
-		
+
 		@Override
 		protected String hoverText() {
 			return Messages.titleCase(buff.name());
@@ -381,13 +366,13 @@ public class BuffIndicator extends Component {
 			heroInstance.needsRefresh = true;
 		}
 	}
-	
+
 	public static void refreshBoss(){
 		if (bossInstance != null) {
 			bossInstance.needsRefresh = true;
 		}
 	}
-	
+
 	public static void setBossInstance(BuffIndicator boss){
 		bossInstance = boss;
 	}

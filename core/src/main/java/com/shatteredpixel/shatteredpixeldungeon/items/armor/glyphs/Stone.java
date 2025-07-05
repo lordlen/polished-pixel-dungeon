@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
@@ -51,10 +50,10 @@ public class Stone extends Armor.Glyph {
 		//FIXME this is duplicated here because these apply in hit(), not in attack/defenseskill
 		// the true solution is probably to refactor accuracy/evasion code a little bit
 		if (attacker.buff(Bless.class) != null) accuracy *= 1.25f;
-		if (attacker.buff(  Hex.class) != null) accuracy *= 0.75f;
+		if (attacker.buff(  Hex.class) != null) accuracy *= 0.8f;
 		if (attacker.buff( Daze.class) != null) accuracy *= 0.5f;
 		for (ChampionEnemy buff : attacker.buffs(ChampionEnemy.class)){
-			accuracy *= buff.accuracyFactor();
+			accuracy *= buff.evasionAndAccuracyFactor();
 		}
 		accuracy *= AscensionChallenge.statModifier(attacker);
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC
@@ -63,14 +62,12 @@ public class Stone extends Armor.Glyph {
 			// + 3%/5%
 			accuracy *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 		}
-		Berserk berserk = attacker.buff(Berserk.class);
-		if(berserk != null) accuracy *= berserk.accuracyFactor();
 
 		if (defender.buff(Bless.class) != null) evasion *= 1.25f;
-		if (defender.buff(  Hex.class) != null) evasion *= 0.75f;
+		if (defender.buff(  Hex.class) != null) evasion *= 0.8f;
 		if (defender.buff( Daze.class) != null) evasion *= 0.5f;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
-			evasion *= buff.evasionFactor(false);
+			evasion *= buff.evasionAndAccuracyFactor();
 		}
 		evasion *= AscensionChallenge.statModifier(defender);
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC

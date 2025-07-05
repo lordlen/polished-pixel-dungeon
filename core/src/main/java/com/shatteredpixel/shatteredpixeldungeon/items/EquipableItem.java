@@ -33,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Callback;
 
 import java.util.ArrayList;
 
@@ -45,25 +44,7 @@ public abstract class EquipableItem extends Item {
 	{
 		bones = true;
 	}
-	
-	@Override
-	public boolean canBeEquipped() {
-		return true;
-	}
-	
-	@Override
-	public String defaultAction() {
-		if(!isEquipped(Dungeon.hero) && canBeEquipped()) {
-			return AC_EQUIP;
-		}
-		else if(defaultAction == null && canBeEquipped()) {
-			return AC_UNEQUIP;
-		}
-		else {
-			return defaultAction;
-		}
-	}
-	
+
 	@Override
 	public ArrayList<String> actions(Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
@@ -77,7 +58,6 @@ public abstract class EquipableItem extends Item {
 			if (!isIdentified() && !Document.ADVENTURERS_GUIDE.isPageRead(Document.GUIDE_IDING)){
 				GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_IDING);
 			}
-			
 			return true;
 		} else {
 			return false;
@@ -168,7 +148,7 @@ public abstract class EquipableItem extends Item {
 			if (collect) Dungeon.level.drop( this, hero.pos ).sprite.drop();
 		}
 		keptThoughLostInvent = wasKept;
-		
+
 		return true;
 	}
 
@@ -176,6 +156,6 @@ public abstract class EquipableItem extends Item {
 		return doUnequip( hero, collect, true );
 	}
 
-	public void activate( Char ch ) {}
+	public void activate( Char ch ){}
 
 }

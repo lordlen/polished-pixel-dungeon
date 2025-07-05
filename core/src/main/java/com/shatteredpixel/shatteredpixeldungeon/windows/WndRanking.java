@@ -34,8 +34,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -60,9 +58,9 @@ import com.watabou.noosa.Group;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.ui.Component;
+import com.watabou.utils.DeviceCompat;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Locale;
 
 public class WndRanking extends WndTabbed {
@@ -265,7 +263,8 @@ public class WndRanking extends WndTabbed {
 
 			int buttontop = HEIGHT - 16;
 
-			if (Dungeon.hero != null && Dungeon.seed != -1 && !Dungeon.daily){
+			if (Dungeon.hero != null && Dungeon.seed != -1 && !Dungeon.daily &&
+					(DeviceCompat.isDebug() || Badges.isUnlocked(Badges.Badge.VICTORY))){
 				final Image icon = Icons.get(Icons.SEED);
 				RedButton btnSeed = new RedButton(Messages.get(this, "copy_seed")){
 					@Override
@@ -344,55 +343,57 @@ public class WndRanking extends WndTabbed {
 		public ItemsTab() {
 			super();
 			
-			ArrayList<Item> exclude = new ArrayList<>();
 			Belongings stuff = Dungeon.hero.belongings;
 			if (stuff.weapon != null) {
 				addItem( stuff.weapon );
-				exclude.add( stuff.weapon );
 			}
 			if (stuff.armor != null) {
 				addItem( stuff.armor );
-				exclude.add( stuff.armor );
 			}
 			if (stuff.artifact != null) {
 				addItem( stuff.artifact );
-				exclude.add( stuff.artifact );
 			}
 			if (stuff.misc != null) {
 				addItem( stuff.misc );
-				exclude.add( stuff.misc );
 			}
 			if (stuff.ring != null) {
 				addItem( stuff.ring );
-				exclude.add( stuff.ring );
 			}
-			
-			ArrayList<Item> slotItems = new ArrayList<>();
-			Trinket trinket = stuff.getItem(Trinket.class);
-			if (trinket != null){
-				slotItems.add(trinket);
-				exclude.add(trinket);
-			}
-			
+
+			pos = 0;
+
+			int slotsActive = 0;
 			for (int i = 0; i < QuickSlot.SIZE; i++){
-				Item item = Dungeon.quickslot.getItem(i);
-				if (Dungeon.quickslot.isNonePlaceholder(i) && !exclude.contains(item) && slotItems.size() < 10) {
-					slotItems.add(item);
+				if (Dungeon.quickslot.isNonePlaceholder(i)){
+					slotsActive++;
 				}
 			}
 
-			float slotWidth = Math.min(28, ((WIDTH - slotItems.size() + 1) / (float)slotItems.size()));
-			
-			pos = 0;
-			for (Item item : slotItems) {
-				QuickSlotButton slot = new QuickSlotButton(item);
-				
-				slot.setRect( pos, 120, slotWidth, 23 );
-				PixelScene.align(slot);
+			Trinket trinket = stuff.getItem(Trinket.class);
+			if (trinket != null){
+				slotsActive++;
+			}
 
-				add(slot);
+			float slotWidth = Math.min(28, ((WIDTH - slotsActive + 1) / (float)slotsActive));
 
-				pos += slotWidth + 1;
+			for (int i = -1; i < QuickSlot.SIZE; i++){
+				Item item = null;
+				if (i == -1){
+					item = trinket;
+				} else if (Dungeon.quickslot.isNonePlaceholder(i)) {
+					item = Dungeon.quickslot.getItem(i);
+				}
+				if (item != null){
+					QuickSlotButton slot = new QuickSlotButton(item);
+
+					slot.setRect( pos, 120, slotWidth, 23 );
+					PixelScene.align(slot);
+
+					add(slot);
+
+					pos += slotWidth + 1;
+
+				}
 			}
 		}
 		
@@ -495,10 +496,6 @@ public class WndRanking extends WndTabbed {
 					bg.ba = +0.35f;
 				}
 			}
-
-			if(item instanceof WealthDrop) {
-				WealthDrop.backgroundColoring(bg);
-			}
 		}
 		
 		@Override
@@ -566,10 +563,6 @@ public class WndRanking extends WndTabbed {
 			} else if (!item.isIdentified()) {
 				bg.ra = 0.1f;
 				bg.ba = 0.1f;
-			}
-
-			if(item instanceof WealthDrop) {
-				WealthDrop.backgroundColoring(bg);
 			}
 		}
 

@@ -95,11 +95,10 @@ public class RockfallTrap extends Trap {
 
 			Char ch = Actor.findChar( cell );
 
-			if (ch != null && ch.isAlive() && !ch.isImmune(this.getClass())){
+			if (ch != null && ch.isAlive()){
 				if (ch instanceof Mob) {
 					Buff.prolong(ch, Trap.HazardAssistTracker.class, HazardAssistTracker.DURATION);
 				}
-				
 				int damage = Random.NormalIntRange(5+scalingDepth(), 10+scalingDepth()*2);
 				damage -= ch.drRoll();
 				ch.damage( Math.max(damage, 0) , this);

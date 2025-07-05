@@ -90,10 +90,9 @@ public class BeaconOfReturning extends Spell {
 	
 	@Override
 	protected void onThrow(int cell) {
-		if (Dungeon.hero.belongings.getItem(getClass()) == null && Polished_wealthDrop == null){
+		if (Dungeon.hero.belongings.getItem(getClass()) == null){
 			Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
 		}
-		
 		returnDepth = -1;
 		super.onThrow(cell);
 	}
@@ -101,19 +100,20 @@ public class BeaconOfReturning extends Spell {
 	@Override
 	public void doDrop(Hero hero) {
 		Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
-		
 		returnDepth = -1;
 		super.doDrop(hero);
 	}
 	
 	private void setBeacon(Hero hero ){
+		if (returnDepth != -1){
+			Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
+		}
+
 		returnDepth = Dungeon.depth;
 		returnBranch = Dungeon.branch;
 		returnPos = hero.pos;
-		
-		if(Polished_wealthDrop == null) {
-			Notes.add(Notes.Landmark.BEACON_LOCATION, returnDepth);
-		}
+
+		Notes.add(Notes.Landmark.BEACON_LOCATION, returnDepth);
 		
 		hero.spend( 1f );
 		hero.busy();
@@ -184,11 +184,9 @@ public class BeaconOfReturning extends Spell {
 			InterlevelScene.returnPos = returnPos;
 			Game.switchScene( InterlevelScene.class );
 		}
-
-		if (quantity == 1 && Polished_wealthDrop == null){
+		if (quantity == 1){
 			Notes.remove(Notes.Landmark.BEACON_LOCATION, returnDepth);
 		}
-		
 		detach(hero.belongings.backpack);
 		Catalog.countUse(getClass());
 		if (Random.Float() < talentChance){

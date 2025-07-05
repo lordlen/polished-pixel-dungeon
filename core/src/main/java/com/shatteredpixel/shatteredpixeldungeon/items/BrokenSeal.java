@@ -45,10 +45,8 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndUseItem;
-import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.GameMath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -337,6 +335,60 @@ public class BrokenSeal extends Item {
 			}
 		}
 
+		private int cooldown = 0;
+		private int turnsSinceEnemies = 0;
+
+		private static int COOLDOWN_START = 150;
+
+		@Override
+		public int icon() {
+			if (coolingDown() || shielding() > 0){
+				return BuffIndicator.SEAL_SHIELD;
+			} else {
+				return BuffIndicator.NONE;
+			}
+		}
+
+		@Override
+		public void tintIcon(Image icon) {
+			if (coolingDown() && shielding() == 0){
+				icon.brightness(0.3f);
+			} else {
+				icon.resetColor();
+			}
+		}
+
+		@Override
+		public float iconFadePercent() {
+			if (shielding() > 0){
+				return GameMath.gate(0, 1f - shielding()/(float)maxShield(), 1);
+			} else if (coolingDown()){
+				return GameMath.gate(0, cooldown / (float)COOLDOWN_START, 1);
+			} else {
+				return 0;
+			}
+		}
+
+		@Override
+		public String iconTextDisplay() {
+			if (shielding() > 0){
+				return Integer.toString(shielding());
+			} else if (coolingDown()){
+				return Integer.toString(cooldown);
+			} else {
+				return "";
+			}
+		}
+
+		@Override
+		public String desc() {
+			if (shielding() > 0){
+				return Messages.get(this, "desc_active", shielding(), cooldown);
+			} else {
+				return Messages.get(this, "desc_cooldown", cooldown);
+			}
+		}
+
 		@Override
 		public synchronized boolean act() {
 			if (cooldown > 0 && Regeneration.regenOn()){
@@ -410,6 +462,29 @@ public class BrokenSeal extends Item {
 			
 			//make sure it doesn't prematurely end
 			turnsSinceEnemies = -100;
+		}
+
+		public static final String COOLDOWN = "cooldown";
+		public static final String TURNS_SINCE_ENEMIES = "turns_since_enemies";
+
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(COOLDOWN, cooldown);
+			bundle.put(TURNS_SINCE_ENEMIES, turnsSinceEnemies);
+		}
+
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			if (bundle.contains(COOLDOWN)) {
+				cooldown = bundle.getInt(COOLDOWN);
+				turnsSinceEnemies = bundle.getInt(TURNS_SINCE_ENEMIES);
+
+			//if we have shield from pre-3.1, have it last a bit
+			} else if (shielding() > 0) {
+				turnsSinceEnemies = -100;
+			}
 		}
 
 		public static final String COOLDOWN = "cooldown";
