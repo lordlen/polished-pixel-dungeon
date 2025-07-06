@@ -101,6 +101,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Dungeon {
 
@@ -241,6 +242,44 @@ public class Dungeon {
 				current.call();
 				callback.call();
 			};
+		}
+		
+		
+		public static ConcurrentHashMap<Integer, Integer> levelLocks = new ConcurrentHashMap<>();
+		public static Integer getLock(int depth, int branch) {
+			final Integer id = 1000 * depth + branch;
+			levelLocks.putIfAbsent(id, id);
+			return levelLocks.get(id);
+		}
+		
+		public static Level getLevel( int depth, int branch ) throws IOException {
+			synchronized (getLock( depth, branch )) {
+				if(Dungeon.depth == depth && Dungeon.branch == branch) {
+					return Dungeon.level;
+				}
+				
+				Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ));
+				Level level = (Level)bundle.get( LEVEL );
+				
+				if (level == null){
+					throw new IOException();
+				} else {
+					return level;
+				}
+			}
+		}
+		
+		public static void replaceLevel( int depth, int branch, Level replacement ) throws IOException {
+			synchronized (getLock( depth, branch )) {
+				if(Dungeon.depth == depth && Dungeon.branch == branch) {
+					return;
+				}
+				
+				Bundle bundle = new Bundle();
+				bundle.put( LEVEL, replacement );
+				
+				FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
+			}
 		}
   
 	}
@@ -998,7 +1037,7 @@ public class Dungeon {
 		Debug.LoadGame();
 	}
 	
-	public static synchronized Level loadLevel( int save ) throws IOException {
+	public static Level loadLevel( int save ) throws IOException {
 		
 		Dungeon.level = null;
 		Actor.clear();
@@ -1012,32 +1051,6 @@ public class Dungeon {
 		} else {
 			return level;
 		}
-	}
-	
-	public static synchronized Level getLevel( int depth, int branch ) throws IOException {
-		if(Dungeon.depth == depth && Dungeon.branch == branch) {
-			return Dungeon.level;
-		}
-		
-		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ));
-		Level level = (Level)bundle.get( LEVEL );
-		
-		if (level == null){
-			throw new IOException();
-		} else {
-			return level;
-		}
-	}
-	
-	public static synchronized void replaceLevel( int depth, int branch, Level replacement ) throws IOException {
-		if(Dungeon.depth == depth && Dungeon.branch == branch) {
-			return;
-		}
-		
-		Bundle bundle = new Bundle();
-		bundle.put( LEVEL, replacement );
-		
-		FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
 	}
 	
 	public static void deleteGame( int save, boolean deleteLevels ) {

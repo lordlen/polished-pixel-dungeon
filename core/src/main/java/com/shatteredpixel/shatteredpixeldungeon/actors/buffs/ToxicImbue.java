@@ -86,7 +86,7 @@ public class ToxicImbue extends Buff {
 		left -= TICK;
 		
 		if (left <= 0){
-			Buff.affect(target, ToxicImmunity.class, ToxicImmunity.DURATION);
+			Buff.prolong(target, ToxicImmunity.class, ToxicImmunity.DURATION);
 			detach();
 		}
 		return true;
