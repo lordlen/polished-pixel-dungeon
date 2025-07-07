@@ -42,7 +42,7 @@ public class Scimitar extends MeleeWeapon {
 
 	@Override
 	public int max(int lvl) {
-		return  Math.round(3.75f*(tier+1)) +    //15 base, down from 20
+		return  Math.round(3.5f*(tier+1)) +    //14 base, down from 20
 				lvl*(tier+1);   				//scaling unchanged
 	}
 
