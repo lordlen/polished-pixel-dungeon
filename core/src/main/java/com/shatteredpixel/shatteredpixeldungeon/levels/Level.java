@@ -863,11 +863,19 @@ public abstract class Level implements Bundlable {
 
 			cell = Random.Int( length() );
 
-		} while ((Dungeon.level == this && heroFOV[cell])
-				|| !passable[cell]
-				|| (Char.hasProp(ch, Char.Property.LARGE) && !openSpace[cell])
-				|| Actor.findChar( cell ) != null);
+		} while (!validRespawn(ch, cell));
 		return cell;
+	}
+	
+	public boolean validRespawn( Char ch, int cell ) {
+		return ((Dungeon.level != this || !heroFOV[cell]) &&
+				(Dungeon.level == this ? Actor.findChar(cell) : findMob(cell)) == null &&
+				passable[cell] &&
+				!solid[cell] &&
+				traps.get(cell) == null &&
+				plants.get(cell) == null &&
+				cell != exit() &&
+				(!Char.hasProp(ch, Char.Property.LARGE) || openSpace[cell]));
 	}
 	
 	public int randomDestination( Char ch ) {

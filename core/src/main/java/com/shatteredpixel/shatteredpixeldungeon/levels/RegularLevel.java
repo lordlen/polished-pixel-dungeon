@@ -266,14 +266,12 @@ public abstract class RegularLevel extends Level {
 			do {
 				mob.pos = pointToCell(roomToSpawn.random());
 				tries--;
-			} while (tries >= 0 && (findMob(mob.pos) != null
-					|| entranceFOV[mob.pos] || PathFinder.distance[mob.pos] != Integer.MAX_VALUE
-					|| !passable[mob.pos]
-					|| solid[mob.pos]
-					|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
-					|| mob.pos == exit()
-					|| traps.get(mob.pos) != null || plants.get(mob.pos) != null
-					|| (!openSpace[mob.pos] && mob.properties().contains(Char.Property.LARGE))));
+			} while (tries >= 0 && (
+					entranceFOV[mob.pos] ||
+					PathFinder.distance[mob.pos] != Integer.MAX_VALUE ||
+					!roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this) ||
+					!validRespawn(mob, mob.pos)
+			));
 
 			if (tries >= 0) {
 				mobsToSpawn--;
@@ -288,14 +286,12 @@ public abstract class RegularLevel extends Level {
 					do {
 						mob.pos = pointToCell(roomToSpawn.random());
 						tries--;
-					} while (tries >= 0 && (findMob(mob.pos) != null
-							|| entranceFOV[mob.pos] || PathFinder.distance[mob.pos] != Integer.MAX_VALUE
-							|| !passable[mob.pos]
-							|| solid[mob.pos]
-							|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
-							|| mob.pos == exit()
-							|| traps.get(mob.pos) != null || plants.get(mob.pos) != null
-							|| (!openSpace[mob.pos] && mob.properties().contains(Char.Property.LARGE))));
+					} while (tries >= 0 && (
+							entranceFOV[mob.pos] ||
+							PathFinder.distance[mob.pos] != Integer.MAX_VALUE ||
+							!roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this) ||
+							!validRespawn(mob, mob.pos)
+					));
 
 					if (tries >= 0) {
 						mobsToSpawn--;
@@ -333,13 +329,9 @@ public abstract class RegularLevel extends Level {
 			}
 
 			cell = pointToCell(room.random(1));
-			if (!heroFOV[cell]
-					&& Actor.findChar( cell ) == null
-					&& passable[cell]
-					&& !solid[cell]
-					&& (!Char.hasProp(ch, Char.Property.LARGE) || openSpace[cell])
-					&& room.canPlaceCharacter(cellToPoint(cell), this)
-					&& cell != exit()) {
+			if (validRespawn(ch, cell) &&
+				room.canPlaceCharacter(cellToPoint(cell), this)) {
+				
 				return cell;
 			}
 

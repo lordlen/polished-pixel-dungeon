@@ -390,19 +390,35 @@ public abstract class ChampionEnemy extends Buff {
 			rays = 6;
 		}
 		
-		private float multiplier = 1.25f + .00001f;
+		//we add a small epsilon to avoid text display errors
+		private static final float baseMulti = 1.25f + .000001f;
+		private float multiplier = baseMulti;
+		
+		public boolean campExit = true;
 
-		public boolean Polished_huntThreshold() {
+		
+		private void modifyMultiplier(float amount) {
+			multiplier = GameMath.gate(baseMulti, multiplier + amount, 2f);
+		}
+		
+		public boolean huntThreshold() {
 			return multiplier >= 2f;
 		}
 		
 		private boolean Polished_huntNoti = false;
 		public void Polished_growingHunt() {
 			Mob mob = (Mob) target;
-			if(Polished_huntThreshold() && !Dungeon.hero.isStealthyTo(target) && !(mob.state == mob.FLEEING)) {
+			if(campExit) {
+				campExit = mob.state != mob.HUNTING;
+			}
+			
+			if(huntThreshold()) {
 				
 				if(target.buff(MagicalSleep.class) != null) {
 					Polished_huntNoti = false;
+					return;
+				}
+				if(Dungeon.hero.isStealthyTo(target) || mob.state == mob.FLEEING) {
 					return;
 				}
 				
@@ -413,6 +429,7 @@ public abstract class ChampionEnemy extends Buff {
 					GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
 					Polished_huntNoti = true;
 				}
+				
 			}
 		}
 		
@@ -420,8 +437,7 @@ public abstract class ChampionEnemy extends Buff {
 		public void Polished_weaken(Mob src) {
 			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
 				//-10 turns
-				multiplier -= 0.04f;
-				multiplier = Math.max(multiplier, 1.25f + .00001f);
+				modifyMultiplier(-0.04f);
 				
 				Sample.INSTANCE.play(Assets.Sounds.BURNING);
 				if(!Polished_weakenNoti) {
@@ -433,8 +449,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public boolean act() {
-			//POLISHED: .25%->.4%
-			if(!Polished_huntThreshold()) multiplier += 0.02f;
+			modifyMultiplier(+0.02f);
 			spend(5*TICK);
 			return true;
 		}
@@ -457,7 +472,7 @@ public abstract class ChampionEnemy extends Buff {
 		@Override
 		public String desc() {
 			String desc = Messages.get(this, "desc", (int)(100*(multiplier-1)), (int)(100*(1 - 1f/multiplier)));
-			if(Polished_huntThreshold()) desc += "\n\n" + Messages.get(this, "hunt_desc");
+			if(huntThreshold()) desc += "\n\n" + Messages.get(this, "hunt_desc");
 			return desc;
 		}
 
