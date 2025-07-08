@@ -28,10 +28,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.HolyDart;
+import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -39,10 +42,12 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
-import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
+import com.watabou.utils.Point;
 import com.watabou.utils.Random;
+
+import java.util.ArrayList;
 
 public abstract class ChampionEnemy extends Buff {
 
@@ -82,7 +87,7 @@ public abstract class ChampionEnemy extends Buff {
 		return 1f;
 	}
 
-	public float damageTakenFactor(boolean externalAttack){
+	public float damageTakenFactor(Object src){
 		return 1f;
 	}
 
@@ -254,7 +259,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float damageTakenFactor(boolean externalAttack) {
+		public float damageTakenFactor(Object src) {
 			return 0.6f;
 		}
 
@@ -285,15 +290,22 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float meleeDamageFactor(boolean adjacent) {
-			return adjacent ? 1f : 1.25f;
+		public float damageTakenFactor(Object src) {
+			if (Hero.Polished.isHeroSource(src, false)) {
+				src = Dungeon.hero;
+			}
+			
+			if(isDamageResisted(src)) {
+				return 0.1f;
+			}
+			else if(target.distance((Char) src) > 1) {
+				return 0.4f;
+			}
+			else {
+				return 0.5f;
+			}
 		}
-
-		@Override
-		public float damageTakenFactor(boolean externalAttack) {
-			return externalAttack ? 0.2f : 0.5f;
-		}
-
+		
 		@Override
 		public boolean canAttackWithExtraReach(Char enemy) {
 			if (Dungeon.level.distance( target.pos, enemy.pos ) > 2){
@@ -310,6 +322,46 @@ public abstract class ChampionEnemy extends Buff {
 				return PathFinder.distance[target.pos] <= 2;
 			}
 		}
+	}
+	
+	boolean isDamageResisted(Object src) {
+		
+		if(!(src instanceof Char)) {
+			//always get def boost against debuffs, blobs and other indirect sources
+			return true;
+		}
+		if(!(Dungeon.level instanceof RegularLevel)) {
+			return false;
+		}
+		
+		Char attacker = (Char)src;
+		RegularLevel level = (RegularLevel)Dungeon.level;
+		
+		ArrayList<Integer> roomCells = new ArrayList<>();
+		Room r = (level.room(target.pos));
+		
+		if(r != null) {
+			for (Point p : r.getPoints()){
+				roomCells.add(level.pointToCell(p));
+			}
+			
+			return !roomCells.contains(attacker.pos);
+		}
+		else {
+			boolean enemyRoom = true;
+			for(int i : PathFinder.NEIGHBOURS9) {
+				if (level.room( attacker.pos+i ) == null) {
+					enemyRoom = false;
+				}
+			}
+			if(enemyRoom) {
+				return true;
+			}
+			
+			//if within a reasonable distance, assume they're in the same room
+			return target.distance(attacker) > 8;
+		}
+		
 	}
 
 	public static class Blessed extends ChampionEnemy {
@@ -393,7 +445,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float damageTakenFactor(boolean externalAttack) {
+		public float damageTakenFactor(Object src) {
 			return 1f/multiplier;
 		}
 
