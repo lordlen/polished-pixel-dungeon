@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.HolyDart;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -43,6 +44,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
@@ -406,7 +408,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 		
 		private boolean Polished_huntNoti = false;
-		public void Polished_growingHunt() {
+		public void updateState() {
 			Mob mob = (Mob) target;
 			if(campExit) {
 				campExit = mob.state != mob.HUNTING;
@@ -433,6 +435,73 @@ public abstract class ChampionEnemy extends Buff {
 			}
 		}
 		
+		public static void relocateAll(Level level) {
+			for (Mob mob : level.mobs) {
+				if(mob.buff(ChampionEnemy.Growing.class) != null) {
+					relocateToExit(mob, level);
+				}
+			}
+		}
+		
+		public static void relocateToExit(Char ch, Level level) {
+			
+			int exit = level.exit();
+			
+			for(int offset : PathFinder.NEIGHBOURS8) {
+				int cell = exit + offset;
+				
+				if (level.validRespawn(ch, cell)) {
+					ch.pos = cell;
+					return;
+				}
+			}
+			
+			for(int offset : PathFinder.NEIGHBOURS25) {
+				int cell = exit + offset;
+				
+				if (cell >= 0 && cell < level.length() &&
+					level.validRespawn(ch, cell)) {
+					
+					ch.pos = cell;
+					return;
+				}
+			}
+		}
+		
+		public static int closeToExit(Char ch) {
+			
+			Growing grow = ch.buff(Growing.class);
+			if (grow == null || !grow.campExit) {
+				return -1;
+			}
+			
+			Level level = Dungeon.level;
+			int exit = level.exit();
+			
+			boolean[] pass = Dungeon.findPassable(ch, level.passable, ch.fieldOfView, false, true);
+			PathFinder.buildDistanceMap(exit, pass);
+			
+			//cant reach exit
+			if(PathFinder.distance[ch.pos] == Integer.MAX_VALUE) {
+				return -1;
+			}
+			
+			ArrayList<Integer> candidates = new ArrayList<>();
+			for(int i = 0; i < level.length(); i++) {
+				if(PathFinder.distance[i] <= 7 && i != exit) {
+					candidates.add(i);
+				}
+			}
+			
+			//exit blocked
+			if(candidates.isEmpty()) {
+				return -1;
+			}
+			
+			return Random.element(candidates);
+		}
+		
+		//unused, leftover code
 		private boolean Polished_weakenNoti = false;
 		public void Polished_weaken(Mob src) {
 			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
@@ -450,7 +519,7 @@ public abstract class ChampionEnemy extends Buff {
 		@Override
 		public boolean act() {
 			modifyMultiplier(+0.02f);
-			spend(5*TICK);
+			spend(6*TICK);
 			return true;
 		}
 
@@ -476,18 +545,21 @@ public abstract class ChampionEnemy extends Buff {
 			return desc;
 		}
 
-		private static final String MULTIPLIER = "multiplier";
+		private static final String MULTIPLIER 	= "multiplier";
+		private static final String CAMP_EXIT 	= "camp_exit";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
 			bundle.put(MULTIPLIER, multiplier);
+			bundle.put(CAMP_EXIT, campExit);
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 			multiplier = bundle.getFloat(MULTIPLIER);
+			campExit = bundle.getBoolean(CAMP_EXIT);
 		}
 	}
 

@@ -51,13 +51,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.ShadowClone;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.GuidingLight;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -76,7 +73,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScrol
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
@@ -281,7 +277,7 @@ public abstract class Mob extends Char {
 		}
 		
 		ChampionEnemy.Growing grow = buff(ChampionEnemy.Growing.class);
-		if (grow != null) grow.Polished_growingHunt();
+		if (grow != null) grow.updateState();
 		
 		enemy = chooseEnemy();
 		boolean enemyInFOV = enemy != null && enemy.isAlive() && fieldOfView[enemy.pos] && !enemy.isStealthyTo(this);
@@ -939,11 +935,6 @@ public abstract class Mob extends Char {
 				Berserk berserk = Dungeon.hero.buff(Berserk.class);
 				if(berserk != null) berserk.continueRampage();
 			}
-			
-			for (Mob mob : Dungeon.level.mobs) {
-				ChampionEnemy.Growing grow = mob.buff(ChampionEnemy.Growing.class);
-				if(grow != null) grow.Polished_weaken(this);
-			}
 		}
 
 		if (Dungeon.hero.isAlive() && !Dungeon.level.heroFOV[pos]) {
@@ -1263,6 +1254,9 @@ public abstract class Mob extends Char {
 		}
 
 		protected int randomDestination(){
+			int campExit = ChampionEnemy.Growing.closeToExit(Mob.this);
+			if(campExit != -1) return campExit;
+			
 			return Dungeon.level.randomDestination( Mob.this );
 		}
 		

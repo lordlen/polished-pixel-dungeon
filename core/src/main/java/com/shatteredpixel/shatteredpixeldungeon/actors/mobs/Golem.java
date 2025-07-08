@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
@@ -250,6 +251,10 @@ public class Golem extends Mob {
 		
 		@Override
 		protected int randomDestination() {
+			
+			int campExit = ChampionEnemy.Growing.closeToExit(Golem.this);
+			if(campExit != -1) return campExit;
+			
 			if(selfTeleCooldown <= 0) {
 				int tries = 0;
 				while (tries++ <= 10) {
@@ -260,8 +265,9 @@ public class Golem extends Mob {
 				
 				return -1;
 			}
-			
-			else return super.randomDestination();
+			else {
+				return Dungeon.level.randomDestination( Golem.this );
+			}
 		}
 	}
 

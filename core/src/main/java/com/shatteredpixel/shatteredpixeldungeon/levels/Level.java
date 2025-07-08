@@ -384,6 +384,9 @@ public abstract class Level implements Bundlable {
 		
 		createMobs();
 		createItems();
+		
+		//we have to do this at the end so it doesn't alter level generation
+		ChampionEnemy.Growing.relocateAll(this);
 
 		Random.popGenerator();
 	}
@@ -425,6 +428,9 @@ public abstract class Level implements Bundlable {
 			}
 		}
 		createMobs();
+		
+		ChampionEnemy.Growing.relocateAll(this);
+		
 	}
 
 	public void playLevelMusic(){
@@ -844,6 +850,10 @@ public abstract class Level implements Bundlable {
 				for (ChampionEnemy champ : mob.buffs(ChampionEnemy.class)) {
 					Class<?> type = champ.getClass();
 					GLog.w(Messages.get(type, "warn"));
+					
+					if(champ instanceof ChampionEnemy.Growing) {
+						ChampionEnemy.Growing.relocateToExit(mob, this);
+					}
 				}
 			}
 			return true;
