@@ -168,36 +168,34 @@ public abstract class ChampionEnemy extends Buff {
 
 		public class Polished {
 
-			private static final String COOLDOWN = "cooldown";
 			private static final String TIMER = "timer";
 
 			final static float baseCooldown = 1f;
-			public boolean cooldown;
 			Actor timer = null;
+			
 			{
-				initCooldown();
+				if(!Dungeon.Polished.loading) {
+					initCooldown();
+				}
 			}
 
 			void initCooldown() {
 				initCooldown(baseCooldown);
 			}
 			void initCooldown(float cd) {
-				cooldown = true;
-
 				//this should realistically never happen
 				if(timer != null) return;
+				
 				timer = new Actor() {
-
 					{
 						actPriority = LAST_PRIO;
 					}
 
 					@Override
 					protected boolean act() {
-						cooldown = false;
 						timer = null;
-
 						Actor.remove(this);
+						
 						return true;
 					}
 				};
@@ -209,23 +207,15 @@ public abstract class ChampionEnemy extends Buff {
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
-			bundle.put(Polished.COOLDOWN, polished.cooldown);
 			if(polished.timer != null) bundle.put(Polished.TIMER, polished.timer);
 		}
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 
-			if(bundle.contains(Polished.COOLDOWN))
-				polished.cooldown = bundle.getBoolean(Polished.COOLDOWN);
 			if(bundle.contains(Polished.TIMER)) {
 				if (polished.timer == null) polished.initCooldown();
 				polished.timer.restoreFromBundle(bundle.getBundle(Polished.TIMER));
-			} else {
-				//get rid of the spawn timer since we're loading
-				Actor.remove(polished.timer);
-				polished.timer = null;
-				polished.cooldown = false;
 			}
 		}
 
@@ -238,7 +228,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public boolean canAttackWithExtraReach(Char enemy) {
-			int range = polished.cooldown ? 1 : 4;
+			int range = polished.timer == null ? 4 : 1;
 
 			if (Dungeon.level.distance( target.pos, enemy.pos ) > range) {
 				return false;
