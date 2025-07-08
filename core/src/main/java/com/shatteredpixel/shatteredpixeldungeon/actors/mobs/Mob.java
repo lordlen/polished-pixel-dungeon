@@ -838,13 +838,13 @@ public abstract class Mob extends Char {
 			if (!(src instanceof Corruption) && state != FLEEING) {
 				if (state != HUNTING) {
 					alerted = true;
-					//assume the hero is hitting us in these common cases
-					if (src instanceof Wand || src instanceof ClericSpell || src instanceof ArmorAbility) {
+					
+					if (Hero.Polished.isHeroSource(src, true)) {
 						aggro(Dungeon.hero);
 						target = Dungeon.hero.pos;
 					}
 				} else {
-					if (src instanceof Wand || src instanceof ClericSpell || src instanceof ArmorAbility) {
+					if (Hero.Polished.isHeroSource(src, true)) {
 						recentlyAttackedBy.add(Dungeon.hero);
 					}
 				}

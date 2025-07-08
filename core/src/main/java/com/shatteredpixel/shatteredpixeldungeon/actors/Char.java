@@ -461,7 +461,7 @@ public abstract class Char extends Actor {
 			}
 
 			for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-				dmg *= buff.meleeDamageFactor(Dungeon.level.adjacent(this.pos, enemy.pos));
+				dmg *= buff.meleeDamageFactor(distance(enemy) > 1);
 			}
 
 			dmg *= AscensionChallenge.statModifier(this);

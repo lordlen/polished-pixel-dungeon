@@ -73,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.El
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BodyForm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HallowedGround;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
@@ -116,6 +117,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArm
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Berry;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.Guidebook;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.CrystalKey;
@@ -165,6 +167,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.MiningLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ExplosiveTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
@@ -326,6 +329,29 @@ public class Hero extends Char {
 
 			return tiersAvailable;
 		}
+		
+		public static boolean isHeroSource(Object src, boolean strict) {
+			
+			if (src instanceof Wand || src instanceof Bomb.ConjuredBomb ||
+				src instanceof ClericSpell || src instanceof ArmorAbility) {
+				
+				return true;
+			}
+			
+			if(!strict) {
+				if(src instanceof Trap) {
+					return true;
+				}
+				
+				if(src instanceof Bomb && !(src instanceof ExplosiveTrap.ExplosiveBomb)) {
+					return true;
+				}
+			}
+			
+			return false;
+			
+		}
+		
 	}
 
 	//This list is maintained so that some logic checks can be skipped
