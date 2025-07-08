@@ -128,9 +128,19 @@ public class Golem extends Mob {
 		if (teleporting){
 			((GolemSprite)sprite).teleParticles(false);
 			
-			if (!validTeleport(target)) {
-				target = adaptiveDestination();
+			if(!validTeleport(target)) {
+				//try to find a nearby tile
+				for(int offset : PathFinder.NEIGHBOURS8) {
+					if(validTeleport(target + offset)) {
+						target += offset;
+						break;
+					}
+				}
 			}
+			if(!validTeleport(target)) {
+				target = ((Golem.Wandering) WANDERING).randomDestination();
+			}
+			
 			if (validTeleport(target)) {
 				ScrollOfTeleportation.appear(this, target);
 				selfTeleCooldown = 30;
@@ -231,11 +241,27 @@ public class Golem extends Mob {
 				teleporting = true;
 				spend( 2*TICK );
 			} else {
-				target = adaptiveDestination();
+				target = randomDestination();
 				spend( TICK );
 			}
 
 			return true;
+		}
+		
+		@Override
+		protected int randomDestination() {
+			if(selfTeleCooldown <= 0) {
+				int tries = 0;
+				while (tries++ <= 10) {
+					//ignore pathing
+					int destination = Dungeon.level.randomDestination(null);
+					if (validTeleport(destination)) return destination;
+				}
+				
+				return -1;
+			}
+			
+			else return super.randomDestination();
 		}
 	}
 
