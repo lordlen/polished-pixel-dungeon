@@ -871,12 +871,27 @@ public abstract class Level implements Bundlable {
 	}
 	
 	public int randomDestination( Char ch ) {
-		int cell;
-		do {
-			cell = Random.Int( length() );
-		} while (!passable[cell]
-				|| (Char.hasProp(ch, Char.Property.LARGE) && !openSpace[cell]));
-		return cell;
+		
+		if(ch != null) {
+			boolean[] pass = Dungeon.findPassable(ch, passable, ch.fieldOfView, false, true);
+			PathFinder.buildDistanceMap(ch.pos, pass);
+		}
+		
+		int tries = 0;
+		while (tries++ <= 30) {
+			int cell = Random.Int( length() );
+			
+			if(ch != null) {
+				if(PathFinder.distance[cell] < Integer.MAX_VALUE) {
+					return cell;
+				}
+			}
+			else if(passable[cell]) {
+				return cell;
+			}
+		}
+		
+		return -1;
 	}
 	
 	public void addItemToSpawn( Item item ) {

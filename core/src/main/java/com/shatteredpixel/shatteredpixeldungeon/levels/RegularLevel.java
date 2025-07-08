@@ -349,29 +349,34 @@ public abstract class RegularLevel extends Level {
 	@Override
 	public int randomDestination( Char ch ) {
 		
-		int count = 0;
-		int cell = -1;
+		if(rooms.isEmpty()) return -1;
 		
-		while (true) {
-			
-			if (++count > 30) {
-				return -1;
-			}
+		if(ch != null) {
+			boolean[] pass = Dungeon.findPassable(ch, passable, ch.fieldOfView, false, true);
+			PathFinder.buildDistanceMap(ch.pos, pass);
+		}
+		
+		int tries = 0;
+		while (tries++ <= 30) {
 			
 			Room room = Random.element( rooms );
-			if (room == null) {
-				continue;
-			}
-
 			ArrayList<Point> points = room.charPlaceablePoints(this);
+			
 			if (!points.isEmpty()){
-				cell = pointToCell(Random.element(points));
-				if (passable[cell] && (!Char.hasProp(ch, Char.Property.LARGE) || openSpace[cell])) {
+				int cell = pointToCell(Random.element(points));
+				
+				if(ch != null) {
+					if(PathFinder.distance[cell] < Integer.MAX_VALUE) {
+						return cell;
+					}
+				}
+				else if(passable[cell]) {
 					return cell;
 				}
 			}
-			
 		}
+		
+		return -1;
 	}
 	
 	@Override

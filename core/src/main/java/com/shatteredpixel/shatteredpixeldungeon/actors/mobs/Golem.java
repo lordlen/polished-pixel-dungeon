@@ -124,14 +124,18 @@ public class Golem extends Mob {
 	protected boolean act() {
 		selfTeleCooldown--;
 		enemyTeleCooldown--;
+		
 		if (teleporting){
 			((GolemSprite)sprite).teleParticles(false);
-			if (Actor.findChar(target) == null && Dungeon.level.openSpace[target]) {
+			
+			if (!validTeleport(target)) {
+				target = adaptiveDestination();
+			}
+			if (validTeleport(target)) {
 				ScrollOfTeleportation.appear(this, target);
 				selfTeleCooldown = 30;
-			} else {
-				target = Dungeon.level.randomDestination(this);
 			}
+			
 			teleporting = false;
 			spend(TICK);
 			return true;
@@ -181,6 +185,36 @@ public class Golem extends Mob {
 		}
 		return true;
 	}
+	
+	private int adaptiveDestination() {
+		if(selfTeleCooldown <= 0) {
+			int tries = 0;
+			while (tries++ <= 10) {
+				
+				//ignore pathing
+				int destination = Dungeon.level.randomDestination(null);
+				if (validTeleport(destination)) return destination;
+			}
+			
+			return -1;
+		}
+		else {
+			return Dungeon.level.randomDestination(this);
+		}
+	}
+	
+	private boolean validTeleport(int cell) {
+		if(cell == -1) {
+			return false;
+		}
+		
+		Char ch = Actor.findChar(cell);
+		if(ch != null) {
+			return false;
+		}
+		
+		return Dungeon.level.passable[cell] && Dungeon.level.openSpace[cell];
+	}
 
 	private class Wandering extends Mob.Wandering{
 
@@ -197,7 +231,7 @@ public class Golem extends Mob {
 				teleporting = true;
 				spend( 2*TICK );
 			} else {
-				target = randomDestination();
+				target = adaptiveDestination();
 				spend( TICK );
 			}
 
