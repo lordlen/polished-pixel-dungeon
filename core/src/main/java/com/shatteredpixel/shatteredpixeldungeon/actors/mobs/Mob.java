@@ -933,8 +933,9 @@ public abstract class Mob extends Char {
 				}
 			}
 
-			if ((cause == Dungeon.hero || cause instanceof Wand || cause instanceof ClericSpell || cause instanceof ArmorAbility)
+			if ((cause == Dungeon.hero || Hero.Polished.isHeroSource(cause, false))
 				&& Dungeon.hero.subClass == HeroSubClass.BERSERKER) {
+				
 				Berserk berserk = Dungeon.hero.buff(Berserk.class);
 				if(berserk != null) berserk.continueRampage();
 			}

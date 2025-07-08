@@ -118,7 +118,7 @@ public abstract class ChampionEnemy extends Buff {
 			case 4:             buffCls = Blessed.class;      break;
 			case 5:             buffCls = Growing.class;      break;
 		}
-
+		
 		if (Dungeon.mobsToChampion <= 0 && Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES)) {
 			Buff.affect(m, buffCls);
 			if (m.state != m.PASSIVE) {
@@ -389,8 +389,7 @@ public abstract class ChampionEnemy extends Buff {
 			color = 0xFF2222; //a little white helps it stick out from background
 			rays = 6;
 		}
-
-		//POLISHED: base 19%->25%
+		
 		private float multiplier = 1.25f + .00001f;
 
 		public boolean Polished_huntThreshold() {
@@ -399,13 +398,14 @@ public abstract class ChampionEnemy extends Buff {
 		
 		private boolean Polished_huntNoti = false;
 		public void Polished_growingHunt() {
-			if(target.buff(MagicalSleep.class) != null) {
-				Polished_huntNoti = false;
-				return;
-			}
-			
 			Mob mob = (Mob) target;
 			if(Polished_huntThreshold() && !Dungeon.hero.isStealthyTo(target) && !(mob.state == mob.FLEEING)) {
+				
+				if(target.buff(MagicalSleep.class) != null) {
+					Polished_huntNoti = false;
+					return;
+				}
+				
 				mob.aggro(Dungeon.hero);
 				mob.target=Dungeon.hero.pos;
 				
