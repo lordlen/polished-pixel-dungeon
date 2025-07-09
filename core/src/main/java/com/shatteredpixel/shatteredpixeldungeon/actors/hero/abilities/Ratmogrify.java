@@ -149,7 +149,8 @@ public class Ratmogrify extends ArmorAbility {
 			Actor.remove( ch );
 			ch.sprite.killAndErase();
 			Dungeon.level.mobs.remove(ch);
-
+			
+			//Growing gets reset, guess its fine?
 			for (Buff b : persistentBuffs){
 				ch.add(b);
 			}

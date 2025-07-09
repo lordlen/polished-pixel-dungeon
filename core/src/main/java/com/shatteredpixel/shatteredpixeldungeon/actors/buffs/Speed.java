@@ -39,7 +39,7 @@ public class Speed extends FlavourBuff {
 
 	@Override
 	public void tintIcon(Image icon) {
-		icon.hardlight(0f, 0.2f, 1f);
+		icon.hardlight(0f, 0.25f, 1f);
 	}
 
 	@Override

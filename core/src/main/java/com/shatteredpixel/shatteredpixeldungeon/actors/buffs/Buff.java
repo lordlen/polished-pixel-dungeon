@@ -180,6 +180,21 @@ public class Buff extends Actor {
 			return buff;
 		}
 		
+		public static void copyPersistent(Char from, Char to) {
+			for (Buff b : from.buffs()){
+				if (b.revivePersists) {
+					Buff copy = Buff.affect(to, b.getClass());
+					
+					//make sure we preserve the scaling
+					if(b instanceof ChampionEnemy.Growing) {
+						Bundle bundle = new Bundle();
+						b.storeInBundle(bundle);
+						copy.restoreFromBundle(bundle);
+					}
+				}
+			}
+		}
+		
 		public static float customIconFade(Buff buff) {
 			float fade = -1f;
 			

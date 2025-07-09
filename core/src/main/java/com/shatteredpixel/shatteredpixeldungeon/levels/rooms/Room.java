@@ -156,6 +156,10 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 		return p.x > left && p.y > top && p.x < right && p.y < bottom;
 	}
 	
+	public boolean within( Point p ) {
+		return p.x >= left && p.y >= top && p.x <= right && p.y <= bottom;
+	}
+	
 	public Point center() {
 		return new Point(
 				(left + right) / 2 + (((right - left) % 2) == 1 ? Random.Int( 2 ) : 0),

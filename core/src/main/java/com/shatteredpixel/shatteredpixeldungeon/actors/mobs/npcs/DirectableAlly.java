@@ -850,7 +850,7 @@ public class DirectableAlly extends NPC {
 				level.updateFieldOfView(ch, fieldOfView);
 			}
 			
-			boolean[] pass = Dungeon.findPassable(ch, level.passable, fieldOfView, false);
+			boolean[] pass = Dungeon.findPassable(ch, level.passable);
 			path = PathFinder.find( from, end(), pass );
 		}
 		

@@ -23,6 +23,10 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.watabou.utils.BArray;
@@ -37,7 +41,7 @@ public class BlastingTrap extends Trap {
 	
 	@Override
 	public void activate() {
-		destroyEquipables();
+		affectTiles();
 		new BlastingBomb().explode(pos);
 		
 		if (reclaimed && !Dungeon.hero.isAlive()) {
@@ -45,7 +49,7 @@ public class BlastingTrap extends Trap {
 		}
 	}
 	
-	private void destroyEquipables() {
+	private void affectTiles() {
 		boolean[] explodable = new boolean[Dungeon.level.length()];
 		BArray.not( Dungeon.level.solid, explodable);
 		BArray.or( Dungeon.level.flamable, explodable, explodable);
@@ -56,11 +60,16 @@ public class BlastingTrap extends Trap {
 				
 				Heap heap = Dungeon.level.heaps.get(i);
 				if(heap != null) heap.Polished_destroyEquipables();
+				
+				Char ch = Actor.findChar(i);
+				if (ch instanceof Mob){
+					Buff.prolong(ch, Trap.HazardAssistTracker.class, HazardAssistTracker.DURATION);
+				}
 			}
 		}
 	}
 	
-	static class BlastingBomb extends Bomb {
+	public static class BlastingBomb extends ExplosiveTrap.ExplosiveBomb {
 		@Override
 		protected int explosionRange() {
 			return 2;

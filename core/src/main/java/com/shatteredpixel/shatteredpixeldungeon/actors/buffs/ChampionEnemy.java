@@ -28,10 +28,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.HolyDart;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -39,10 +43,13 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
-import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
+import com.watabou.utils.Point;
 import com.watabou.utils.Random;
+
+import java.util.ArrayList;
 
 public abstract class ChampionEnemy extends Buff {
 
@@ -82,7 +89,7 @@ public abstract class ChampionEnemy extends Buff {
 		return 1f;
 	}
 
-	public float damageTakenFactor(boolean externalAttack){
+	public float damageTakenFactor(Object src){
 		return 1f;
 	}
 
@@ -113,7 +120,7 @@ public abstract class ChampionEnemy extends Buff {
 			case 4:             buffCls = Blessed.class;      break;
 			case 5:             buffCls = Growing.class;      break;
 		}
-
+		
 		if (Dungeon.mobsToChampion <= 0 && Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES)) {
 			Buff.affect(m, buffCls);
 			if (m.state != m.PASSIVE) {
@@ -168,36 +175,34 @@ public abstract class ChampionEnemy extends Buff {
 
 		public class Polished {
 
-			private static final String COOLDOWN = "cooldown";
 			private static final String TIMER = "timer";
 
 			final static float baseCooldown = 1f;
-			public boolean cooldown;
 			Actor timer = null;
+			
 			{
-				initCooldown();
+				if(!Dungeon.Polished.loading) {
+					initCooldown();
+				}
 			}
 
 			void initCooldown() {
 				initCooldown(baseCooldown);
 			}
 			void initCooldown(float cd) {
-				cooldown = true;
-
 				//this should realistically never happen
 				if(timer != null) return;
+				
 				timer = new Actor() {
-
 					{
 						actPriority = LAST_PRIO;
 					}
 
 					@Override
 					protected boolean act() {
-						cooldown = false;
 						timer = null;
-
 						Actor.remove(this);
+						
 						return true;
 					}
 				};
@@ -209,23 +214,15 @@ public abstract class ChampionEnemy extends Buff {
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
-			bundle.put(Polished.COOLDOWN, polished.cooldown);
 			if(polished.timer != null) bundle.put(Polished.TIMER, polished.timer);
 		}
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 
-			if(bundle.contains(Polished.COOLDOWN))
-				polished.cooldown = bundle.getBoolean(Polished.COOLDOWN);
 			if(bundle.contains(Polished.TIMER)) {
 				if (polished.timer == null) polished.initCooldown();
 				polished.timer.restoreFromBundle(bundle.getBundle(Polished.TIMER));
-			} else {
-				//get rid of the spawn timer since we're loading
-				Actor.remove(polished.timer);
-				polished.timer = null;
-				polished.cooldown = false;
 			}
 		}
 
@@ -238,7 +235,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public boolean canAttackWithExtraReach(Char enemy) {
-			int range = polished.cooldown ? 1 : 4;
+			int range = polished.timer == null ? 4 : 1;
 
 			if (Dungeon.level.distance( target.pos, enemy.pos ) > range) {
 				return false;
@@ -264,7 +261,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float damageTakenFactor(boolean externalAttack) {
+		public float damageTakenFactor(Object src) {
 			return 0.6f;
 		}
 
@@ -295,15 +292,22 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float meleeDamageFactor(boolean adjacent) {
-			return adjacent ? 1f : 1.25f;
+		public float damageTakenFactor(Object src) {
+			if (Hero.Polished.isHeroSource(src, false)) {
+				src = Dungeon.hero;
+			}
+			
+			if(isDamageResisted(src)) {
+				return 0.1f;
+			}
+			else if(target.distance((Char) src) > 1) {
+				return 0.4f;
+			}
+			else {
+				return 0.5f;
+			}
 		}
-
-		@Override
-		public float damageTakenFactor(boolean externalAttack) {
-			return externalAttack ? 0.2f : 0.5f;
-		}
-
+		
 		@Override
 		public boolean canAttackWithExtraReach(Char enemy) {
 			if (Dungeon.level.distance( target.pos, enemy.pos ) > 2){
@@ -320,6 +324,69 @@ public abstract class ChampionEnemy extends Buff {
 				return PathFinder.distance[target.pos] <= 2;
 			}
 		}
+	}
+	
+	boolean isDamageResisted(Object src) {
+		
+		if(!(src instanceof Char)) {
+			//always get def boost against debuffs, blobs and other indirect sources
+			return true;
+		}
+		
+		Char attacker = (Char)src;
+		
+		if(!(Dungeon.level instanceof RegularLevel)) {
+			
+			//just check for an open path to the attacker
+			boolean[] pass = BArray.not(Dungeon.level.solid);
+			BArray.and(pass, Dungeon.level.openSpace, pass);
+			
+			PathFinder.buildDistanceMap(target.pos, pass);
+			for(int offset : PathFinder.NEIGHBOURS9) {
+				if(PathFinder.distance[attacker.pos + offset] < Integer.MAX_VALUE) {
+					return false;
+				}
+			}
+			
+			return true;
+			
+		}
+		
+		RegularLevel level = (RegularLevel)Dungeon.level;
+		
+		//resist damage unless...
+		// on the same room
+		Room room = (level.roomWithin(target.pos));
+		if(room != null && room.within(level.cellToPoint(attacker.pos))) {
+			return false;
+		}
+		Room roomAttacker = (level.roomWithin(attacker.pos));
+		if(roomAttacker!= null && roomAttacker.within(level.cellToPoint(target.pos))) {
+			return false;
+		}
+		
+		// there's an open path to the attacker
+		boolean[] pass = BArray.not(level.solid);
+		BArray.and(pass, level.openSpace, pass);
+		
+		PathFinder.buildDistanceMap(target.pos, pass);
+		for(int offset : PathFinder.NEIGHBOURS9) {
+			if(PathFinder.distance[attacker.pos + offset] < Integer.MAX_VALUE) {
+				return false;
+			}
+		}
+		
+		// there's an open path to their room
+		if(roomAttacker != null) {
+			for(Point p : roomAttacker.getPoints()) {
+				if(PathFinder.distance[level.pointToCell(p)] < Integer.MAX_VALUE) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+		
 	}
 
 	public static class Blessed extends ChampionEnemy {
@@ -347,23 +414,40 @@ public abstract class ChampionEnemy extends Buff {
 			color = 0xFF2222; //a little white helps it stick out from background
 			rays = 6;
 		}
+		
+		//we add a small epsilon to avoid text display errors
+		private static final float baseMulti = 1.25f 	+ .000001f;
+		private static final float maxMulti  = 2f 		+ .000001f;
+		private float multiplier = baseMulti;
+		
+		public boolean campExit = true;
 
-		//POLISHED: base 19%->25%
-		private float multiplier = 1.25f + .00001f;
-
-		public boolean Polished_huntThreshold() {
+		
+		private void modifyMultiplier(float amount) {
+			multiplier = GameMath.gate(baseMulti, multiplier + amount, maxMulti);
+		}
+		
+		public boolean huntThreshold() {
 			return multiplier >= 2f;
 		}
 		
 		private boolean Polished_huntNoti = false;
-		public void Polished_growingHunt() {
-			if(target.buff(MagicalSleep.class) != null) {
-				Polished_huntNoti = false;
-				return;
+		public void updateState() {
+			Mob mob = (Mob) target;
+			if(campExit) {
+				campExit = mob.state != mob.HUNTING;
 			}
 			
-			Mob mob = (Mob) target;
-			if(Polished_huntThreshold() && !Dungeon.hero.isStealthyTo(target) && !(mob.state == mob.FLEEING)) {
+			if(huntThreshold()) {
+				
+				if(target.buff(MagicalSleep.class) != null) {
+					Polished_huntNoti = false;
+					return;
+				}
+				if(Dungeon.hero.isStealthyTo(target) || mob.state == mob.FLEEING) {
+					return;
+				}
+				
 				mob.aggro(Dungeon.hero);
 				mob.target=Dungeon.hero.pos;
 				
@@ -371,15 +455,82 @@ public abstract class ChampionEnemy extends Buff {
 					GLog.w(Messages.get(ChampionEnemy.Growing.class, "hunt"));
 					Polished_huntNoti = true;
 				}
+				
 			}
 		}
 		
+		public static void relocateAll(Level level) {
+			for (Mob mob : level.mobs) {
+				if(mob.buff(ChampionEnemy.Growing.class) != null) {
+					relocateToExit(mob, level);
+				}
+			}
+		}
+		
+		public static void relocateToExit(Char ch, Level level) {
+			
+			int exit = level.exit();
+			if(exit == 0) return;
+			
+			for(int offset : PathFinder.NEIGHBOURS8) {
+				int cell = exit + offset;
+				
+				if (level.validRespawn(ch, cell)) {
+					ch.pos = cell;
+					return;
+				}
+			}
+			
+			for(int offset : PathFinder.NEIGHBOURS25) {
+				int cell = exit + offset;
+				
+				if (cell >= 0 && cell < level.length() &&
+					level.validRespawn(ch, cell)) {
+					
+					ch.pos = cell;
+					return;
+				}
+			}
+		}
+		
+		public static int closeToExit(Char ch) {
+			
+			Growing grow = ch.buff(Growing.class);
+			if (grow == null || !grow.campExit) {
+				return -1;
+			}
+			
+			Level level = Dungeon.level;
+			int exit = level.exit();
+			
+			PathFinder.buildDistanceMap(exit, Dungeon.findPassable(ch, level.passable));
+			
+			//cant reach exit
+			if(PathFinder.distance[ch.pos] == Integer.MAX_VALUE) {
+				return -1;
+			}
+			
+			ArrayList<Integer> candidates = new ArrayList<>();
+			for(int i = 0; i < level.length(); i++) {
+				if(PathFinder.distance[i] <= 7 && i != exit) {
+					candidates.add(i);
+				}
+			}
+			
+			//exit blocked
+			if(candidates.isEmpty()) {
+				return -1;
+			}
+			
+			return Random.element(candidates);
+		}
+		
+		//unused, leftover code
 		private boolean Polished_weakenNoti = false;
 		public void Polished_weaken(Mob src) {
 			if(src.EXP > 0 && src.maxLvl > 0 && src != target) {
 				//-10 turns
-				multiplier -= 0.04f;
-				multiplier = Math.max(multiplier, 1.25f + .00001f);
+				modifyMultiplier(-0.04f);
 				
 				Sample.INSTANCE.play(Assets.Sounds.BURNING);
 				if(!Polished_weakenNoti) {
@@ -391,9 +542,8 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public boolean act() {
-			//POLISHED: .25%->.4%
-			if(!Polished_huntThreshold()) multiplier += 0.02f;
-			spend(5*TICK);
+			modifyMultiplier(+0.02f);
+			spend(6*TICK);
 			return true;
 		}
 
@@ -403,7 +553,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float damageTakenFactor(boolean externalAttack) {
+		public float damageTakenFactor(Object src) {
 			return 1f/multiplier;
 		}
 
@@ -415,22 +565,25 @@ public abstract class ChampionEnemy extends Buff {
 		@Override
 		public String desc() {
 			String desc = Messages.get(this, "desc", (int)(100*(multiplier-1)), (int)(100*(1 - 1f/multiplier)));
-			if(Polished_huntThreshold()) desc += "\n\n" + Messages.get(this, "hunt_desc");
+			if(huntThreshold()) desc += "\n\n" + Messages.get(this, "hunt_desc");
 			return desc;
 		}
 
-		private static final String MULTIPLIER = "multiplier";
+		private static final String MULTIPLIER 	= "multiplier";
+		private static final String CAMP_EXIT 	= "camp_exit";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
 			bundle.put(MULTIPLIER, multiplier);
+			bundle.put(CAMP_EXIT, campExit);
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
 			multiplier = bundle.getFloat(MULTIPLIER);
+			campExit = bundle.getBoolean(CAMP_EXIT);
 		}
 	}
 

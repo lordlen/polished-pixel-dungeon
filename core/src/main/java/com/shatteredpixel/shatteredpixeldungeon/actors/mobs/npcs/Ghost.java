@@ -72,11 +72,18 @@ public class Ghost extends NPC {
 	protected class Wandering extends Mob.Wandering{
 		@Override
 		protected int randomDestination() {
+			
 			int pos = super.randomDestination();
+			
 			//cannot wander onto heaps or the level exit
 			if (Dungeon.level.heaps.get(pos) != null || pos == Dungeon.level.exit()){
 				return -1;
 			}
+			//avoid pits
+			if (Dungeon.level.avoid[pos]) {
+				return -1;
+			}
+			
 			return pos;
 		}
 	}

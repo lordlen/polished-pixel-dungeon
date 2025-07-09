@@ -65,6 +65,10 @@ public class BArray {
 		return result;
 	}
 	
+	public static boolean[] not(boolean[] a) {
+		return not(a, null);
+	}
+	
 	public static boolean[] not( boolean[] a, boolean[] result ) {
 		
 		int length = a.length;

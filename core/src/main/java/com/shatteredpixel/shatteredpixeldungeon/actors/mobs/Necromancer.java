@@ -317,11 +317,7 @@ public class Necromancer extends Mob {
 			mySkeleton.target = target;
 		}
 
-		for (Buff b : buffs()){
-			if (b.revivePersists) {
-				Buff.affect(mySkeleton, b.getClass());
-			}
-		}
+		Buff.Polished.copyPersistent(this, mySkeleton);
 	}
 
 	public static class SummoningBlockDamage{}

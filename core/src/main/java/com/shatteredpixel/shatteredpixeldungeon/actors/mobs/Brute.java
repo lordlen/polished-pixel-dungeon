@@ -26,14 +26,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
-import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.BruteSprite;
@@ -93,12 +90,17 @@ public class Brute extends Mob {
 
 
 		Char attacker = null;
-		if(src instanceof Char) attacker = (Char)src;
-		//assume the hero is hitting us in these common cases
-		else if (src instanceof Wand || src instanceof ClericSpell || src instanceof ArmorAbility) attacker = Dungeon.hero;
-		else if (enemy != null) attacker = enemy;
+		if(src instanceof Char) {
+			attacker = (Char)src;
+		}
+		else if (Hero.Polished.isHeroSource(src, false)) {
+			src = Dungeon.hero;
+		}
+		else if (enemy != null) {
+			attacker = enemy;
+		}
 
-		int separation = attacker != null ? Dungeon.level.distance(pos, attacker.pos)-1 : 10;
+		int separation = attacker != null ? distance(attacker) - 1 : 10;
 		float percent = GameMath.gate(0f, 0.2f * separation, 1f);
 
 		int deferred = Math.round(percent * dmg);
