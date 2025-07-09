@@ -152,10 +152,10 @@ public class SpiritHawk extends ArmorAbility {
 
 			flying = true;
 			if (Dungeon.hero != null) {
-				viewDistance = GameMath.gate(6, 6 + Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE), 8);
+				viewDistance = GameMath.gate(5, 5 + Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE), 9);
 				baseSpeed = 2f + Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT) / 2f;
 			} else {
-				viewDistance = 6;
+				viewDistance = 5;
 				baseSpeed = 2f;
 			}
 
@@ -258,7 +258,7 @@ public class SpiritHawk extends ArmorAbility {
 
 		@Override
 		protected boolean act() {
-			viewDistance = 6+Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE);
+			viewDistance = 5+Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE);
 			baseSpeed = 2f + Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT)/2f;
 			return super.act();
 		}
