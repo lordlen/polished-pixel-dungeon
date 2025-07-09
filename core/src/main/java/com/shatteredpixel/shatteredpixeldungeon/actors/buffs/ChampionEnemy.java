@@ -332,37 +332,59 @@ public abstract class ChampionEnemy extends Buff {
 			//always get def boost against debuffs, blobs and other indirect sources
 			return true;
 		}
+		
+		Char attacker = (Char)src;
+		
 		if(!(Dungeon.level instanceof RegularLevel)) {
+			
+			boolean[] pass = BArray.not(Dungeon.level.solid);
+			BArray.and(pass, Dungeon.level.openSpace, pass);
+			
+			PathFinder.buildDistanceMap(target.pos, pass);
+			for(int offset : PathFinder.NEIGHBOURS9) {
+				if(PathFinder.distance[attacker.pos + offset] < Integer.MAX_VALUE) {
+					return false;
+				}
+			}
+			
+			return true;
+			
+		}
+		
+		RegularLevel level = (RegularLevel)Dungeon.level;
+		
+		//resist damage unless...
+		// on the same room
+		Room room = (level.roomWithin(target.pos));
+		if(room != null && room.within(level.cellToPoint(attacker.pos))) {
+			return false;
+		}
+		Room roomAttacker = (level.roomWithin(attacker.pos));
+		if(roomAttacker!= null && roomAttacker.within(level.cellToPoint(target.pos))) {
 			return false;
 		}
 		
-		Char attacker = (Char)src;
-		RegularLevel level = (RegularLevel)Dungeon.level;
+		// there's an open path to the attacker
+		boolean[] pass = BArray.not(level.solid);
+		BArray.and(pass, level.openSpace, pass);
 		
-		ArrayList<Integer> roomCells = new ArrayList<>();
-		Room r = (level.room(target.pos));
-		
-		if(r != null) {
-			for (Point p : r.getPoints()){
-				roomCells.add(level.pointToCell(p));
+		PathFinder.buildDistanceMap(target.pos, pass);
+		for(int offset : PathFinder.NEIGHBOURS9) {
+			if(PathFinder.distance[attacker.pos + offset] < Integer.MAX_VALUE) {
+				return false;
 			}
-			
-			return !roomCells.contains(attacker.pos);
 		}
-		else {
-			boolean enemyRoom = true;
-			for(int i : PathFinder.NEIGHBOURS9) {
-				if (level.room( attacker.pos+i ) == null) {
-					enemyRoom = false;
+		
+		// there's an open path to their room
+		if(roomAttacker != null) {
+			for(Point p : roomAttacker.getPoints()) {
+				if(PathFinder.distance[level.pointToCell(p)] < Integer.MAX_VALUE) {
+					return false;
 				}
 			}
-			if(enemyRoom) {
-				return true;
-			}
-			
-			//if within a reasonable distance, assume they're in the same room
-			return target.distance(attacker) > 8;
 		}
+		
+		return true;
 		
 	}
 
