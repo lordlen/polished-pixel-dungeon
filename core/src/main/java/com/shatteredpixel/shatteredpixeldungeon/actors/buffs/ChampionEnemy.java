@@ -416,14 +416,15 @@ public abstract class ChampionEnemy extends Buff {
 		}
 		
 		//we add a small epsilon to avoid text display errors
-		private static final float baseMulti = 1.25f + .000001f;
+		private static final float baseMulti = 1.25f 	+ .000001f;
+		private static final float maxMulti  = 2f 		+ .000001f;
 		private float multiplier = baseMulti;
 		
 		public boolean campExit = true;
 
 		
 		private void modifyMultiplier(float amount) {
-			multiplier = GameMath.gate(baseMulti, multiplier + amount, 2f);
+			multiplier = GameMath.gate(baseMulti, multiplier + amount, maxMulti);
 		}
 		
 		public boolean huntThreshold() {
