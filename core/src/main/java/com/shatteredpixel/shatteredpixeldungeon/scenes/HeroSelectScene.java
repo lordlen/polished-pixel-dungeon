@@ -56,6 +56,7 @@ import com.watabou.noosa.NinePatch;
 import com.watabou.noosa.PointerArea;
 import com.watabou.noosa.tweeners.Tweener;
 import com.watabou.noosa.ui.Component;
+import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PointF;
 
@@ -640,7 +641,7 @@ public class HeroSelectScene extends PixelScene {
 							if (positive && seed != -1){
 
 								for (GamesInProgress.Info info : GamesInProgress.checkAll()){
-									if (info.customSeed.isEmpty() && info.seed == seed){
+									if (!DeviceCompat.isDebug() && info.customSeed.isEmpty() && info.seed == seed){
 										SPDSettings.customSeed("");
 										icon.resetColor();
 										ShatteredPixelDungeon.scene().addToFront(new WndMessage(Messages.get(HeroSelectScene.class, "custom_seed_duplicate")));

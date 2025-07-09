@@ -1236,9 +1236,13 @@ public class Dungeon {
 		else
 			BArray.setFalse(passable);
 	}
-
+	
+	public static boolean[] findPassable(Char ch, boolean[] pass){
+		return findPassable(ch, pass, new boolean[pass.length], false, true);
+	}
+	
 	public static boolean[] findPassable(Char ch, boolean[] pass, boolean[] vis, boolean chars){
-		return findPassable(ch, pass, vis, chars, chars);
+		return findPassable(ch, pass, vis, chars, true);
 	}
 
 	public static boolean[] findPassable(Char ch, boolean[] pass, boolean[] vis, boolean chars, boolean considerLarge){

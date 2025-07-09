@@ -344,8 +344,7 @@ public abstract class RegularLevel extends Level {
 		if(rooms.isEmpty()) return -1;
 		
 		if(ch != null) {
-			boolean[] pass = Dungeon.findPassable(ch, passable, ch.fieldOfView, false, true);
-			PathFinder.buildDistanceMap(ch.pos, pass);
+			PathFinder.buildDistanceMap(ch.pos, Dungeon.findPassable(ch, passable));
 		}
 		
 		int tries = 0;
@@ -727,6 +726,16 @@ public abstract class RegularLevel extends Level {
 	public Room room( int pos ) {
 		for (Room room : rooms) {
 			if (room.inside( cellToPoint(pos) )) {
+				return room;
+			}
+		}
+		
+		return null;
+	}
+	
+	public Room roomWithin( int pos ) {
+		for (Room room : rooms) {
+			if (room.within( cellToPoint(pos) )) {
 				return room;
 			}
 		}

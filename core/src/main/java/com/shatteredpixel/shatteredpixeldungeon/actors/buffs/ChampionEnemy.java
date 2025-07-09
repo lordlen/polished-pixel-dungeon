@@ -478,8 +478,7 @@ public abstract class ChampionEnemy extends Buff {
 			Level level = Dungeon.level;
 			int exit = level.exit();
 			
-			boolean[] pass = Dungeon.findPassable(ch, level.passable, ch.fieldOfView, false, true);
-			PathFinder.buildDistanceMap(exit, pass);
+			PathFinder.buildDistanceMap(exit, Dungeon.findPassable(ch, level.passable));
 			
 			//cant reach exit
 			if(PathFinder.distance[ch.pos] == Integer.MAX_VALUE) {

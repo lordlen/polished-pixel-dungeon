@@ -891,8 +891,7 @@ public abstract class Level implements Bundlable {
 	public int randomDestination( Char ch ) {
 		
 		if(ch != null) {
-			boolean[] pass = Dungeon.findPassable(ch, passable, ch.fieldOfView, false, true);
-			PathFinder.buildDistanceMap(ch.pos, pass);
+			PathFinder.buildDistanceMap(ch.pos, Dungeon.findPassable(ch, passable));
 		}
 		
 		int tries = 0;
