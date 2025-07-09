@@ -330,24 +330,28 @@ public class TimekeepersHourglass extends Artifact {
 
 		float turnPenalty = 0f;
 
-		public void increase(float time) {
+		void increase(float time) {
 			turnPenalty += time;
 			spend(time);
 		}
 
-		public void delay(float time) {
+		void delay(float time) {
 			spend(time);
 		}
 
-		public void endFreeze() {
+		void endFreeze() {
 			actPriority=HERO_PRIO+1;
 			slowTimers.add(this);
 		}
 
-		public void initDelay() {
+		void initDelay() {
 			//we do this temporarily so it doesn't instantly detach
 			actPriority = HERO_PRIO-1;
 			spend(baseDelay);
+		}
+		
+		void onActiveLoad() {
+			actPriority = HERO_PRIO-1;
 		}
 
 		@Override
@@ -682,6 +686,7 @@ public class TimekeepersHourglass extends Artifact {
 
 			if(bundle.contains(TIME_DEBT)) {
 				debt = new timeDebt();
+				debt.onActiveLoad();
 				debt.restoreFromBundle(bundle.getBundle( TIME_DEBT ));
 			}
 		}
