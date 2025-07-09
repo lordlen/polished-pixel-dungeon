@@ -47,7 +47,12 @@ public class Swiftness extends Armor.Glyph {
 
 	@Override
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
+		
 		int level = max(0, armor.buffedLvl());
+		
+		// lvl 0 - 16.7%
+		// lvl 1 - 23.1%
+		// lvl 2 - 28.5%
 		float procChance = (level+2f)/(level+12f) * procChanceMultiplier(defender);
 
 		if ( attacker.alignment != defender.alignment && Random.Float() < procChance ) {
