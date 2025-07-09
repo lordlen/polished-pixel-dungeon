@@ -197,23 +197,6 @@ public class Golem extends Mob {
 		return true;
 	}
 	
-	private int adaptiveDestination() {
-		if(selfTeleCooldown <= 0) {
-			int tries = 0;
-			while (tries++ <= 10) {
-				
-				//ignore pathing
-				int destination = Dungeon.level.randomDestination(null);
-				if (validTeleport(destination)) return destination;
-			}
-			
-			return -1;
-		}
-		else {
-			return Dungeon.level.randomDestination(this);
-		}
-	}
-	
 	private boolean validTeleport(int cell) {
 		if(cell == -1) {
 			return false;
