@@ -384,11 +384,13 @@ public abstract class Level implements Bundlable {
 		
 		createMobs();
 		createItems();
+
+		Random.popGenerator();
+		
 		
 		//we have to do this at the end so it doesn't alter level generation
 		ChampionEnemy.Growing.relocateAll(this);
-
-		Random.popGenerator();
+		
 	}
 	
 	public void setSize(int w, int h){
