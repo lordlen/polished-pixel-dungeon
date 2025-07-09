@@ -470,6 +470,7 @@ public abstract class ChampionEnemy extends Buff {
 		public static void relocateToExit(Char ch, Level level) {
 			
 			int exit = level.exit();
+			if(exit == 0) return;
 			
 			for(int offset : PathFinder.NEIGHBOURS8) {
 				int cell = exit + offset;
