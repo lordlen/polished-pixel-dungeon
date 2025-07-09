@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -126,6 +127,20 @@ public abstract class Shaman extends Mob {
 			
 			int dmg = Random.NormalIntRange( 6, 15 );
 			dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
+			
+			if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
+				
+				dmg = enemy.defenseProc( this, dmg );
+				
+				//do not trigger on-hit logic if defenseProc returned a negative value
+				if (dmg >= 0) {
+					if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
+						dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+						enemy.buff(Viscosity.ViscosityTracker.class).detach();
+					}
+				}
+			}
+			
 			enemy.damage( dmg, new EarthenBolt() );
 			
 			if (!enemy.isAlive() && enemy == Dungeon.hero) {
