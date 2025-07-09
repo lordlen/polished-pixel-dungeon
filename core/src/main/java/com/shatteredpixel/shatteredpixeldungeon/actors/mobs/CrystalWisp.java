@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -132,6 +133,20 @@ public class CrystalWisp extends Mob{
 		if (hit( this, enemy, true )) {
 
 			int dmg = Random.NormalIntRange( 5, 10 );
+			
+			if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
+				
+				dmg = enemy.defenseProc( this, dmg );
+				
+				//do not trigger on-hit logic if defenseProc returned a negative value
+				if (dmg >= 0) {
+					if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
+						dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+						enemy.buff(Viscosity.ViscosityTracker.class).detach();
+					}
+				}
+			}
+			
 			enemy.damage( dmg, new LightBeam() );
 
 			if (!enemy.isAlive() && enemy == Dungeon.hero) {
