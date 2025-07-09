@@ -337,6 +337,7 @@ public abstract class ChampionEnemy extends Buff {
 		
 		if(!(Dungeon.level instanceof RegularLevel)) {
 			
+			//just check for an open path to the attacker
 			boolean[] pass = BArray.not(Dungeon.level.solid);
 			BArray.and(pass, Dungeon.level.openSpace, pass);
 			
