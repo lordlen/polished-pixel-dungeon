@@ -1745,10 +1745,10 @@ public class Hero extends Char {
 
 		//we ceil this one to avoid letting the player easily take 0 dmg from tenacity early
 		//POLISHED: we round normally, and then just set a min of 1. Why doesn't it work like this already?
-		int prevDmg = dmg;
+		int preDmg = dmg;
 		dmg = Math.round(dmg * RingOfTenacity.damageMultiplier( this ));
 		dmg = Math.max(dmg, 1);
-		dmg = Math.min(dmg, prevDmg);
+		dmg = Math.min(dmg, preDmg);
 
 		int preHP = HP + shielding();
 		if (src instanceof Hunger) preHP -= shielding();
@@ -2292,7 +2292,7 @@ public class Hero extends Char {
 				Buff.affect(Dungeon.hero, Hunger.class).satisfy(Hunger.STARVING);
 
 				PotionOfHealing.cure(this);
-				Buff.prolong(this, Invulnerability.class, Invulnerability.DURATION);
+				Buff.Polished.prolongAligned(this, Invulnerability.class, Invulnerability.DURATION);
 
 				SpellSprite.show(this, SpellSprite.ANKH);
 				GameScene.flash(0x80FFFF40);
