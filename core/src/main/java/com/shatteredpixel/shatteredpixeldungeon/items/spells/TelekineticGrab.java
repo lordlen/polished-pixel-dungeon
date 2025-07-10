@@ -91,7 +91,8 @@ public class TelekineticGrab extends TargetedSpell {
 
 			}
 
-		} else if (ch != null && ch == Dungeon.hero && bow != null && SPDSettings.Polished.huntress()) {
+		} else if (	ch != null && ch == Dungeon.hero &&
+					bow != null && SPDSettings.Polished.huntress()) {
 			bow.Polished_resetCharges();
 			updateQuickslot();
 			

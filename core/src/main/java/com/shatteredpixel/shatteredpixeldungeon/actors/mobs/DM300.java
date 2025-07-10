@@ -207,7 +207,8 @@ public class DM300 extends Mob {
 				if (!canReach() && turnsSinceLastAbility >= MIN_COOLDOWN) {
           
 					//use a coneAOE to try and account for trickshotting angles
-					if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC)) {
+					if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC) &&
+							(Random.Int(4) != 0 || enemy.paralysed > 0)) {
 						lastAbility = GAS;
 						turnsSinceLastAbility = 0;
 
@@ -449,7 +450,7 @@ public class DM300 extends Mob {
 		do {
 			safeCell = rockCenter + PathFinder.NEIGHBOURS8[Random.Int(8)];
 		} while (safeCell == pos
-				|| (Dungeon.level.solid[safeCell] && Random.Int(4) != 0)
+				|| (Dungeon.level.solid[safeCell] && Random.Int(2) != 0)
 				|| (Blob.volumeAt(safeCell, CavesBossLevel.PylonEnergy.class) > 0 && Random.Int(2) == 0));
 
 		ArrayList<Integer> rockCells = new ArrayList<>();
@@ -777,8 +778,8 @@ public class DM300 extends Mob {
 
 		@Override
 		public void affectChar(Char ch) {
-			if (!(ch instanceof DM300) && !ch.isImmune(this.getClass())){
-				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 4 : 3);
+			if (!(ch instanceof DM300) && !ch.isImmune(getClass())){
+				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 4);
 				if (ch == Dungeon.hero) {
 					Statistics.bossScores[2] -= 100;
 				}

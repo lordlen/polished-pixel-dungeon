@@ -116,7 +116,7 @@ public class WarpingTrap extends TeleportationTrap {
 				super.detach();
 			}
 			else {
-				spendConstant(Float.POSITIVE_INFINITY);
+				diactivate();
 				active = false;
 			}
 		}

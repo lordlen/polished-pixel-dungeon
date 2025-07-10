@@ -493,7 +493,8 @@ public abstract class Char extends Actor {
 			//POLISHED: do we let them stack?
 			if ( buff(Weakness.class) != null ){
 				dmg *= 0.67f;
-			} else if(buff(Brittle.class) != null) {
+			}
+			if(buff(Brittle.class) != null) {
 				dmg *= 0.75f;
 			}
 
@@ -520,11 +521,14 @@ public abstract class Char extends Actor {
 
 				//vulnerable specifically applies after armor reductions
 				//POLISHED: do we let them stack?
+				float multi = 1f;
 				if (enemy.buff(Vulnerable.class) != null) {
-					effectiveDamage *= 1.33f;
-				} else if(enemy.buff(Brittle.class) != null) {
-					effectiveDamage *= 1.25f;
+					multi *= 1.33f;
 				}
+				if(enemy.buff(Brittle.class) != null) {
+					multi *= 1.25f;
+				}
+				effectiveDamage = Math.round(effectiveDamage * multi);
 
 				effectiveDamage = attackProc(enemy, effectiveDamage);
 			}

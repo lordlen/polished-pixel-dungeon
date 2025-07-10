@@ -89,10 +89,10 @@ public class WandOfTransfusion extends DamageWand {
 			//heals/shields an ally or a charmed enemy while damaging self
 			if (ch.alignment == Char.Alignment.ALLY || ch.buff(Charm.class) != null){
 				
-				// 5% of max hp
-				int selfDmg = Math.round(curUser.HT*0.05f);
+				// 4% of max hp
+				int selfDmg = Math.round(curUser.HT*0.04f);
 				
-				int healing = selfDmg + 3*buffedLvl();
+				int healing = selfDmg + 1 + 3*buffedLvl();
 				int shielding = (ch.HP + healing) - ch.HT;
 				if (shielding > 0){
 					healing -= shielding;
@@ -189,17 +189,17 @@ public class WandOfTransfusion extends DamageWand {
 
 	@Override
 	public String statsDesc() {
-		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.05f): 1;
+		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.04f): 1;
 		if (levelKnown)
-			return Messages.get(this, "stats_desc", selfDMG, selfDMG + 3*buffedLvl(), 5+buffedLvl(), min(), max());
+			return Messages.get(this, "stats_desc", selfDMG, selfDMG + 1 + 3*buffedLvl(), 5+buffedLvl(), min(), max());
 		else
-			return Messages.get(this, "stats_desc", selfDMG, selfDMG, 5, min(0), max(0));
+			return Messages.get(this, "stats_desc", selfDMG, selfDMG + 1, 5, min(0), max(0));
 	}
 
 	@Override
 	public String upgradeStat1(int level) {
-		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.05f): 1;
-		return Integer.toString(selfDMG + 3*level);
+		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.04f): 1;
+		return Integer.toString(selfDMG + 1 + 3*level);
 	}
 
 	@Override
