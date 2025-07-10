@@ -51,8 +51,10 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndSadGhost;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 public class Ghost extends NPC {
@@ -181,8 +183,13 @@ public class Ghost extends NPC {
 					questBoss = new GreatCrab();
 					txt_quest = Messages.get(this, "crab_1", Messages.titleCase(Dungeon.hero.name())); break;
 			}
-
-			questBoss.pos = Dungeon.level.randomRespawnCell( this );
+			
+			boolean[] pass = BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null);
+			PathFinder.buildDistanceMap(Dungeon.hero.pos, pass);
+			int tries = 10;
+			do {
+				questBoss.pos = Dungeon.level.randomRespawnCell( this );
+			} while(PathFinder.distance[questBoss.pos] <= 10 && tries-- >= 0);
 
 			if (questBoss.pos != -1) {
 				GameScene.add(questBoss);
