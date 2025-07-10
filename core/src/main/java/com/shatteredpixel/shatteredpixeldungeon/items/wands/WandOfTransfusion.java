@@ -89,10 +89,10 @@ public class WandOfTransfusion extends DamageWand {
 			//heals/shields an ally or a charmed enemy while damaging self
 			if (ch.alignment == Char.Alignment.ALLY || ch.buff(Charm.class) != null){
 				
-				// 5% of max hp
-				int selfDmg = Math.round(curUser.HT*0.05f);
+				// 4% of max hp
+				int selfDmg = Math.round(curUser.HT*0.04f);
 				
-				int healing = selfDmg + 3*buffedLvl();
+				int healing = selfDmg + 1 + 3*buffedLvl();
 				int shielding = (ch.HP + healing) - ch.HT;
 				if (shielding > 0){
 					healing -= shielding;
