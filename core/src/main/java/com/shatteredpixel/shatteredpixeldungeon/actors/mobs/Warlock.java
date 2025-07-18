@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -126,6 +127,19 @@ public class Warlock extends Mob implements Callback {
 					&& enemy.alignment == alignment
 					&& (Char.hasProp(enemy, Property.BOSS) || Char.hasProp(enemy, Property.MINIBOSS))){
 				dmg *= 0.5f;
+			}
+			
+			if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
+				
+				dmg = enemy.defenseProc( this, dmg );
+				
+				//do not trigger on-hit logic if defenseProc returned a negative value
+				if (dmg >= 0) {
+					if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
+						dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+						enemy.buff(Viscosity.ViscosityTracker.class).detach();
+					}
+				}
 			}
 
 			enemy.damage( dmg, new DarkBolt() );

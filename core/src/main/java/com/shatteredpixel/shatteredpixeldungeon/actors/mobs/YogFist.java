@@ -510,8 +510,23 @@ public abstract class YogFist extends Mob {
 			Invisibility.dispel(this);
 			Char enemy = this.enemy;
 			if (hit( this, enemy, true )) {
+				
+				int dmg = Random.NormalIntRange(10, 20);
+				
+				if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
+					
+					dmg = enemy.defenseProc( this, dmg );
+					
+					//do not trigger on-hit logic if defenseProc returned a negative value
+					if (dmg >= 0) {
+						if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
+							dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+							enemy.buff(Viscosity.ViscosityTracker.class).detach();
+						}
+					}
+				}
 
-				enemy.damage( Random.NormalIntRange(10, 20), new LightBeam() );
+				enemy.damage( dmg, new LightBeam() );
 				Buff.prolong( enemy, Blindness.class, Blindness.DURATION/2f );
 
 				if (!enemy.isAlive() && enemy == Dungeon.hero) {
@@ -579,8 +594,23 @@ public abstract class YogFist extends Mob {
 			Invisibility.dispel(this);
 			Char enemy = this.enemy;
 			if (hit( this, enemy, true )) {
+				
+				int dmg = Random.NormalIntRange(10, 20);
+				
+				if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
+					
+					dmg = enemy.defenseProc( this, dmg );
+					
+					//do not trigger on-hit logic if defenseProc returned a negative value
+					if (dmg >= 0) {
+						if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
+							dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+							enemy.buff(Viscosity.ViscosityTracker.class).detach();
+						}
+					}
+				}
 
-				enemy.damage( Random.NormalIntRange(10, 20), new DarkBolt() );
+				enemy.damage( dmg, new DarkBolt() );
 
 				Light l = enemy.buff(Light.class);
 				boolean cleanse = enemy.buff(PotionOfCleansing.Cleanse.class) != null;
