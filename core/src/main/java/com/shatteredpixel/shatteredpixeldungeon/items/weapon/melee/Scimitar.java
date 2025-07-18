@@ -37,13 +37,13 @@ public class Scimitar extends MeleeWeapon {
 		hitSoundPitch = 1.2f;
 
 		tier = 3;
-		DLY = 0.8f; //1.25x speed
+		DLY = 0.75f; //1.33x speed
 	}
 
 	@Override
 	public int max(int lvl) {
-		return  4*(tier+1) +    //16 base, down from 20
-				lvl*(tier+1);   //scaling unchanged
+		return  Math.round(3.75f*(tier+1)) +    //15 base, down from 20
+				lvl*(tier+1);   				//scaling unchanged
 	}
 
 	@Override
