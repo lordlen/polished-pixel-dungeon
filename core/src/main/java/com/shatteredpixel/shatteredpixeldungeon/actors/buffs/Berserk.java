@@ -164,17 +164,16 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	public float resistanceFactor(){
 		int points = ((Hero)target).pointsInTalent(Talent.LAST_STAND);
-
+		if(points == 0) return 1f;
+		
 		if(facingEnemies() >= 3) {
 			switch (points) {
 				case 1: return 0.82f;
 				case 2: return 0.7f;
 				case 3: return 0.62f;
-
-				case 0: default: return 1f;
 			}
 		}
-		else return 1f;
+		return 1f;
 	}
 
 	public float damageFactor(){

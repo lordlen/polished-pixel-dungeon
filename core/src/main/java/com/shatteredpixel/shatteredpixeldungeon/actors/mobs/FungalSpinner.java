@@ -46,7 +46,10 @@ public class FungalSpinner extends Spinner {
 	@Override
 	public Item createLoot(){
 		//doesn't affect regular spinner drops
-		Dungeon.LimitedDrops.SPINNER_MEAT.count--;
+		//Dungeon.LimitedDrops.SPINNER_MEAT.count--;
+		
+		//TO ADD: Separate Fungal Spinner drop count
+		
 		return super.createLoot();
 	}
 

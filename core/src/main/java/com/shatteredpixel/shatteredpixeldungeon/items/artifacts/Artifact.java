@@ -60,12 +60,7 @@ public class Artifact extends KindofMisc {
 
 	//used by some artifacts to keep track of duration of effects or cooldowns to use.
 	protected int cooldown = 0;
-
-
-	public void Polished_maxCharge() {
-		charge = chargeCap;
-	}
-
+	
 	@Override
 	public boolean doEquip( final Hero hero ) {
 
@@ -255,7 +250,12 @@ public class Artifact extends KindofMisc {
 	public void charge(Hero target, float amount){
 		//do nothing by default;
 	}
-
+	
+	public void DEBUG_maxCharge() {
+		charge = chargeCap;
+	}
+	
+	
 	public class ArtifactBuff extends Buff {
 
 		@Override

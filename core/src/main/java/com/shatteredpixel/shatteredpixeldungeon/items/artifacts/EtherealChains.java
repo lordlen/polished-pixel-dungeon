@@ -130,11 +130,6 @@ public class EtherealChains extends Artifact {
 		charge = 5+(level()*2); //sets charge to soft cap
 	}
 
-	@Override
-	public void Polished_maxCharge() {
-		charge = 5+(level()*2);
-	}
-
 	public CellSelector.Listener caster = new CellSelector.Listener(){
 
 		@Override
@@ -339,8 +334,8 @@ public class EtherealChains extends Artifact {
 					&& !cursed
 					&& target.buff(MagicImmune.class) == null
 					&& Regeneration.regenOn()) {
-				//gains a charge in 50 - 2*missingCharge turns
-				float chargeGain = (1 / (50f - (chargeTarget - charge)*2f));
+				//gains a charge in 50 - missingCharge turns
+				float chargeGain = (1 / (50f - (chargeTarget - charge)));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 				partialCharge += chargeGain;
 			} else if (cursed && Random.Int(100) == 0){
@@ -379,4 +374,10 @@ public class EtherealChains extends Artifact {
 
 		}
 	}
+	
+	@Override
+	public void DEBUG_maxCharge() {
+		charge = 5+(level()*2);
+	}
+	
 }
