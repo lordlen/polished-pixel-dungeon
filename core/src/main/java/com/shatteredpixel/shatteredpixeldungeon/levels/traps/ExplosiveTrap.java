@@ -50,5 +50,8 @@ public class ExplosiveTrap extends Trap {
 			Badges.validateDeathFromFriendlyMagic();
 		}
 	}
+	
+	//used to track source
+	public static class ExplosiveBomb extends Bomb {}
 
 }

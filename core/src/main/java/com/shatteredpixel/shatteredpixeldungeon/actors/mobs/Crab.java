@@ -37,8 +37,7 @@ public class Crab extends Mob {
 		defenseSkill = 5;
 		
 		baseSpeed = 1.5f;
-		//we do this to avoid any potential rounding errors
-		//crab would need to move for ~5.000.000 turns for this to alter regular movement
+		//we do this to avoid rounding errors
 		baseSpeed -= .0000001f;
 		
 		EXP = 4;

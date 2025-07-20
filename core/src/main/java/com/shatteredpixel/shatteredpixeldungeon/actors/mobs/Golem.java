@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
@@ -124,14 +125,28 @@ public class Golem extends Mob {
 	protected boolean act() {
 		selfTeleCooldown--;
 		enemyTeleCooldown--;
+		
 		if (teleporting){
 			((GolemSprite)sprite).teleParticles(false);
-			if (Actor.findChar(target) == null && Dungeon.level.openSpace[target]) {
+			
+			if(!validTeleport(target)) {
+				//try to find a nearby tile
+				for(int offset : PathFinder.NEIGHBOURS8) {
+					if(validTeleport(target + offset)) {
+						target += offset;
+						break;
+					}
+				}
+			}
+			if(!validTeleport(target)) {
+				target = ((Golem.Wandering) WANDERING).randomDestination();
+			}
+			
+			if (validTeleport(target)) {
 				ScrollOfTeleportation.appear(this, target);
 				selfTeleCooldown = 30;
-			} else {
-				target = Dungeon.level.randomDestination(this);
 			}
+			
 			teleporting = false;
 			spend(TICK);
 			return true;
@@ -181,6 +196,19 @@ public class Golem extends Mob {
 		}
 		return true;
 	}
+	
+	private boolean validTeleport(int cell) {
+		if(cell == -1) {
+			return false;
+		}
+		
+		Char ch = Actor.findChar(cell);
+		if(ch != null) {
+			return false;
+		}
+		
+		return Dungeon.level.passable[cell] && Dungeon.level.openSpace[cell];
+	}
 
 	private class Wandering extends Mob.Wandering{
 
@@ -202,6 +230,27 @@ public class Golem extends Mob {
 			}
 
 			return true;
+		}
+		
+		@Override
+		protected int randomDestination() {
+			
+			int campExit = ChampionEnemy.Growing.closeToExit(Golem.this);
+			if(campExit != -1) return campExit;
+			
+			if(selfTeleCooldown <= 0) {
+				int tries = 0;
+				while (tries++ <= 10) {
+					//ignore pathing
+					int destination = Dungeon.level.randomDestination(null);
+					if (validTeleport(destination)) return destination;
+				}
+				
+				return -1;
+			}
+			else {
+				return Dungeon.level.randomDestination( Golem.this );
+			}
 		}
 	}
 

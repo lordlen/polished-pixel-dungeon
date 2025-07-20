@@ -166,12 +166,8 @@ public class SpectralNecromancer extends Necromancer {
 		wraith.adjustStats(4);
 		Dungeon.level.occupyCell( wraith );
 		((SpectralNecromancerSprite)sprite).finishSummoning();
-
-		for (Buff b : buffs()){
-			if (b.revivePersists) {
-				Buff.affect(wraith, b.getClass());
-			}
-		}
+		
+		Buff.Polished.copyPersistent(this, wraith);
 		wraithIDs.add(wraith.id());
 	}
 }

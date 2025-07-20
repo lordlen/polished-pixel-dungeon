@@ -737,10 +737,10 @@ public class DM300 extends Mob {
 		}
 		 */
 
-		PathFinder.Path path_large = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, true));
+		PathFinder.Path path_long = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, true));
 		PathFinder.Path path_destroy = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, false));
 
-		boolean destroy = path_destroy != null && (path_large == null || path_large.size() > path_destroy.size());
+		boolean destroy = path_destroy != null && (path_long == null || path_long.size() > path_destroy.size());
 		destroy = destroy || (Dungeon.level.adjacent(pos, target) && !Dungeon.level.openSpace[target]);
 
 		if(state == HUNTING && destroy ) {
