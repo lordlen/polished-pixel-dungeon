@@ -293,8 +293,10 @@ public class Toolbar extends Component {
 		add(btnSearch = new Tool() {
 			@Override
 			protected void onClick() {
+				boolean examine = examining || GameScene.cancel();
+				
 				if (Dungeon.hero != null && Dungeon.hero.ready) {
-					if (!examining && !GameScene.cancel()) {
+					if (!examine) {
 						GameScene.selectCell(informer);
 						examining = true;
 					} else if (examining && GameScene.Polished.canInput()) {

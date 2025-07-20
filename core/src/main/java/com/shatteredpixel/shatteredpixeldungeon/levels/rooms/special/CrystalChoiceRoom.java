@@ -163,9 +163,7 @@ public class CrystalChoiceRoom extends SpecialRoom {
 					(!forceAdjacent && level.adjacent(pos, level.pointToCell(entrance1))));
 			
 			Heap drop = level.drop(reward, pos);
-			if(nearsighted && !Polished.addLighting) {
-				drop.autoExplored = !level.adjacent(pos, level.pointToCell(entrance1));
-			}
+			drop.autoExplored = !level.adjacent(pos, level.pointToCell(entrance1));
 		}
 
 		Item hidden = Generator.random(Random.oneOf(
