@@ -142,7 +142,7 @@ public class Debug {
             ((Wand) i).gainCharge(level);
         }
         if(i instanceof Artifact) {
-            ((Artifact) i).Polished_maxCharge();
+            ((Artifact) i).DEBUG_maxCharge();
         }
 
         i.collect();

@@ -140,9 +140,11 @@ public class HallowedGround extends TargetedClericSpell {
 
 			if (ch != Dungeon.hero) {
 				int barrier = 15 - (ch.HT - ch.HP);
-				barrier = Math.max(barrier, 0);
+				barrier = Math.max(0, barrier);
+				
 				ch.HP += 15 - barrier;
 				ch.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(15-barrier), FloatingText.HEALING );
+				
 				if (barrier > 0){
 					Buff.affect(ch, Barrier.class).incShield(barrier);
 					ch.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(barrier), FloatingText.SHIELDING );

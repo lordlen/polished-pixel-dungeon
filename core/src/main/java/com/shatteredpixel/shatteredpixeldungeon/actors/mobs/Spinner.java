@@ -60,8 +60,7 @@ public class Spinner extends Mob {
 
 	@Override
 	public float lootChance() {
-		if(this instanceof FungalSpinner) 	return super.lootChance();
-		else 								return super.lootChance() * ((6f - Dungeon.LimitedDrops.SPINNER_MEAT.count) / 6f);
+		return super.lootChance() * ((6f - Dungeon.LimitedDrops.SPINNER_MEAT.count) / 6f);
 	}
 
 	@Override

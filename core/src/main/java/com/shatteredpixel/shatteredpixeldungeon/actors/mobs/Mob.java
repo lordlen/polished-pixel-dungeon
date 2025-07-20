@@ -146,10 +146,11 @@ public abstract class Mob extends Char {
 
 
 	}
+	
 	public class Polished {
 		public boolean onCooldown = false;
 		Actor timer = null;
-		int blockCooldown = 20;
+		static final int blockCooldown = 20;
 
 		void initTimer() {
 			timer = new Actor() {

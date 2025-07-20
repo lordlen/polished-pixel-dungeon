@@ -53,7 +53,6 @@ public class HighGrass {
 
 	public static void trample( Level level, int pos ) {
 		if (freezeTrample) return;
-
 		int trampledItems = 0;
 		
 		Char ch = Actor.findChar(pos);
@@ -61,7 +60,6 @@ public class HighGrass {
 		if (level.map[pos] == Terrain.FURROWED_GRASS){
 			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.HUNTRESS){
 				//Do nothing
-				freezeTrample = true;
 			} else {
 				Level.set(pos, Terrain.GRASS);
 			}

@@ -149,7 +149,7 @@ public abstract class TippedDart extends Dart {
 		
 		int nature = Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
 		if (nature > 0 && Dungeon.hero.heroClass != HeroClass.HUNTRESS && SPDSettings.Polished.huntress()) {
-			Barkskin.conditionallyAppend(Dungeon.hero, 2, 2*nature);
+			Barkskin.conditionallyAppend(Dungeon.hero, 2, 3);
 		}
 	}
 
