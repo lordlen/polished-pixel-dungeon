@@ -363,15 +363,15 @@ public class TitleScene extends PixelScene {
 						if (index == 0) {
 							Updates.launchUpdate(Updates.updateData());
 						} else if (index == 1){
-							ChangesScene.changesSelected = 0;
-							ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
+							PolishedChangesScene.changesSelected = 0;
+							ShatteredPixelDungeon.switchNoFade( PolishedChangesScene.class );
 						}
 					}
 				});
 
 			} else {
-				ChangesScene.changesSelected = 0;
-				ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
+				PolishedChangesScene.changesSelected = 0;
+				ShatteredPixelDungeon.switchNoFade( PolishedChangesScene.class );
 			}
 		}
 

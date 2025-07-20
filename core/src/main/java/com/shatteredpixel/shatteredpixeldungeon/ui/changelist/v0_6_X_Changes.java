@@ -859,6 +859,10 @@ public class v0_6_X_Changes {
 		changes.hardlight(Window.TITLE_COLOR);
 		changeInfos.add(changes);
 		
+		changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+		changes.hardlight( Window.TITLE_COLOR );
+		changeInfos.add(changes);
+		
 		changes.addButton( new ChangeButton(Icons.get(Icons.SHPX), "Developer Commentary",
 				"_-_ Released June 4th, 2017\n" +
 				"_-_ 116 days after Shattered v0.5.0\n" +
@@ -877,37 +881,48 @@ public class v0_6_X_Changes {
 				"_-_ Added 8 new standard room types, and loads of new standard room layouts\n\n" +
 				"_-_ Reduced number of traps in later chapters"));
 		
-		changes.addButton( new ChangeButton(new ItemSprite(new Torch()), "Light Source Buffs",
-				"_-_ Light sources now grant significantly more vision\n" +
-				"_-_ Light from torches now lasts 20% longer\n" +
-				"_-_ Slightly increased visibility on floor 22+\n" +
-				"_-_ Floor 21 shop now sells 3 torches, up from 2"));
-		
-		changes.addButton( new ChangeButton(new ItemSprite(new Food()), "Food Buffs",
-				"_-_ Meat and small rations are 50% more filling\n" +
-				"_-_ Pasties and blandfruit are 12.5% more filling"));
-		
-		changes.addButton( new ChangeButton(new ItemSprite(new Greataxe()), "Tier-5 Weapon Buffs",
-				"_-_ Greataxe base damage increased by ~22%\n" +
-				"_-_ Greatshield base damage increased by ~17%"));
+		changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+		changes.hardlight( CharSprite.WARNING );
+		changeInfos.add(changes);
 		
 		changes.addButton( new ChangeButton(new ItemSprite(new StoneOfEnchantment()), "Enchant and Glyph Balance Changes",
 				"_-_ Vampiric enchant lifesteal reduced by 20%\n\n" +
-				"Lucky enchant rebalanced:\n" +
-				"_-_ now deals 2x/0x damage, instead of min/max\n" +
-				"_-_ base chance to deal 2x increased by ~10%\n\n" +
-				"Glyph of Viscosity rebalanced:\n" +
-				"_-_ proc chance reduced by ~25% \n" +
-				"_-_ damage over time reverted from 15% to 10%\n\n" +
-				"_-_ Glyph of Entanglement root time reduced by 40%\n\n" +
-				"Glyph of Potential rebalanced:\n" +
-				"_-_ self-damage no longer scales with max hp\n" +
-				"_-_ grants more charge at higher levels"));
+						"Lucky enchant rebalanced:\n" +
+						"_-_ now deals 2x/0x damage, instead of min/max\n" +
+						"_-_ base chance to deal 2x increased by ~10%\n\n" +
+						"Glyph of Viscosity rebalanced:\n" +
+						"_-_ proc chance reduced by ~25% \n" +
+						"_-_ damage over time reverted from 15% to 10%\n\n" +
+						"_-_ Glyph of Entanglement root time reduced by 40%\n\n" +
+						"Glyph of Potential rebalanced:\n" +
+						"_-_ self-damage no longer scales with max hp\n" +
+						"_-_ grants more charge at higher levels"));
 		
 		changes.addButton( new ChangeButton(Icons.get(Icons.PREFS), Messages.get(ChangesScene.class, "misc"),
 				"_-_ Visiting floor 21 before completing the imp quest no longer prevents his shop from spawning\n\n" +
-				"_-_ Floor 2 entry doors are now only hidden for new players\n\n" +
-				"_-_ Falling damage tweaked to be less random\n\n" +
-				"_-_ Resume indicator now appears in more cases"));
+						"_-_ Floor 2 entry doors are now only hidden for new players\n\n" +
+						"_-_ Falling damage tweaked to be less random\n\n" +
+						"_-_ Resume indicator now appears in more cases"));
+		
+		changes = new ChangeInfo(Messages.get(ChangesScene.class, "buffs"), false, null);
+		changes.hardlight( CharSprite.POSITIVE );
+		changeInfos.add(changes);
+		
+		changes.addButton( new ChangeButton(new ItemSprite(new Torch()), "Light Source Buffs",
+				"_-_ Light sources now grant significantly more vision\n" +
+						"_-_ Light from torches now lasts 20% longer\n" +
+						"_-_ Slightly increased visibility on floor 22+\n" +
+						"_-_ Floor 21 shop now sells 3 torches, up from 2"));
+		
+		changes.addButton( new ChangeButton(new ItemSprite(new Food()), "Food Buffs",
+				"_-_ Meat and small rations are 50% more filling\n" +
+						"_-_ Pasties and blandfruit are 12.5% more filling"));
+		
+		changes.addButton( new ChangeButton(new ItemSprite(new Greataxe()), "Tier-5 Weapon Buffs",
+				"_-_ Greataxe base damage increased by ~22%\n" +
+						"_-_ Greatshield base damage increased by ~17%"));
+		
+		changes = new ChangeInfo("", false, null);
+		changeInfos.add(changes);
 	}
 }

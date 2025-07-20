@@ -151,6 +151,7 @@ public enum Icons {
 	CHASM_ROOM_SECRET,
 
 	WELL_CHANGE,
+	WELL_EMPTY,
 
 
 	//ui menus, credits scene
@@ -167,7 +168,6 @@ public enum Icons {
 	PPD,
 
 	//unused
-	WELL_EMPTY,
 	TRAPS_ROOM_POISON,
 	PIRANHA,
 	TOXIC_GAS_ROOM_SIMPLIFIED
@@ -497,6 +497,9 @@ public enum Icons {
 			case WELL_CHANGE:
 				icon.frame( icon.texture.uvRectBySize( 144, 144, 16, 16 ) );
 				break;
+			case WELL_EMPTY:
+				icon.frame( icon.texture.uvRectBySize( 160, 144, 16, 16 ) );
+				break;
 
 			//ui menus, credits scene
 			case UNCHECKED_POLISHED:
@@ -532,9 +535,6 @@ public enum Icons {
 				break;
 
 			//unusued
-			case WELL_EMPTY:
-				icon.frame( icon.texture.uvRectBySize( 192, 176, 16, 16 ) );
-				break;
 			case TRAPS_ROOM_POISON:
 				icon.frame( icon.texture.uvRectBySize( 208, 176, 16, 16 ) );
 				break;
