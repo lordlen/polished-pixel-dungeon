@@ -44,7 +44,7 @@ public class Sickle extends MeleeWeapon {
 		hitSoundPitch = 1f;
 
 		tier = 2;
-		ACC = 0.66f; //34% penalty to accuracy
+		ACC = 0.67f; //33% penalty to accuracy
 	}
 
 	@Override
