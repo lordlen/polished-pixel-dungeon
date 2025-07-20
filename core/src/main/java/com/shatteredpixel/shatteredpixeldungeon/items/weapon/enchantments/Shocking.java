@@ -35,6 +35,7 @@ import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Shocking extends Weapon.Enchantment {
 
@@ -43,7 +44,6 @@ public class Shocking extends Weapon.Enchantment {
 	@Override
 	public int proc( Weapon weapon, Char attacker, Char defender, int damage ) {
 		int level = Math.max( 0, weapon.buffedLvl() );
-		boolean onWater = Dungeon.level.water[defender.pos] && !defender.flying;
 
 		// lvl 0 - 25%
 		// lvl 1 - 40%
@@ -61,7 +61,7 @@ public class Shocking extends Weapon.Enchantment {
 			affected.remove(defender); //defender isn't hurt by lightning
 			for (Char ch : affected) {
 				if (ch.alignment != attacker.alignment) {
-					ch.damage(Math.round(damage * powerMulti * (onWater ? 0.75f : 0.5f)), this);
+					ch.damage(Math.round(damage * powerMulti * (Dungeon.level.water[ch.pos] && !ch.flying ? 0.75f : 0.5f)), this);
 				}
 			}
 
@@ -79,11 +79,11 @@ public class Shocking extends Weapon.Enchantment {
 		return WHITE;
 	}
 
-	private ArrayList<Char> affected = new ArrayList<>();
+	private HashSet<Char> affected = new HashSet<>();
 
 	private ArrayList<Lightning.Arc> arcs = new ArrayList<>();
 	
-	public static void arc( Char attacker, Char defender, int dist, ArrayList<Char> affected, ArrayList<Lightning.Arc> arcs ) {
+	public static void arc( Char attacker, Char defender, int dist, HashSet<Char> affected, ArrayList<Lightning.Arc> arcs ) {
 
 		defender.sprite.centerEmitter().burst(SparkParticle.FACTORY, 3);
 		defender.sprite.flash();
@@ -93,7 +93,7 @@ public class Shocking extends Weapon.Enchantment {
 		for (int i = 0; i < PathFinder.distance.length; i++) {
 			if (PathFinder.distance[i] < Integer.MAX_VALUE) {
 				Char n = Actor.findChar(i);
-				if (n != null && n != attacker && !affected.contains(n)) {
+				if (n != null && n != attacker && n != defender && !affected.contains(n)) {
 					hitThisArc.add(n);
 				}
 			}
