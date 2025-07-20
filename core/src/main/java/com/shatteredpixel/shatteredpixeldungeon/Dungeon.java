@@ -960,7 +960,6 @@ public class Dungeon {
 		if (fullLoad) {
 			
 			LimitedDrops.restore( bundle.getBundle(LIMDROPS) );
-			FoundItems.restore( bundle.getBundle(FOUND_ITEMS) );
 
 			chapters = new HashSet<>();
 			int ids[] = bundle.getIntArray( CHAPTERS );
@@ -1015,6 +1014,7 @@ public class Dungeon {
 		}
 		
 		Notes.restoreFromBundle( bundle );
+		FoundItems.restore( bundle.getBundle(FOUND_ITEMS) );
 		
 		hero = null;
 		hero = (Hero)bundle.get( HERO );

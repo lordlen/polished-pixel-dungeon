@@ -373,16 +373,18 @@ public class TimekeepersHourglass extends Artifact {
 		@Override
 		public void detach() {
 
-			if(turnPenalty > 0 && target.buff(PotionOfCleansing.Cleanse.class) == null) {
+			if(turnPenalty > 0) {
 				GameScene.flash(0x80FFFFFF);
 				Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
-
-				Buff.affect(target, Slow.class, 2* (baseDebt + turnPenalty));
-				target.next();
 				
-				//shouldn't punish the player for going into debt frequently
-				Hunger hunger = Buff.affect(target, Hunger.class);
-				hunger.POLISHED_delay(baseDebt);
+				Slow slow = Buff.affect(target, Slow.class, 2* (baseDebt + turnPenalty));
+				if(target.buffs().contains(slow)) {
+					//shouldn't punish the player for going into debt frequently
+					Hunger hunger = Buff.affect(target, Hunger.class);
+					hunger.POLISHED_delay(baseDebt);
+				}
+				
+				target.next();
 			}
 
 			super.detach();

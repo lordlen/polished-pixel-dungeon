@@ -43,7 +43,7 @@ public class Shocking extends Weapon.Enchantment {
 	@Override
 	public int proc( Weapon weapon, Char attacker, Char defender, int damage ) {
 		int level = Math.max( 0, weapon.buffedLvl() );
-		boolean onWater = Dungeon.level.water[defender.pos];
+		boolean onWater = Dungeon.level.water[defender.pos] && !defender.flying;
 
 		// lvl 0 - 25%
 		// lvl 1 - 40%
