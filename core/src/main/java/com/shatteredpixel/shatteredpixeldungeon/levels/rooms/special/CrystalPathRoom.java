@@ -289,12 +289,12 @@ public class CrystalPathRoom extends SpecialRoom {
 		}
 		while(adjacents != Polished.forceAdjacents && (horizontalPath ? height() : width()) >= 9);
 		
-		boolean auto = nearsighted && !Polished.addLighting;
-		level.drop(potions.remove(0), level.pointToCell(p1)).autoExplored = auto && !adj1;
-		level.drop(scrolls.remove(0), level.pointToCell(s1)).autoExplored = auto && !adj2;
+		
+		level.drop(potions.remove(0), level.pointToCell(p1)).autoExplored = !adj1;
+		level.drop(scrolls.remove(0), level.pointToCell(s1)).autoExplored = !adj2;
 
-		level.drop(potions.remove(0), level.pointToCell(p2)).autoExplored = auto && !adj3;
-		level.drop(scrolls.remove(0), level.pointToCell(s2)).autoExplored = auto && !adj4;
+		level.drop(potions.remove(0), level.pointToCell(p2)).autoExplored = !adj3;
+		level.drop(scrolls.remove(0), level.pointToCell(s2)).autoExplored = !adj4;
 
 		//player can only see these if they unlock the previous doors, so never count them for exploration
 		level.drop(potions.remove(0), shuffle == 1 ? prize1 : prize2).autoExplored = true;

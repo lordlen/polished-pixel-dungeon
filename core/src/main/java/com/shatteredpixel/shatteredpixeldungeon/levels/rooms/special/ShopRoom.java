@@ -258,7 +258,7 @@ public class ShopRoom extends SpecialRoom {
 		
 		itemsToSpawn.add( TippedDart.randomTipped(2) );
 
-		itemsToSpawn.add( new Alchemize().quantity(Random.IntRange(8, 12)));
+		itemsToSpawn.add( new Alchemize().quantity(8));
 
 		Bag bag = ChooseBag(Dungeon.hero.belongings);
 		if (bag != null) {
