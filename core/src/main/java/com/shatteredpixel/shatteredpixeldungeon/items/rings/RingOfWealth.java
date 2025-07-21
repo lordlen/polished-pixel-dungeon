@@ -561,8 +561,9 @@ public class RingOfWealth extends Ring {
 
 	public static void onLevelUp(Char target) {
 		AlchemizeLeft alchemizeLeft = target.buff(AlchemizeLeft.class);
-		if(getBuffedBonus(target, Wealth.class) > 0 && alchemizeLeft != null)
+		if(getBuffedBonus(target, Wealth.class) > 0 && alchemizeLeft != null) {
 			alchemizeLeft.countUp(1);
+		}
 	}
 
 	public class Wealth extends RingBuff {}
