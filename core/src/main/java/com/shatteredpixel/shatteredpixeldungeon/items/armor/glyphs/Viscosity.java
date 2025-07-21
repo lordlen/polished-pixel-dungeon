@@ -63,6 +63,10 @@ public class Viscosity extends Glyph {
 		}
 
 		private int level = 0;
+		
+		public void setLevel(int level) {
+			this.level = level;
+		}
 
 		public int deferDamage(int dmg){
 			//account for icon stomach (just skip the glyph)
