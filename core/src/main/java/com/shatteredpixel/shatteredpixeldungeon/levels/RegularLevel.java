@@ -238,18 +238,7 @@ public abstract class RegularLevel extends Level {
 		Point c = cellToPoint(entrance());
 		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 10);
 
-		boolean[] entranceWalkable = BArray.not(solid, null);
-
-		//all doors within the entrance room are ignored for this walk
-		for (int y = roomEntrance.top; y <= roomEntrance.bottom; y++){
-			for (int x = roomEntrance.left; x <= roomEntrance.right; x++){
-				int cell = x + y*width();
-				if (passable[cell]){
-					entranceWalkable[cell] = true;
-				}
-			}
-		}
-
+		boolean[] entranceWalkable = BArray.or(BArray.not(solid), passable, null);
 		PathFinder.buildDistanceMap(entrance(), entranceWalkable, 10);
 
 		Mob mob = null;
