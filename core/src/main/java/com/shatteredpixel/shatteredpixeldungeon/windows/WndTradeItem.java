@@ -234,6 +234,13 @@ public class WndTradeItem extends WndInfoItem {
 		hero.spend(-Item.TIME_TO_PICK_UP);
 
 		if (shop != null){
+			for (Item buyback : shop.getBuybackItems()) {
+				if(buyback.isSimilar(item)) {
+					buyback.merge(item);
+					return;
+				}
+			}
+			
 			shop.getBuybackItems().add(item);
 			while (shop.getBuybackItems().size() > Shopkeeper.MAX_BUYBACK_HISTORY){
 				shop.getBuybackItems().remove(0);
@@ -259,6 +266,13 @@ public class WndTradeItem extends WndInfoItem {
 			hero.spend(-Item.TIME_TO_PICK_UP);
 
 			if (shop != null){
+				for (Item buyback : shop.getBuybackItems()) {
+					if(buyback.isSimilar(item)) {
+						buyback.merge(item);
+						return;
+					}
+				}
+				
 				shop.getBuybackItems().add(item);
 				while (shop.getBuybackItems().size() > Shopkeeper.MAX_BUYBACK_HISTORY){
 					shop.getBuybackItems().remove(0);
