@@ -93,6 +93,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CrabSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DM300Sprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ElementalSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GhostSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.GolemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GuardSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HermitCrabSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -101,6 +102,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.NecromancerSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ShopkeeperSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SpectralNecromancerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.WandmakerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
@@ -362,7 +364,7 @@ public class v1_0_X_PPDChanges {
 						"50% dmg reduction -> 40%\n" +
 						"\n" +
 						"Now also immune to Wand of Corrosion damage.\n" +
-						"Now also resistant to Wand of Blastwave and Regrowth effects.\n" +
+						"Now also resistant to wands of Blastwave, Regrowth and Corruption effects.\n" +
 						"No longer immune to Shocking\n" +
 						"\n" +
 						"_Projecting:_\n" +
@@ -1034,11 +1036,42 @@ public class v1_0_X_PPDChanges {
 		RoundShield shield = new RoundShield();
 		shield.enchant(Reflection.newInstance(Blocking.class));
 		addChange(shield, "Blocking Rework",
-				"- Shield strength: 2 + level -> 3 + level/2 (rounded)\n" +
+				"- Shield strength: 2 + level -> 4 + level/2 (rounded)\n" +
 						"- Proc chance: 10%/12%/14%... -> 18%/19.5%/21%...\n" +
 						"\n" +
-						"- Shielding now breaks after first hit.\n" +
+						"- Shielding now breaks after the first hit.\n" +
 						"- Duration: 6 turns -> 5 turns"
+		);
+		
+		Image arrow = Icons.ARROW.get();
+		arrow.brightness(1.25f);
+		addChange(arrow, "Resume Indicator",
+				"On resume, all visible mobs will now get marked and won't interrupt the hero again until a new action is commanded.\n" +
+						"\n" +
+						"No longer disables damage interrupt, unless damage was the reason for the previous interruption.\n" +
+						"\n" +
+						"Fixed bugs that made it unresponsive, and some actions not being remembered."
+		);
+		
+		addChange(QOL(), "Quality of Life",
+				"- Various gases like toxic gas, corrosive gas, paralytic gas, among others:\n" +
+						"Now update visuals faster, both spreading and fading more quickly.\n" +
+						"\n" +
+						"- When _Input Block_ is enabled, doors opening in fog in close proximity to hero will pause his movement.\n" +
+						"\n" +
+						"- Target Cycling (mainly on PC with TAB) now prioritizes closer enemies, shifting through targets in order.\n" +
+						"\n" +
+						"- Hero no longer avoids picking up items when all visible mobs are far away.\n" +
+						"\n" +
+						"- Some runestones now use auto-targeting."
+		);
+		
+		addChange(BUGFIX(), "Bugfixes",
+				"- Runestones no longer activate when thrown into a well of Transmutation.\n" +
+						"\n" +
+						"- Wait button in toolbar now correctly highlights when used with a hotkey.\n" +
+						"\n" +
+						"- Quickslot placeholders no longer show their quantity as 0."
 		);
 		// ***
 		
@@ -1159,7 +1192,7 @@ public class v1_0_X_PPDChanges {
 						"\n" +
 						"_- Thorns:_\n" +
 						"Against inorganic enemies, now deals upfront damage instead of trying to apply bleed.\n" +
-						"This damage however can't drop the HP of an enemy below 1!"
+						"This damage goes through shields, but can't drop the HP of an enemy below 1!"
 		);
 		
 		addChange(new BrokenSeal(), "Broken Seal",
@@ -1194,7 +1227,7 @@ public class v1_0_X_PPDChanges {
 						"\n" +
 						"_- Katana Rework:_\n" +
 						"_Removed:_ No longer grants 0-3 defense.\n" +
-						"Instead, works like a fast weapon, granting a +33% attack speed boost.\n" +
+						"Instead works like Scimitar, granting a +33% attack speed boost.\n" +
 						"\n" +
 						"_Stone Gauntlet Buff:_\n" +
 						"Base damage: 5-15 -> 5-16"
@@ -1512,7 +1545,7 @@ public class v1_0_X_PPDChanges {
 						"- Wealth drops can't be energized, sold, or transmuted.\n" +
 						"\n" +
 						"- Item pool revamped:\n" +
-						"Generates a bunch of new items, such as phase shift, reclaim trap, elixir of dragon's blood, etc.\n" +
+						"Generates a bunch of new items, such as spells, elixirs, and bombs.\n" +
 						"Probability table adjusted.\n" +
 						"\n" +
 						"- Every 5-7 drops, also generates alchemizes.\n" +
@@ -1535,9 +1568,13 @@ public class v1_0_X_PPDChanges {
 		
 		addSection(changeInfos, BUFFS);
 		// ***
-		addChange(itemIcon(ItemSpriteSheet.RING_TOPAZ), "Ring of Furor",
-				"Attack speed boost:\n" +
-						"9.05%/level -> 10%/level"
+		addChange(itemIcon(ItemSpriteSheet.RING_TOPAZ), "Ring of Furor and Elements",
+				"_- Ring of Furor:_\n" +
+						"Attack speed boost:\n" +
+						"9.05%/level -> 10%/level\n" +
+						"\n" +
+						"_- Ring of Elements:_\n" +
+						"Now also resists Rooted and Slowed."
 		);
 		
 		addChange(new Alchemize(), "Alchemize",
@@ -1570,6 +1607,9 @@ public class v1_0_X_PPDChanges {
 						"\n" +
 						"_- Levitation:_\n" +
 						"Potion duration: 20 -> 25\n" +
+						"\n" +
+						"_- Toxic Gas:_\n" +
+						"Now spawns pre-expanded.\n" +
 						"\n" +
 						"_- Magical Sight:_\n" +
 						"Potion duration: 50 -> 60\n" +
@@ -1629,12 +1669,9 @@ public class v1_0_X_PPDChanges {
 						"\n" +
 						"- Huntress's Berries now drop a seed on the first eat, instead of the second one. They're also found more quickly/consistently.\n" +
 						"\n" +
-						"- Warrior's Iron Stomach now lasts through floor transitions: this means it can be used to resist chasm damage if combined with other tools.\n" +
+						"- Warrior's Iron Stomach now lasts through floor transitions: this means it can be used to tank chasm damage when combined with other tools.\n" +
 						"\n" +
 						"- Stone of Detect Magic no longer detects enchantments and glyphs as positive (since they're already visible anyway).\n" +
-						"\n" +
-						"- Selling and recovering items on shops doesn't take time anymore.\n" +
-						"- Items sold will now try to stack.\n" +
 						"\n" +
 						"- Initial floor mobs won't spawn as close to the entrance anymore.\n" +
 						"\n" +
@@ -1642,13 +1679,31 @@ public class v1_0_X_PPDChanges {
 						"\n" +
 						"- Unstable Brew can no longer roll Purity when thrown."
 		);
+		
+		addChange(new ShopkeeperSprite(), "Shop Changes",
+				"- Items sold to shopkeeper will be preserved through regions, you can use this for storage.\n" +
+						"Only exception is the Imp who has a separate record.\n" +
+						"\n" +
+						"- Selling and recovering items on shops doesn't take time anymore.\n" +
+						"- Items sold will now try to stack."
+		);
 		// ***
 		
 		addSection(changeInfos, BUFFS);
 		// ***
-		addChange(new BruteSprite(), "Brute",
-				"_- Brute:_\n" +
-						"Now cleanses all its debuffs upon going berserk."
+		addChange(new BruteSprite(), "Gnoll Brute and Swarm of Flies",
+				"_- Gnoll Brute:_\n" +
+						"Now cleanses all its debuffs upon going berserk.\n" +
+						"\n" +
+						"_- Swarm of Flies:_\n" +
+						"No longer shares burning/poison to its children."
+		);
+		
+		addChange(new GolemSprite(), "Large Enemies",
+				"Improved AI. They shouldn't get stuck on doors, trying to path to unreachable tiles, unless constantly attacked.\n" +
+						"Instead, will stick to wandering inside their room.\n" +
+						"\n" +
+						"Golem teleport no longer gets randomly cancelled, having to restart from scratch."
 		);
 		// ***
 		
@@ -1704,7 +1759,7 @@ public class v1_0_X_PPDChanges {
 		// ***
 		addChange(Icons.TRAPS_ROOM, "Trap Adjustments",
 				"_- Gripping trap:_\n" +
-						"Base damage: 2 -> 1-2\n" +
+						"Base bleed: 2 -> 1-2\n" +
 						"\n" +
 						"_- Warping Trap:_\n" +
 						"Now only breaks if a character steps onto it.\n" +
