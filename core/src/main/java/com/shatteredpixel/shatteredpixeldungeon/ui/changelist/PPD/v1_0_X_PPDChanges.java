@@ -862,7 +862,7 @@ public class v1_0_X_PPDChanges {
 						"Replaces _Foresight._\n" +
 						"\n" +
 						"- New talent: _Smart Escape:_\n" +
-						"The Rogue gains _1.5 turns/2 turns_ of haste whenever a trap is activated in his vision. Regular levels will generate _10%/20%_ more revealed traps.\n" +
+						"The Rogue gains _1.5 turns/2 turns_ of haste whenever a trap is activated in his vision. Floors will generate _10%/20%_ more revealed traps.\nTraps that don't break can only grant haste up to 3 times.\n" +
 						"\n" +
 						"Replaces _Wide Search._"
 		);
@@ -1646,12 +1646,9 @@ public class v1_0_X_PPDChanges {
 		
 		addSection(changeInfos, BUFFS);
 		// ***
-		addChange(new BruteSprite(), "Brute and Ripper Demon",
+		addChange(new BruteSprite(), "Brute",
 				"_- Brute:_\n" +
-						"Now cleanses all their deferred damage upon becoming berserk.\n" +
-						"\n" +
-						"_- Ripper Demon:_\n" +
-						"Armor effectiveness vs leap attack: 100% -> 50%"
+						"Now cleanses all its debuffs upon going berserk."
 		);
 		// ***
 		
@@ -1707,12 +1704,7 @@ public class v1_0_X_PPDChanges {
 		// ***
 		addChange(Icons.TRAPS_ROOM, "Trap Adjustments",
 				"_- Gripping trap:_\n" +
-						"Base damage: 2 -> 1\n" +
-						"No longer gets reduced by armor.\n" +
-						"\n" +
-						"_- Flashing trap:_\n" +
-						"Base damage: 4 -> 3\n" +
-						"No longer gets reduced by armor.\n" +
+						"Base damage: 2 -> 1-2\n" +
 						"\n" +
 						"_- Warping Trap:_\n" +
 						"Now only breaks if a character steps onto it.\n" +
