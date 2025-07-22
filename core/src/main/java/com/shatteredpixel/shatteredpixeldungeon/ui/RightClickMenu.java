@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
@@ -192,7 +193,8 @@ public class RightClickMenu extends Component {
 	
 	public static class Polished {
 		public static boolean notesAction(Item item) {
-			return !item.isIdentified() && ( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
+			return  !item.isIdentified() && !(item instanceof WealthDrop) &&
+					( item instanceof Potion || item instanceof Scroll || item instanceof Ring );
 		}
 		
 		public static boolean notesAction(Heap heap) {
