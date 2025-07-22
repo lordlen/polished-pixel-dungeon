@@ -53,7 +53,7 @@ public class Necromancer extends Mob {
 	{
 		spriteClass = NecromancerSprite.class;
 		
-		HP = HT = 40;
+		HP = HT = 45;
 		defenseSkill = 14;
 		
 		EXP = 7;
@@ -132,7 +132,7 @@ public class Necromancer extends Mob {
 
 	@Override
 	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 5);
+		return super.drRoll() + Random.NormalIntRange(0, 3);
 	}
 	
 	@Override
@@ -471,8 +471,17 @@ public class Necromancer extends Mob {
 			
 			//no loot or exp
 			maxLvl = -5;
+			
+			//5 less HP
+			HP = HT = 20;
 		}
-
+		
+		@Override
+		public int damageRoll() {
+			//higher damage output
+			return Random.NormalIntRange(2, 12);
+		}
+		
 		@Override
 		public float spawningWeight() {
 			return 0;
