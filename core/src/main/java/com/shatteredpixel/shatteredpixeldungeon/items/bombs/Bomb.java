@@ -258,7 +258,7 @@ public class Bomb extends Item {
 	@Override
 	public String name() {
 		if(rowDrop) {
-			return super.name() + " (Wealth)";
+			return super.name() + Messages.get(WealthDrop.class, "suffix");
 		}
 		else {
 			return super.name();
