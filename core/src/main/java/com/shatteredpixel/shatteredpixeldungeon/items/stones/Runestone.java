@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public abstract class Runestone extends Item {
@@ -49,14 +50,17 @@ public abstract class Runestone extends Item {
 	protected void onThrow(int cell) {
 		///inventory stones are thrown like normal items, other stones don't trigger when thrown into pits
 		if (this instanceof InventoryStone ||
-				Dungeon.hero.buff(MagicImmune.class) != null ||
-				(Dungeon.level.pit[cell] && Actor.findChar(cell) == null)){
+			Dungeon.hero.buff(MagicImmune.class) != null ||
+			( Actor.findChar(cell) == null && (Dungeon.level.pit[cell] || Dungeon.level.map[cell] == Terrain.WELL) ))
+		{
 			if (!anonymous) super.onThrow( cell );
-		} else {
-			if (!anonymous || Polished_wealthDrop != null) {
+		}
+		else {
+			if (!anonymous) {
 				Catalog.countUse(getClass());
 				Talent.onRunestoneUsed(curUser, cell, getClass());
 			}
+			
 			activate(cell);
 			if (Actor.findChar(cell) == null) Dungeon.level.pressCell( cell );
 			Invisibility.dispel();

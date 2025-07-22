@@ -63,7 +63,7 @@ public class StoneOfAugmentation extends InventoryStone {
 		weapon.augment = augment;
 		useAnimation();
 		ScrollOfUpgrade.upgrade(curUser);
-		if (!anonymous || Polished_wealthDrop != null) {
+		if (!anonymous) {
 			curItem.detach(curUser.belongings.backpack);
 			Catalog.countUse(getClass());
 			Talent.onRunestoneUsed(curUser, curUser.pos, getClass());
@@ -79,7 +79,7 @@ public class StoneOfAugmentation extends InventoryStone {
 		armor.augment = augment;
 		useAnimation();
 		ScrollOfUpgrade.upgrade(curUser);
-		if (!anonymous || Polished_wealthDrop != null) {
+		if (!anonymous) {
 			curItem.detach(curUser.belongings.backpack);
 			Catalog.countUse(getClass());
 			Talent.onRunestoneUsed(curUser, curUser.pos, getClass());

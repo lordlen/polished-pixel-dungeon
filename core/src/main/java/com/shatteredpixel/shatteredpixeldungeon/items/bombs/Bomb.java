@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
+import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
@@ -73,11 +74,13 @@ public class Bomb extends Item {
 
 		stackable = true;
 	}
+	
+	public boolean rowDrop = false;
 
 	public Fuse fuse;
 
 	//FIXME using a static variable for this is kinda gross, should be a better way
-	private static boolean lightingFuse = false;
+	protected static boolean lightingFuse = false;
 
 	private static final String AC_LIGHTTHROW = "LIGHTTHROW";
 
@@ -131,6 +134,13 @@ public class Bomb extends Item {
 
 	@Override
 	public boolean doPickUp(Hero hero, int pos) {
+		if(rowDrop) {
+			WealthDrop.vanishVFX(pos);
+			Heap heap = Dungeon.level.heaps.get( pos );
+			if(heap != null) heap.pickUp();
+			return false;
+		}
+		
 		if (fuse != null) {
 			GLog.w( Messages.get(this, "snuff_fuse") );
 			fuse = null;
@@ -246,9 +256,24 @@ public class Bomb extends Item {
 	}
 	
 	@Override
+	public String name() {
+		if(rowDrop) {
+			return super.name() + " (Wealth)";
+		}
+		else {
+			return super.name();
+		}
+	}
+	
+	@Override
 	public String desc() {
 		int depth = Dungeon.hero == null ? 1 : Dungeon.scalingDepth();
 		String desc = Messages.get(this, "desc", 4+depth, 12+3*depth);
+		
+		if(rowDrop) {
+			desc += "\n\n_" + Messages.get(WealthDrop.class, "cant_pickup") + "_";
+		}
+		
 		if (fuse == null) {
 			return desc + "\n\n" + Messages.get(this, "desc_fuse");
 		} else {
@@ -257,18 +282,25 @@ public class Bomb extends Item {
 	}
 
 	private static final String FUSE = "fuse";
+	
+	private static final String ROW_DROP = "row_drop";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put( FUSE, fuse );
+		
+		bundle.put( ROW_DROP, rowDrop);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
-		if (bundle.contains( FUSE ))
+		if (bundle.contains( FUSE )) {
 			Actor.add( fuse = ((Fuse)bundle.get(FUSE)).ignite(this) );
+		}
+		
+		rowDrop = bundle.getBoolean(ROW_DROP);
 	}
 
 	//used to track the death from friendly magic badge, if an explosion was conjured by magic

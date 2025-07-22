@@ -263,25 +263,25 @@ public class ItemSlot extends Button {
 		else {
 			status.resetColor();
 		}
-
+		
+		if(item instanceof WealthDrop) {
+			extra.text( ((WealthDrop) item).dropExtra() );
+			((WealthDrop) item).dropColor(extra);
+			
+			extra.scale.set(PixelScene.align(0.9f));
+			extra.measure();
+		}
+		else {
+			extra.text( null );
+			extra.resetColor();
+			extra.scale.set(1f);
+		}
+		
 		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
 			
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
 			itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
 			add(itemIcon);
-			
-			if(item instanceof WealthDrop) {
-				extra.text( ((WealthDrop) item).dropExtra() );
-				((WealthDrop) item).dropColor(extra);
-				
-				extra.scale.set(PixelScene.align(0.9f));
-				extra.measure();
-			}
-			else {
-				extra.text( null );
-				extra.resetColor();
-				extra.scale.set(1f);
-			}
 
 		} else if (item instanceof Weapon || item instanceof Armor) {
 
@@ -303,11 +303,6 @@ public class ItemSlot extends Button {
 				extra.hardlight( WARNING );
 			}
 			extra.measure();
-
-		} else {
-
-			extra.text( null );
-			extra.resetColor();
 
 		}
 

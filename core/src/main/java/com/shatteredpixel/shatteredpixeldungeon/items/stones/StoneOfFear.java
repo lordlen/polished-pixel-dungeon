@@ -36,6 +36,8 @@ public class StoneOfFear extends Runestone {
 	
 	{
 		image = ItemSpriteSheet.STONE_FEAR;
+		
+		usesTargeting = true;
 	}
 	
 	@Override

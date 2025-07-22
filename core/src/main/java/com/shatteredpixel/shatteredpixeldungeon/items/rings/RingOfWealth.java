@@ -34,7 +34,17 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.ArcaneBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Firebomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.FlashBangBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Noisemaker;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.RegrowthBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.ShrapnelBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.SmokeBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.WealthBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.WoollyBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
@@ -301,6 +311,21 @@ public class RingOfWealth extends Ring {
 		spellChances.put(PhaseShift.class,    			2f);
 		spellChances.put(UnstableSpell.class,    		2f);
 	}
+	
+	private static HashMap<Class<? extends Bomb>, Float> bombChances = new HashMap<>();
+	static{
+		bombChances.put(Bomb.class,			5f);
+		
+		bombChances.put(WoollyBomb.class,	2f);
+		bombChances.put(Firebomb.class,		2f);
+		bombChances.put(Noisemaker.class,	2f);
+		bombChances.put(SmokeBomb.class,	2f);
+		bombChances.put(FlashBangBomb.class,2f);
+		
+		bombChances.put(HolyBomb.class,		1f);
+		bombChances.put(ArcaneBomb.class,	1f);
+		bombChances.put(ShrapnelBomb.class,	1f);
+	}
 
 	private static HashMap<Class<? extends Item>, Float> typeChances = new HashMap<>();
 	static{
@@ -308,6 +333,9 @@ public class RingOfWealth extends Ring {
 		typeChances.put(Scroll.class,    				25f);
 		typeChances.put(Runestone.class,    			20f);
 		typeChances.put(Spell.class,    				15f);
+		
+		// yes we go over 100% but oh well im lazy
+		typeChances.put(Bomb.class,    					10f);
 	}
 
 	private static HashMap<Class<? extends Item>, Integer> itemRarities = new HashMap<>();
@@ -348,6 +376,8 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(PhaseShift.class,    			2);
 		itemRarities.put(UnstableSpell.class,    		2);
 		
+		itemRarities.put(Bomb.class,    				2);
+		
 		
 		
 		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
@@ -365,6 +395,15 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(StoneOfBlink.class,    		3);
 		itemRarities.put(StoneOfDeepSleep.class,    	3);
 		itemRarities.put(StoneOfAggression.class,    	3);
+		
+		itemRarities.put(WoollyBomb.class,    			3);
+		itemRarities.put(Firebomb.class,	   			3);
+		itemRarities.put(Noisemaker.class,    			3);
+		itemRarities.put(SmokeBomb.class,    			3);
+		itemRarities.put(FlashBangBomb.class,    		3);
+		itemRarities.put(HolyBomb.class,				3);
+		itemRarities.put(ArcaneBomb.class,    			3);
+		itemRarities.put(ShrapnelBomb.class,    		3);
 	}
 
 	public static Item randomItem() {
@@ -381,6 +420,9 @@ public class RingOfWealth extends Ring {
 		}
 		else if(type == Runestone.class) {
 			return randomStone();
+		}
+		else if(type == Bomb.class) {
+			return randomBomb();
 		}
 		else return Reflection.newInstance(Gold.class).quantity(1);
 	}
@@ -408,6 +450,12 @@ public class RingOfWealth extends Ring {
 	public static WealthStone randomStone() {
 		WealthStone drop = Reflection.newInstance(WealthStone.class);
 		drop.set(Random.chances(stoneChances));
+		return drop;
+	}
+	
+	public static WealthBomb randomBomb() {
+		WealthBomb drop = Reflection.newInstance(WealthBomb.class);
+		drop.set(Random.chances(bombChances));
 		return drop;
 	}
 	
