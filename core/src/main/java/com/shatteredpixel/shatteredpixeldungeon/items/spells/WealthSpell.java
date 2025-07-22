@@ -46,6 +46,8 @@ public class WealthSpell extends Spell implements WealthDrop<Spell> {
 
 		talentFactor = spell.talentFactor;
 		talentChance = spell.talentChance;
+		
+		usesTargeting = spell.usesTargeting;
 	}
 
 	@Override

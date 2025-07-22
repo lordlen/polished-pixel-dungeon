@@ -23,12 +23,15 @@ package com.shatteredpixel.shatteredpixeldungeon.items.stones;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -45,15 +48,14 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone> {
 
 	@Override
 	protected void activate(int cell) {
-		stone.anonymous = true;
 		stone.activate(cell);
-		stone.anonymous = false;
 	}
 
 	@Override
 	public void updateStats() {
+		usesTargeting = stone.usesTargeting;
+		
 		//stone.talentFactor *= 0.5f;
-
 		//talentFactor = stone.talentFactor;
 		//talentChance = stone.talentChance;
 	}
@@ -81,12 +83,18 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone> {
 	protected void onThrow(int cell) {
 		if (stone instanceof InventoryStone ||
 			Dungeon.hero.buff(MagicImmune.class) != null ||
-			(Dungeon.level.pit[cell] && Actor.findChar(cell) == null)) {
-
+			( Actor.findChar(cell) == null && (Dungeon.level.pit[cell] || Dungeon.level.map[cell] == Terrain.WELL) ))
+		{
 			WealthDrop.vanishVFX(cell);
-			return;
 		}
-		super.onThrow(cell);
+		else {
+			Catalog.countUse(stone.getClass());
+			Talent.onRunestoneUsed(curUser, cell, stone.getClass());
+			
+			activate(cell);
+			if (Actor.findChar(cell) == null) Dungeon.level.pressCell( cell );
+			Invisibility.dispel();
+		}
 	}
 
 

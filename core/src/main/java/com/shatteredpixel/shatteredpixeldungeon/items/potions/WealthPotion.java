@@ -27,9 +27,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.utils.Bundle;
+
+import java.util.ArrayList;
 
 public class WealthPotion extends Potion implements WealthDrop<Potion> {
 
@@ -44,9 +49,9 @@ public class WealthPotion extends Potion implements WealthDrop<Potion> {
 		pot.anonymous = false;
 	}
 	@Override
-	public void apply(Hero hero) {
+	protected void drink(Hero hero) {
 		pot.anonymous = true;
-		pot.apply(hero);
+		pot.drink(hero);
 		pot.anonymous = false;
 	}
 
@@ -56,22 +61,71 @@ public class WealthPotion extends Potion implements WealthDrop<Potion> {
 
 		talentFactor = pot.talentFactor;
 		talentChance = pot.talentChance;
+		
+		usesTargeting = pot.usesTargeting;
 	}
-
+	
+	@Override
+	public ArrayList<String> actions(Hero hero) {
+		return pot.actions(hero);
+	}
 	@Override
 	public String defaultAction() {
-		if (mustThrowPots.contains(pot.getClass())) {
-			return AC_THROW;
-		} else if (canThrowPots.contains(pot.getClass())){
-			return AC_CHOOSE;
+		pot.anonymous = true;
+		String action = pot.defaultAction();
+		pot.anonymous = false;
+		
+		return action;
+	}
+	public String actionName(String action, Hero hero){
+		return pot.actionName(action, hero);
+	}
+	
+	@Override
+	public void execute(Hero hero, String action) {
+		if (action.equals( AC_DRINK ) && mustThrowPots.contains(pot.getClass())) {
+			
+			GameScene.show(
+					new WndOptions(new ItemSprite(this),
+							Messages.get(Potion.class, "harmful"),
+							Messages.get(Potion.class, "sure_drink"),
+							Messages.get(Potion.class, "yes"), Messages.get(Potion.class, "no") ) {
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0) {
+								drink( hero );
+							}
+						}
+					}
+			);
+			
 		} else {
-			return AC_DRINK;
+			super.execute(hero, action);
 		}
 	}
 	@Override
 	public void doThrow(Hero hero) {
-		GameScene.selectCell(thrower);
+		if (!mustThrowPots.contains(pot.getClass()) && !canThrowPots.contains(pot.getClass())) {
+			
+			GameScene.show(
+					new WndOptions(new ItemSprite(this),
+							Messages.get(Potion.class, "beneficial"),
+							Messages.get(Potion.class, "sure_throw"),
+							Messages.get(Potion.class, "yes"), Messages.get(Potion.class, "no") ) {
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0) {
+								GameScene.selectCell(thrower);
+							}
+						}
+					}
+			);
+			
+		} else {
+			GameScene.selectCell(thrower);
+		}
 	}
+	
 	@Override
 	protected void onThrow(int cell) {
 		if(Dungeon.level.map[cell] == Terrain.WELL) {
