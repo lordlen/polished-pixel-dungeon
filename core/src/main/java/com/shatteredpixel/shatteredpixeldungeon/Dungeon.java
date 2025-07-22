@@ -245,10 +245,10 @@ public class Dungeon {
 		}
 		
 		
-		public static ConcurrentHashMap<Integer, Integer> levelLocks = new ConcurrentHashMap<>();
-		public static Integer getLock(int depth, int branch) {
+		public static ConcurrentHashMap<Integer, Object> levelLocks = new ConcurrentHashMap<>();
+		public static Object getLock(int depth, int branch) {
 			final Integer id = 1000 * depth + branch;
-			levelLocks.putIfAbsent(id, id);
+			levelLocks.putIfAbsent(id, new Object());
 			return levelLocks.get(id);
 		}
 		

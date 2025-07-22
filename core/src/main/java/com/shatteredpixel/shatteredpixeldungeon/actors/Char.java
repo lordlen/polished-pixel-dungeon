@@ -198,6 +198,11 @@ public abstract class Char extends Actor {
 	
 	public boolean[] fieldOfView = null;
 	
+	protected boolean validFov() {
+		return  fieldOfView != null && Dungeon.level != null &&
+				fieldOfView.length > 0 && fieldOfView.length == Dungeon.level.length();
+	}
+	
 	private LinkedHashSet<Buff> buffs = new LinkedHashSet<>();
 
 	public boolean isStealthy() {

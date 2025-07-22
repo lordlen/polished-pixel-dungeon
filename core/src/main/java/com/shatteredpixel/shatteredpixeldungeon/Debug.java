@@ -78,8 +78,9 @@ public class Debug {
         for(Class<?extends Item> itemType : Starting_Items) {
             DebugCollect(itemType);
         }
-        if(Dungeon.isChallenged(Challenges.DARKNESS))
+        if(Dungeon.isChallenged(Challenges.DARKNESS)) {
             DebugCollect(Torch.class);
+        }
         
         
     }
@@ -114,6 +115,9 @@ public class Debug {
     }
     public static<T extends Item> T DebugCollect(Class<T> itemType, int level, int quantity) {
         return DebugCollect(itemType, level, quantity, null);
+    }
+    public static<T extends Item, E> T DebugCollect(Class<T> itemType, Class<E> enchant) {
+        return DebugCollect(itemType, 0, 1, enchant);
     }
     public static<T extends Item, E> T DebugCollect(Class<T> itemType, int level, int quantity, Class<E> enchant) {
         if(!DEBUG_MODE) return null;

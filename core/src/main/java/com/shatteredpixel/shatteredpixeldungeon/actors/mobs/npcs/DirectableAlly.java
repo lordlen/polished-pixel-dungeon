@@ -469,6 +469,18 @@ public class DirectableAlly extends NPC {
 		erasePath();
 	}
 	
+	public static void updateAllPaths() {
+		for (Char ch : Actor.chars()){
+			if (ch instanceof DirectableAlly) {
+				DirectableAlly ally = (DirectableAlly) ch;
+				
+				ally.updatePath();
+				ally.drawPath();
+				ally.updateChain(true);
+			}
+		}
+	}
+	
 	public static boolean observing = false;
 	public static void observeAll() {
 		

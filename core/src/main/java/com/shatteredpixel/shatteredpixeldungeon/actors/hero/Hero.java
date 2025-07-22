@@ -276,26 +276,22 @@ public class Hero extends Char {
 		public static int trampledItemsLast = 0;
 
 		private static boolean interruptsInput(Mob mob) {
-			if(  mob instanceof Necromancer.NecroSkeleton ||
-					mob instanceof Wraith ||
-					(mob instanceof Swarm && ((Swarm)mob).generation > 0) ||
-					mob instanceof YogDzewa.Larva) {
-				return false;
-			}
-			else return true;
+            return  !(mob instanceof Necromancer.NecroSkeleton) &&
+                    !(mob instanceof Wraith) &&
+                    !(mob instanceof Swarm && ((Swarm) mob).generation > 0) &&
+                    !(mob instanceof YogDzewa.Larva);
 		}
 		public static boolean noEnemiesSeen() {
 			return Dungeon.hero.visibleEnemies.isEmpty();
 		}
-		private static boolean autoPickUp(Heap heap) {
-			if (heap == null) return false;
-
-			Item item = heap.peek();
+		private static boolean autoPickUp(Item item) {
 			Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
-
-			if (item instanceof Dewdrop && waterskin == null) return false;
-			if (item instanceof Dewdrop && waterskin.isFull()) return false;
-			if (!(item instanceof Dewdrop || item instanceof Plant.Seed || item instanceof Runestone || item instanceof Berry)) return false;
+			if  (item instanceof Dewdrop &&
+				(waterskin == null || waterskin.isFull())) return false;
+			
+			if(!(item instanceof Dewdrop || item instanceof Plant.Seed ||
+				 item instanceof Runestone || item instanceof Berry)) return false;
+			
 			if(!Dungeon.hero.belongings.Polished_canHold(item)) return false;
 
 			return (SPDSettings.Polished.autoPickup() && noEnemiesSeen() && noEnemiesLast);
@@ -936,6 +932,7 @@ public class Hero extends Char {
 	@Override
 	public void spendConstant(float time) {
 		justMoved = false;
+		Polished.noEnemiesLast = Polished.noEnemiesSeen();
 		super.spendConstant(time);
 	}
 
@@ -953,20 +950,24 @@ public class Hero extends Char {
 	
 	@Override
 	public boolean act() {
-		if(paralysed > 0 || (!(curAction instanceof HeroAction.Move) && !(curAction instanceof HeroAction.PickUp))) {
-			Polished.noEnemiesLast = Polished.noEnemiesSeen();
-		}
-
+		
 		//Do an input block check before updating fov to account for enemies entering the edge of your vision
-		if(fieldOfView != null && fieldOfView.length > 0 && fieldOfView.length == Dungeon.level.length()) {
+		if(validFov()) {
+			boolean blocked = false;
+			
 			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
 				if (fieldOfView[ m.pos ] && m.alignment == Alignment.ENEMY) {
-					if(Polished.interruptsInput(m) && !m.polished.onCooldown) {
+					
+					if(!blocked && Polished.interruptsInput(m) && !m.polished.onCooldown) {
+						blocked = true;
 						interrupt();
 						GameScene.Polished.blockInput();
 					}
-					m.polished.spot(true);
+					
 					Polished.noEnemiesLast = false;
+					
+					m.polished.spot(true);
+					
 				} else {
 					m.polished.spot(false);
 				}
@@ -1029,10 +1030,32 @@ public class Hero extends Char {
 		} else {
 			
 			resting = false;
-			
 			ready = false;
 			
-			if (curAction instanceof HeroAction.Move) {
+			
+			boolean autopick = false;
+			//if hero trampled an item from grass last move, pick it up
+			if (Polished.trampledItemsLast > 0) {
+				Heap heap = Dungeon.level.heaps.get(pos);
+				Item item = heap != null ? heap.peek() : null;
+				
+				if(item != null && Polished.autoPickUp(item)) {
+					if(item.doPickUp(this)) {
+						heap.pickUp();
+						
+						autopick = true;
+						Polished.trampledItemsLast--;
+					}
+				}
+				else {
+					Polished.trampledItemsLast = 0;
+				}
+			}
+			
+			if(autopick) {
+				actResult = false;
+				
+			} else if (curAction instanceof HeroAction.Move) {
 				actResult = actMove( (HeroAction.Move)curAction );
 				
 			} else if (curAction instanceof HeroAction.Interact) {
@@ -1098,9 +1121,9 @@ public class Hero extends Char {
 			lastAction = curAction;
 		}
 		curAction = null;
-		GameScene.resetKeyHold();
 		resting = false;
-
+		GameScene.resetKeyHold();
+		
 		Polished.trampledItemsLast = 0;
 	}
 	
@@ -1125,7 +1148,6 @@ public class Hero extends Char {
 	private boolean actMove( HeroAction.Move action ) {
 
 		if (getCloser( action.dst )) {
-			if(justMoved) Polished.noEnemiesLast = Polished.noEnemiesSeen();
 			canSelfTrample = false;
 			return true;
 
@@ -1229,8 +1251,6 @@ public class Hero extends Char {
 			
 			Heap heap = Dungeon.level.heaps.get( pos );
 			if (heap != null) {
-				Polished.noEnemiesLast = Polished.noEnemiesSeen();
-
 				Item item = heap.peek();
 				if (item.doPickUp( this )) {
 					heap.pickUp();
@@ -1295,9 +1315,7 @@ public class Hero extends Char {
 			return false;
 
 		} else if (getCloser( dst )) {
-			if(justMoved) Polished.noEnemiesLast = Polished.noEnemiesSeen();
 			return true;
-
 		} else {
 			ready();
 			return false;
@@ -1815,6 +1833,7 @@ public class Hero extends Char {
 		ArrayList<Mob> visible = new ArrayList<>();
 
 		boolean newMob = false;
+		boolean block = false;
 
 		Mob target = null;
 		for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
@@ -1827,11 +1846,11 @@ public class Hero extends Char {
 				if (!visibleEnemies.contains( m )) {
 					newMob = true;
 
-					if(Polished.interruptsInput(m) && !m.polished.onCooldown) {
+					if(!block && Polished.interruptsInput(m) && !m.polished.onCooldown) {
+						block = true;
 						GameScene.Polished.blockInput();
 					}
 				}
-				m.polished.spot(true);
 
 				//only do a simple check for mind visioned enemies, better performance
 				if ((!mindVisionEnemies.contains(m) && QuickSlotButton.autoAim(m) != -1)
@@ -1848,7 +1867,10 @@ public class Hero extends Char {
 						Document.ADVENTURERS_GUIDE.readPage(Document.GUIDE_EXAMINING);
 					}
 				}
-			} else {
+				
+				m.polished.spot(true);
+			}
+			else {
 				m.polished.spot(false);
 			}
 		}
@@ -1921,23 +1943,6 @@ public class Hero extends Char {
 	public boolean justMoved = false;
 	
 	private boolean getCloser( final int target ) {
-
-		//if hero trampled an item from grass last move, pick it up
-		if (Polished.trampledItemsLast > 0) {
-			Polished.trampledItemsLast--;
-
-			Heap heap = Dungeon.level.heaps.get(Dungeon.hero.pos);
-			if(Polished.autoPickUp(heap)) {
-				Item item = heap.peek();
-				if(item.doPickUp(Dungeon.hero)) {
-					heap.pickUp();
-					justMoved = false;
-					return true;
-				}
-			} else {
-				Polished.trampledItemsLast = 0;
-			}
-		}
 
 		if (target == pos)
 			return false;
@@ -2209,7 +2214,7 @@ public class Hero extends Char {
 
 				RingOfWealth.onLevelUp(this);
 
-				SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+				SpiritBow bow = belongings.getItem(SpiritBow.class);
 				if(bow != null && lvl % 5 == 0) bow.Polished_resetCharges();
 				
 				updateHT( true );
@@ -2708,8 +2713,8 @@ public class Hero extends Char {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
 			sprite.operate( pos );
 			if (!Dungeon.level.locked) {
-				float searchTime = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;
-				float searchHunger = Dungeon.hero.hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : HUNGER_FOR_SEARCH;
+				float searchTime = hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;
+				float searchHunger = hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : HUNGER_FOR_SEARCH;
 
 				if(cursed) {
 					searchTime++;

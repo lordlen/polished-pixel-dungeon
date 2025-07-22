@@ -274,6 +274,14 @@ public class CustomNoteButton extends IconButton {
 								GameScene.show(new CustomNoteWindow(rec, newParent));
 							}
 						}
+						if (parentWindow instanceof WndJournal) {
+							WndJournal newParent = new WndJournal();
+							GameScene.show(newParent);
+							
+							if(Notes.contains(rec)) {
+								GameScene.show(new CustomNoteWindow(rec, newParent));
+							}
+						}
 						else if(Notes.contains(rec)) {
 							GameScene.show(new CustomNoteWindow(rec, parentWindow));
 						}

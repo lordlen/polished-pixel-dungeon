@@ -547,12 +547,11 @@ public class Generator {
 					RingOfEvasion.class,
 					RingOfForce.class,
 					RingOfFuror.class,
-					RingOfHaste.class,
 					RingOfMight.class,
 					RingOfSharpshooting.class,
 					RingOfTenacity.class,
 					RingOfWealth.class};
-			RING.defaultProbs = new float[]{ 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3 };
+			RING.defaultProbs = new float[]{ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
 			RING.probs = RING.defaultProbs.clone();
 			
 			ARTIFACT.classes = new Class<?>[]{
@@ -586,13 +585,12 @@ public class Generator {
 					MimicTooth.class,
 					WondrousResin.class,
 					EyeOfNewt.class,
-					SaltCube.class,
 					VialOfBlood.class,
 					ShardOfOblivion.class,
 					ChaoticCenser.class,
 					FerretTuft.class
 			};
-			TRINKET.defaultProbs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1 };
+			TRINKET.defaultProbs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 			TRINKET.probs = TRINKET.defaultProbs.clone();
 
 			for (Category cat : Category.values()){

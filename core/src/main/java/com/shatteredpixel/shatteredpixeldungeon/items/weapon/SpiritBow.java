@@ -204,7 +204,17 @@ public class SpiritBow extends Weapon {
 
 		return super.proc(attacker, defender, damage);
 	}
-
+	
+	@Override
+	public String desc() {
+		if(SPDSettings.Polished.huntress()) {
+			return Messages.get(this, "polished_desc");
+		}
+		else {
+			return super.desc();
+		}
+	}
+	
 	@Override
 	public String info() {
 		String info = super.info();

@@ -159,7 +159,7 @@ public class DriedRose extends Artifact {
 				&& Ghost() == null) {
 			actions.add(AC_SUMMON);
 		}
-		if (Ghost() != null && !Ghost().stasis()){
+		if (Ghost() != null && !ghost.stasis()){
 			actions.add(AC_DIRECT);
 			actions.add(AC_CHAIN);
 		}
@@ -178,7 +178,7 @@ public class DriedRose extends Artifact {
 		else if (Ghost() == null) {
 			return AC_SUMMON;
 		}
-		else if (!Ghost().stasis()){
+		else if (!ghost.stasis()){
 			return AC_DIRECT;
 		}
 		else {

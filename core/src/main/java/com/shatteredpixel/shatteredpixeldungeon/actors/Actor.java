@@ -62,13 +62,18 @@ public abstract class Actor implements Bundlable {
 		return time;
 	}
 	
-	public float Polished_alignTurnWheel( float time ) {
-		float partial = time % TICK;
+	public void Polished_alignTurnWheel( Char target ) {
+		float partial = target.cooldown() % TICK;
 		if(partial < 0) partial++;
+		
+		if (partial == 0 &&
+			curActorPriority() == MOB_PRIO &&
+			target.actPriority > MOB_PRIO)
+		{
+			partial = 1;
+		}
 
 		spendConstant(partial);
-
-		return partial;
 	}
 	
 	public void Polished_timeToNow() {
