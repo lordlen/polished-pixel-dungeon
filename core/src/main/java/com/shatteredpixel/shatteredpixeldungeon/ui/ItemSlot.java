@@ -185,6 +185,9 @@ public class ItemSlot extends Button {
 		if (level != null) {
 			level.x = x + (width - level.width()) - margin.right;
 			level.y = y + (height - level.baseLine() - 1) - margin.bottom;
+			if(item instanceof WealthDrop && !quickSlotButton()) {
+				level.x--; level.y--;
+			}
 			PixelScene.align(level);
 		}
 
@@ -264,14 +267,6 @@ public class ItemSlot extends Button {
 			status.resetColor();
 		}
 		
-		if(item instanceof WealthDrop) {
-			((WealthDrop<?>) item).setSlotTimer(extra);
-		}
-		else {
-			extra.text( null );
-			extra.resetColor();
-		}
-		
 		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()) || item instanceof WealthDrop)){
 			
 			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
@@ -299,12 +294,19 @@ public class ItemSlot extends Button {
 			}
 			extra.measure();
 
+		} else {
+			
+			extra.text( null );
+			
 		}
 
 		int trueLvl = item.visiblyUpgraded();
 		int buffedLvl = item.buffedVisiblyUpgraded();
 
-		if(item instanceof RingOfWealth && quickSlotButton()) {
+		if(item instanceof WealthDrop) {
+			((WealthDrop<?>) item).setSlotTimer(level);
+		}
+		else if(item instanceof RingOfWealth && quickSlotButton()) {
 			RingOfWealth.setSlotTimer(level);
 		}
 		else if (trueLvl != 0 || buffedLvl != 0) {
