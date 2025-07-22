@@ -194,8 +194,8 @@ public interface WealthDrop<T extends Item> {
             if (decay.cooldown() <= 10 && decay.warning && decay.item != null) {
                 decay.warning = false;
                 
-                GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
                 GLog.newLine();
+                GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
                 Dungeon.hero.interrupt();
             }
             

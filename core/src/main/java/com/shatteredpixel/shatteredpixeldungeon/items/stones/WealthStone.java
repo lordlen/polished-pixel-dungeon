@@ -132,6 +132,7 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone> {
 	public boolean collect(Bag container) {
 		return afterCollect(super.collect(container));
 	}
+	
 	@Override
 	public void doDrop( Hero hero ) {
 		onDrop(hero);
