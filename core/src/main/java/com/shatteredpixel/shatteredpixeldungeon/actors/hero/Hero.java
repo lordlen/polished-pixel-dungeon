@@ -180,6 +180,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DangerIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StatusPane;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -956,7 +957,7 @@ public class Hero extends Char {
 			boolean blocked = false;
 			
 			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
-				if (fieldOfView[ m.pos ] && m.alignment == Alignment.ENEMY) {
+				if (fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
 					
 					if(!blocked && Polished.interruptsInput(m) && !m.polished.onCooldown) {
 						blocked = true;
@@ -1110,6 +1111,7 @@ public class Hero extends Char {
 		canSelfTrample = true;
 
 		AttackIndicator.updateState();
+		DangerIndicator.enemyIndex = 0;
 		
 		GameScene.ready();
 	}
@@ -1881,7 +1883,7 @@ public class Hero extends Char {
 				!lastTarget.isAlive() || !lastTarget.isActive() ||
 				lastTarget.alignment == Alignment.ALLY ||
 				!fieldOfView[lastTarget.pos] ||
-				( distance(lastTarget) > 6 && QuickSlotButton.autoAim(lastTarget) == -1 ))
+				( distance(lastTarget) > 8 && QuickSlotButton.autoAim(lastTarget) == -1 ))
 			{
 				QuickSlotButton.target(target);
 				//its a soft target, meaning it wont lock in until we actually shoot it
