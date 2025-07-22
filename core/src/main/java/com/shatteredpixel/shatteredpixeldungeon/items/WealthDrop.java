@@ -95,7 +95,9 @@ public interface WealthDrop<T extends Item> {
     default boolean afterCollect(boolean collected) {
         if(!collected) return false;
 
-        if(!Dungeon.Polished.loading && Dungeon.hero != null && this instanceof Item) {
+        if (!Dungeon.Polished.loading && Dungeon.hero != null &&
+            this instanceof Item && (decay() == null || decay().item != th()))
+        {
             setDecay(Buff.append(Dungeon.hero, Decay.class, decayTimer()));
             decay().item = th();
             decay().max = (int)decay().cooldown();
@@ -104,6 +106,7 @@ public interface WealthDrop<T extends Item> {
     }
     default void afterDetach() {
         if(decay() != null) decay().detach();
+        setDecay(null);
     }
 
     default void onDrop(Hero hero) {
@@ -187,18 +190,17 @@ public interface WealthDrop<T extends Item> {
     }
 
     static void refreshIndicators() {
-        if(Dungeon.hero.buff(Decay.class) != null) {
+        for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
+            if (decay.cooldown() <= 10 && decay.warning && decay.item != null) {
+                decay.warning = false;
+                
+                GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
+                GLog.newLine();
+                Dungeon.hero.interrupt();
+            }
+            
             Item.updateQuickslot();
         }
-        
-        //disabled for now
-        /*for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
-            if (decay.cooldown() <= 25 && decay.warning && decay.item != null) {
-                decay.warning = false;
-                GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
-            }
-            Item.updateQuickslot();
-        }*/
     }
 
     class Decay extends FlavourBuff {
