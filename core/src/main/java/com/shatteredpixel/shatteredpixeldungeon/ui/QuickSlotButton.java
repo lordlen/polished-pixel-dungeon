@@ -161,7 +161,7 @@ public class QuickSlotButton extends Button {
 			}
 			
 			@Override
-			protected boolean quickslotButton() {
+			protected boolean quickSlotButton() {
 				return true;
 			}
 		};

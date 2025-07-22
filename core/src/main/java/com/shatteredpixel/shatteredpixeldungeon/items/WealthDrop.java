@@ -29,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -135,15 +134,17 @@ public interface WealthDrop<T extends Item> {
 
         return desc;
     }
-
-    default String dropExtra() {
-        return decay() != null ? decay().iconTextDisplay() : null;
-    }
-
-    default void dropColor(BitmapText text) {
-        if(decay() != null) {
+    
+    default void setSlotTimer(BitmapText timer) {
+        if(decay() == null) {
+            timer.text(null);
+        }
+        else {
+            timer.text(decay().iconTextDisplay());
+            timer.measure();
+            
             float percent = decay().cooldown() / decay().max;
-            text.hardlight(1f, percent, percent);
+            timer.hardlight(1f, percent, percent);
         }
     }
 
