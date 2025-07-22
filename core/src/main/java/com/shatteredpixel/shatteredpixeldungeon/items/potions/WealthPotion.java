@@ -77,9 +77,6 @@ public class WealthPotion extends Potion implements WealthDrop<Potion> {
 		
 		return action;
 	}
-	public String actionName(String action, Hero hero){
-		return pot.actionName(action, hero);
-	}
 	
 	@Override
 	public void execute(Hero hero, String action) {

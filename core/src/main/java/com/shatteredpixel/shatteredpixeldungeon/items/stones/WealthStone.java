@@ -68,9 +68,6 @@ public class WealthStone extends Runestone implements WealthDrop<Runestone> {
 	public ArrayList<String> actions(Hero hero) {
 		return stone.actions(hero);
 	}
-	public String actionName(String action, Hero hero){
-		return stone.actionName(action, hero);
-	}
 	@Override
 	public void execute(Hero hero, String action) {
 		super.execute(hero, action);
