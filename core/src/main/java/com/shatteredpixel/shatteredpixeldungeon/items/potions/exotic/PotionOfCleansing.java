@@ -73,7 +73,9 @@ public class PotionOfCleansing extends ExoticPotion {
 	}
 
 	public static void cleanse(Char ch, float duration){
-		Buff.prolong(ch, Cleanse.class, duration);
+		if(duration > 0) {
+			Buff.prolong(ch, Cleanse.class, duration);
+		}
 		
 		for (Buff b : ch.buffs()){
 			if (b.type == Buff.buffType.NEGATIVE
@@ -91,9 +93,11 @@ public class PotionOfCleansing extends ExoticPotion {
 
 		{
 			type = buffType.POSITIVE;
+			
+			actPriority = HERO_PRIO+1;
 		}
 
-		public static final float DURATION = 5f;
+		public static final float DURATION = 6f;
 
 		@Override
 		public int icon() {

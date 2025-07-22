@@ -153,6 +153,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
@@ -2208,6 +2209,8 @@ public class Hero extends Char {
 				}
 
 				RingOfWealth.onLevelUp(this);
+				
+				MeleeWeapon.Charger.onLevelUp();
 
 				SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
 				if(bow != null && lvl % 5 == 0) bow.Polished_resetCharges();

@@ -473,6 +473,12 @@ public class MeleeWeapon extends Weapon {
 			super.detach();
 			ActionIndicator.clearAction(this);
 		}
+		
+		public static void onLevelUp() {
+			if(Dungeon.hero.heroClass == HeroClass.DUELIST && Dungeon.hero.lvl % 3 == 1) {
+				Buff.affect(Dungeon.hero, Charger.class).gainCharge(1f);
+			}
+		}
 
 		public int chargeCap(){
 			//caps at level 19 with 8 or 10 charges

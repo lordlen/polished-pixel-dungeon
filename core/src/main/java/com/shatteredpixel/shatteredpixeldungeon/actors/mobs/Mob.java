@@ -1023,7 +1023,11 @@ public abstract class Mob extends Char {
 		}
 		
 		Heap heap = Dungeon.level.heaps.get(pos);
-		if(dropped && heap != null && Dungeon.level.visited[pos]) heap.seen = true;
+		if (dropped && heap != null &&
+			(Dungeon.level.visited[pos] || Dungeon.level.mapped[pos]))
+		{
+			heap.seen = true;
+		}
 
 	}
 	

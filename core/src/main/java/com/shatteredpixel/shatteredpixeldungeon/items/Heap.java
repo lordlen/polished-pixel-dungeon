@@ -110,7 +110,7 @@ public class Heap implements Bundlable {
 		type = Type.HEAP;
 		ArrayList<Item> bonus = RingOfWealth.tryForBonusDrop(hero, 1);
 		if (bonus != null && !bonus.isEmpty()) {
-			items.addAll(0, bonus);
+			for (Item b : bonus) items.add(0, b);
 			RingOfWealth.showFlareForBonusDrop(sprite);
 		}
 		sprite.link();

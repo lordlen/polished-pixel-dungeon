@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Brittle;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corrosion;
@@ -238,7 +239,13 @@ public class WandOfCorruption extends Wand {
 		Class<?extends FlavourBuff> debuffCls = (Class<? extends FlavourBuff>) Random.chances(debuffs);
 		
 		if (debuffCls != null){
-			Buff debuff = Buff.Polished.prolongAligned(enemy, debuffCls, 6 + buffedLvl()*3);
+			
+			int duration = 6 + buffedLvl() * 3;
+			if(enemy.buff(ChampionEnemy.AntiMagic.class) != null) {
+				duration /= 2;
+			}
+			
+			Buff debuff = Buff.Polished.prolongAligned(enemy, debuffCls, duration);
 			if(debuff instanceof Charm) {
 				((Charm) debuff).object = Dungeon.hero.id();
 			}

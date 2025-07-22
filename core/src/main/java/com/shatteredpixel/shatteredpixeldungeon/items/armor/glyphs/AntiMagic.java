@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSleep;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Judgement;
@@ -80,28 +81,34 @@ public class AntiMagic extends Armor.Glyph {
 	static {
 		RESISTS.add( MagicalSleep.class );
 		RESISTS.add( Charm.class );
-		RESISTS.add( Weakness.class );
-		RESISTS.add( Vulnerable.class );
-		RESISTS.add( Brittle.class );
+		RESISTS.add( Slow.class );
 		RESISTS.add( Hex.class );
 		RESISTS.add( Degrade.class );
+		RESISTS.add( Weakness.class );
+		RESISTS.add( Vulnerable.class );
+		// Brittle is not a magical effect
+		//RESISTS.add( Brittle.class );
 		
 		RESISTS.add( DisintegrationTrap.class );
 		RESISTS.add( GrimTrap.class );
-
-		RESISTS.add( ArcaneBomb.class );
-		RESISTS.add( HolyBomb.HolyDamage.class );
+		
 		RESISTS.add( ScrollOfRetribution.class );
 		RESISTS.add( ScrollOfPsionicBlast.class );
 		RESISTS.add( ScrollOfTeleportation.class );
+		
+		RESISTS.add( ArcaneBomb.class );
+		// Holy damage
+		// ***
+		RESISTS.add( HolyBomb.HolyDamage.class );
 		RESISTS.add( HolyDart.class );
-
+		
 		RESISTS.add( GuidingLight.class );
 		RESISTS.add( HolyWeapon.class );
 		RESISTS.add( Sunray.class );
 		RESISTS.add( HolyLance.class );
 		RESISTS.add( Smite.class );
 		RESISTS.add( Judgement.class );
+		// ***
 
 		RESISTS.add( ElementalBlast.class );
 		RESISTS.add( CursedWand.class );
@@ -115,13 +122,15 @@ public class AntiMagic extends Armor.Glyph {
 		RESISTS.add( WandOfPrismaticLight.class );
 		RESISTS.add( WandOfTransfusion.class );
 		RESISTS.add( WandOfWarding.Ward.class );
-
+		
 		RESISTS.add( ElementalStrike.class );
-		RESISTS.add( Blazing.class );
-		RESISTS.add( WandOfFireblast.FireBlastOnHit.class );
-		RESISTS.add( Shocking.class );
-		RESISTS.add( WandOfLightning.LightningOnHit.class );
 		RESISTS.add( Grim.class );
+		RESISTS.add( Blazing.class );
+		// Shocking uses electricity, not magic
+		//RESISTS.add( Shocking.class );
+		
+		RESISTS.add( WandOfFireblast.FireBlastOnHit.class );
+		RESISTS.add( WandOfLightning.LightningOnHit.class );
 
 		RESISTS.add( WarpBeacon.class );
 		

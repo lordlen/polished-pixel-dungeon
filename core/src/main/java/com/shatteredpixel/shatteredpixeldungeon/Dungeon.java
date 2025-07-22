@@ -44,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -478,6 +479,8 @@ public class Dungeon {
 		Wandmaker.Quest.reset();
 		Blacksmith.Quest.reset();
 		Imp.Quest.reset();
+		
+		Shopkeeper.resetBuyback();
 
 		hero = new Hero();
 		hero.live();
@@ -868,6 +871,8 @@ public class Dungeon {
 			Imp			.Quest.storeInBundle( quests );
 			bundle.put( QUESTS, quests );
 			
+			Shopkeeper.storeBuyback(bundle);
+			
 			SpecialRoom.storeRoomsInBundle( bundle );
 			SecretRoom.storeRoomsInBundle( bundle );
 			
@@ -981,6 +986,8 @@ public class Dungeon {
 				Blacksmith.Quest.reset();
 				Imp.Quest.reset();
 			}
+			
+			Shopkeeper.restoreBuyback(bundle);
 			
 			SpecialRoom.restoreRoomsFromBundle(bundle);
 			SecretRoom.restoreRoomsFromBundle(bundle);
