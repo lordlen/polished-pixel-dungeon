@@ -1128,16 +1128,17 @@ public class Hero extends Char {
 	}
 	
 	public void interrupt() {
-		if (isAlive() && curAction != null &&
-			((curAction instanceof HeroAction.Move && curAction.dst != pos) ||
-			(curAction instanceof HeroAction.LvlTransition))) {
+		if (isAlive() && curAction != null && curAction.dst != pos) {
 			lastAction = curAction;
 		}
+		
 		curAction = null;
 		resting = false;
 		GameScene.resetKeyHold();
 		
 		Polished.trampledItemsLast = 0;
+		GameScene.Polished.bufferedMovement = null;
+		GameScene.Polished.bufferedAction = null;
 	}
 	
 	public void resume() {
@@ -2083,9 +2084,10 @@ public class Hero extends Char {
 			return false;
 		}
 
-		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
-			fieldOfView = new boolean[Dungeon.level.length()];
-			Dungeon.level.updateFieldOfView( this, fieldOfView );
+		Level level = Dungeon.level;
+		if (validFov()){
+			fieldOfView = new boolean[level.length()];
+			level.updateFieldOfView( this, fieldOfView );
 		}
 
 		if (!Dungeon.level.visited[cell] && !Dungeon.level.mapped[cell]
@@ -2098,7 +2100,31 @@ public class Hero extends Char {
 		}
 		
 		Char ch = Actor.findChar( cell );
-		Heap heap = Dungeon.level.heaps.get( cell );
+		Heap heap = level.heaps.get( cell );
+		LevelTransition transition = level.getTransition(cell);
+		
+		boolean nearbyMobs = false;
+		if(heap != null || transition != null) {
+			boolean[] pass = BArray.or(BArray.not(level.solid), level.passable, null);
+			PathFinder.buildDistanceMap(pos, pass, 9);
+			
+			for(Mob mob : visibleEnemies) {
+				if(PathFinder.distance[mob.pos] < Integer.MAX_VALUE) {
+					nearbyMobs = true;
+					break;
+				}
+			}
+		}
+		
+		if(lastAction != null) {
+			//remove old path
+			path = null;
+			
+			if(!(fieldOfView[cell] && ch instanceof Mob)) {
+				//if we're not attacking, forget previous action
+				lastAction = null;
+			}
+		}
 
 		if (Dungeon.level.map[cell] == Terrain.ALCHEMY && cell != pos) {
 			
@@ -2124,7 +2150,7 @@ public class Hero extends Char {
 
 		} else if (heap != null
 				//moving to an item doesn't auto-pickup when enemies are near...
-				&& (visibleEnemies.size() == 0 || cell == pos ||
+				&& (!nearbyMobs || cell == pos ||
 				//...but only for standard heaps. Chests and similar open as normal.
 				(heap.type != Type.HEAP && heap.type != Type.FOR_SALE))) {
 
@@ -2145,12 +2171,12 @@ public class Hero extends Char {
 			
 			curAction = new HeroAction.Unlock( cell );
 			
-		} else if (Dungeon.level.getTransition(cell) != null
+		} else if (transition != null
 				//moving to a transition doesn't automatically trigger it when enemies are near
-				&& (visibleEnemies.size() == 0 || cell == pos)
+				&& (!nearbyMobs || cell == pos)
 				&& !Dungeon.level.locked
 				&& !Dungeon.level.plants.containsKey(cell)
-				&& (Dungeon.depth < 26 || Dungeon.level.getTransition(cell).type == LevelTransition.Type.REGULAR_ENTRANCE) ) {
+				&& (Dungeon.depth < 26 || transition.type == LevelTransition.Type.REGULAR_ENTRANCE) ) {
 
 			curAction = new HeroAction.LvlTransition( cell );
 			

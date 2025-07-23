@@ -1658,7 +1658,6 @@ public class GameScene extends PixelScene {
 			
 			Dungeon.hero.curAction = null;
 			Dungeon.hero.resting = false;
-			Hero.Polished.trampledItemsLast = 0;
 			return true;
 			
 		} else {
