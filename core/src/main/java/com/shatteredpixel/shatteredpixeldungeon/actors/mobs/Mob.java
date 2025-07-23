@@ -138,27 +138,36 @@ public abstract class Mob extends Char {
 			HT = Math.round(HT * AscensionChallenge.statModifier(this));
 			HP = Math.round(HT * percent);
 			firstAdded = false;
+			
+			
+			if (this instanceof Necromancer.NecroSkeleton ||
+				this instanceof Wraith ||
+				( this instanceof Swarm && ((Swarm) this).generation > 0 ) ||
+				properties().contains(Property.BOSS_MINION))
+			{
+				polished.spot(true);
+			}
 		}
-
-
 	}
 	
 	public class Polished {
-		public boolean onCooldown = false;
+		static final int spotCooldown = 15;
+		
+		public boolean recentlySpot = false;
 		Actor timer = null;
-		static final int blockCooldown = 20;
 
 		void initTimer() {
 			timer = new Actor() {
 				@Override
 				protected boolean act() {
-					onCooldown = false;
+					recentlySpot = false;
 					killTimer();
 					return true;
 				}
  			};
-			Actor.addDelayed(timer, blockCooldown);
+			Actor.addDelayed(timer, spotCooldown);
 		}
+		
 		void killTimer() {
 			if(timer != null) {
 				Actor.remove(timer);
@@ -168,10 +177,10 @@ public abstract class Mob extends Char {
 
 		public void spot(boolean spot) {
 			if(spot) {
-				onCooldown = true;
+				recentlySpot = true;
 				killTimer();
 			} else {
-				if(onCooldown && timer == null) {
+				if(recentlySpot && timer == null) {
 					initTimer();
 				}
 			}

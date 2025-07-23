@@ -273,18 +273,49 @@ public class Hero extends Char {
 		}
 
 		public static boolean noEnemiesLast = false;
-
 		public static int trampledItemsLast = 0;
-
-		private static boolean interruptsInput(Mob mob) {
-            return  !(mob instanceof Necromancer.NecroSkeleton) &&
-                    !(mob instanceof Wraith) &&
-                    !(mob instanceof Swarm && ((Swarm) mob).generation > 0) &&
-                    !(mob instanceof YogDzewa.Larva);
+		
+		private static boolean blocksInput(Mob mob, int[] distanceMap) {
+			return  !mob.polished.recentlySpot &&
+					( Dungeon.hero.distance(mob) <= 3 || distanceMap[mob.pos] < Integer.MAX_VALUE );
 		}
+		
 		public static boolean noEnemiesSeen() {
 			return Dungeon.hero.visibleEnemies.isEmpty();
 		}
+		
+		public static int nextStep() {
+			PathFinder.Path path = Dungeon.hero.path;
+			return path != null && !path.isEmpty() ? path.getFirst() : -1;
+		}
+		
+		private static void checkInputBlock() {
+			Hero hero = Dungeon.hero;
+			Level level = Dungeon.level;
+			
+			if(hero.validFov()) {
+				boolean blocked = false;
+				boolean[] pass = BArray.or(BArray.not(level.solid), level.passable, null);
+				PathFinder.buildDistanceMap(hero.pos, pass, 7);
+				
+				for (Mob m : level.mobs) {
+					if (hero.fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
+						
+						if (!blocked && blocksInput(m, PathFinder.distance)) {
+							blocked = true;
+							hero.interrupt();
+							GameScene.Polished.blockInput();
+						}
+						
+						noEnemiesLast = false;
+						m.polished.spot(true);
+					} else {
+						m.polished.spot(false);
+					}
+				}
+			}
+		}
+		
 		private static boolean autoPickUp(Item item) {
 			Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
 			if  (item instanceof Dewdrop &&
@@ -953,27 +984,7 @@ public class Hero extends Char {
 	public boolean act() {
 		
 		//Do an input block check before updating fov to account for enemies entering the edge of your vision
-		if(validFov()) {
-			boolean blocked = false;
-			
-			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
-				if (fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
-					
-					if(!blocked && Polished.interruptsInput(m) && !m.polished.onCooldown) {
-						blocked = true;
-						interrupt();
-						GameScene.Polished.blockInput();
-					}
-					
-					Polished.noEnemiesLast = false;
-					
-					m.polished.spot(true);
-					
-				} else {
-					m.polished.spot(false);
-				}
-			}
-		}
+		Polished.checkInputBlock();
 
 		//calls to dungeon.observe will also update hero's local FOV.
 		fieldOfView = Dungeon.level.heroFOV;
@@ -1835,7 +1846,10 @@ public class Hero extends Char {
 		ArrayList<Mob> visible = new ArrayList<>();
 
 		boolean newMob = false;
-		boolean block = false;
+		
+		boolean blocked = false;
+		boolean[] pass = BArray.or(BArray.not(Dungeon.level.solid), Dungeon.level.passable, null);
+		PathFinder.buildDistanceMap(Dungeon.hero.pos, pass, 7);
 
 		Mob target = null;
 		for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
@@ -1848,8 +1862,8 @@ public class Hero extends Char {
 				if (!visibleEnemies.contains( m )) {
 					newMob = true;
 
-					if(!block && Polished.interruptsInput(m) && !m.polished.onCooldown) {
-						block = true;
+					if(!blocked && Polished.blocksInput(m, PathFinder.distance)) {
+						blocked = true;
 						GameScene.Polished.blockInput();
 					}
 				}
