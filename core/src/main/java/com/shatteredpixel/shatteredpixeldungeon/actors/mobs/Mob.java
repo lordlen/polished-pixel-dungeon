@@ -151,7 +151,7 @@ public abstract class Mob extends Char {
 	}
 	
 	public class Polished {
-		static final int spotCooldown = 15;
+		static final int spotCooldown = 10+1;
 		
 		public boolean recentlySpot = false;
 		Actor timer = null;
@@ -160,8 +160,14 @@ public abstract class Mob extends Char {
 			timer = new Actor() {
 				@Override
 				protected boolean act() {
-					recentlySpot = false;
-					killTimer();
+					if(timer == this) {
+						recentlySpot = false;
+						killTimer();
+					}
+					else {
+						Actor.remove(this);
+					}
+					
 					return true;
 				}
  			};
@@ -179,10 +185,9 @@ public abstract class Mob extends Char {
 			if(spot) {
 				recentlySpot = true;
 				killTimer();
-			} else {
-				if(recentlySpot && timer == null) {
-					initTimer();
-				}
+			}
+			else if(recentlySpot && timer == null) {
+				initTimer();
 			}
 		}
 	}

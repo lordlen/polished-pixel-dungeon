@@ -81,11 +81,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Smite;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Swarm;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Wraith;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
@@ -271,14 +267,9 @@ public class Hero extends Char {
 			hero.STR = Math.max(hero.STR, newStr);
 			
 		}
-
-		public static boolean noEnemiesLast = false;
-		public static int trampledItemsLast = 0;
 		
-		private static boolean blocksInput(Mob mob, int[] distanceMap) {
-			return  !mob.polished.recentlySpot &&
-					( Dungeon.hero.distance(mob) <= 3 || distanceMap[mob.pos] < Integer.MAX_VALUE );
-		}
+		public static int trampledItemsLast = 0;
+		public static boolean noEnemiesLast = false;
 		
 		public static boolean noEnemiesSeen() {
 			return Dungeon.hero.visibleEnemies.isEmpty();
@@ -287,6 +278,15 @@ public class Hero extends Char {
 		public static int nextStep() {
 			PathFinder.Path path = Dungeon.hero.path;
 			return path != null && !path.isEmpty() ? path.getFirst() : -1;
+		}
+		public static int pathLength() {
+			PathFinder.Path path = Dungeon.hero.path;
+			return path != null ? path.size() : 0;
+		}
+		
+		private static boolean blocksInput(Mob mob, int[] distanceMap) {
+			return  !mob.polished.recentlySpot &&
+					( Dungeon.hero.distance(mob) <= 3 || distanceMap[mob.pos] < Integer.MAX_VALUE );
 		}
 		
 		private static void checkInputBlock() {

@@ -221,10 +221,12 @@ public class GameScene extends PixelScene {
 			blockInput(1f);
 		}
 		public static void blockInput(float multi) {
-			inputBlockTimer = Game.realTime + Math.round(inputBlock*multi);
+			if(SPDSettings.Polished.inputBlock()) {
+				inputBlockTimer = Game.realTime + Math.round(inputBlock*multi);
+			}
 		}
 		public static boolean canInput() {
-			return (Game.realTime > inputBlockTimer || !SPDSettings.Polished.inputBlock());
+			return Game.realTime > inputBlockTimer;
 		}
 
 
