@@ -165,6 +165,7 @@ public abstract class Mob extends Char {
 						recentlySpot = false;
 						killTimer();
 					}
+					//this should realistically never happen
 					else {
 						Actor.remove(this);
 					}

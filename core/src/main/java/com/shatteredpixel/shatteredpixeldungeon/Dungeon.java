@@ -73,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
@@ -113,15 +114,20 @@ public class Dungeon {
 		static Callback delayed = () -> {};
 		static Actor delayedActor = null;
 		
-		static boolean expertise = false;
-		
 		private static void reset() {
 			DriedRose.resetGhost();
 			SpiritHawk.resetHawk();
 			ShadowClone.resetShadow();
 			PowerOfMany.resetAlly();
+			
+			Door.Polished_reset();
+			
+			//in case it wasn't handled for some reason
+			delayed = () -> {};
+			delayedActor = null;
 		}
 		
+		static boolean expertise = false;
 		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
 			int l_e = Math.max( 0, l-1 );
 			int r_e = Math.min( r+1, level.width() - 1 );
@@ -211,9 +217,13 @@ public class Dungeon {
 					
 					@Override
 					protected boolean act() {
-						callDelayed();
-						//this should already be handled but just in case
-						Actor.remove(this);
+						if(delayedActor == this) {
+							callDelayed();
+						}
+						//this should realistically never happen
+						else {
+							Actor.remove(this);
+						}
 						return true;
 					}
 				};
