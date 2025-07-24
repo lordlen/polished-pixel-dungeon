@@ -22,23 +22,52 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.features;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.BArray;
+import com.watabou.utils.PathFinder;
 
 public class Door {
 
 	public static void enter( int pos ) {
 		Level.set( pos, Terrain.OPEN_DOOR );
 		GameScene.updateMap( pos );
-
+		
 		if (Dungeon.level.heroFOV[pos]) {
 			Dungeon.observe();
 			Sample.INSTANCE.play( Assets.Sounds.OPEN );
+		}
+		
+		if(Polished.interruptHero(pos)) {
+			
+			Mob mob = Dungeon.level.findMob(pos);
+			Actor.addDelayed(new Actor() {
+				{
+					actPriority = HERO_PRIO+1;
+				}
+				@Override
+				protected boolean act() {
+					//make sure the door is still open by hero's turn
+					if(Dungeon.level.map[pos] == Terrain.OPEN_DOOR) {
+						Dungeon.hero.mobInterrupt(mob);
+						GameScene.Polished.blockInput(0.75f);
+						
+						mob.polished.spot(true);
+						Polished.initTimer();
+					}
+					return true;
+				}
+			}, Dungeon.hero.cooldown());
+			
 		}
 	}
 
@@ -53,8 +82,92 @@ public class Door {
 		if (Dungeon.level.heaps.get( pos ) == null && chars <= 1) {
 			Level.set( pos, Terrain.DOOR );
 			GameScene.updateMap( pos );
-			if (Dungeon.level.heroFOV[pos])
+			if (Dungeon.level.heroFOV[pos]) {
 				Dungeon.observe();
+			}
 		}
+	}
+	
+	
+	static class Polished {
+		static boolean interruptHero( int pos ) {
+			Level level = Dungeon.level;
+			Hero hero = Dungeon.hero;
+			
+			if(!SPDSettings.Polished.inputBlock() || !Dungeon.isChallenged(Challenges.DARKNESS)) {
+				return false;
+			}
+			if(Polished.onCooldown) {
+				return false;
+			}
+			
+			if(level.heroFOV[pos]) {
+				return false;
+			}
+			if(!level.visited[pos] && !level.mapped[pos]) {
+				return false;
+			}
+			if(pos == hero.pos || level.distance(pos, hero.pos) > 7) {
+				return false;
+			}
+			
+			Mob mob = level.findMob(pos);
+			// Allies and fleeing enemies usually have predictable paths anyway,
+			// so we're not really giving away much info here.
+			if(mob == null || mob.alignment == Char.Alignment.ALLY || mob.state == mob.FLEEING) {
+				return false;
+			}
+			// This does give information however. Would prefer if there was another way.
+			if(mob.polished.recentlySpot || Hero.Polished.ignoreMobs.contains(mob)) {
+				return false;
+			}
+			
+			boolean[] pass = BArray.or(BArray.not(level.solid), level.passable, null);
+			PathFinder.buildDistanceMap(pos, pass, 7);
+			
+			int dist = PathFinder.distance[hero.pos];
+			if (dist == Integer.MAX_VALUE) {
+				return false;
+			}
+			if(Hero.Polished.nextStep() == -1 || PathFinder.distance[Hero.Polished.nextStep()] > dist) {
+				return false;
+			}
+			if(3*Hero.Polished.pathLength() < dist) {
+				return false;
+			}
+			
+			if(hero.isStealthy()) {
+				return false;
+			}
+			
+			return true;
+		}
+		
+		static final int interruptCooldown = 10+1;
+		static boolean onCooldown = false;
+		
+		static Actor timer = null;
+		static void initTimer() {
+			timer = new Actor() {
+				@Override
+				protected boolean act() {
+					//this should realistically always be true
+					if(timer == this) {
+						Polished_reset();
+					}
+					
+					Actor.remove(this);
+					return true;
+				}
+			};
+			
+			Actor.addDelayed(timer, interruptCooldown);
+			onCooldown = true;
+		}
+	}
+	
+	public static void Polished_reset() {
+		Polished.onCooldown = false;
+		Polished.timer = null;
 	}
 }
