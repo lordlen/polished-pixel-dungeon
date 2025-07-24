@@ -659,9 +659,9 @@ public abstract class Char extends Actor {
 
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
-
-		if (defender instanceof Hero && ((Hero) defender).damageInterrupt){
-			((Hero) defender).interrupt();
+		
+		if (defender instanceof Hero){
+			((Hero) defender).damageInterrupt();
 		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)

@@ -196,6 +196,7 @@ import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public class Hero extends Char {
@@ -225,7 +226,6 @@ public class Hero extends Char {
 	private int defenseSkill = 5;
 
 	public boolean ready = false;
-	public boolean damageInterrupt = true;
 	public HeroAction curAction = null;
 	public HeroAction lastAction = null;
 
@@ -268,6 +268,10 @@ public class Hero extends Char {
 			
 		}
 		
+		public static boolean resuming = false;
+		public static boolean ignoreDamage = false;
+		public static HashSet<Mob> ignoreMobs = new HashSet<>();
+		
 		public static int trampledItemsLast = 0;
 		public static boolean noEnemiesLast = false;
 		
@@ -285,7 +289,7 @@ public class Hero extends Char {
 		}
 		
 		private static boolean blocksInput(Mob mob, int[] distanceMap) {
-			return  !mob.polished.recentlySpot &&
+			return  !mob.polished.recentlySpot && !Polished.ignoreMobs.contains(mob) &&
 					( Dungeon.hero.distance(mob) <= 3 || distanceMap[mob.pos] < Integer.MAX_VALUE );
 		}
 		
@@ -302,9 +306,10 @@ public class Hero extends Char {
 					if (hero.fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
 						
 						if (!blocked && blocksInput(m, PathFinder.distance)) {
-							blocked = true;
-							hero.interrupt();
-							GameScene.Polished.blockInput();
+							if(hero.mobInterrupt(m)) {
+								GameScene.Polished.blockInput();
+								blocked = true;
+							}
 						}
 						
 						noEnemiesLast = false;
@@ -1116,15 +1121,35 @@ public class Hero extends Char {
 	private void ready() {
 		if (sprite.looping()) sprite.idle();
 		curAction = null;
-		damageInterrupt = true;
 		waitOrPickup = false;
 		ready = true;
 		canSelfTrample = true;
+		
+		if(lastAction == null) {
+			Polished.ignoreMobs.clear();
+			Polished.ignoreDamage = false;
+		}
+		Polished.resuming = false;
 
 		AttackIndicator.updateState();
 		DangerIndicator.enemyIndex = 0;
 		
 		GameScene.ready();
+	}
+	
+	public boolean mobInterrupt(Mob mob) {
+		if(Polished.ignoreMobs.add(mob) || !Polished.resuming) {
+			interrupt();
+			return true;
+		}
+		return false;
+	}
+	
+	public void damageInterrupt() {
+		if(!Polished.ignoreDamage || !Polished.resuming) {
+			interrupt();
+		}
+		Polished.ignoreDamage = true;
 	}
 	
 	public void interrupt() {
@@ -1144,8 +1169,10 @@ public class Hero extends Char {
 	public void resume() {
 		curAction = lastAction;
 		lastAction = null;
-		damageInterrupt = false;
 		next();
+		
+		Polished.resuming = true;
+		Polished.ignoreMobs.addAll(visibleEnemies);
 	}
 
 	private boolean canSelfTrample = false;
@@ -1756,8 +1783,8 @@ public class Hero extends Char {
 
 		//regular damage interrupt, triggers on any damage except specific mild DOT effects
 		// unless the player recently hit 'continue moving', in which case this is ignored
-		if (!(src instanceof Hunger || src instanceof Viscosity.DeferedDamage) && damageInterrupt) {
-			interrupt();
+		if (!(src instanceof Hunger || src instanceof Viscosity.DeferedDamage)) {
+			damageInterrupt();
 		}
 
 		if (this.buff(Drowsy.class) != null){
@@ -1838,7 +1865,7 @@ public class Hero extends Char {
 				}
 				//hero gets interrupted on taking serious damage, regardless of any other factor
 				interrupt();
-				damageInterrupt = true;
+				Polished.ignoreDamage = false;
 			}
 		}
 	}
@@ -1847,6 +1874,7 @@ public class Hero extends Char {
 		ArrayList<Mob> visible = new ArrayList<>();
 
 		boolean newMob = false;
+		boolean interrupted = false;
 		
 		boolean blocked = false;
 		boolean[] pass = BArray.or(BArray.not(Dungeon.level.solid), Dungeon.level.passable, null);
@@ -1862,8 +1890,12 @@ public class Hero extends Char {
 				visible.add(m);
 				if (!visibleEnemies.contains( m )) {
 					newMob = true;
+					
+					if(!interrupted && mobInterrupt(m)) {
+						interrupted = true;
+					}
 
-					if(!blocked && Polished.blocksInput(m, PathFinder.distance)) {
+					if(!blocked && interrupted && Polished.blocksInput(m, PathFinder.distance)) {
 						blocked = true;
 						GameScene.Polished.blockInput();
 					}
@@ -1906,13 +1938,9 @@ public class Hero extends Char {
 			}
 		}
 		
-		if (newMob) {
-			if (resting){
-				Dungeon.observe();
-			}
-			interrupt();
+		if (newMob && resting) {
+			Dungeon.observe();
 		}
-
 		visibleEnemies = visible;
 
 		//we also scan for blob landmarks here
@@ -2115,6 +2143,9 @@ public class Hero extends Char {
 				}
 			}
 		}
+		
+		Polished.ignoreDamage = false;
+		Polished.ignoreMobs.clear();
 		
 		if(lastAction != null) {
 			//remove old path

@@ -145,6 +145,7 @@ public abstract class Mob extends Char {
 				( this instanceof Swarm && ((Swarm) this).generation > 0 ) ||
 				properties().contains(Property.BOSS_MINION))
 			{
+				//Automatically spot them on summon
 				polished.spot(true);
 			}
 		}
