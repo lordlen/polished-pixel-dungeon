@@ -233,13 +233,13 @@ public abstract class RegularLevel extends Level {
 		Random.shuffle(stdRooms);
 		Iterator<Room> stdRoomIter = stdRooms.iterator();
 
-		//enemies cannot be within a 10-tile FOV or 10-tile open space walk from the entrance
+		//enemies cannot be within a 9-tile FOV or 9-tile open space walk from the entrance
 		boolean[] entranceFOV = new boolean[length()];
 		Point c = cellToPoint(entrance());
-		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 10);
+		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 9);
 
 		boolean[] entranceWalkable = BArray.or(BArray.not(solid), passable, null);
-		PathFinder.buildDistanceMap(entrance(), entranceWalkable, 10);
+		PathFinder.buildDistanceMap(entrance(), entranceWalkable, 9);
 
 		Mob mob = null;
 		while (mobsToSpawn > 0) {
