@@ -43,7 +43,7 @@ public class Timer extends Actor {
 	}
 	
 	public static void callAll() {
-		for (Timer timer : timers) {
+		for (Timer timer : timers.toArray(new Timer[0])) {
 			if(timer.onTransition != null) {
 				timer.onTransition.call();
 			}
