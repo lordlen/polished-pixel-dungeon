@@ -60,6 +60,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.ShockingBrew
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.UnstableBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfDragonsBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfIcyTouch;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfToxicEssence;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCorrosiveGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
@@ -257,13 +258,14 @@ public class RingOfWealth extends Ring {
 		potionChances.put(PotionOfCorrosiveGas.class,   2f);
 		potionChances.put(PotionOfShroudingFog.class,   2f);
 		potionChances.put(PotionOfHaste.class,   		2f);
+		potionChances.put(PotionOfInvisibility.class,   2f);
 		potionChances.put(PotionOfPurity.class,         2f);
-
-		potionChances.put(ElixirOfDragonsBlood.class,	1f);
-		potionChances.put(ElixirOfIcyTouch.class,		1f);
-		potionChances.put(PotionOfInvisibility.class,   1f);
+		
 		potionChances.put(PotionOfStamina.class,   		1f);
 		potionChances.put(PotionOfParalyticGas.class,   1f);
+		potionChances.put(ElixirOfDragonsBlood.class,	1f);
+		potionChances.put(ElixirOfIcyTouch.class,		1f);
+		potionChances.put(ElixirOfToxicEssence.class,	1f);
 	}
 
 	private static HashMap<Class<? extends Scroll>, Float> scrollChances = new HashMap<>();
@@ -350,6 +352,7 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(PotionOfCorrosiveGas.class,	2);
 		itemRarities.put(PotionOfShroudingFog.class, 	2);
 		itemRarities.put(PotionOfHaste.class,   		2);
+		itemRarities.put(PotionOfInvisibility.class,   	2);
 		itemRarities.put(PotionOfPurity.class,         	2);
 
 		itemRarities.put(ScrollOfMirrorImage.class,    	2);
@@ -372,11 +375,11 @@ public class RingOfWealth extends Ring {
 		
 		
 		
-		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
-		itemRarities.put(ElixirOfIcyTouch.class,   		3);
-		itemRarities.put(PotionOfInvisibility.class,   	3);
 		itemRarities.put(PotionOfStamina.class,   		3);
 		itemRarities.put(PotionOfParalyticGas.class,   	3);
+		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
+		itemRarities.put(ElixirOfIcyTouch.class,   		3);
+		itemRarities.put(ElixirOfToxicEssence.class,   	3);
 
 		itemRarities.put(ScrollOfTerror.class,   		3);
 		itemRarities.put(ScrollOfRetribution.class, 	3);
