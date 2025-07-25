@@ -275,10 +275,20 @@ public class Hero extends Char {
 		public static int trampledItemsLast = 0;
 		public static boolean noEnemiesLast = false;
 		
+		
+		public static void Reset() {
+			resuming = false;
+			ignoreDamage = false;
+			ignoreMobs.clear();
+			
+			trampledItemsLast = 0;
+			noEnemiesLast = false;
+		}
+		
+		
 		public static boolean noEnemiesSeen() {
 			return Dungeon.hero.visibleEnemies.isEmpty();
 		}
-		
 		public static int nextStep() {
 			PathFinder.Path path = Dungeon.hero.path;
 			return path != null && !path.isEmpty() ? path.getFirst() : -1;
@@ -288,12 +298,13 @@ public class Hero extends Char {
 			return path != null ? path.size() : 0;
 		}
 		
-		private static boolean blocksInput(Mob mob, int[] distanceMap) {
+		
+		static boolean blocksInput(Mob mob, int[] distanceMap) {
 			return  !mob.polished.recentlySpot && !Polished.ignoreMobs.contains(mob) &&
 					( Dungeon.hero.distance(mob) <= 3 || distanceMap[mob.pos] < Integer.MAX_VALUE );
 		}
 		
-		private static void checkInputBlock() {
+		static void checkInputBlock() {
 			Hero hero = Dungeon.hero;
 			Level level = Dungeon.level;
 			
@@ -313,15 +324,15 @@ public class Hero extends Char {
 						}
 						
 						noEnemiesLast = false;
-						m.polished.spot(true);
+						m.polished.spot();
 					} else {
-						m.polished.spot(false);
+						m.polished.unseen();
 					}
 				}
 			}
 		}
 		
-		private static boolean autoPickUp(Item item) {
+		static boolean autoPickUp(Item item) {
 			Waterskin waterskin = Dungeon.hero.belongings.getItem(Waterskin.class);
 			if  (item instanceof Dewdrop &&
 				(waterskin == null || waterskin.isFull())) return false;
@@ -362,6 +373,7 @@ public class Hero extends Char {
 
 			return tiersAvailable;
 		}
+		
 		
 		public static boolean isHeroSource(Object src, boolean strict) {
 			
@@ -1125,11 +1137,12 @@ public class Hero extends Char {
 		ready = true;
 		canSelfTrample = true;
 		
+		Polished.trampledItemsLast = 0;
+		Polished.resuming = false;
 		if(lastAction == null) {
 			Polished.ignoreMobs.clear();
 			Polished.ignoreDamage = false;
 		}
-		Polished.resuming = false;
 
 		AttackIndicator.updateState();
 		DangerIndicator.enemyIndex = 0;
@@ -1161,7 +1174,6 @@ public class Hero extends Char {
 		resting = false;
 		GameScene.resetKeyHold();
 		
-		Polished.trampledItemsLast = 0;
 		GameScene.Polished.bufferedMovement = null;
 		GameScene.Polished.bufferedAction = null;
 	}
@@ -1917,10 +1929,10 @@ public class Hero extends Char {
 					}
 				}
 				
-				m.polished.spot(true);
+				m.polished.spot();
 			}
 			else {
-				m.polished.spot(false);
+				m.polished.unseen();
 			}
 		}
 

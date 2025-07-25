@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
@@ -73,7 +74,6 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
-import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
@@ -112,7 +112,7 @@ public class Dungeon {
 		static Callback afterLoad = () -> {};
 		
 		static Callback delayed = () -> {};
-		static Actor delayedActor = null;
+		static Timer timer = null;
 		
 		private static void reset() {
 			DriedRose.resetGhost();
@@ -120,12 +120,49 @@ public class Dungeon {
 			ShadowClone.resetShadow();
 			PowerOfMany.resetAlly();
 			
-			Door.Polished_reset();
-			
-			//in case it wasn't handled for some reason
-			delayed = () -> {};
-			delayedActor = null;
+			Hero.Polished.Reset();
 		}
+		
+		public static void runAfterLoad(Callback callback) {
+			if(!loading) {
+				callback.call();
+				return;
+			}
+			
+			Callback current = afterLoad;
+			afterLoad = () -> {
+				current.call();
+				callback.call();
+			};
+		}
+		
+		public static void runDelayed(Callback callback) {
+			Callback current = delayed;
+			delayed = () -> {
+				current.call();
+				callback.call();
+			};
+			
+			if(timer == null) {
+				timer = Timer.addTimer(() -> {
+					delayed.call();
+					delayed = () -> {};
+					timer = null;
+				});
+				
+				//this should never happen, clear the callback
+				timer.onTransition(() -> {
+					delayed = () -> {};
+				});
+			}
+		}
+		
+		public static void callDelayed() {
+			if(timer != null) {
+				timer.call();
+			}
+		}
+		
 		
 		static boolean expertise = false;
 		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
@@ -199,59 +236,6 @@ public class Dungeon {
 					}
 				}
 			}
-		}
-		
-		public static void runDelayed(Callback callback) {
-			
-			Callback current = delayed;
-			delayed = () -> {
-				current.call();
-				callback.call();
-			};
-			
-			if(delayedActor == null) {
-				delayedActor = new Actor() {
-					{
-						actPriority = VFX_PRIO+20;
-					}
-					
-					@Override
-					protected boolean act() {
-						if(delayedActor == this) {
-							callDelayed();
-						}
-						//this should realistically never happen
-						else {
-							Actor.remove(this);
-						}
-						return true;
-					}
-				};
-				
-				Actor.add(delayedActor);
-			}
-		}
-		public static void callDelayed() {
-			if(delayedActor != null) {
-				delayed.call();
-				
-				Actor.remove(delayedActor);
-				delayedActor = null;
-			}
-			delayed = () -> {};
-		}
-		
-		public static void runAfterLoad(Callback callback) {
-			if(!loading) {
-				callback.call();
-				return;
-			}
-			
-			Callback current = afterLoad;
-			afterLoad = () -> {
-				current.call();
-				callback.call();
-			};
 		}
 		
 		
@@ -698,6 +682,8 @@ public class Dungeon {
 
 		level.addRespawner();
 		
+		Timer.callAll();
+		
 		for(Mob m : level.mobs){
 			if (m.pos == hero.pos && !Char.hasProp(m, Char.Property.IMMOVABLE)){
 				//displace mob
@@ -1048,14 +1034,17 @@ public class Dungeon {
 	}
 	
 	public static Level loadLevel( int save ) throws IOException {
-		
+		Polished.loading = true;
 		Dungeon.level = null;
 		Actor.clear();
 
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( save, depth, branch ));
-
 		Level level = (Level)bundle.get( LEVEL );
-
+		
+		Polished.afterLoad.call();
+		Polished.afterLoad = () -> {};
+		Polished.loading = false;
+		
 		if (level == null){
 			throw new IOException();
 		} else {

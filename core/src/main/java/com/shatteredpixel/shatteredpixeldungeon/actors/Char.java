@@ -198,7 +198,7 @@ public abstract class Char extends Actor {
 	
 	public boolean[] fieldOfView = null;
 	
-	protected boolean validFov() {
+	public boolean validFov() {
 		return  fieldOfView != null && Dungeon.level != null &&
 				fieldOfView.length > 0 && fieldOfView.length == Dungeon.level.length();
 	}
@@ -707,9 +707,7 @@ public abstract class Char extends Actor {
 		if (defender.buff(  Hex.class) != null) defRoll *= 0.75f;
 		if (defender.buff( Daze.class) != null) defRoll *= 0.5f;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
-			boolean surprise = (defender instanceof Mob && ((Mob)defender).surprisedBy(attacker));
-
-			defRoll *= buff.evasionFactor(surprise);
+			defRoll *= buff.evasionFactor();
 		}
 		defRoll *= AscensionChallenge.statModifier(defender);
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC

@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.features;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -48,26 +49,21 @@ public class Door {
 		}
 		
 		if(Polished.interruptHero(pos)) {
+			Level level = Dungeon.level;
+			Mob mob = level.findMob(pos);
 			
-			Mob mob = Dungeon.level.findMob(pos);
-			Actor.addDelayed(new Actor() {
-				{
-					actPriority = HERO_PRIO+1;
+			Timer.addTimer(() -> {
+				
+				//make sure the door is still open by hero's turn
+				if(level.map[pos] == Terrain.OPEN_DOOR) {
+					Dungeon.hero.mobInterrupt(mob);
+					GameScene.Polished.blockInput(0.75f);
+					
+					mob.polished.spot();
+					Polished.initTimer();
 				}
-				@Override
-				protected boolean act() {
-					//make sure the door is still open by hero's turn
-					if(Dungeon.level.map[pos] == Terrain.OPEN_DOOR) {
-						Dungeon.hero.mobInterrupt(mob);
-						GameScene.Polished.blockInput(0.75f);
-						
-						mob.polished.spot(true);
-						Polished.initTimer();
-					}
-					return true;
-				}
-			}, Dungeon.hero.cooldown());
-			
+				
+			}).setBeforeHero();
 		}
 	}
 
@@ -143,31 +139,19 @@ public class Door {
 			return true;
 		}
 		
-		static final int interruptCooldown = 10+1;
+		static final int interruptCooldown = 10;
 		static boolean onCooldown = false;
 		
-		static Actor timer = null;
+		static Timer timer = null;
 		static void initTimer() {
-			timer = new Actor() {
-				@Override
-				protected boolean act() {
-					//this should realistically always be true
-					if(timer == this) {
-						Polished_reset();
-					}
-					
-					Actor.remove(this);
-					return true;
-				}
-			};
-			
-			Actor.addDelayed(timer, interruptCooldown);
 			onCooldown = true;
+			
+			if(timer == null) {
+				timer = Timer.addTimer(() -> {
+					onCooldown = false;
+					timer = null;
+				}, interruptCooldown);
+			}
 		}
-	}
-	
-	public static void Polished_reset() {
-		Polished.onCooldown = false;
-		Polished.timer = null;
 	}
 }
