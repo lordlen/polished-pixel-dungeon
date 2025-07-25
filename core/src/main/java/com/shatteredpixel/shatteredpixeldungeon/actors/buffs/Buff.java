@@ -183,6 +183,7 @@ public class Buff extends Actor {
 			return buff;
 		}
 		
+		//should always call AFTER adding the character to the game scene
 		public static void copyPersistent(Char from, Char to) {
 			for (Buff b : from.buffs()){
 				if (b.revivePersists) {

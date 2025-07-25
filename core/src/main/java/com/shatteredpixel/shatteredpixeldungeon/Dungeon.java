@@ -123,6 +123,7 @@ public class Dungeon {
 			Hero.Polished.Reset();
 		}
 		
+		
 		public static void runAfterLoad(Callback callback) {
 			if(!loading) {
 				callback.call();
@@ -155,6 +156,12 @@ public class Dungeon {
 					delayed = () -> {};
 				});
 			}
+		}
+		
+		public static void stopLoading() {
+			loading = false;
+			afterLoad.call();
+			afterLoad = () -> {};
 		}
 		
 		public static void callDelayed() {
@@ -675,7 +682,9 @@ public class Dungeon {
 		for (WarpingTrap.Disoriented disoriented : hero.buffs(WarpingTrap.Disoriented.class)) {
 			disoriented.onLevelSwitch();
 		}
-
+		
+		Polished.loading = true;
+		
 		Mob.restoreAllies( level, pos );
 
 		Actor.init();
@@ -683,6 +692,7 @@ public class Dungeon {
 		level.addRespawner();
 		
 		Timer.callAll();
+		Polished.stopLoading();
 		
 		for(Mob m : level.mobs){
 			if (m.pos == hero.pos && !Char.hasProp(m, Char.Property.IMMOVABLE)){
@@ -1024,13 +1034,10 @@ public class Dungeon {
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
 		Level.Feeling.restoreFromBundle( bundle );
-
-
-		Polished.afterLoad.call();
-		Polished.afterLoad = () -> {};
-		Polished.loading = false;
-
+		
+		
 		Debug.LoadGame();
+		Polished.stopLoading();
 	}
 	
 	public static Level loadLevel( int save ) throws IOException {
@@ -1041,9 +1048,7 @@ public class Dungeon {
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( save, depth, branch ));
 		Level level = (Level)bundle.get( LEVEL );
 		
-		Polished.afterLoad.call();
-		Polished.afterLoad = () -> {};
-		Polished.loading = false;
+		Polished.stopLoading();
 		
 		if (level == null){
 			throw new IOException();

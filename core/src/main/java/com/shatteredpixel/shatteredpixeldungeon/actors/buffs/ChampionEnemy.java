@@ -176,7 +176,7 @@ public abstract class ChampionEnemy extends Buff {
 		
 		@Override
 		public boolean attachTo( Char target ) {
-			if(!Dungeon.Polished.loading) {
+			if(!Dungeon.Polished.loading && Actor.all().contains(target)) {
 				Buff.prolong(target, rangeDisabled.class, rangeCooldown + TICK);
 			}
 			return super.attachTo(target);
@@ -184,8 +184,7 @@ public abstract class ChampionEnemy extends Buff {
 		
 		@Override
 		public float meleeDamageFactor(boolean adjacent) {
-			Mob mob = (Mob) target;
-			Buff.prolong(target, rangeDisabled.class, rangeCooldown + mob.attackDelay());
+			Buff.prolong(target, rangeDisabled.class, rangeCooldown + ((Mob) target).attackDelay());
 			return 1.25f;
 		}
 
