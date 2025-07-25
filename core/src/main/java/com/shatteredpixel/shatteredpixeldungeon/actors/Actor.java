@@ -62,26 +62,26 @@ public abstract class Actor implements Bundlable {
 		return time;
 	}
 	
+	public synchronized void Polished_timeToNow() {
+		if(all.contains(this)) {
+			time = now;
+		} else {
+			time = 0;
+		}
+	}
+	
 	public void Polished_alignTurnWheel( Char target ) {
 		float partial = target.cooldown() % TICK;
 		if(partial < 0) partial++;
 		
 		if (partial == 0 &&
-			curActorPriority() == MOB_PRIO &&
-			target.actPriority > MOB_PRIO)
+				curActorPriority() == MOB_PRIO &&
+				target.actPriority > MOB_PRIO)
 		{
 			partial = 1;
 		}
-
+		
 		spendConstant(partial);
-	}
-	
-	public void Polished_timeToNow() {
-		if(all().contains(this)) {
-			time = now;
-		} else {
-			time = 0;
-		}
 	}
 
 	//Always spends exactly the specified amount of time, regardless of time-influencing factors
