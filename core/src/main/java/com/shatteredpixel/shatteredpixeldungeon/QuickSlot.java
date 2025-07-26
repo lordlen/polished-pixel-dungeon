@@ -57,6 +57,21 @@ public class QuickSlot {
 		}
 	}
 	
+	//unused
+	public void Polished_clearMissile(Item item) {
+		for (int i = 0; i < SIZE; i++) {
+			if (item.isSimilar(getItem(i)) && isPlaceholder(i)) {
+				for(Heap h : Dungeon.level.heaps.valueList()) {
+					for(Item it : h.items) {
+						if(it.isSimilar(item)) return;
+					}
+				}
+				
+				clearSlot(i);
+			}
+		}
+	}
+	
 	
 	//direct array interaction methods, everything should build from these methods.
 	public void setSlot(int slot, Item item){
@@ -84,23 +99,6 @@ public class QuickSlot {
 			}
 		}
 		return -1;
-	}
-
-	public void clearMissile(Item item) {
-		//unused for now
-
-		for (int i = 0; i < SIZE; i++) {
-			if (item.isSimilar(getItem(i)) && isPlaceholder(i)) {
-				boolean found = false;
-				for(Heap h : Dungeon.level.heaps.valueList()) {
-					for(Item it : h.items) {
-						if(it.isSimilar(item)) found = true;
-					}
-				}
-
-				if(!found) clearSlot(i);
-			}
-		}
 	}
 
 	public Boolean isPlaceholder(int slot){

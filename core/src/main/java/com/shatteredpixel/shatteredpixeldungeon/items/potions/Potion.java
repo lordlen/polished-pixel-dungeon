@@ -242,23 +242,23 @@ public class Potion extends Item {
 			
 			if (isKnown() && mustThrowPots.contains(getClass())) {
 				
-					GameScene.show(
-						new WndOptions(new ItemSprite(this),
-								Messages.get(Potion.class, "harmful"),
-								Messages.get(Potion.class, "sure_drink"),
-								Messages.get(Potion.class, "yes"), Messages.get(Potion.class, "no") ) {
-							@Override
-							protected void onSelect(int index) {
-								if (index == 0) {
-									drink( hero );
-								}
+				GameScene.show(
+					new WndOptions(new ItemSprite(this),
+							Messages.get(Potion.class, "harmful"),
+							Messages.get(Potion.class, "sure_drink"),
+							Messages.get(Potion.class, "yes"), Messages.get(Potion.class, "no") ) {
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0) {
+								drink( hero );
 							}
 						}
-					);
-					
-				} else {
-					drink( hero );
-				}
+					}
+				);
+				
+			} else {
+				drink( hero );
+			}
 			
 		}
 	}
@@ -301,7 +301,7 @@ public class Potion extends Item {
 		
 		hero.sprite.operate( hero.pos );
 
-		if (!anonymous) {
+		if (!anonymous || Polished_wealthDrop != null) {
 			Catalog.countUse(getClass());
 			if (Random.Float() < talentChance) {
 				Talent.onPotionUsed(curUser, curUser.pos, talentFactor);

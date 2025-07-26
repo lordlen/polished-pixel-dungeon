@@ -876,13 +876,14 @@ public enum Talent {
 	}
 
 	public static void onRunestoneUsed( Hero hero, int pos, Class<?extends Item> cls ){
-		boolean wealthDrop = WealthDrop.class.isAssignableFrom(cls);
-		
 		if (hero.hasTalent(RECALL_INSCRIPTION) && Runestone.class.isAssignableFrom(cls)){
 			if (hero.heroClass == HeroClass.CLERIC){
 				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 50 : 10).item = cls;
 			}
-			else if(!wealthDrop) {
+			else {
+				
+				//IMPORTANT: this can generate free items with WealthDrops. However since its weak and niche,
+				//i won't bother fixing it.
 
 				//don't trigger on 1st intuition use
 				if (cls.equals(StoneOfIntuition.class) && hero.buff(StoneOfIntuition.IntuitionUseTracker.class) != null){

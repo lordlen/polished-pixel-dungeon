@@ -46,6 +46,8 @@ public class WealthSpell extends Spell implements WealthDrop<Spell> {
 
 		talentFactor = spell.talentFactor;
 		talentChance = spell.talentChance;
+		
+		usesTargeting = spell.usesTargeting;
 	}
 
 	@Override
@@ -96,6 +98,7 @@ public class WealthSpell extends Spell implements WealthDrop<Spell> {
 	public boolean collect(Bag container) {
 		return afterCollect(super.collect(container));
 	}
+	
 	@Override
 	public void doDrop( Hero hero ) {
 		onDrop(hero);

@@ -28,6 +28,8 @@ public class StoneOfBlast extends Runestone {
 	
 	{
 		image = ItemSpriteSheet.STONE_BLAST;
+		
+		usesTargeting = true;
 	}
 	
 	@Override

@@ -319,8 +319,6 @@ abstract public class MissileWeapon extends Weapon {
 				}
 			}
 			Dungeon.level.drop( this, cell ).sprite.drop();
-		} else {
-			//Dungeon.quickslot.clearMissile(this);
 		}
 	}
 	
