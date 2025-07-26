@@ -109,7 +109,7 @@ public class Kinetic extends Weapon.Enchantment {
 		
 		@Override
 		public boolean act() {
-			preservedDamage -= Math.max(preservedDamage*.025f, 0.1f);
+			preservedDamage -= Math.max(preservedDamage*.02f, 0.1f);
 			if (preservedDamage <= 0) detach();
 			
 			spend(TICK);
