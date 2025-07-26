@@ -38,7 +38,8 @@ public class Berry extends Food {
 		
 		energy = Hunger.HUNGRY/3f; //100 food value
 		if(SPDSettings.Polished.huntress()) {
-			//energy = Hunger.HUNGRY/2f; //150 food value
+			//unused, 3/5 berries for 150 food value
+			//energy = Hunger.HUNGRY/2f;
 		}
 		bones = false;
 	}

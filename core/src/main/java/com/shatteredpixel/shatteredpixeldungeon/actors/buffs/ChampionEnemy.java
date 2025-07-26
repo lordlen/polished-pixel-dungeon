@@ -96,7 +96,7 @@ public abstract class ChampionEnemy extends Buff {
 	public float accuracyFactor(){
 		return 1f;
 	}
-	public float evasionFactor(boolean surpriseAttack){
+	public float evasionFactor(){
 		return 1f;
 	}
 
@@ -106,7 +106,6 @@ public abstract class ChampionEnemy extends Buff {
 
 	public static void rollForChampion(Mob m){
 		if (Dungeon.mobsToChampion <= 0) Dungeon.mobsToChampion = 8;
-
 		Dungeon.mobsToChampion--;
 
 		//we roll for a champion enemy even if we aren't spawning one to ensure that
@@ -172,70 +171,26 @@ public abstract class ChampionEnemy extends Buff {
 			color = 0x8800FF;
 			rays = 4;
 		}
-
-		public class Polished {
-
-			private static final String TIMER = "timer";
-
-			final static float baseCooldown = 1f;
-			Actor timer = null;
-			
-			{
-				if(!Dungeon.Polished.loading) {
-					initCooldown();
-				}
-			}
-
-			void initCooldown() {
-				initCooldown(baseCooldown);
-			}
-			void initCooldown(float cd) {
-				//this should realistically never happen
-				if(timer != null) return;
-				
-				timer = new Actor() {
-					{
-						actPriority = LAST_PRIO;
-					}
-
-					@Override
-					protected boolean act() {
-						timer = null;
-						Actor.remove(this);
-						
-						return true;
-					}
-				};
-				Actor.addDelayed(timer, cd);
-			}
-		}
-		Polished polished = new Polished();
-
+		
+		final static float rangeCooldown = 1f;
+		
 		@Override
-		public void storeInBundle(Bundle bundle) {
-			super.storeInBundle(bundle);
-			if(polished.timer != null) bundle.put(Polished.TIMER, polished.timer);
-		}
-		@Override
-		public void restoreFromBundle(Bundle bundle) {
-			super.restoreFromBundle(bundle);
-
-			if(bundle.contains(Polished.TIMER)) {
-				if (polished.timer == null) polished.initCooldown();
-				polished.timer.restoreFromBundle(bundle.getBundle(Polished.TIMER));
+		public boolean attachTo( Char target ) {
+			if(!Dungeon.Polished.loading && Actor.all().contains(target)) {
+				Buff.prolong(target, rangeDisabled.class, rangeCooldown + TICK);
 			}
+			return super.attachTo(target);
 		}
-
-
+		
 		@Override
 		public float meleeDamageFactor(boolean adjacent) {
-			polished.initCooldown();
+			Buff.prolong(target, rangeDisabled.class, rangeCooldown + ((Mob) target).attackDelay());
 			return 1.25f;
 		}
 
 		@Override
 		public boolean canAttackWithExtraReach(Char enemy) {
-			int range = polished.timer == null ? 4 : 1;
+			int range = target.buff(rangeDisabled.class) == null ? 4 : 1;
 
 			if (Dungeon.level.distance( target.pos, enemy.pos ) > range) {
 				return false;
@@ -249,6 +204,12 @@ public abstract class ChampionEnemy extends Buff {
 				PathFinder.buildDistanceMap(enemy.pos, passable, 4);
 
 				return PathFinder.distance[target.pos] <= 4;
+			}
+		}
+		
+		public static class rangeDisabled extends FlavourBuff {
+			{
+				actPriority = MOB_PRIO+1;
 			}
 		}
 	}
@@ -391,7 +352,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		@Override
-		public float evasionFactor(boolean surpriseAttack) {
+		public float evasionFactor() {
 			return 3f;
 		}
 	}

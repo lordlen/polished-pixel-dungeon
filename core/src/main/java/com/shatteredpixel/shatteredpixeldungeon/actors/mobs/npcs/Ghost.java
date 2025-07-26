@@ -74,6 +74,9 @@ public class Ghost extends NPC {
 		protected int randomDestination() {
 			
 			int pos = super.randomDestination();
+			if(pos == -1) {
+				return pos;
+			}
 			
 			//cannot wander onto heaps or the level exit
 			if (Dungeon.level.heaps.get(pos) != null || pos == Dungeon.level.exit()){

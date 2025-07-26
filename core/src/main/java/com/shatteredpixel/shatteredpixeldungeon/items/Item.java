@@ -602,7 +602,7 @@ public class Item implements Bundlable {
 	}
 	
 	public String status() {
-		return quantity != 1 ? Integer.toString( quantity ) : null;
+		return quantity > 1 ? Integer.toString( quantity ) : null;
 	}
 
 	public static void updateQuickslot() {

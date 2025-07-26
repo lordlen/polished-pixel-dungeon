@@ -95,7 +95,7 @@ public class Brute extends Mob {
 			attacker = (Char)src;
 		}
 		else if (Hero.Polished.isHeroSource(src, false)) {
-			src = Dungeon.hero;
+			attacker = Dungeon.hero;
 		}
 		else if (enemy != null) {
 			attacker = enemy;

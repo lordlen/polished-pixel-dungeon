@@ -355,16 +355,6 @@ public class TimekeepersHourglass extends Artifact {
 		}
 
 		@Override
-		public boolean attachTo(Char target) {
-			if (super.attachTo(target)) {
-
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		@Override
 		public boolean act() {
 			detach();
 			return true;

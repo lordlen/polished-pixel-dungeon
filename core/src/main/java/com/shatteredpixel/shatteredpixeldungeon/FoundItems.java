@@ -66,10 +66,6 @@ public class FoundItems {
         Pair pair = floors.get(getEquivalent(cls));
         if(pair == null) return "";
 
-        if (Scroll.class.isAssignableFrom(cls)
-            && Scroll.getKnown().contains(ScrollOfUpgrade.class))
-            return "";
-
         if(pair.first != 0 && pair.second != 0) {
             return "\n\nThis item type was last found on _floors " + pair.first + " and " + pair.second + "_.";
         }

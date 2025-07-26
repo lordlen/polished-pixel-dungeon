@@ -638,8 +638,7 @@ public class MonkEnergy extends Buff implements ActionIndicator.Action {
 				if (Buff.affect(hero, MonkEnergy.class).abilitiesEmpowered(hero)){
 					Buff.affect(hero, MeditateResistance.class, hero.cooldown());
 				}
-				Hunger hunger = hero.buff(Hunger.class);
-				if(hunger != null) hunger.POLISHED_delay(hero.cooldown());
+				Buff.affect(hero, Hunger.class).affectHunger(8f);
 
 				Actor.addDelayed(new Actor() {
 

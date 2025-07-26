@@ -198,6 +198,11 @@ public abstract class Char extends Actor {
 	
 	public boolean[] fieldOfView = null;
 	
+	public boolean validFov() {
+		return  fieldOfView != null && Dungeon.level != null &&
+				fieldOfView.length > 0 && fieldOfView.length == Dungeon.level.length();
+	}
+	
 	private LinkedHashSet<Buff> buffs = new LinkedHashSet<>();
 
 	public boolean isStealthy() {
@@ -654,9 +659,9 @@ public abstract class Char extends Actor {
 
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
-
-		if (defender instanceof Hero && ((Hero) defender).damageInterrupt){
-			((Hero) defender).interrupt();
+		
+		if (defender instanceof Hero){
+			((Hero) defender).damageInterrupt();
 		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)
@@ -702,9 +707,7 @@ public abstract class Char extends Actor {
 		if (defender.buff(  Hex.class) != null) defRoll *= 0.75f;
 		if (defender.buff( Daze.class) != null) defRoll *= 0.5f;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
-			boolean surprise = (defender instanceof Mob && ((Mob)defender).surprisedBy(attacker));
-
-			defRoll *= buff.evasionFactor(surprise);
+			defRoll *= buff.evasionFactor();
 		}
 		defRoll *= AscensionChallenge.statModifier(defender);
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC

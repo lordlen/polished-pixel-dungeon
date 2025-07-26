@@ -32,6 +32,10 @@ import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Image;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 public class DangerIndicator extends Tag {
 	
 	public static final int COLOR	= 0xC03838;
@@ -39,7 +43,7 @@ public class DangerIndicator extends Tag {
 	private BitmapText number;
 	private Image icon;
 	
-	private int enemyIndex = 0;
+	public static int enemyIndex = 0;
 	
 	private int lastNumber = -1;
 
@@ -110,9 +114,21 @@ public class DangerIndicator extends Tag {
 	@Override
 	protected void onClick() {
 		super.onClick();
-		if (Dungeon.hero.visibleEnemies() > 0) {
-
-			Mob target = Dungeon.hero.visibleEnemy(++enemyIndex);
+		
+		ArrayList<Mob> visible = Dungeon.hero.getVisibleEnemies();
+		if (!visible.isEmpty()) {
+			
+			Collections.sort(visible, new Comparator<Mob>() {
+				@Override
+				public int compare(Mob a, Mob b) {
+					return Dungeon.hero.distance(a) - Dungeon.hero.distance(b);
+				}
+			});
+			
+			Mob target = visible.get(enemyIndex++ % visible.size());
+			if(target == QuickSlotButton.lastTarget) {
+				target = visible.get(enemyIndex++ % visible.size());
+			}
 
 			QuickSlotButton.target(target);
 			if (Dungeon.hero.canAttack(target)) AttackIndicator.target(target);

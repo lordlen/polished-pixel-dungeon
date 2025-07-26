@@ -160,12 +160,15 @@ public class Buff extends Actor {
 
 	public static class Polished {
 		public static<T extends FlavourBuff> T affectAligned(Char target, Class<T> buffClass, float duration) {
-			boolean isNew = target.buff(buffClass) == null;
-
-			T buff = affect(target, buffClass);
-			if(isNew) buff.Polished_alignTurnWheel(target.cooldown());
+			T buff = target.buff(buffClass);
+			
+			if(buff == null) {
+				buff = affect(target, buffClass);
+			} else {
+				buff.Polished_alignTurnWheel(target);
+			}
+			
 			buff.spend( duration * target.resist(buffClass) );
-
 			return buff;
 		}
 
@@ -180,6 +183,7 @@ public class Buff extends Actor {
 			return buff;
 		}
 		
+		//should always call AFTER adding the character to the game scene
 		public static void copyPersistent(Char from, Char to) {
 			for (Buff b : from.buffs()){
 				if (b.revivePersists) {

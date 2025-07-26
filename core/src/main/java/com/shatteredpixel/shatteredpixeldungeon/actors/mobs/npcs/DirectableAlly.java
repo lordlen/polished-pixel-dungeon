@@ -332,7 +332,7 @@ public class DirectableAlly extends NPC {
 		}
 		
 		Level level = Dungeon.level;
-		if(fieldOfView == null || fieldOfView.length != level.length()) {
+		if(!validFov()) {
 			fieldOfView = new boolean[level.length()];
 			level.updateFieldOfView(this, fieldOfView);
 		}
@@ -469,6 +469,18 @@ public class DirectableAlly extends NPC {
 		erasePath();
 	}
 	
+	public static void updateAllPaths() {
+		for (Char ch : Actor.chars()){
+			if (ch instanceof DirectableAlly) {
+				DirectableAlly ally = (DirectableAlly) ch;
+				
+				ally.updatePath();
+				ally.drawPath();
+				ally.updateChain(true);
+			}
+		}
+	}
+	
 	public static boolean observing = false;
 	public static void observeAll() {
 		
@@ -494,7 +506,7 @@ public class DirectableAlly extends NPC {
 			else {
 				if(ally != Stasis.getStasisAlly()) {
 					Level level = Dungeon.level;
-					if(ally.fieldOfView == null || ally.fieldOfView.length != level.length()) {
+					if(!ally.validFov()) {
 						ally.fieldOfView = new boolean[level.length()];
 					}
 					level.updateFieldOfView(ally, ally.fieldOfView);
@@ -510,7 +522,7 @@ public class DirectableAlly extends NPC {
 	protected void observe() {
 		if(!stasis()) {
 			Level level = Dungeon.level;
-			if(fieldOfView == null || fieldOfView.length != level.length()) {
+			if(!validFov()) {
 				fieldOfView = new boolean[level.length()];
 			}
 			level.updateFieldOfView(this, fieldOfView);
@@ -521,7 +533,7 @@ public class DirectableAlly extends NPC {
 	
 	protected void afterObserve() {
 		Level level = Dungeon.level;
-		if(fieldOfView == null || fieldOfView.length != level.length()) {
+		if(!validFov()) {
 			fieldOfView = new boolean[level.length()];
 		}
 		
@@ -845,7 +857,7 @@ public class DirectableAlly extends NPC {
 			Level level = Dungeon.level;
 			Char ch = DirectableAlly.this;
 			
-			if(fieldOfView == null || fieldOfView.length != level.length()) {
+			if(!validFov()) {
 				fieldOfView = new boolean[level.length()];
 				level.updateFieldOfView(ch, fieldOfView);
 			}

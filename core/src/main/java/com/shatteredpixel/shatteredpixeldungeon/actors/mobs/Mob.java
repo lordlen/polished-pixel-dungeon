@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
@@ -138,44 +139,56 @@ public abstract class Mob extends Char {
 			HT = Math.round(HT * AscensionChallenge.statModifier(this));
 			HP = Math.round(HT * percent);
 			firstAdded = false;
+			
+			
+			if (polished.isMinion()) {
+				//Automatically spot them on summon
+				polished.spot();
+			}
 		}
-
-
+	}
+	
+	@Override
+	protected synchronized void onRemove() {
+		super.onRemove();
+		//start ticking timer
+		polished.unseen();
 	}
 	
 	public class Polished {
-		public boolean onCooldown = false;
-		Actor timer = null;
-		static final int blockCooldown = 20;
+		
+		static final int spotCooldown = 10;
+		public boolean recentlySpot = false;
+		
+		Timer timer = null;
 
-		void initTimer() {
-			timer = new Actor() {
-				@Override
-				protected boolean act() {
-					onCooldown = false;
-					killTimer();
-					return true;
-				}
- 			};
-			Actor.addDelayed(timer, blockCooldown);
-		}
-		void killTimer() {
+		public void spot() {
+			recentlySpot = true;
+			
 			if(timer != null) {
-				Actor.remove(timer);
+				timer.kill();
 				timer = null;
 			}
 		}
-
-		public void spot(boolean spot) {
-			if(spot) {
-				onCooldown = true;
-				killTimer();
-			} else {
-				if(onCooldown && timer == null) {
-					initTimer();
-				}
+		
+		public void unseen() {
+			if(recentlySpot && timer == null) {
+				timer = Timer.addTimer(() -> {
+					recentlySpot = false;
+					timer = null;
+				}, spotCooldown);
 			}
 		}
+		
+		public boolean isMinion() {
+			Mob mob = Mob.this;
+			
+			return  mob instanceof Necromancer.NecroSkeleton ||
+					mob instanceof Wraith ||
+					( mob instanceof Swarm && ((Swarm) mob).generation > 0 ) ||
+					mob.properties().contains(Property.BOSS_MINION);
+		}
+		
 	}
 	public Polished polished = new Polished();
 
@@ -1484,7 +1497,7 @@ public abstract class Mob extends Char {
 				}
 				if (ally.sprite != null) ally.sprite.place(ally.pos);
 
-				if (ally.fieldOfView == null || ally.fieldOfView.length != level.length()){
+				if (!ally.validFov()){
 					ally.fieldOfView = new boolean[level.length()];
 				}
 				Dungeon.level.updateFieldOfView( ally, ally.fieldOfView );
