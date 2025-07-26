@@ -1629,10 +1629,11 @@ public class v1_0_X_PPDChanges {
 		// ***
 		addChange(itemIcon(ItemSpriteSheet.EXOTIC_ISAZ), "Scrolls of Identify and Divination",
 				"_- Scroll of Identify:_\n" +
-						"Bla bla bla...\n" +
+						"Now also identifies all held copies of the selected item.\n" +
 						"\n" +
 						"_- Scroll of Divination:_\n" +
-						"Bla bla bla..."
+						"_New:_ Now lets the hero reveal any 1 item type of their choosing.\n" +
+						"The other three will now always be: 1 random potion, 1 random scroll, and 1 random ring."
 		);
 		// ***
 		
