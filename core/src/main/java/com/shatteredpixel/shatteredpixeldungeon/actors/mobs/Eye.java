@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle
 import com.shatteredpixel.shatteredpixeldungeon.items.Dewdrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DisintegrationTrap;
@@ -202,6 +203,19 @@ public class Eye extends Mob {
 					dmg *= 0.5f;
 					if (ch instanceof YogDzewa){
 						dmg *= 0.5f;
+					}
+				}
+				
+				if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
+					
+					dmg = enemy.defenseProc( this, dmg );
+					
+					//do not trigger on-hit logic if defenseProc returned a negative value
+					if (dmg >= 0) {
+						if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
+							dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+							enemy.buff(Viscosity.ViscosityTracker.class).detach();
+						}
 					}
 				}
 
