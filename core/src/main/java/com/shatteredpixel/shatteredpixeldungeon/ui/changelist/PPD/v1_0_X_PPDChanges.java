@@ -1305,12 +1305,10 @@ public class v1_0_X_PPDChanges {
 		);
 		
 		addChange(heroIcon(HeroClass.DUELIST, 6), "Monk",
-				"-ADD DESCRIPTION IN GAME:\n" +
-						"No longer gains energy when chasming enemies.\n" +
+				"No longer gains energy when chasming enemies.\n" +
 						"\n" +
 						"_- Meditate:_\n" +
 						"No longer grants artifact recharge (wand recharge untouched).\n" +
-						"-ADD DESCRIPTION IN GAME:\n" +
 						"_New:_ Monk doesn't consume hunger while meditating.\n" +
 						"\n" +
 						"When empowered:\n" +
@@ -1321,9 +1319,6 @@ public class v1_0_X_PPDChanges {
 		addChange(new Dirk(), "Weapon Abilities\nSneak and Guard",
 				"_- Sneak:_\n" +
 						"Isn't instantaneous anymore.\n" +
-						"\n" +
-						"-TO REMOVE:\n" +
-						"Grants camouflage instead of invis.\n" +
 						"\n" +
 						"Teleport distance:\n" +
 						"- Assassin's Blade: 3 -> 2\n" +
