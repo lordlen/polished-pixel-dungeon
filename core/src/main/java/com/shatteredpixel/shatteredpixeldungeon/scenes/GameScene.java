@@ -221,10 +221,12 @@ public class GameScene extends PixelScene {
 			blockInput(1f);
 		}
 		public static void blockInput(float multi) {
-			inputBlockTimer = Game.realTime + Math.round(inputBlock*multi);
+			if(SPDSettings.Polished.inputBlock()) {
+				inputBlockTimer = Game.realTime + Math.round(inputBlock*multi);
+			}
 		}
 		public static boolean canInput() {
-			return (Game.realTime > inputBlockTimer || !SPDSettings.Polished.inputBlock());
+			return Game.realTime > inputBlockTimer;
 		}
 
 
@@ -1656,7 +1658,6 @@ public class GameScene extends PixelScene {
 			
 			Dungeon.hero.curAction = null;
 			Dungeon.hero.resting = false;
-			Hero.Polished.trampledItemsLast = 0;
 			return true;
 			
 		} else {
@@ -1677,7 +1678,8 @@ public class GameScene extends PixelScene {
 			tagDisappeared = false;
 			updateTags = true;
 		}
-
+		
+		
 		if(Polished.movementQueued()) {
 			Polished.bufferedAction = null;
 			Polished.bufferedCell = -1;
@@ -1693,15 +1695,7 @@ public class GameScene extends PixelScene {
 		}
 
 		Polished.displayIndicators();
-		
-		for (Char ch : Actor.chars()){
-			if (ch instanceof DirectableAlly) {
-				DirectableAlly ally = (DirectableAlly) ch;
-				ally.updatePath();
-				ally.drawPath();
-				ally.updateChain(true);
-			}
-		}
+		DirectableAlly.updateAllPaths();
 	}
 	
 	public static void checkKeyHold(){

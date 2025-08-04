@@ -89,7 +89,8 @@ public class HighGrass {
 				if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.NATURES_BOUNTY)){
 					
 					int berriesAvailable = 2 + 2*((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
-					//if(SPDSettings.Polished.huntress()) berriesAvailable--; // 5/3
+					//unused, 3/5 berries for 150 food value
+					//if(SPDSettings.Polished.huntress()) berriesAvailable--;
 					
 					int targetFloor = 2 + berriesAvailable;
 

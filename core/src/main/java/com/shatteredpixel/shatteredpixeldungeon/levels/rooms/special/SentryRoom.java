@@ -236,7 +236,7 @@ public class SentryRoom extends SpecialRoom {
 		if(Dungeon.level instanceof RegularLevel) {
 			RegularLevel level = (RegularLevel)Dungeon.level;
 			if(level.room(cell) instanceof SentryRoom) {
-				GameScene.Polished.blockInput(3f);
+				GameScene.Polished.blockInput(2.5f);
 				GLog.n(Messages.get(SentryRoom.class, "aqua_brew"));
 			}
 		}

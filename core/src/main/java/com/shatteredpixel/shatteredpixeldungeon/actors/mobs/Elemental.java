@@ -63,6 +63,7 @@ import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public abstract class Elemental extends Mob {
 
@@ -517,11 +518,11 @@ public abstract class Elemental extends Mob {
 		
 		@Override
 		protected void meleeProc( Char enemy, int damage ) {
-			ArrayList<Char> affected = new ArrayList<>();
+			HashSet<Char> affected = new HashSet<>();
 			ArrayList<Lightning.Arc> arcs = new ArrayList<>();
 			Shocking.arc( this, enemy, 2, affected, arcs );
 			
-			if (!Dungeon.level.water[enemy.pos]) {
+			if (!Dungeon.level.water[enemy.pos] || enemy.flying) {
 				affected.remove( enemy );
 			}
 			

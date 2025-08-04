@@ -204,7 +204,7 @@ public class Toolbar extends Component {
 		add(btnWait = new Tool() {
 			@Override
 			protected void onClick() {
-				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready /*&& !GameScene.cancel()*/ && GameScene.Polished.canInput()) {
+				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready && GameScene.Polished.canInput()) {
 					examining = false;
 					Dungeon.hero.rest(false);
 				}
@@ -226,7 +226,7 @@ public class Toolbar extends Component {
 			}
 
 			protected boolean onLongClick() {
-				if (Dungeon.hero != null && Dungeon.hero.ready && !GameScene.cancel() && GameScene.Polished.canInput()) {
+				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready && GameScene.Polished.canInput()) {
 					examining = false;
 					Dungeon.hero.rest(true);
 				}
@@ -239,7 +239,7 @@ public class Toolbar extends Component {
 		add(new Button(){
 			@Override
 			protected void onClick() {
-				if (Dungeon.hero != null && Dungeon.hero.ready && !GameScene.cancel() && GameScene.Polished.canInput()) {
+				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready && GameScene.Polished.canInput()) {
 					examining = false;
 					Dungeon.hero.rest(true);
 				}
@@ -250,13 +250,28 @@ public class Toolbar extends Component {
 				if (btnWait.active) return SPDAction.REST;
 				else				return null;
 			}
+			
+			//make sure the real button is highlighted
+			@Override
+			protected void onPointerDown() {
+				btnWait.base.brightness( 1.4f );
+			}
+			
+			@Override
+			protected void onPointerUp() {
+				if (active) {
+					btnWait.base.resetColor();
+				} else {
+					btnWait.base.tint(Tool.BGCOLOR, 0.7f );
+				}
+			}
 		});
 
 		//hidden button for wait / pickup keybind
 		add(new Button(){
 			@Override
 			protected void onClick() {
-				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready /*&& !GameScene.cancel()*/ && GameScene.Polished.canInput()) {
+				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready && GameScene.Polished.canInput()) {
 					Dungeon.hero.waitOrPickup = true;
 					if ((Dungeon.level.heaps.get(Dungeon.hero.pos) != null || Dungeon.hero.canSelfTrample())
 						&& Dungeon.hero.handle(Dungeon.hero.pos)){
@@ -276,7 +291,7 @@ public class Toolbar extends Component {
 			}
 
 			protected boolean onLongClick() {
-				if (Dungeon.hero != null && Dungeon.hero.ready && !GameScene.cancel() && GameScene.Polished.canInput()) {
+				if (!GameScene.cancel() && Dungeon.hero != null && Dungeon.hero.ready && GameScene.Polished.canInput()) {
 					examining = false;
 					Dungeon.hero.rest(true);
 				}
@@ -287,6 +302,21 @@ public class Toolbar extends Component {
 			public GameAction keyAction() {
 				if (btnWait.active) return SPDAction.WAIT_OR_PICKUP;
 				else				return null;
+			}
+			
+			//make sure the real button is highlighted
+			@Override
+			protected void onPointerDown() {
+				btnWait.base.brightness( 1.4f );
+			}
+			
+			@Override
+			protected void onPointerUp() {
+				if (active) {
+					btnWait.base.resetColor();
+				} else {
+					btnWait.base.tint(Tool.BGCOLOR, 0.7f );
+				}
 			}
 		});
 		
@@ -318,7 +348,14 @@ public class Toolbar extends Component {
 			
 			@Override
 			protected boolean onLongClick() {
-				if(GameScene.Polished.canInput()) Dungeon.hero.search(true);
+				if(Dungeon.hero != null && (Dungeon.hero.curAction != null || Dungeon.hero.resting)) {
+					Dungeon.hero.curAction = null;
+					Dungeon.hero.resting = false;
+				}
+				else if(GameScene.Polished.canInput()) {
+					Dungeon.hero.search(true);
+				}
+				
 				return true;
 			}
 		});

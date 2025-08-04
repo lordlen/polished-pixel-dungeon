@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.CorrosiveGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
@@ -350,28 +351,17 @@ public class DM300 extends Mob {
 		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
 		if (!supercharged && !flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP && state == HUNTING && fightStarted()) {
-
-			if (/*Dungeon.level.heroFOV[pos]*/true) {
-				GLog.w(Messages.get(this, "wires"));
+			
+			GLog.w(Messages.get(this, "wires"));
+			if (Dungeon.level.heroFOV[pos]) {
 				Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
 				sprite.emitter().start(SparkParticle.STATIC, 0.05f, 20);
 			}
-
-			Actor.add(new Actor(){
-
-				{
-					actPriority = VFX_PRIO;
-				}
-
-				@Override
-				protected boolean act() {
-					Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3.5f);
-					((DM300Sprite)sprite).updateChargeState(true);
-					((DM300Sprite)sprite).charge();
-
-					Actor.remove(this);
-					return true;
-				}
+			
+			Dungeon.Polished.runDelayed(() -> {
+				Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3.5f);
+				((DM300Sprite)sprite).updateChargeState(true);
+				((DM300Sprite)sprite).charge();
 			});
 
 		}
@@ -678,19 +668,9 @@ public class DM300 extends Mob {
 			//Make sure DM isn't too aggressive on spawn
 			if(!fightStarted()) {
 				clearEnemy();
-
-				Actor.addDelayed(new Actor() {
-					{
-						actPriority = curActorPriority()+1;
-					}
-
-					@Override
-					protected boolean act() {
-						if(sprite != null) sprite.showLost();
-						Actor.remove(this);
-
-						return true;
-					}
+				
+				Timer.addTimer(() -> {
+					if(sprite != null) sprite.showLost();
 				}, cooldown());
 			}
 

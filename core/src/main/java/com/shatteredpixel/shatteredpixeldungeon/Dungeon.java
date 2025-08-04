@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
@@ -112,17 +113,66 @@ public class Dungeon {
 		static Callback afterLoad = () -> {};
 		
 		static Callback delayed = () -> {};
-		static Actor delayedActor = null;
-		
-		static boolean expertise = false;
+		static Timer timer = null;
 		
 		private static void reset() {
 			DriedRose.resetGhost();
 			SpiritHawk.resetHawk();
 			ShadowClone.resetShadow();
 			PowerOfMany.resetAlly();
+			
+			Hero.Polished.Reset();
 		}
 		
+		
+		public static void runAfterLoad(Callback callback) {
+			if(!loading) {
+				callback.call();
+				return;
+			}
+			
+			Callback current = afterLoad;
+			afterLoad = () -> {
+				current.call();
+				callback.call();
+			};
+		}
+		
+		public static void runDelayed(Callback callback) {
+			Callback current = delayed;
+			delayed = () -> {
+				current.call();
+				callback.call();
+			};
+			
+			if(timer == null) {
+				timer = Timer.addTimer(() -> {
+					delayed.call();
+					delayed = () -> {};
+					timer = null;
+				});
+				
+				//this should never happen, clear the callback
+				timer.onTransition(() -> {
+					delayed = () -> {};
+				});
+			}
+		}
+		
+		public static void stopLoading() {
+			loading = false;
+			afterLoad.call();
+			afterLoad = () -> {};
+		}
+		
+		public static void callDelayed() {
+			if(timer != null) {
+				timer.call();
+			}
+		}
+		
+		
+		static boolean expertise = false;
 		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
 			int l_e = Math.max( 0, l-1 );
 			int r_e = Math.min( r+1, level.width() - 1 );
@@ -196,60 +246,11 @@ public class Dungeon {
 			}
 		}
 		
-		public static void runDelayed(Callback callback) {
-			
-			Callback current = delayed;
-			delayed = () -> {
-				current.call();
-				callback.call();
-			};
-			
-			if(delayedActor == null) {
-				delayedActor = new Actor() {
-					{
-						actPriority = VFX_PRIO+20;
-					}
-					
-					@Override
-					protected boolean act() {
-						callDelayed();
-						//this should already be handled but just in case
-						Actor.remove(this);
-						return true;
-					}
-				};
-				
-				Actor.add(delayedActor);
-			}
-		}
-		public static void callDelayed() {
-			if(delayedActor != null) {
-				delayed.call();
-				
-				Actor.remove(delayedActor);
-				delayedActor = null;
-			}
-			delayed = () -> {};
-		}
 		
-		public static void runAfterLoad(Callback callback) {
-			if(!loading) {
-				callback.call();
-				return;
-			}
-			
-			Callback current = afterLoad;
-			afterLoad = () -> {
-				current.call();
-				callback.call();
-			};
-		}
-		
-		
-		public static ConcurrentHashMap<Integer, Integer> levelLocks = new ConcurrentHashMap<>();
-		public static Integer getLock(int depth, int branch) {
+		public static ConcurrentHashMap<Integer, Object> levelLocks = new ConcurrentHashMap<>();
+		public static Object getLock(int depth, int branch) {
 			final Integer id = 1000 * depth + branch;
-			levelLocks.putIfAbsent(id, id);
+			levelLocks.putIfAbsent(id, new Object());
 			return levelLocks.get(id);
 		}
 		
@@ -684,12 +685,17 @@ public class Dungeon {
 		for (WarpingTrap.Disoriented disoriented : hero.buffs(WarpingTrap.Disoriented.class)) {
 			disoriented.onLevelSwitch();
 		}
-
+		
+		Polished.loading = true;
+		
 		Mob.restoreAllies( level, pos );
 
 		Actor.init();
 
 		level.addRespawner();
+		
+		Timer.callAll();
+		Polished.stopLoading();
 		
 		for(Mob m : level.mobs){
 			if (m.pos == hero.pos && !Char.hasProp(m, Char.Property.IMMOVABLE)){
@@ -1035,24 +1041,22 @@ public class Dungeon {
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
 		Level.Feeling.restoreFromBundle( bundle );
-
-
-		Polished.afterLoad.call();
-		Polished.afterLoad = () -> {};
-		Polished.loading = false;
-
+		
+		
 		Debug.LoadGame();
+		Polished.stopLoading();
 	}
 	
 	public static Level loadLevel( int save ) throws IOException {
-		
+		Polished.loading = true;
 		Dungeon.level = null;
 		Actor.clear();
 
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( save, depth, branch ));
-
 		Level level = (Level)bundle.get( LEVEL );
-
+		
+		Polished.stopLoading();
+		
 		if (level == null){
 			throw new IOException();
 		} else {
