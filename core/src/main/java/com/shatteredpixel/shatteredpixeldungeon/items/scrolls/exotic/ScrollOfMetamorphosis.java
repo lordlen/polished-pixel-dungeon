@@ -80,6 +80,7 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		if (Dungeon.hero.hasTalent(newTalent)) {
 			Talent.onTalentUpgraded(Dungeon.hero, newTalent);
 		}
+		Talent.onTalentRemoval(Dungeon.hero, oldTalent);
 	}
 
 	public static void replaceTalent(Talent replaced, Talent newTalent) {
