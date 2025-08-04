@@ -241,7 +241,7 @@ public class EtherealChains extends Artifact {
 			return;
 		}
 		
-		//don't pull if there are no enemy mobs next to the pull location
+		//don't pull if there are no visible enemy mobs next to the pull location
 		boolean enemyFound = false;
 		for (int i : PathFinder.NEIGHBOURS8){
 			Mob mob = Dungeon.level.findMob(chain.collisionPos+i);
