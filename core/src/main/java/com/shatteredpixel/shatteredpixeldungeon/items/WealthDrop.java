@@ -1,3 +1,24 @@
+/*
+ * Pixel Dungeon
+ * Copyright (C) 2012-2015 Oleg Dolya
+ *
+ * Shattered Pixel Dungeon
+ * Copyright (C) 2014-2024 Evan Debenham
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
@@ -8,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -74,7 +94,9 @@ public interface WealthDrop<T extends Item> {
     default boolean afterCollect(boolean collected) {
         if(!collected) return false;
 
-        if(!Dungeon.Polished.loading && Dungeon.hero != null && this instanceof Item) {
+        if (!Dungeon.Polished.loading && Dungeon.hero != null &&
+            this instanceof Item && (decay() == null || decay().item != th()))
+        {
             setDecay(Buff.append(Dungeon.hero, Decay.class, decayTimer()));
             decay().item = th();
             decay().max = (int)decay().cooldown();
@@ -83,6 +105,7 @@ public interface WealthDrop<T extends Item> {
     }
     default void afterDetach() {
         if(decay() != null) decay().detach();
+        setDecay(null);
     }
 
     default void onDrop(Hero hero) {
@@ -94,8 +117,7 @@ public interface WealthDrop<T extends Item> {
     }
 
     default void wealthDetach(Bag container) {
-        //Wealth potions already detach by themselves
-        if(valid() && item().quantity() <= 1 && !(this instanceof WealthPotion)) {
+        if(valid() && item().quantity() <= 1) {
             th().detach(container);
         }
     }
@@ -112,15 +134,17 @@ public interface WealthDrop<T extends Item> {
 
         return desc;
     }
-
-    default String dropExtra() {
-        return decay() != null ? decay().iconTextDisplay() : null;
-    }
-
-    default void dropColor(BitmapText text) {
-        if(decay() != null) {
+    
+    default void setSlotTimer(BitmapText timer) {
+        if(decay() == null) {
+            timer.text(null);
+        }
+        else {
+            timer.text(decay().iconTextDisplay());
+            timer.measure();
+            
             float percent = decay().cooldown() / decay().max;
-            text.hardlight(1f, percent, percent);
+            timer.hardlight(1f, percent, percent);
         }
     }
 
@@ -167,18 +191,17 @@ public interface WealthDrop<T extends Item> {
     }
 
     static void refreshIndicators() {
-        if(Dungeon.hero.buff(Decay.class) != null) {
+        for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
+            if (decay.cooldown() <= 10 && decay.warning && decay.item != null) {
+                decay.warning = false;
+                
+                GLog.newLine();
+                GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
+                Dungeon.hero.interrupt();
+            }
+            
             Item.updateQuickslot();
         }
-        
-        //disabled for now
-        /*for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
-            if (decay.cooldown() <= 25 && decay.warning && decay.item != null) {
-                decay.warning = false;
-                GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
-            }
-            Item.updateQuickslot();
-        }*/
     }
 
     class Decay extends FlavourBuff {

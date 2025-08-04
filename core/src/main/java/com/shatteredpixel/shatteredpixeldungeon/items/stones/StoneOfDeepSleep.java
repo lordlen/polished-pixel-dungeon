@@ -35,6 +35,8 @@ public class StoneOfDeepSleep extends Runestone {
 	
 	{
 		image = ItemSpriteSheet.STONE_SLEEP;
+		
+		usesTargeting = true;
 	}
 	
 	@Override
