@@ -229,6 +229,7 @@ public class Hero extends Char {
 	public boolean ready = false;
 	public HeroAction curAction = null;
 	public HeroAction lastAction = null;
+	public HeroAction operateAction = null;
 
 	//reference to the enemy the hero is currently in the process of attacking
 	private Char attackTarget;
@@ -1416,6 +1417,7 @@ public class Hero extends Char {
 					Sample.INSTANCE.play( Assets.Sounds.UNLOCK );
 				}
 				
+				operateAction = curAction;
 				sprite.operate( dst );
 				
 			} else {
@@ -1461,6 +1463,7 @@ public class Hero extends Char {
 			
 			if (hasKey) {
 				
+				operateAction = curAction;
 				sprite.operate( doorCell );
 				
 				Sample.INSTANCE.play( Assets.Sounds.UNLOCK );
@@ -2628,9 +2631,9 @@ public class Hero extends Char {
 	@Override
 	public void onOperateComplete() {
 		
-		if (curAction instanceof HeroAction.Unlock) {
+		if (operateAction instanceof HeroAction.Unlock) {
 
-			int doorCell = ((HeroAction.Unlock)curAction).dst;
+			int doorCell = ((HeroAction.Unlock)operateAction).dst;
 			int door = Dungeon.level.map[doorCell];
 			
 			if (Dungeon.level.distance(pos, doorCell) <= 1) {
@@ -2657,9 +2660,9 @@ public class Hero extends Char {
 				}
 			}
 			
-		} else if (curAction instanceof HeroAction.OpenChest) {
+		} else if (operateAction instanceof HeroAction.OpenChest) {
 			
-			Heap heap = Dungeon.level.heaps.get( ((HeroAction.OpenChest)curAction).dst );
+			Heap heap = Dungeon.level.heaps.get( ((HeroAction.OpenChest)operateAction).dst );
 			
 			if (Dungeon.level.distance(pos, heap.pos) <= 1){
 				boolean hasKey = true;
@@ -2679,6 +2682,7 @@ public class Hero extends Char {
 			}
 			
 		}
+		operateAction = null;
 		curAction = null;
 
 		if (!ready) {
@@ -2807,6 +2811,7 @@ public class Hero extends Char {
 		
 		if (intentional) {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
+			operateAction = null;
 			sprite.operate( pos );
 			if (!Dungeon.level.locked) {
 				float searchTime = hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;
