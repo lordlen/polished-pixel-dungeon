@@ -56,12 +56,14 @@ public class Shocking extends Weapon.Enchantment {
 			affected.clear();
 			arcs.clear();
 			
+			//always distance of 2 for the first target, regardless of water
 			arc(attacker, defender, 2, affected, arcs);
 			
 			affected.remove(defender); //defender isn't hurt by lightning
 			for (Char ch : affected) {
 				if (ch.alignment != attacker.alignment) {
-					ch.damage(Math.round(damage * powerMulti * (Dungeon.level.water[ch.pos] && !ch.flying ? 0.75f : 0.5f)), this);
+					boolean onWater = Dungeon.level.water[ch.pos] && !ch.flying;
+					ch.damage(Math.round(damage * powerMulti * (onWater ? 0.75f : 0.5f)), this);
 				}
 			}
 
@@ -79,16 +81,16 @@ public class Shocking extends Weapon.Enchantment {
 		return WHITE;
 	}
 
-	private HashSet<Char> affected = new HashSet<>();
+	private ArrayList<Char> affected = new ArrayList<>();
 
 	private ArrayList<Lightning.Arc> arcs = new ArrayList<>();
 	
-	public static void arc( Char attacker, Char defender, int dist, HashSet<Char> affected, ArrayList<Lightning.Arc> arcs ) {
+	public static void arc( Char attacker, Char defender, int dist, ArrayList<Char> affected, ArrayList<Lightning.Arc> arcs ) {
 
 		defender.sprite.centerEmitter().burst(SparkParticle.FACTORY, 3);
 		defender.sprite.flash();
 
-		ArrayList<Char> hitThisArc = new ArrayList<>();
+		HashSet<Char> hitThisArc = new HashSet<>();
 		PathFinder.buildDistanceMap( defender.pos, BArray.not( Dungeon.level.solid, null ), dist );
 		for (int i = 0; i < PathFinder.distance.length; i++) {
 			if (PathFinder.distance[i] < Integer.MAX_VALUE) {
@@ -102,7 +104,8 @@ public class Shocking extends Weapon.Enchantment {
 		affected.addAll(hitThisArc);
 		for (Char hit : hitThisArc){
 			arcs.add(new Lightning.Arc(defender.sprite.center(), hit.sprite.center()));
-			arc(attacker, hit, (Dungeon.level.water[hit.pos] && !hit.flying) ? 2 : 1, affected, arcs);
+			boolean onWater = Dungeon.level.water[hit.pos] && !hit.flying;
+			arc(attacker, hit, onWater ? 2 : 1, affected, arcs);
 		}
 
 	}

@@ -518,7 +518,7 @@ public abstract class Elemental extends Mob {
 		
 		@Override
 		protected void meleeProc( Char enemy, int damage ) {
-			HashSet<Char> affected = new HashSet<>();
+			ArrayList<Char> affected = new ArrayList<>();
 			ArrayList<Lightning.Arc> arcs = new ArrayList<>();
 			Shocking.arc( this, enemy, 2, affected, arcs );
 			
