@@ -656,13 +656,16 @@ public abstract class Char extends Actor {
 	}
 
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
+		
+		if (defender instanceof Hero){
+			Hero hero = (Hero) defender;
+			if(hero.damageInterrupt() && !hero.fieldOfView[attacker.pos]) {
+				GameScene.Polished.blockInput(0.75f);
+			}
+		}
 
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
-		
-		if (defender instanceof Hero){
-			((Hero) defender).damageInterrupt();
-		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)
 		if (attacker.isStealthyTo(defender) && attacker.canSurpriseAttack()) {

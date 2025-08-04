@@ -1168,11 +1168,13 @@ public class Hero extends Char {
 		return false;
 	}
 	
-	public void damageInterrupt() {
+	public boolean damageInterrupt() {
 		if(!Polished.ignoreDamage || !Polished.resuming) {
+			Polished.ignoreDamage = true;
 			interrupt();
+			return true;
 		}
-		Polished.ignoreDamage = true;
+		return false;
 	}
 	
 	public void interrupt() {
