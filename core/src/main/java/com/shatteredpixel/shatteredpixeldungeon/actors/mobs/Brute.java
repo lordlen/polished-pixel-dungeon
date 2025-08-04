@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.BruteSprite;
@@ -138,8 +139,7 @@ public class Brute extends Mob {
 	}
 	
 	protected void triggerEnrage(){
-		Viscosity.DeferedDamage deferred = buff(Viscosity.DeferedDamage.class);
-		if(deferred != null) deferred.detach();
+		PotionOfCleansing.cleanse(this, 0);
 		
 		Buff.affect(this, BruteRage.class).setShield(HT/2 + 4);
 		sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(HT/2 + 4), FloatingText.SHIELDING );

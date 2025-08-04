@@ -429,11 +429,15 @@ public class RingOfWealth extends Ring {
 
 		triesToDrop.countDown(tries);
 		while ( triesToDrop.count() <= 0 ){
-			Item i = null;
-
+			triesToDrop.countUp( Random.NormalIntRange(1, max) );
+			
 			if(alchemizeLeft.count() > 0) {
 				if(alchemizeCounter.count() <= 0) {
-					i = Reflection.newInstance(Alchemize.class).quantity(Random.NormalIntRange(3, 4) + bonus);
+					
+					Alchemize alchemize = Reflection.newInstance(Alchemize.class);
+					alchemize.quantity(Random.NormalIntRange(3, 4) + bonus);
+					drops.add(alchemize);
+					
 					alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
 					alchemizeLeft.countDown(1);
 				} else {
@@ -441,17 +445,15 @@ public class RingOfWealth extends Ring {
 				}
 			}
 
-			if(i == null) {
-				do {
-					i = randomItem();
-				} while (Challenges.isItemBlocked(i));
-			}
+			Item drop;
+			do {
+				drop = randomItem();
+			} while (Challenges.isItemBlocked(drop));
 
-			drops.add(i);
+			drops.add(drop);
 
-			Integer rarity = itemRarities.get(i.getClass());
+			Integer rarity = itemRarities.get(drop.getClass());
 			latestDropTier = Math.max(latestDropTier, rarity != null ? rarity : 0);
-			triesToDrop.countUp( Random.NormalIntRange(1, max) );
 		}
 
 		return drops;
@@ -561,8 +563,9 @@ public class RingOfWealth extends Ring {
 
 	public static void onLevelUp(Char target) {
 		AlchemizeLeft alchemizeLeft = target.buff(AlchemizeLeft.class);
-		if(getBuffedBonus(target, Wealth.class) > 0 && alchemizeLeft != null)
+		if(getBuffedBonus(target, Wealth.class) > 0 && alchemizeLeft != null) {
 			alchemizeLeft.countUp(1);
+		}
 	}
 
 	public class Wealth extends RingBuff {}

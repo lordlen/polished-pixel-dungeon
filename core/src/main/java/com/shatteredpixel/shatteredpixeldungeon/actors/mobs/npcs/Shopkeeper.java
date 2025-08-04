@@ -65,12 +65,17 @@ public class Shopkeeper extends NPC {
 
 		properties.add(Property.IMMOVABLE);
 	}
-
-	public static int MAX_BUYBACK_HISTORY = 3;
-	public ArrayList<Item> buybackItems = new ArrayList<>();
-
+	
 	private int turnsSinceHarmed = -1;
 
+	public static int MAX_BUYBACK_HISTORY = 3;
+	private static ArrayList<Item> buybackItems = new ArrayList<>();
+	private static ArrayList<Item> buybackItemsImp = new ArrayList<>();
+	
+	public ArrayList<Item> getBuybackItems() {
+		return this instanceof ImpShopkeeper ? buybackItemsImp : buybackItems;
+	}
+	
 	@Override
 	public Notes.Landmark landmark() {
 		return Notes.Landmark.SHOP;
@@ -241,12 +246,12 @@ public class Shopkeeper extends NPC {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
-				String[] options = new String[2+ buybackItems.size()];
+				String[] options = new String[2+ getBuybackItems().size()];
 				int maxLen = PixelScene.landscape() ? 30 : 25;
 				int i = 0;
 				options[i++] = Messages.get(Shopkeeper.this, "sell");
 				options[i++] = Messages.get(Shopkeeper.this, "talk");
-				for (Item item : buybackItems){
+				for (Item item : getBuybackItems()){
 					options[i] = Messages.get(Heap.class, "for_sale", item.value(), Messages.titleCase(item.title()));
 					if (options[i].length() > maxLen) options[i] = options[i].substring(0, maxLen-3) + "...";
 					i++;
@@ -262,7 +267,7 @@ public class Shopkeeper extends NPC {
 							GameScene.show(new WndTitledMessage(sprite(), Messages.titleCase(name()), chatText()));
 						} else if (index > 1){
 							GLog.i(Messages.get(Shopkeeper.this, "buyback"));
-							Item returned = buybackItems.remove(index-2);
+							Item returned = getBuybackItems().remove(index-2);
 							Dungeon.gold -= returned.value();
 							Statistics.goldCollected -= returned.value();
 							if (!returned.doPickUp(Dungeon.hero)){
@@ -276,7 +281,7 @@ public class Shopkeeper extends NPC {
 					@Override
 					protected boolean enabled(int index) {
 						if (index > 1){
-							return Dungeon.gold >= buybackItems.get(index-2).value();
+							return Dungeon.gold >= getBuybackItems().get(index-2).value();
 						} else {
 							return super.enabled(index);
 						}
@@ -290,7 +295,7 @@ public class Shopkeeper extends NPC {
 					@Override
 					protected Image getIcon(int index) {
 						if (index > 1){
-							return new ItemSprite(buybackItems.get(index-2));
+							return new ItemSprite(getBuybackItems().get(index-2));
 						}
 						return null;
 					}
@@ -322,26 +327,45 @@ public class Shopkeeper extends NPC {
 		}
 	}
 
-	public static String BUYBACK_ITEMS = "buyback_items";
-
-	public static String TURNS_SINCE_HARMED = "turns_since_harmed";
-
-	@Override
-	public void storeInBundle(Bundle bundle) {
-		super.storeInBundle(bundle);
+	public static String BUYBACK_ITEMS 		= "buyback_items";
+	public static String BUYBACK_ITEMS_IMP 	= "buyback_items_imp";
+	public static void storeBuyback(Bundle bundle) {
 		bundle.put(BUYBACK_ITEMS, buybackItems);
-		bundle.put(TURNS_SINCE_HARMED, turnsSinceHarmed);
+		bundle.put(BUYBACK_ITEMS_IMP, buybackItemsImp);
 	}
-
-	@Override
-	public void restoreFromBundle(Bundle bundle) {
-		super.restoreFromBundle(bundle);
+	
+	public static void restoreBuyback(Bundle bundle) {
 		buybackItems.clear();
 		if (bundle.contains(BUYBACK_ITEMS)){
 			for (Bundlable i : bundle.getCollection(BUYBACK_ITEMS)){
 				buybackItems.add((Item) i);
 			}
 		}
+		
+		buybackItemsImp.clear();
+		if (bundle.contains(BUYBACK_ITEMS_IMP)){
+			for (Bundlable i : bundle.getCollection(BUYBACK_ITEMS_IMP)){
+				buybackItemsImp.add((Item) i);
+			}
+		}
+	}
+	
+	public static void resetBuyback() {
+		buybackItems.clear();
+		buybackItemsImp.clear();
+	}
+
+	public static String TURNS_SINCE_HARMED = "turns_since_harmed";
+
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		bundle.put(TURNS_SINCE_HARMED, turnsSinceHarmed);
+	}
+
+	@Override
+	public void restoreFromBundle(Bundle bundle) {
+		super.restoreFromBundle(bundle);
 		turnsSinceHarmed = bundle.contains(TURNS_SINCE_HARMED) ? bundle.getInt(TURNS_SINCE_HARMED) : -1;
 	}
 }
