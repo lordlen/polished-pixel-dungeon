@@ -283,7 +283,16 @@ public class Dungeon {
 				FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
 			}
 		}
-  
+		
+		
+		public static boolean[] openTiles() {
+			boolean[] open = new boolean[level.length()];
+			for (int i = 0; i < level.length(); i++) {
+				open[i] = !level.solid[i] || !level.losBlocking[i] || level.passable[i];
+			}
+			return open;
+		}
+		
 	}
 
 	//enum of items which have limited spawns, records how many have spawned
@@ -1117,13 +1126,16 @@ public class Dungeon {
 			Statistics.floorsExplored.put( depth, level.levelExplorePercent(depth));
 		}
 	}
-
-	//default to recomputing based on max hero vision, in case vision just shrank/grew
+	
 	public static void observe(){
-		int dist = Math.max(Dungeon.hero.viewDistance, 8);
-		dist *= 1f + 0.18f*Dungeon.hero.pointsInTalent(Talent.FARSIGHT);
+		int dist = hero.viewDistance;
+		dist *= 1f + 0.18f*hero.pointsInTalent(Talent.FARSIGHT);
+		
+		//default to computing based on max vision, in case it just shrank
+		//farsight can't be metamorphed so we don't have to worry about that
+		//dist *= EyeOfNewt.visionRangeMultiplier();
 
-		if (Dungeon.hero.buff(MagicalSight.class) != null){
+		if (hero.buff(MagicalSight.class) != null){
 			dist = Math.max( dist, MagicalSight.DISTANCE );
 		}
 
