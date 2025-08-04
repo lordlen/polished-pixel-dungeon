@@ -325,7 +325,7 @@ public class WndSettings extends WndTabbed {
 			add(optVisGrid);
 
 			optFollowIntensity = new OptionSlider(Messages.get(this, "camera_follow"),
-					Messages.get(this, "low"), Messages.get(this, "high"), 1, 4) {
+					Messages.get(this, "low"), Messages.get(this, "high"), 0, 4) {
 				@Override
 				protected void onChange() {
 					SPDSettings.cameraFollow(getSelectedValue());
