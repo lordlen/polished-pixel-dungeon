@@ -72,7 +72,7 @@ public class CellSelector extends ScrollArea {
 	
 	@Override
 	protected void onScroll( ScrollEvent event ) {
-		float diff = event.amount/(PC ? 20f : 10f);
+		float diff = event.amount/(PC ? 15f : 10f);
 		
 		//scale zoom difference so zooming is consistent
 		diff /= ((camera.zoom+1)/camera.zoom)-1;
