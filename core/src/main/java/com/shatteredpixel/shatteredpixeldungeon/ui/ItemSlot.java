@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -390,7 +391,12 @@ public class ItemSlot extends Button {
 	@Override
 	protected String hoverText() {
 		if (item != null && item.name() != null) {
-			return Messages.titleCase(item.name());
+			Notes.CustomRecord rec = Notes.findCustomRecord(item);
+			if(rec != null && rec.title() != null) {
+				return rec.title();
+			} else {
+				return Messages.titleCase(item.name());
+			}
 		} else {
 			return super.hoverText();
 		}
