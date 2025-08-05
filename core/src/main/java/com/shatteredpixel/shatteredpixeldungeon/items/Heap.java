@@ -82,6 +82,9 @@ public class Heap implements Bundlable {
 	public LinkedList<Item> items = new LinkedList<>();
 	
 	public void open( Hero hero ) {
+		
+		//Notes.LandmarkRecord.Polished.updateOnContainerOpen(pos, type);
+		
 		switch (type) {
 		case TOMB:
 			Wraith.spawnAround( hero.pos );
@@ -92,8 +95,6 @@ public class Heap implements Bundlable {
 			break;
 		default:
 		}
-
-		Notes.LandmarkRecord.Polished.updateOnContainerOpen(pos, type);
 		
 		if (haunted){
 			if (Wraith.spawnAt( pos ) == null) {

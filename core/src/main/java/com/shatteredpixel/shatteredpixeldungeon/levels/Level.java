@@ -1014,7 +1014,7 @@ public abstract class Level implements Bundlable {
 			web.clear(pos);
 		}
 
-		if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
+		//if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
 	}
 
 	public void cleanWalls() {
