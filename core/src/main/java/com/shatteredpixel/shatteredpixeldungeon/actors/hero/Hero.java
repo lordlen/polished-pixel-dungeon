@@ -1970,24 +1970,13 @@ public class Hero extends Char {
 		//we also scan for blob landmarks here
 		for (Blob b : Dungeon.level.blobs.values().toArray(new Blob[0])){
 			if (b.volume > 0 && b.landmark() != null && !Notes.contains(b.landmark())){
-				int cell;
-				boolean found = false;
-				//if a single cell within the blob is visible, we add the landmark
-				for (int i=b.area.top; i < b.area.bottom; i++) {
-					for (int j = b.area.left; j < b.area.right; j++) {
-						cell = j + i* Dungeon.level.width();
-						if (fieldOfView[cell] && b.cur[cell] > 0) {
-							Notes.add( b.landmark() );
-							found = true;
-							break;
-						}
+				
+				if(b.isVisible()) {
+					Notes.add( b.landmark() );
+					//Clear blobs that only exist for landmarks.
+					if (b instanceof LandmarkBlob){
+						b.fullyClear();
 					}
-					if (found) break;
-				}
-
-				//Clear blobs that only exist for landmarks.
-				if (found && b instanceof LandmarkBlob){
-					b.fullyClear();
 				}
 			}
 		}

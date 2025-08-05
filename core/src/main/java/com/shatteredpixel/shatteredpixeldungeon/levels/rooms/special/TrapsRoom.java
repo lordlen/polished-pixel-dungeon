@@ -64,12 +64,15 @@ public class TrapsRoom extends SpecialRoom {
 		Painter.fill( level, this, Terrain.WALL );
 
 		Class<? extends Trap> trapClass;
+		Class<? extends LandmarkBlob> landmark;
 		switch (Random.Int(4)){
 			case 0:
 				trapClass = null;
+				landmark = ChasmID.class;
 				break;
 			default:
 				trapClass = Random.oneOf(levelTraps[Dungeon.depth/5]);
+				landmark = TrapsID.class;
 				break;
 		}
 
@@ -90,18 +93,22 @@ public class TrapsRoom extends SpecialRoom {
 			x = right - 1;
 			y = top + height() / 2;
 			Painter.fill( level, x, top + 1, 1, height() - 2 , lastRow );
+			Blob.seed( level.pointToCell(door) + 1, 1, landmark, level );
 		} else if (door.x == right) {
 			x = left + 1;
 			y = top + height() / 2;
 			Painter.fill( level, x, top + 1, 1, height() - 2 , lastRow );
+			Blob.seed( level.pointToCell(door) - 1, 1, landmark, level );
 		} else if (door.y == top) {
 			x = left + width() / 2;
 			y = bottom - 1;
 			Painter.fill( level, left + 1, y, width() - 2, 1 , lastRow );
+			Blob.seed( level.pointToCell(door) + level.width(), 1, landmark, level );
 		} else if (door.y == bottom) {
 			x = left + width() / 2;
 			y = top + 1;
 			Painter.fill( level, left + 1, y, width() - 2, 1 , lastRow );
+			Blob.seed( level.pointToCell(door) - level.width(), 1, landmark, level );
 		}
 
 		for(Point p : getPoints()) {
@@ -121,11 +128,9 @@ public class TrapsRoom extends SpecialRoom {
 			Painter.set( level, pos, Terrain.PEDESTAL );
 			level.drop( prize( level ), pos ).type = Heap.Type.CHEST;
 		}
-
+		Blob.seed( pos, 1, landmark, level );
+		
 		level.addItemToSpawn( new PotionOfLevitation() );
-
-		if(trapClass == null) 	Blob.seed( pos, 1, ChasmID.class, level );
-		else 					Blob.seed( pos, 1, TrapsID.class, level );
 	}
 	
 	private static Item prize( Level level ) {

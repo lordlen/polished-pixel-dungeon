@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
+import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 public class PoolRoom extends SpecialRoom {
@@ -55,6 +56,13 @@ public class PoolRoom extends SpecialRoom {
 		
 		Painter.fill( level, this, Terrain.WALL );
 		Painter.fill( level, this, 1, Terrain.WATER );
+		
+		//landmark
+		for(Point p : getPoints()) {
+			if(inside(p)) {
+				Blob.seed(level.pointToCell(p), 1, PoolID.class);
+			}
+		}
 		
 		Door door = entrance();
 		door.set( Door.Type.REGULAR );
@@ -90,7 +98,6 @@ public class PoolRoom extends SpecialRoom {
 		int pos = x + y * level.width();
 		level.drop( prize( level ), pos ).type = Heap.Type.CHEST;
 		Painter.set( level, pos, Terrain.PEDESTAL );
-		Blob.seed( pos, 1, PoolID.class, level );
 		
 		level.addItemToSpawn( new PotionOfInvisibility() );
 		

@@ -105,6 +105,9 @@ public class SentryRoom extends SpecialRoom {
 				}
 			}
 			dangerDist = 2*(width()-5);
+			
+			Blob.seed( level.pointToCell(entrance) + 1, 1, SentryID.class, level );
+			
 		} else if (entrance.x == right){
 			sentryPos.set(left+1, center.y);
 			Painter.fill(level, right-1, top+1, 1, height()-2, Terrain.EMPTY);
@@ -123,6 +126,9 @@ public class SentryRoom extends SpecialRoom {
 				}
 			}
 			dangerDist = 2*(width()-5);
+			
+			Blob.seed( level.pointToCell(entrance) - 1, 1, SentryID.class, level );
+			
 		} else if (entrance.y == top){
 			sentryPos.set(center.x, bottom-1);
 			Painter.fill(level, left+1, top+1, width()-2, 1, Terrain.EMPTY);
@@ -141,6 +147,9 @@ public class SentryRoom extends SpecialRoom {
 				}
 			}
 			dangerDist = 2*(height()-5);
+			
+			Blob.seed( level.pointToCell(entrance) + width(), 1, SentryID.class, level );
+			
  		} else  if (entrance.y == bottom){
 			sentryPos.set(center.x, top+1);
 			Painter.fill(level, left+1, bottom-1, width()-2, 1, Terrain.EMPTY);
@@ -159,6 +168,9 @@ public class SentryRoom extends SpecialRoom {
 				}
 			}
 			dangerDist = 2*(height()-5);
+			
+			Blob.seed( level.pointToCell(entrance) - width(), 1, SentryID.class, level );
+			
 		}
 
 		Painter.set(level, sentryPos, Terrain.PEDESTAL);
@@ -171,6 +183,9 @@ public class SentryRoom extends SpecialRoom {
 
 		Painter.set(level, treasurePos, Terrain.PEDESTAL);
 		level.drop( prize( level ), level.pointToCell(treasurePos) ).type = Heap.Type.CHEST;
+		
+		//landmark
+		Blob.seed(level.pointToCell(sentryPos), 1, SentryID.class, level);
 		Blob.seed(level.pointToCell(treasurePos), 1, SentryID.class, level);
 
 		level.addItemToSpawn(new PotionOfHaste());

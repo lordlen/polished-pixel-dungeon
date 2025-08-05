@@ -59,6 +59,7 @@ public class MassGraveRoom extends SpecialRoom {
 		entrance.set(Door.Type.BARRICADE);
 		level.addItemToSpawn(new PotionOfLiquidFlame());
 
+		//landmark
 		Blob.seed( entrance().x + level.width() * entrance().y, 1, BarricadeID.class, level );
 
 		Painter.fill(level, this, Terrain.WALL);
