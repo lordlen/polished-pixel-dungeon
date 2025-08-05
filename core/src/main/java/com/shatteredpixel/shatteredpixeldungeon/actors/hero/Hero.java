@@ -2089,8 +2089,15 @@ public class Hero extends Char {
 			}
 			
 			Char ally = Actor.findChar(step);
-			if (ally instanceof DirectableAlly) {
-				return ally.interact(this);
+			if (ally != null && ally.canInteract(this)) {
+				ally.interact(this);
+				
+				if(pos != step) {
+					PixelScene.shake( 1, 1f );
+					return false;
+				} else {
+					return true;
+				}
 			}
 
 			if (buff(GreaterHaste.class) != null){
