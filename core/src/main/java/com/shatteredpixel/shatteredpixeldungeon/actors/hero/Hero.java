@@ -307,7 +307,7 @@ public class Hero extends Char {
 			if(!SPDSettings.Polished.inputBlock()) return;
 			
 			boolean blocked = false;
-			PathFinder.buildDistanceMap(hero.pos, Dungeon.Polished.openTiles(), 9);
+			PathFinder.buildDistanceMap(hero.pos, Dungeon.Polished.openTiles(), 9+1);
 			
 			for (Mob m : Dungeon.level.mobs) {
 				if (hero.fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
