@@ -61,7 +61,7 @@ public class PrismaticGuard extends Buff {
 			}
 		}
 		
-		if (closest != null && Dungeon.level.distance(hero.pos, closest.pos) < 5){
+		if (closest != null && Dungeon.level.distance(hero.pos, closest.pos) <= 3){
 			//spawn guardian
 			int bestPos = -1;
 			for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {

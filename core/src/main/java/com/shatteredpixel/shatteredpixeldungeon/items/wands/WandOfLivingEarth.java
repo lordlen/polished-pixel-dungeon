@@ -377,6 +377,8 @@ public class WandOfLivingEarth extends DamageWand {
 
 			//before other mobs
 			actPriority = MOB_PRIO + 1;
+			
+			viewDistance = 5;
 
 			HP = HT = 0;
 		}
@@ -398,8 +400,8 @@ public class WandOfLivingEarth extends DamageWand {
 
 		@Override
 		public int attackSkill(Char target) {
-			//1.5 times the hero's
-			return 3*defenseSkill + 8;
+			//same as the hero
+			return 2*defenseSkill + 5;
 		}
 
 		@Override

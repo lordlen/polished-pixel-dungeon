@@ -784,7 +784,7 @@ public class CursedWand {
 		public boolean effect(Item origin, Char user, Ballistica bolt, boolean positiveOnly) {
 			//mirror images if positive only and user is hero
 			if (positiveOnly && user == Dungeon.hero){
-				ScrollOfMirrorImage.spawnImages(Dungeon.hero, bolt.collisionPos, 2);
+				ScrollOfMirrorImage.spawnImages(Dungeon.hero, bolt.collisionPos, ScrollOfMirrorImage.NIMAGES);
 			} else {
 				new SummoningTrap().set(bolt.collisionPos).activate();
 			}

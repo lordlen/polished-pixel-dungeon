@@ -60,6 +60,8 @@ public class PrismaticImage extends NPC {
 		
 		//before other mobs
 		actPriority = MOB_PRIO + 1;
+		
+		viewDistance = 3;
 	}
 	
 	private Hero hero;
