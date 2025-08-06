@@ -1675,7 +1675,27 @@ public class Hero extends Char {
 		
 		return super.defenseProc( enemy, damage );
 	}
-
+	
+	@Override
+	public int magicDefenseProc( Char enemy, int damage ) {
+		
+		if (damage > 0 && subClass == HeroSubClass.BERSERKER){
+			Berserk berserk = Buff.affect(this, Berserk.class);
+			berserk.damage(damage);
+		}
+		
+		if (belongings.armor() != null) {
+			damage = belongings.armor().proc( enemy, this, damage );
+		} else {
+			if (buff(BodyForm.BodyFormBuff.class) != null
+				&& buff(BodyForm.BodyFormBuff.class).glyph() != null) {
+				damage = buff(BodyForm.BodyFormBuff.class).glyph().proc(new ClothArmor(), enemy, this, damage);
+			}
+		}
+		
+		return super.magicDefenseProc(enemy, damage);
+	}
+	
 	@Override
 	public int glyphLevel(Class<? extends Armor.Glyph> cls) {
 		if (belongings.armor() != null && belongings.armor().hasGlyph(cls, this)){

@@ -700,6 +700,14 @@ public class DriedRose extends Artifact {
 		}
 		
 		@Override
+		public int magicDefenseProc(Char enemy, int damage) {
+			if (rose != null && rose.armor != null) {
+				damage = rose.armor.proc( enemy, this, damage );
+			}
+			return super.magicDefenseProc(enemy, damage);
+		}
+		
+		@Override
 		public void damage(int dmg, Object src) {
 			super.damage( dmg, src );
 			

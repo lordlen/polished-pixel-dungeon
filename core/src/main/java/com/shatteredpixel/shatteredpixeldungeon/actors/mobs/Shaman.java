@@ -127,21 +127,7 @@ public abstract class Shaman extends Mob {
 			
 			int dmg = Random.NormalIntRange( 6, 15 );
 			dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
-			
-			if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
-				
-				dmg = enemy.defenseProc( this, dmg );
-				
-				//do not trigger on-hit logic if defenseProc returned a negative value
-				if (dmg >= 0) {
-					if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
-						dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
-						enemy.buff(Viscosity.ViscosityTracker.class).detach();
-					}
-				}
-			}
-			
-			enemy.damage( dmg, new EarthenBolt() );
+			dmg = enemy.magicAttack(this, new EarthenBolt(), dmg);
 			
 			if (!enemy.isAlive() && enemy == Dungeon.hero) {
 				Badges.validateDeathFromEnemyMagic();

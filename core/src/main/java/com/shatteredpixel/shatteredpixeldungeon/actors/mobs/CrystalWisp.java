@@ -133,21 +133,7 @@ public class CrystalWisp extends Mob{
 		if (hit( this, enemy, true )) {
 
 			int dmg = Random.NormalIntRange( 5, 10 );
-			
-			if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
-				
-				dmg = enemy.defenseProc( this, dmg );
-				
-				//do not trigger on-hit logic if defenseProc returned a negative value
-				if (dmg >= 0) {
-					if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
-						dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
-						enemy.buff(Viscosity.ViscosityTracker.class).detach();
-					}
-				}
-			}
-			
-			enemy.damage( dmg, new LightBeam() );
+			dmg = enemy.magicAttack(this, new LightBeam(), dmg);
 
 			if (!enemy.isAlive() && enemy == Dungeon.hero) {
 				Badges.validateDeathFromEnemyMagic();

@@ -101,21 +101,7 @@ public class DM100 extends Mob implements Callback {
 				
 				int dmg = Random.NormalIntRange(3, 10);
 				dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
-				
-				if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
-					
-					dmg = enemy.defenseProc( this, dmg );
-					
-					//do not trigger on-hit logic if defenseProc returned a negative value
-					if (dmg >= 0) {
-						if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
-							dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
-							enemy.buff(Viscosity.ViscosityTracker.class).detach();
-						}
-					}
-				}
-				
-				enemy.damage( dmg, new LightningBolt() );
+				dmg = enemy.magicAttack(this, new LightningBolt(), dmg);
 
 				if (enemy.sprite.visible) {
 					enemy.sprite.centerEmitter().burst(SparkParticle.FACTORY, 3);

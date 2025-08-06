@@ -788,6 +788,38 @@ public abstract class Char extends Actor {
 
 		return damage;
 	}
+	
+	public int magicDefenseProc( Char enemy, int damage ) {
+		
+		// hero and pris images skip this as they already benefit from hero's armor glyph proc
+		if (!(this instanceof Hero || this instanceof PrismaticImage)) {
+			if (Dungeon.hero.alignment == alignment && Dungeon.hero.belongings.armor() != null
+					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
+					&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)) {
+				damage = Dungeon.hero.belongings.armor().proc( enemy, this, damage );
+			}
+		}
+		
+		return damage;
+	}
+	
+	public int magicAttack( Char enemy, Object bolt, int damage ) {
+		if(isInvulnerable(bolt.getClass()) || isInvulnerable(enemy.getClass()) || !isAlive()) {
+			return damage;
+		}
+		
+		damage = magicDefenseProc( enemy, damage );
+		damage = Math.max(0, damage);
+		
+		Viscosity.ViscosityTracker viscosity = buff(Viscosity.ViscosityTracker.class);
+		if (viscosity != null) {
+			damage = viscosity.deferDamage(damage);
+			viscosity.detach();
+		}
+		
+		damage(damage, bolt);
+		return damage;
+	}
 
 	//Returns the level a glyph is at for a char, or -1 if they are not benefitting from that glyph
 	//This function is needed as (unlike enchantments) many glyphs trigger in a variety of cases

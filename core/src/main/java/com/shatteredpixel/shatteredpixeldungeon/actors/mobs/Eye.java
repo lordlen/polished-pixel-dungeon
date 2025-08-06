@@ -206,20 +206,7 @@ public class Eye extends Mob {
 					}
 				}
 				
-				if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
-					
-					dmg = enemy.defenseProc( this, dmg );
-					
-					//do not trigger on-hit logic if defenseProc returned a negative value
-					if (dmg >= 0) {
-						if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
-							dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
-							enemy.buff(Viscosity.ViscosityTracker.class).detach();
-						}
-					}
-				}
-
-				ch.damage( dmg, new DeathGaze() );
+				dmg = enemy.magicAttack(this, new DeathGaze(), dmg);
 
 				if (Dungeon.level.heroFOV[pos]) {
 					ch.sprite.flash();

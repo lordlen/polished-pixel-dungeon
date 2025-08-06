@@ -129,20 +129,7 @@ public class Warlock extends Mob implements Callback {
 				dmg *= 0.5f;
 			}
 			
-			if (!enemy.isInvulnerable(getClass()) && dmg > 0 && enemy.isAlive()) {
-				
-				dmg = enemy.defenseProc( this, dmg );
-				
-				//do not trigger on-hit logic if defenseProc returned a negative value
-				if (dmg >= 0) {
-					if (enemy.buff(Viscosity.ViscosityTracker.class) != null) {
-						dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
-						enemy.buff(Viscosity.ViscosityTracker.class).detach();
-					}
-				}
-			}
-
-			enemy.damage( dmg, new DarkBolt() );
+			dmg = enemy.magicAttack(this, new DarkBolt(), dmg);
 			
 			if (enemy == Dungeon.hero && !enemy.isAlive()) {
 				Badges.validateDeathFromEnemyMagic();
