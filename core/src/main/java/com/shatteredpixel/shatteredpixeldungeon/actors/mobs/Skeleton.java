@@ -63,9 +63,10 @@ public class Skeleton extends Mob {
 	@Override
 	public void die( Object cause ) {
 		
-		super.die( cause );
-		
-		if (cause == Chasm.class) return;
+		if (cause == Chasm.class) {
+			super.die( cause );
+			return;
+		}
 		
 		boolean heroKilled = false;
 		for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
@@ -93,12 +94,17 @@ public class Skeleton extends Mob {
 
 				//apply DR twice (with 2 rolls for more consistency)
 				damage = Math.max( 0,  damage - (ch.drRoll() + ch.drRoll()) );
-				ch.damage( damage, this );
+				//apply glyphs
+				ch.magicAttack( this, this, damage );
+				
 				if (ch == Dungeon.hero && !ch.isAlive()) {
 					heroKilled = true;
 				}
 			}
 		}
+		
+		//we die after to prevent bugs with applied glyphs
+		super.die( cause );
 		
 		if (Dungeon.level.heroFOV[pos]) {
 			Sample.INSTANCE.play( Assets.Sounds.BONES );
