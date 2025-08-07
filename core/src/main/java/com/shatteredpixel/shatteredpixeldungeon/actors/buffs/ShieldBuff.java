@@ -112,7 +112,7 @@ public abstract class ShieldBuff extends Buff {
 	}
 
 	public static int processDamage( Char target, int damage, Object src ){
-		//hunger damage is not affected by shielding
+		//hunger and thorns damage are not affected by shielding
 		if (src instanceof Hunger || src instanceof Thorns){
 			return damage;
 		}

@@ -50,7 +50,7 @@ public class Thorns extends Armor.Glyph {
 			if(!Char.hasProp(attacker, Char.Property.INORGANIC)) {
 				Buff.affect( attacker, Bleeding.class).set( Math.round(bleed) );
 			}
-			else {
+			else if(attacker.HP > 0) {
 				attacker.damage(Math.round(Random.Float(1.25f, 2.5f) * bleed), this);
 			}
 
