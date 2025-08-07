@@ -39,6 +39,9 @@ public class PrismaticGuard extends Buff {
 	
 	{
 		type = buffType.POSITIVE;
+		
+		//check to spawn before other mobs act
+		actPriority = MOB_PRIO+1;
 	}
 	
 	private float HP;
