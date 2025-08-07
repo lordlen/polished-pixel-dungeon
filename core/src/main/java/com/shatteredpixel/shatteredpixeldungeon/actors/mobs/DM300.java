@@ -112,7 +112,7 @@ public class DM300 extends Mob {
 	public boolean supercharged = false;
 	public boolean chargeAnnounced = false;
 
-	private final int MIN_COOLDOWN = 5;
+	private final int MIN_COOLDOWN = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 6;
 	private final int MAX_COOLDOWN = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 7 : 9;
 
 	private int turnsSinceLastAbility = -1;
@@ -761,7 +761,7 @@ public class DM300 extends Mob {
 		@Override
 		public void affectChar(Char ch) {
 			if (!(ch instanceof DM300) && !ch.isImmune(getClass())){
-				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 4);
+				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 3);
 				if (ch == Dungeon.hero) {
 					Statistics.bossScores[2] -= 100;
 				}
