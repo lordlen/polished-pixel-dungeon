@@ -173,7 +173,7 @@ public class Dungeon {
 		
 		
 		static boolean expertise = false;
-		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
+		private static void updateFogsEdgeAndExpertise(int l, int r, int t, int b) {
 			int l_e = Math.max( 0, l-1 );
 			int r_e = Math.min( r+1, level.width() - 1 );
 			int t_e = Math.max( 0, t-1 );
@@ -1175,9 +1175,9 @@ public class Dungeon {
 			level.visited[hero.pos+i] = true;
 		}
 		
-		GameScene.updateFog(l, t, width, height);
+		Polished.updateFogsEdgeAndExpertise(l, r, t, b);
 		
-		Polished.updateFogEdgeAndExpertise(l, r, t, b);
+		GameScene.updateFog(l, t, width, height);
 		
 		if (hero.buff(MindVision.class) != null || hero.buff(DivineSense.DivineSenseTracker.class) != null){
 			for (Mob m : level.mobs.toArray(new Mob[0])){
@@ -1240,10 +1240,9 @@ public class Dungeon {
 					pos+=level.width();
 				}
 				
+				Polished.updateFogsEdgeAndExpertise(l, r, t, b);
+				
 				GameScene.updateFog(ch.pos, dist);
-				
-				Polished.updateFogEdgeAndExpertise(l, r, t, b);
-				
 			}
 		}
 

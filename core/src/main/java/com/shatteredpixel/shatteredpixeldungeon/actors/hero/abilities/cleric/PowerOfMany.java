@@ -87,6 +87,10 @@ public class PowerOfMany extends ArmorAbility {
 	}
 	
 	public static Char PoweredAlly() {
+		return PoweredAlly(false);
+	}
+	
+	public static Char PoweredAlly(boolean checkStasis) {
 		if(ally != null) {
 			if(!ally.isAlive()) resetAlly();
 			return ally;
@@ -105,11 +109,13 @@ public class PowerOfMany extends ArmorAbility {
 			allyID = -1;
 		}
 		
-		Char stasisAlly = Stasis.getStasisAlly();
-		if (stasisAlly != null) {
-			ally = stasisAlly;
-			allyID = stasisAlly.id();
-			return ally;
+		if(checkStasis) {
+			Char stasisAlly = Stasis.getStasisAlly();
+			if (stasisAlly != null) {
+				ally = stasisAlly;
+				allyID = stasisAlly.id();
+				return ally;
+			}
 		}
 		
 		return null;
@@ -233,7 +239,7 @@ public class PowerOfMany extends ArmorAbility {
 
 	//kept for compatibility with SPD, only returns if !stasis
 	public static Char getPoweredAlly(){
-		if(PoweredAlly() != null && ally != Stasis.getStasisAlly()) {
+		if(PoweredAlly(false) != null) {
 			return ally;
 		}
 		return null;

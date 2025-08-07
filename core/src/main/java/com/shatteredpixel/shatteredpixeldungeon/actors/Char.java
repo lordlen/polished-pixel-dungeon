@@ -266,9 +266,9 @@ public abstract class Char extends Actor {
 	//swaps places by default
 	public boolean interact(Char c){
 
-		//don't allow char to swap onto hazard unless they're flying
-		//you can swap onto a hazard though, as you're not the one instigating the swap
-		if (!Dungeon.level.passable[pos] && !c.flying){
+		//don't allow char to swap onto pits unless they're flying
+		//you can swap onto a pit though, as you're not the one instigating the swap
+		if (Dungeon.level.pit[pos] && !c.flying){
 			return true;
 		}
 
@@ -392,7 +392,7 @@ public abstract class Char extends Actor {
 
 		if (enemy == null) return false;
 		
-		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos] || enemy instanceof DirectableAlly;
+		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
 
 		if (enemy.isInvulnerable(getClass())) {
 
@@ -1313,7 +1313,7 @@ public abstract class Char extends Actor {
 
 		pos = step;
 		
-		if (this != Dungeon.hero && !(this instanceof DirectableAlly)) {
+		if (this != Dungeon.hero) {
 			sprite.visible = Dungeon.level.heroFOV[pos];
 		}
 		

@@ -121,6 +121,10 @@ public class DriedRose extends Artifact {
 	}
 	
 	public static GhostHero Ghost() {
+		return Ghost(true);
+	}
+	
+	public static GhostHero Ghost(boolean checkStasis) {
 		if(ghost != null) {
 			if(!ghost.isAlive()) resetGhost();
 			return ghost;
@@ -136,11 +140,13 @@ public class DriedRose extends Artifact {
 			}
 		}
 		
-		Char ally = Stasis.getStasisAlly();
-		if (ally instanceof GhostHero){
-			ghost = (GhostHero)ally;
-			ghostID = ally.id();
-			return ghost;
+		if(checkStasis) {
+			Char ally = Stasis.getStasisAlly();
+			if (ally instanceof GhostHero){
+				ghost = (GhostHero)ally;
+				ghostID = ally.id();
+				return ghost;
+			}
 		}
 		
 		return null;
@@ -159,7 +165,7 @@ public class DriedRose extends Artifact {
 				&& Ghost() == null) {
 			actions.add(AC_SUMMON);
 		}
-		if (Ghost() != null && !ghost.stasis()){
+		if (Ghost(false) != null){
 			actions.add(AC_DIRECT);
 			actions.add(AC_CHAIN);
 		}

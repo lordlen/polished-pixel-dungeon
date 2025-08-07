@@ -86,6 +86,10 @@ public class SpiritHawk extends ArmorAbility {
 	}
 	
 	public static HawkAlly Hawk() {
+		return Hawk(true);
+	}
+	
+	public static HawkAlly Hawk(boolean checkStasis) {
 		if(hawk != null) {
 			if(!hawk.isAlive()) resetHawk();
 			return hawk;
@@ -101,11 +105,13 @@ public class SpiritHawk extends ArmorAbility {
 			}
 		}
 		
-		Char ally = Stasis.getStasisAlly();
-		if (ally instanceof HawkAlly){
-			hawk = (HawkAlly) ally;
-			hawkID = ally.id();
-			return hawk;
+		if(checkStasis) {
+			Char ally = Stasis.getStasisAlly();
+			if (ally instanceof HawkAlly){
+				hawk = (HawkAlly) ally;
+				hawkID = ally.id();
+				return hawk;
+			}
 		}
 		
 		return null;

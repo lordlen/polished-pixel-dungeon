@@ -1515,7 +1515,8 @@ public abstract class Level implements Bundlable {
 			c == PowerOfMany.PoweredAlly()) {
 			if(!DirectableAlly.observing) {
 				BArray.or(fieldOfView, heroFOV, fieldOfView);
-				GameScene.updateFog(c.pos, c.viewDistance+(int)Math.ceil(c.speed()));
+				//it needs to be generous on high speeds to prevent fog update bugs...
+				GameScene.updateFog(c.pos, c.viewDistance+1 + (int)Math.ceil(c.speed()));
 			}
 		}
 
