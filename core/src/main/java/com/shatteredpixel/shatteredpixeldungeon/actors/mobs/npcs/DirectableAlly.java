@@ -23,7 +23,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
@@ -47,8 +46,6 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.watabou.noosa.Game;
@@ -139,10 +136,16 @@ public class DirectableAlly extends NPC {
 			GameScene.selectCell(chainer);
 		}
 		else {
-			GameScene.selectCell(commander);
-			
 			if(GameScene.Polished.quickslotKeyPress && DeviceCompat.isDesktop()) {
+				//prevent the simulated click from clicking the prompt box
+				commander.showPrompt = false;
+				GameScene.selectCell(commander);
+				commander.showPrompt = true;
+				
 				GameScene.Polished.simulateTilemapClick();
+			}
+			else {
+				GameScene.selectCell(commander);
 			}
 		}
 	}
@@ -481,36 +484,42 @@ public class DirectableAlly extends NPC {
 		}
 	}
 	
+	public static boolean allyActive() {
+		return  DriedRose.Ghost(false) != null || SpiritHawk.Hawk(false) != null ||
+				ShadowClone.Shadow(false) != null || PowerOfMany.PoweredAlly(false) != null;
+	}
+	
 	public static boolean observing = false;
 	public static void observeAll() {
 		
 		observing = true;
 		
-		if(DriedRose.Ghost() != null) {
-			DriedRose.Ghost().observe();
+		if(DriedRose.Ghost(false) != null) {
+			DriedRose.Ghost(false).observe();
 		}
-		if(SpiritHawk.Hawk() != null) {
-			SpiritHawk.Hawk().observe();
+		if(SpiritHawk.Hawk(false) != null) {
+			SpiritHawk.Hawk(false).observe();
 		}
-		if(ShadowClone.Shadow() != null) {
-			ShadowClone.Shadow().observe();
+		if(ShadowClone.Shadow(false) != null) {
+			ShadowClone.Shadow(false).observe();
 		}
 		
-		Char ally = PowerOfMany.PoweredAlly();
+		Char ally = PowerOfMany.PoweredAlly(false);
 		if(ally != null) {
 			if(ally instanceof PowerOfMany.LightAlly) {
 				((PowerOfMany.LightAlly) ally).observe();
 			}
 			
-			//have to do it manually
 			else {
-				if(ally != Stasis.getStasisAlly()) {
-					Level level = Dungeon.level;
-					if(!ally.validFov()) {
-						ally.fieldOfView = new boolean[level.length()];
-					}
-					level.updateFieldOfView(ally, ally.fieldOfView);
+				// have to do it manually
+				Level level = Dungeon.level;
+				if(!ally.validFov()) {
+					ally.fieldOfView = new boolean[level.length()];
 				}
+				level.updateFieldOfView(ally, ally.fieldOfView);
+				
+				// we don't need to share hero fov with them yet,
+				// since we can't control regular enemies anyway
 			}
 			
 		}
@@ -520,19 +529,21 @@ public class DirectableAlly extends NPC {
 	}
 	
 	protected void observe() {
-		if(!stasis()) {
-			Level level = Dungeon.level;
-			if(!validFov()) {
-				fieldOfView = new boolean[level.length()];
-			}
-			level.updateFieldOfView(this, fieldOfView);
-			
-			Dungeon.Polished.runDelayed(this::afterObserve);
+		Level level = Dungeon.level;
+		if(!validFov()) {
+			fieldOfView = new boolean[level.length()];
 		}
+		level.updateFieldOfView(this, fieldOfView);
+		
+		Dungeon.Polished.runDelayed(this::afterObserve);
 	}
 	
 	protected void afterObserve() {
 		Level level = Dungeon.level;
+		//since this runs delayed we take some extra precautions
+		if(level == null || level.heroFOV == null || level.heroFOV.length != level.length()) {
+			return;
+		}
 		if(!validFov()) {
 			fieldOfView = new boolean[level.length()];
 		}
@@ -541,6 +552,32 @@ public class DirectableAlly extends NPC {
 				level.heroFOV, 0,
 				fieldOfView, 0,
 				level.length());
+	}
+	
+	@Override
+	public void move(int step, boolean travelling) {
+		Level level = Dungeon.level;
+		if(!travelling && !level.adjacent(pos, step)) {
+			//update fog on previous location before teleporting
+			GameScene.updateFog(pos, viewDistance+1);
+		}
+		
+		super.move(step, travelling);
+		
+		//make sure animations play out correctly
+		if(!level.heroFOV[step]) {
+			sprite.visible = true;
+			level.heroFOV[step] = true;
+			level.visited[step] = true;
+			//we shouldn't need to handle fog updates here
+		}
+	}
+	
+	@Override
+	public void destroy() {
+		super.destroy();
+		Dungeon.observe();
+		GameScene.updateFog(pos, viewDistance+1);
 	}
 	
 	public boolean stasis() {
@@ -668,9 +705,10 @@ public class DirectableAlly extends NPC {
 		@Override
 		public void onSelect(Integer cell) {}
 		
+		public boolean showPrompt = true;
 		@Override
 		public String prompt() {
-			return Messages.get(DirectableAlly.class, "command_prompt");
+			return showPrompt ? Messages.get(DirectableAlly.class, "command_prompt") : null;
 		}
 	}
 	public CommandListener commander = new CommandListener(){

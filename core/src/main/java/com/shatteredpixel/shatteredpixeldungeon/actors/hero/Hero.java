@@ -229,6 +229,7 @@ public class Hero extends Char {
 	public boolean ready = false;
 	public HeroAction curAction = null;
 	public HeroAction lastAction = null;
+	public HeroAction operateAction = null;
 
 	//reference to the enemy the hero is currently in the process of attacking
 	private Char attackTarget;
@@ -300,37 +301,46 @@ public class Hero extends Char {
 		}
 		
 		
-		static boolean blocksInput(Mob mob, int[] distanceMap) {
-			return  !mob.polished.recentlySpot && !Polished.ignoreMobs.contains(mob) &&
-					( Dungeon.hero.distance(mob) <= 3 || distanceMap[mob.pos] < Integer.MAX_VALUE );
-		}
-		
-		static void checkInputBlock() {
+		static void checkVisionEdge() {
 			Hero hero = Dungeon.hero;
-			Level level = Dungeon.level;
+			if(!hero.validFov()) return;
+			if(!SPDSettings.Polished.inputBlock()) return;
 			
-			if(hero.validFov()) {
-				boolean blocked = false;
-				boolean[] pass = BArray.or(BArray.not(level.solid), level.passable, null);
-				PathFinder.buildDistanceMap(hero.pos, pass, 7);
-				
-				for (Mob m : level.mobs) {
-					if (hero.fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
+			boolean blocked = false;
+			PathFinder.buildDistanceMap(hero.pos, Dungeon.Polished.openTiles(), 9+1);
+			
+			for (Mob m : Dungeon.level.mobs) {
+				if (hero.fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
+					if(PathFinder.distance[m.pos] < Integer.MAX_VALUE) {
 						
-						if (!blocked && blocksInput(m, PathFinder.distance)) {
+						if(!blocked && !m.polished.recentlySpot) {
 							if(hero.mobInterrupt(m)) {
-								GameScene.Polished.blockInput();
+								GameScene.Polished.blockInput(0.75f);
 								blocked = true;
 							}
 						}
 						
 						noEnemiesLast = false;
 						m.polished.spot();
-					} else {
-						m.polished.unseen();
+						
+						// we dont need to handle m.polished.unseen()
+						// that's done later, after updating fov
+						
 					}
 				}
 			}
+		}
+		
+		static boolean mobBlock(Mob mob, int[] distanceMap) {
+			if(mob.polished.recentlySpot) {
+				return false;
+			}
+			if(distanceMap[mob.pos] == Integer.MAX_VALUE && Dungeon.hero.distance(mob) > 3) {
+				return false;
+			}
+			
+			GameScene.Polished.blockInput();
+			return true;
 		}
 		
 		static boolean autoPickUp(Item item) {
@@ -982,7 +992,7 @@ public class Hero extends Char {
 	@Override
 	public void spendConstant(float time) {
 		justMoved = false;
-		Polished.noEnemiesLast = Polished.noEnemiesSeen();
+		Polished.noEnemiesLast = visibleEnemies.isEmpty();
 		super.spendConstant(time);
 	}
 
@@ -1001,24 +1011,24 @@ public class Hero extends Char {
 	@Override
 	public boolean act() {
 		
-		//Do an input block check before updating fov to account for enemies entering the edge of your vision
-		Polished.checkInputBlock();
+		//Do an interrupt check before updating fov to account for enemies entering the edge of your vision
+		Polished.checkVisionEdge();
 
 		//calls to dungeon.observe will also update hero's local FOV.
 		fieldOfView = Dungeon.level.heroFOV;
 		if (!ready) {
-			//do a full observe (including fog update) if not resting.
-			if (!resting || buff(MindVision.class) != null || buff(Awareness.class) != null) {
+			if (!resting || buff(MindVision.class) != null ||
+				buff(Awareness.class) != null || DirectableAlly.allyActive()) {
+				//do a full observe - includes updates to fog, fog's edge, expertise
 				Dungeon.observe();
-			} else {
-				DirectableAlly.observeAll();
+			}
+			else {
 				//otherwise just directly re-calculate FOV
 				Dungeon.level.updateFieldOfView(this, fieldOfView);
 			}
 		}
 		checkVisibleMobs();
-
-
+		
 		if (buff(Endure.EndureTracker.class) != null){
 			buff(Endure.EndureTracker.class).endEnduring();
 		}
@@ -1061,7 +1071,6 @@ public class Hero extends Char {
 			
 			resting = false;
 			ready = false;
-			
 			
 			boolean autopick = false;
 			//if hero trampled an item from grass last move, pick it up
@@ -1159,11 +1168,13 @@ public class Hero extends Char {
 		return false;
 	}
 	
-	public void damageInterrupt() {
+	public boolean damageInterrupt() {
 		if(!Polished.ignoreDamage || !Polished.resuming) {
+			Polished.ignoreDamage = true;
 			interrupt();
+			return true;
 		}
-		Polished.ignoreDamage = true;
+		return false;
 	}
 	
 	public void interrupt() {
@@ -1405,6 +1416,7 @@ public class Hero extends Char {
 					Sample.INSTANCE.play( Assets.Sounds.UNLOCK );
 				}
 				
+				operateAction = curAction;
 				sprite.operate( dst );
 				
 			} else {
@@ -1450,6 +1462,7 @@ public class Hero extends Char {
 			
 			if (hasKey) {
 				
+				operateAction = curAction;
 				sprite.operate( doorCell );
 				
 				Sample.INSTANCE.play( Assets.Sounds.UNLOCK );
@@ -1890,8 +1903,7 @@ public class Hero extends Char {
 		boolean interrupted = false;
 		
 		boolean blocked = false;
-		boolean[] pass = BArray.or(BArray.not(Dungeon.level.solid), Dungeon.level.passable, null);
-		PathFinder.buildDistanceMap(Dungeon.hero.pos, pass, 7);
+		PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), 9);
 
 		Mob target = null;
 		for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
@@ -1908,9 +1920,8 @@ public class Hero extends Char {
 						interrupted = true;
 					}
 
-					if(!blocked && interrupted && Polished.blocksInput(m, PathFinder.distance)) {
+					if(!blocked && interrupted && Polished.mobBlock(m, PathFinder.distance)) {
 						blocked = true;
-						GameScene.Polished.blockInput();
 					}
 				}
 
@@ -1931,8 +1942,7 @@ public class Hero extends Char {
 				}
 				
 				m.polished.spot();
-			}
-			else {
+			} else {
 				m.polished.unseen();
 			}
 		}
@@ -1959,24 +1969,13 @@ public class Hero extends Char {
 		//we also scan for blob landmarks here
 		for (Blob b : Dungeon.level.blobs.values().toArray(new Blob[0])){
 			if (b.volume > 0 && b.landmark() != null && !Notes.contains(b.landmark())){
-				int cell;
-				boolean found = false;
-				//if a single cell within the blob is visible, we add the landmark
-				for (int i=b.area.top; i < b.area.bottom; i++) {
-					for (int j = b.area.left; j < b.area.right; j++) {
-						cell = j + i* Dungeon.level.width();
-						if (fieldOfView[cell] && b.cur[cell] > 0) {
-							Notes.add( b.landmark() );
-							found = true;
-							break;
-						}
+				
+				if(b.isVisible()) {
+					Notes.add( b.landmark() );
+					//Clear blobs that only exist for landmarks.
+					if (b instanceof LandmarkBlob){
+						b.fullyClear();
 					}
-					if (found) break;
-				}
-
-				//Clear blobs that only exist for landmarks.
-				if (found && b instanceof LandmarkBlob){
-					b.fullyClear();
 				}
 			}
 		}
@@ -2089,8 +2088,15 @@ public class Hero extends Char {
 			}
 			
 			Char ally = Actor.findChar(step);
-			if (ally instanceof DirectableAlly) {
-				return ally.interact(this);
+			if (ally != null && ally.canInteract(this)) {
+				ally.interact(this);
+				
+				if(pos != step) {
+					PixelScene.shake( 1, 1f );
+					return false;
+				} else {
+					return true;
+				}
 			}
 
 			if (buff(GreaterHaste.class) != null){
@@ -2145,12 +2151,12 @@ public class Hero extends Char {
 		LevelTransition transition = level.getTransition(cell);
 		
 		boolean nearbyMobs = false;
-		if(heap != null || transition != null) {
-			boolean[] pass = BArray.or(BArray.not(level.solid), level.passable, null);
-			PathFinder.buildDistanceMap(pos, pass, 9);
+		if((heap != null && heap.seen) || transition != null) {
+			int limit = heap != null && heap.seen ? 10 : 8;
+			PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), limit);
 			
 			for(Mob mob : visibleEnemies) {
-				if(PathFinder.distance[mob.pos] < Integer.MAX_VALUE) {
+				if(PathFinder.distance[mob.pos] < Integer.MAX_VALUE || distance(mob) <= 3) {
 					nearbyMobs = true;
 					break;
 				}
@@ -2192,7 +2198,7 @@ public class Hero extends Char {
 
 			curAction = new HeroAction.Mine( cell );
 
-		} else if (heap != null
+		} else if (heap != null && heap.seen
 				//moving to an item doesn't auto-pickup when enemies are near...
 				&& (!nearbyMobs || cell == pos ||
 				//...but only for standard heaps. Chests and similar open as normal.
@@ -2620,9 +2626,9 @@ public class Hero extends Char {
 	@Override
 	public void onOperateComplete() {
 		
-		if (curAction instanceof HeroAction.Unlock) {
+		if (operateAction instanceof HeroAction.Unlock) {
 
-			int doorCell = ((HeroAction.Unlock)curAction).dst;
+			int doorCell = ((HeroAction.Unlock)operateAction).dst;
 			int door = Dungeon.level.map[doorCell];
 			
 			if (Dungeon.level.distance(pos, doorCell) <= 1) {
@@ -2649,9 +2655,9 @@ public class Hero extends Char {
 				}
 			}
 			
-		} else if (curAction instanceof HeroAction.OpenChest) {
+		} else if (operateAction instanceof HeroAction.OpenChest) {
 			
-			Heap heap = Dungeon.level.heaps.get( ((HeroAction.OpenChest)curAction).dst );
+			Heap heap = Dungeon.level.heaps.get( ((HeroAction.OpenChest)operateAction).dst );
 			
 			if (Dungeon.level.distance(pos, heap.pos) <= 1){
 				boolean hasKey = true;
@@ -2671,6 +2677,7 @@ public class Hero extends Char {
 			}
 			
 		}
+		operateAction = null;
 		curAction = null;
 
 		if (!ready) {
@@ -2799,6 +2806,7 @@ public class Hero extends Char {
 		
 		if (intentional) {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
+			operateAction = null;
 			sprite.operate( pos );
 			if (!Dungeon.level.locked) {
 				float searchTime = hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;

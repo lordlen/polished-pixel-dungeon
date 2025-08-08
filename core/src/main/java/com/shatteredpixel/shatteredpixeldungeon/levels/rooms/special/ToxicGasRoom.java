@@ -53,12 +53,15 @@ public class ToxicGasRoom extends SpecialRoom {
 		Painter.fill( level, this, 1, Terrain.EMPTY );
 
 		Painter.set( level, center(), Terrain.STATUE );
-
+		
 		for (Point p : getPoints()){
 			int cell = level.pointToCell(p);
 			if (level.map[cell] == Terrain.EMPTY) {
 				//as if gas has been spreading in the room for a while
 				Blob.seed(cell, 30, ToxicGas.class, level);
+				
+				//landmark
+				Blob.seed(cell, 1, GasID.class, level);
 			}
 		}
 
@@ -72,8 +75,6 @@ public class ToxicGasRoom extends SpecialRoom {
 			level.setTrap(new ToxicVent().reveal(), cell);
 			Blob.seed(cell, 12, ToxicGasSeed.class, level);
 			Painter.set(level, cell, Terrain.INACTIVE_TRAP);
-
-			Blob.seed(cell, 1, GasID.class, level);
 		}
 
 		//skeleton with 2x gold, somewhat far from entry

@@ -135,13 +135,11 @@ public class Blob extends Actor {
 				area.setEmpty();
 				//clear any values remaining in off
 				System.arraycopy(cur, 0, off, 0, cur.length);
-
-				if(Dungeon.level.blobs.containsKey(this.getClass())) {
-					Dungeon.level.blobs.remove(this.getClass());
-				}
-				if(Actor.all().contains(this)) {
-					Actor.remove(this);
-				}
+			}
+			
+			Dungeon.level.blobs.remove(getClass());
+			if(Actor.all().contains(this)) {
+				Actor.remove(this);
 			}
 		}
 		
@@ -248,6 +246,20 @@ public class Blob extends Actor {
 	
 	public String tileDesc() {
 		return null;
+	}
+	
+	public boolean isVisible() {
+		//Check if a single cell within the blob is visible
+		for (int i=area.top; i < area.bottom; i++) {
+			for (int j = area.left; j < area.right; j++) {
+				int cell = j + i* Dungeon.level.width();
+				
+				if (cur[cell] > 0 && Dungeon.level.heroFOV[cell]) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public static<T extends Blob> T seed( int cell, int amount, Class<T> type ) {

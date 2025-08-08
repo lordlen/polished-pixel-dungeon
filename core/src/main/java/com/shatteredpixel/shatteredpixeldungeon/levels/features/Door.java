@@ -103,25 +103,27 @@ public class Door {
 			if(!level.visited[pos] && !level.mapped[pos]) {
 				return false;
 			}
-			if(pos == hero.pos || level.distance(pos, hero.pos) > 7) {
+			if(pos == hero.pos || level.distance(pos, hero.pos) > 8) {
 				return false;
 			}
 			
 			Mob mob = level.findMob(pos);
-			// Allies and fleeing enemies usually have predictable paths anyway,
+			// Allies, non-mob characters and fleeing enemies usually have predictable paths anyway,
 			// so we're not really giving away much info here.
 			if(mob == null || mob.alignment == Char.Alignment.ALLY || mob.state == mob.FLEEING) {
 				return false;
 			}
+			if(Hero.Polished.resuming && Hero.Polished.ignoreMobs.contains(mob)) {
+				return false;
+			}
 			// This does give information however. Would prefer if there was another way.
-			if(mob.polished.recentlySpot || Hero.Polished.ignoreMobs.contains(mob)) {
+			if(mob.polished.recentlySpot) {
 				return false;
 			}
 			
-			boolean[] pass = BArray.or(BArray.not(level.solid), level.passable, null);
-			PathFinder.buildDistanceMap(pos, pass, 7);
-			
+			PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), 8);
 			int dist = PathFinder.distance[hero.pos];
+			
 			if (dist == Integer.MAX_VALUE) {
 				return false;
 			}

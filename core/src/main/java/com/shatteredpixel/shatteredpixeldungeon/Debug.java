@@ -47,6 +47,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Reflection;
 
@@ -67,14 +68,14 @@ public class Debug {
     public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1;
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1;
 
-    public static final int Starting_Floor = DebuggingStats ?           11      : 1;
+    public static final int Starting_Floor = DebuggingStats ?           6       : 1;
     public static final int Starting_HeroLevel = DebuggingStats ?       15      : 1;
     public static final int Starting_Str = DebuggingStats ?             16      : 10;
     public static final int Starting_HP = DebuggingStats ?              2000    : 20;
-
-
+    
     private static final boolean ActOnStart = false || DebuggingStats;
-    private static final boolean ActOnLoad = false;
+    private static final boolean ActOnLoad = false
+    ;
     private static final ArrayList<Class<?extends Item>> Starting_Items;
     static {
         //Testing items
@@ -87,12 +88,13 @@ public class Debug {
         if(DebuggingStats && true) {
             Starting_Items.addAll(Arrays.asList(
                 PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class,
-                ScrollOfMagicMapping.class, PhaseShift.class, ScrollOfUpgrade.class,
+                ScrollOfMagicMapping.class, ScrollOfUpgrade.class,
                 StoneOfBlink.class, StoneOfBlast.class, StoneOfShock.class,
-                TimekeepersHourglass.class, Food.class, EnergyCrystal.class
+                Food.class, EnergyCrystal.class
             ));
         }
     }
+    
     public static void Starting_Bag() {
         if(!DEBUG_MODE || Starting_Items == null) return;
 
@@ -105,7 +107,16 @@ public class Debug {
         
         
     }
-
+    
+    public static void LoadGame() {
+        if(!DEBUG_MODE || !ActOnLoad) return;
+        
+        //Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
+        //Starting_Bag();
+        
+        
+    }
+    
     public static void StartGame() {
         if(!DEBUG_MODE || !ActOnStart) return;
         
@@ -115,19 +126,18 @@ public class Debug {
         Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
         MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
         if(charger != null) charger.gainCharge(charger.chargeCap() - charger.charges);
-        
-        
     }
-    public static void LoadGame() {
-        if(!DEBUG_MODE || !ActOnLoad) return;
+    
+    
+    public static final ArrayList<Class<?extends Room>> Generate_Rooms;
+    static {
+        //If you put too many rooms, there's no guarantee levels will load.
+        Generate_Rooms = new ArrayList<>(Arrays.asList(
         
-        //Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
-        //Starting_Bag();
-        
-        
+        ));
     }
-
-
+    
+    
     public static<T extends Item> T DebugCollect(Class<T> itemType) {
         return DebugCollect(itemType, 0, 99, null);
     }
@@ -197,8 +207,10 @@ public class Debug {
             
             int index = 1;
             for(Item item : items) {
-                Dungeon.quickslot.setSlot(index, item);
-                index++;
+                if(index < QuickSlot.SIZE) {
+                    Dungeon.quickslot.setSlot(index, item);
+                    index++;
+                }
             }
         }
         else if(DebuggingStats) {

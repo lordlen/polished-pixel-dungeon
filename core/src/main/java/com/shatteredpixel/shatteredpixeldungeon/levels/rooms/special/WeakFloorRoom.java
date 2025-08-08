@@ -52,21 +52,25 @@ public class WeakFloorRoom extends SpecialRoom {
 				Painter.drawInside( level, this, new Point( left, i ), Random.IntRange( 1, width() - 4 ), Terrain.EMPTY_SP );
 			}
 			well = new Point( right-1, Random.Int( 2 ) == 0 ? top + 2 : bottom - 1 );
+			Blob.seed( level.pointToCell(door) + 1, 1, WellID.class, level );
 		} else if (door.x == right) {
 			for (int i=top + 1; i < bottom; i++) {
 				Painter.drawInside( level, this, new Point( right, i ), Random.IntRange( 1, width() - 4 ), Terrain.EMPTY_SP );
 			}
 			well = new Point( left+1, Random.Int( 2 ) == 0 ? top + 2 : bottom - 1 );
+			Blob.seed( level.pointToCell(door) - 1, 1, WellID.class, level );
 		} else if (door.y == top) {
 			for (int i=left + 1; i < right; i++) {
 				Painter.drawInside( level, this, new Point( i, top ), Random.IntRange( 1, height() - 4 ), Terrain.EMPTY_SP );
 			}
 			well = new Point( Random.Int( 2 ) == 0 ? left + 1 : right - 1, bottom-1 );
+			Blob.seed( level.pointToCell(door) + width(), 1, WellID.class, level );
 		} else if (door.y == bottom) {
 			for (int i=left + 1; i < right; i++) {
 				Painter.drawInside( level, this, new Point( i, bottom ), Random.IntRange( 1, height() - 4 ), Terrain.EMPTY_SP );
 			}
 			well = new Point( Random.Int( 2 ) == 0 ? left + 1 : right - 1, top+2 );
+			Blob.seed( level.pointToCell(door) - width(), 1, WellID.class, level );
 		}
 		
 		Painter.set(level, well, Terrain.CHASM);
@@ -74,6 +78,7 @@ public class WeakFloorRoom extends SpecialRoom {
 		vis.pos(well.x, well.y);
 		level.customTiles.add(vis);
 
+		//landmark
 		Blob.seed( well.x + level.width() * well.y, 1, WellID.class, level );
 	}
 

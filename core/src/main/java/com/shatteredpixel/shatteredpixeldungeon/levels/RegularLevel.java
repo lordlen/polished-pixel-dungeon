@@ -85,6 +85,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
+import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -160,6 +161,12 @@ public abstract class RegularLevel extends Level {
 		if (feeling == Feeling.SECRETS) secrets++;
 		for (int i = 0; i < secrets; i++) {
 			initRooms.add(SecretRoom.createRoom());
+		}
+		
+		if(Debug.DEBUG_MODE) {
+			for(Class<? extends Room> toGenerate : Debug.Generate_Rooms) {
+				initRooms.add(Reflection.newInstance(toGenerate));
+			}
 		}
 		
 		return initRooms;

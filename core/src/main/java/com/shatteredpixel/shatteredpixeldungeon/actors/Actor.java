@@ -74,10 +74,8 @@ public abstract class Actor implements Bundlable {
 		float partial = target.cooldown() % TICK;
 		if(partial < 0) partial++;
 		
-		if (partial == 0 &&
-				curActorPriority() == MOB_PRIO &&
-				target.actPriority > MOB_PRIO)
-		{
+		//if the target has higher priority, they already acted. delay 1 full turn.
+		if (partial == 0 && target.actPriority > curActorPriority()) {
 			partial = 1;
 		}
 		

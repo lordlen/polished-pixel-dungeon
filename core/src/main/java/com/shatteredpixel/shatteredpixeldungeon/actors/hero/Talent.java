@@ -617,15 +617,42 @@ public enum Talent {
 			Dungeon.hero.updateHT(false);
 		}
 		
-		//we have to cache every time in case we've just replaced it with talent via metamorph
-		Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
-		if (talent == RUNIC_TRANSFERENCE && BrokenSeal.armor != null) {
-			if(Armor.runic == 1) BrokenSeal.armor.transfer();
+		if (talent == RUNIC_TRANSFERENCE) {
+			Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
+			if(Armor.runic == 1 && BrokenSeal.armor != null) {
+				BrokenSeal.armor.transfer();
+			}
 		}
 		
 		if(talent == DURABLE_PROJECTILES && hero.pointsInTalent(talent) == 2 && SPDSettings.Polished.huntress()) {
 			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
 			if(bow != null) bow.Polished_resetCharges();
+		}
+	}
+	
+	//for metamorphosis
+	public static void onTalentRemoval( Hero hero, Talent talent ) {
+		if (talent == IRON_WILL && hero.heroClass != HeroClass.WARRIOR){
+			Buff.detach(hero, BrokenSeal.WarriorShield.class);
+		}
+		
+		if (talent == HEIGHTENED_SENSES || talent == FARSIGHT || talent == DIVINE_SENSE){
+			Dungeon.observe();
+		}
+		
+		if (talent == TWIN_UPGRADES || talent == DESPERATE_POWER
+				|| talent == STRONGMAN || talent == DURABLE_PROJECTILES
+				|| talent == RUNIC_TRANSFERENCE) {
+			Item.updateQuickslot();
+		}
+		
+		//if we happen to have spirit form applied with a ring of might
+		if (talent == SPIRIT_FORM){
+			Dungeon.hero.updateHT(false);
+		}
+		
+		if (talent == RUNIC_TRANSFERENCE) {
+			Armor.cacheRunic(hero.pointsInTalent(RUNIC_TRANSFERENCE));
 		}
 	}
 

@@ -173,7 +173,7 @@ public class Dungeon {
 		
 		
 		static boolean expertise = false;
-		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
+		private static void updateFogsEdgeAndExpertise(int l, int r, int t, int b) {
 			int l_e = Math.max( 0, l-1 );
 			int r_e = Math.min( r+1, level.width() - 1 );
 			int t_e = Math.max( 0, t-1 );
@@ -283,7 +283,16 @@ public class Dungeon {
 				FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
 			}
 		}
-  
+		
+		
+		public static boolean[] openTiles() {
+			boolean[] open = new boolean[level.length()];
+			for (int i = 0; i < level.length(); i++) {
+				open[i] = !level.solid[i] || !level.losBlocking[i] || level.passable[i];
+			}
+			return open;
+		}
+		
 	}
 
 	//enum of items which have limited spawns, records how many have spawned
@@ -1117,13 +1126,16 @@ public class Dungeon {
 			Statistics.floorsExplored.put( depth, level.levelExplorePercent(depth));
 		}
 	}
-
-	//default to recomputing based on max hero vision, in case vision just shrank/grew
+	
 	public static void observe(){
-		int dist = Math.max(Dungeon.hero.viewDistance, 8);
-		dist *= 1f + 0.18f*Dungeon.hero.pointsInTalent(Talent.FARSIGHT);
+		int dist = hero.viewDistance;
+		dist *= 1f + 0.18f*hero.pointsInTalent(Talent.FARSIGHT);
+		
+		//default to computing based on max vision, in case it just shrank
+		//farsight can't be metamorphed so we don't have to worry about that
+		//dist *= EyeOfNewt.visionRangeMultiplier();
 
-		if (Dungeon.hero.buff(MagicalSight.class) != null){
+		if (hero.buff(MagicalSight.class) != null){
 			dist = Math.max( dist, MagicalSight.DISTANCE );
 		}
 
@@ -1163,9 +1175,9 @@ public class Dungeon {
 			level.visited[hero.pos+i] = true;
 		}
 		
-		GameScene.updateFog(l, t, width, height);
+		Polished.updateFogsEdgeAndExpertise(l, r, t, b);
 		
-		Polished.updateFogEdgeAndExpertise(l, r, t, b);
+		GameScene.updateFog(l, t, width, height);
 		
 		if (hero.buff(MindVision.class) != null || hero.buff(DivineSense.DivineSenseTracker.class) != null){
 			for (Mob m : level.mobs.toArray(new Mob[0])){
@@ -1213,7 +1225,6 @@ public class Dungeon {
 				x = ch.pos % level.width();
 				y = ch.pos / level.width();
 
-				//+1 in case they just moved
 				dist = ch.viewDistance+1;
 				l = Math.max( 0, x - dist );
 				r = Math.min( x + dist, level.width() - 1 );
@@ -1228,10 +1239,10 @@ public class Dungeon {
 					pos+=level.width();
 				}
 				
-				GameScene.updateFog(ch.pos, dist);
+				Polished.updateFogsEdgeAndExpertise(l, r, t, b);
 				
-				Polished.updateFogEdgeAndExpertise(l, r, t, b);
-				
+				//it needs to be generous on high speeds to prevent fog update bugs...
+				GameScene.updateFog(ch.pos, dist-1 + 2 * (int)Math.ceil(ch.speed()));
 			}
 		}
 

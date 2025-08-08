@@ -1147,42 +1147,44 @@ public abstract class Mob extends Char {
 			}
 
 			//can be awoken by the least stealthy hostile present, not necessarily just our target
-			float closestHostileDist = Float.POSITIVE_INFINITY;
-			Char closest = null;
-			
-			for (Char ch : Actor.chars()){
-				if (fieldOfView[ch.pos] && !ch.isStealthy() && ch.alignment != alignment && ch.alignment != Alignment.NEUTRAL){
-					float chDist = ch.stealth() + distance(ch);
-					//silent steps rogue talent, which also applies to rogue's shadow clone
-					if ((ch instanceof Hero || ch instanceof ShadowClone.ShadowAlly)
-							&& Dungeon.hero.hasTalent(Talent.SILENT_STEPS)){
-						if (distance(ch) >= 4 - Dungeon.hero.pointsInTalent(Talent.SILENT_STEPS)) {
+			if(enemy != null) {
+				float closestHostileDist = Float.POSITIVE_INFINITY;
+				Char closest = null;
+				
+				for (Char ch : Actor.chars()){
+					if (fieldOfView[ch.pos] && !ch.isStealthy() && ch.alignment != alignment && ch.alignment != Alignment.NEUTRAL){
+						float chDist = ch.stealth() + distance(ch);
+						//silent steps rogue talent, which also applies to rogue's shadow clone
+						if ((ch instanceof Hero || ch instanceof ShadowClone.ShadowAlly)
+								&& Dungeon.hero.hasTalent(Talent.SILENT_STEPS)){
+							if (distance(ch) >= 4 - Dungeon.hero.pointsInTalent(Talent.SILENT_STEPS)) {
+								chDist = Float.POSITIVE_INFINITY;
+							}
+						}
+						
+						boolean naturalStealth = ch.flying || ch.buff(Corruption.class) != null;
+						if (naturalStealth && distance(ch) >= 2){
 							chDist = Float.POSITIVE_INFINITY;
 						}
+						if (chDist < closestHostileDist){
+							closestHostileDist = chDist;
+							closest = ch;
+						}
 					}
-					
-					boolean naturalStealth = ch.flying || ch.buff(Corruption.class) != null;
-					if (naturalStealth && distance(ch) >= 2){
-						chDist = Float.POSITIVE_INFINITY;
-					}
-					if (chDist < closestHostileDist){
-						closestHostileDist = chDist;
-						closest = ch;
-					}
-				}
-			}
-			
-			if (Random.Float( closestHostileDist ) < 1) {
-				if(closest != null) {
-					aggro(closest);
-					enemyInFOV = true;
 				}
 				
-				awaken(enemyInFOV);
-				if (state == SLEEPING){
-					spend(TICK); //wait if we can't wake up for some reason
+				if (Random.Float( closestHostileDist ) < 1) {
+					if(closest != null) {
+						aggro(closest);
+						enemyInFOV = true;
+					}
+					
+					awaken(enemyInFOV);
+					if (state == SLEEPING){
+						spend(TICK); //wait if we can't wake up for some reason
+					}
+					return true;
 				}
-				return true;
 			}
 
 			enemySeen = false;

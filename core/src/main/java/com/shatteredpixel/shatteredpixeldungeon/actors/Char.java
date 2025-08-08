@@ -266,9 +266,9 @@ public abstract class Char extends Actor {
 	//swaps places by default
 	public boolean interact(Char c){
 
-		//don't allow char to swap onto hazard unless they're flying
-		//you can swap onto a hazard though, as you're not the one instigating the swap
-		if (!Dungeon.level.passable[pos] && !c.flying){
+		//don't allow char to swap onto pits unless they're flying
+		//you can swap onto a pit though, as you're not the one instigating the swap
+		if (Dungeon.level.pit[pos] && !c.flying){
 			return true;
 		}
 
@@ -392,7 +392,7 @@ public abstract class Char extends Actor {
 
 		if (enemy == null) return false;
 		
-		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos] || enemy instanceof DirectableAlly;
+		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
 
 		if (enemy.isInvulnerable(getClass())) {
 
@@ -656,13 +656,16 @@ public abstract class Char extends Actor {
 	}
 
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
+		
+		if (defender instanceof Hero){
+			Hero hero = (Hero) defender;
+			if(hero.damageInterrupt() && !hero.fieldOfView[attacker.pos]) {
+				GameScene.Polished.blockInput(0.75f);
+			}
+		}
 
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
-		
-		if (defender instanceof Hero){
-			((Hero) defender).damageInterrupt();
-		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)
 		if (attacker.isStealthyTo(defender) && attacker.canSurpriseAttack()) {
@@ -1289,6 +1292,10 @@ public abstract class Char extends Actor {
 
 		if (travelling && Dungeon.level.adjacent( step, pos ) && buff( Vertigo.class ) != null) {
 			sprite.interruptMotion();
+			if(this instanceof Hero && !Hero.Polished.resuming) {
+				((Hero) this).interrupt();
+			}
+			
 			int newPos = pos + PathFinder.NEIGHBOURS8[Random.Int( 8 )];
 			if (!(Dungeon.level.passable[newPos] || Dungeon.level.avoid[newPos])
 					|| (properties().contains(Property.LARGE) && !Dungeon.level.openSpace[newPos])
@@ -1306,7 +1313,7 @@ public abstract class Char extends Actor {
 
 		pos = step;
 		
-		if (this != Dungeon.hero && !(this instanceof DirectableAlly)) {
+		if (this != Dungeon.hero) {
 			sprite.visible = Dungeon.level.heroFOV[pos];
 		}
 		

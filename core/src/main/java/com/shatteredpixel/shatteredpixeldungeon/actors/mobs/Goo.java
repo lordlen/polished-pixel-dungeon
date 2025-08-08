@@ -252,20 +252,16 @@ public class Goo extends Mob {
 		}
 		
 		Hero hero = Dungeon.hero;
-		if (HP == HT && distance(hero) == 2 && !hero.fieldOfView[pos]) {
+		Level level = Dungeon.level;
+		
+		if (HP == HT && !hero.fieldOfView[pos] &&
+			distance(hero) == 2 && level.adjacent(hero.pos, target)) {
 			
-			Level level = Dungeon.level;
-			Point p = Point.difference(level.cellToPoint(pos), level.cellToPoint(hero.pos));
-			
-			//along the diagonal
-			if (Math.abs(p.x) == Math.abs(p.y)) {
-				
-				//if we're about to enter vision, dont move
-				level.updateFieldOfView(hero, hero.fieldOfView);
-				if(hero.fieldOfView[pos]) {
-					notice();
-					return false;
-				}
+			//if we're about to enter vision, dont move
+			level.updateFieldOfView(hero, hero.fieldOfView);
+			if(hero.fieldOfView[pos]) {
+				notice();
+				return false;
 			}
 		}
 		

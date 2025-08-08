@@ -23,6 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
@@ -51,7 +53,15 @@ public class Light extends FlavourBuff {
 	@Override
 	public void detach() {
 		target.viewDistance = Dungeon.level.viewDistance;
-		Dungeon.observe();
+		
+		if(target == Dungeon.hero) {
+			int updateDist = DISTANCE;
+			updateDist *= 1f + 0.18f*Dungeon.hero.pointsInTalent(Talent.FARSIGHT);
+			//updateDist *= EyeOfNewt.visionRangeMultiplier();
+			
+			Dungeon.observe();
+			GameScene.updateFog(Dungeon.hero.pos, updateDist+1);
+		}
 		super.detach();
 	}
 

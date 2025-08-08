@@ -59,7 +59,7 @@ public class WndScoreBreakdown extends Window {
 					num.format(Statistics.exploreScore), pos, Statistics.exploreScore >= 20_000);
 			pos = addInfo(this, Messages.get(this, "explore_desc"), pos);
 			pos = statSlot(this, Messages.get(this, "bosses_title"),
-					num.format(Statistics.totalBossScore), pos, Statistics.totalBossScore >= 15_000);
+					num.format(Statistics.totalBossScore), pos, Statistics.totalBossScore >= 20_000);
 			pos = addInfo(this, Messages.get(this, "bosses_desc"), pos);
 			pos = statSlot(this, Messages.get(this, "quests_title"),
 					num.format(Statistics.totalQuestScore), pos, Statistics.totalQuestScore >= 10_000);
@@ -79,7 +79,7 @@ public class WndScoreBreakdown extends Window {
 		if (Statistics.chalMultiplier > 1) {
 			pos = statSlot(this, Messages.get(this, "challenge_multiplier"), Messages.decimalFormat("#.##", Statistics.chalMultiplier) + "x", pos, false);
 		}
-		pos = statSlot(this, Messages.get(this, "total"), num.format(Statistics.totalScore), pos, false);
+		pos = statSlot(this, Messages.get(this, "total"), num.format(Statistics.totalScore), pos, Statistics.totalScore >= 2_235_000);
 
 		if (Dungeon.initialVersion <= ShatteredPixelDungeon.v1_2_3){
 			pos = addInfo(this, Messages.get(this, "old_score_desc"), pos);

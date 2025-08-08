@@ -46,7 +46,7 @@ public class WarpingTrap extends TeleportationTrap {
 
 	@Override
 	public void activate() {
-		if (Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
+		if (pos == Dungeon.hero.pos || Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
 			Disoriented.applyToHero(scalingDepth() <= 5 ? Disoriented.DURATION : 2*Disoriented.DURATION);
 		}
 

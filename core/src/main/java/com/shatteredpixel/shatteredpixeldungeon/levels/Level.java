@@ -1014,7 +1014,7 @@ public abstract class Level implements Bundlable {
 			web.clear(pos);
 		}
 
-		if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
+		//if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
 	}
 
 	public void cleanWalls() {
@@ -1515,7 +1515,6 @@ public abstract class Level implements Bundlable {
 			c == PowerOfMany.PoweredAlly()) {
 			if(!DirectableAlly.observing) {
 				BArray.or(fieldOfView, heroFOV, fieldOfView);
-				GameScene.updateFog(c.pos, c.viewDistance+(int)Math.ceil(c.speed()));
 			}
 		}
 
