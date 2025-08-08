@@ -163,6 +163,8 @@ public class Chasm implements Hero.Doom {
 			
 			tracker.setLevel(level);
 			fallDamage = tracker.deferDamage(fallDamage);
+			
+			tracker.detach();
 		}
 		
 		hero.damage(fallDamage , new Chasm());
