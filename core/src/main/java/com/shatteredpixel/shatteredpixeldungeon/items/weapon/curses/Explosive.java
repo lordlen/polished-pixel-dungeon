@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -47,21 +48,32 @@ public class Explosive extends Weapon.Enchantment {
 	public int proc( Weapon weapon, Char attacker, Char defender, int damage ) {
 
 		//average value of 5, or 20 hits to an explosion
-		int durToReduce = Math.round(Random.IntRange(0, 10) * Polished_procChanceMultiplier(attacker, weapon));
-		int currentDurability = durability;
+		int durToReduce = Math.round(Random.NormalIntRange(0, 10) * Polished_procChanceMultiplier(attacker, weapon));
+		int prevDurability = durability;
 		durability -= durToReduce;
 
-		if (currentDurability > 50 && durability <= 50){
-			attacker.sprite.showStatus(CharSprite.WARNING, Messages.get(this, "warm"));
-			GLog.w(Messages.get(this, "desc_warm"));
+		if (prevDurability > 50 && durability <= 50){
 			attacker.sprite.emitter().burst(SmokeParticle.FACTORY, 4);
-			Item.updateQuickslot();
-		} else if (currentDurability > 10 && durability <= 10){
+			attacker.sprite.showStatus(CharSprite.WARNING, Messages.get(this, "warm"));
+			
+			if(attacker == Dungeon.hero) {
+				GLog.w(Messages.get(this, "desc_warm"));
+				Item.updateQuickslot();
+			}
+		}
+		else if (prevDurability > 0 && durability <= 0){
+			attacker.sprite.emitter().burst(BlastParticle.FACTORY, 10);
 			attacker.sprite.showStatus(CharSprite.WARNING, Messages.get(this, "hot"));
-			GLog.n(Messages.get(this, "desc_hot"));
-			attacker.sprite.emitter().burst(BlastParticle.FACTORY, 5);
-			Item.updateQuickslot();
-		} else if (durability <= 0) {
+			
+			if(attacker == Dungeon.hero) {
+				GLog.n(Messages.get(this, "desc_hot"));
+				Item.updateQuickslot();
+				
+				Dungeon.hero.interrupt();
+				GameScene.Polished.blockInput(0.75f);
+			}
+		}
+		else if (prevDurability <= 0) {
 			//explosion position is the closest adjacent cell to the defender
 			// this will be the attacker's position if they are adjacent
 			int explosionPos = -1;
