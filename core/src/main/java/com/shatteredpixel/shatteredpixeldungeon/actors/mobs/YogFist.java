@@ -510,8 +510,10 @@ public abstract class YogFist extends Mob {
 			Invisibility.dispel(this);
 			Char enemy = this.enemy;
 			if (hit( this, enemy, true )) {
-
-				enemy.damage( Random.NormalIntRange(10, 20), new LightBeam() );
+				
+				int dmg = Random.NormalIntRange(10, 20);
+				dmg = enemy.magicAttack(this, new LightBeam(), dmg);
+				
 				Buff.prolong( enemy, Blindness.class, Blindness.DURATION/2f );
 
 				if (!enemy.isAlive() && enemy == Dungeon.hero) {
@@ -579,8 +581,9 @@ public abstract class YogFist extends Mob {
 			Invisibility.dispel(this);
 			Char enemy = this.enemy;
 			if (hit( this, enemy, true )) {
-
-				enemy.damage( Random.NormalIntRange(10, 20), new DarkBolt() );
+				
+				int dmg = Random.NormalIntRange(10, 20);
+				dmg = enemy.magicAttack(this, new DarkBolt(), dmg);
 
 				Light l = enemy.buff(Light.class);
 				boolean cleanse = enemy.buff(PotionOfCleansing.Cleanse.class) != null;

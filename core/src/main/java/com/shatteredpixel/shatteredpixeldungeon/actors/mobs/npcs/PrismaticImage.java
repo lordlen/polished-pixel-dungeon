@@ -203,7 +203,15 @@ public class PrismaticImage extends NPC {
 		}
 		return super.defenseProc(enemy, damage);
 	}
-
+	
+	@Override
+	public int magicDefenseProc(Char enemy, int damage) {
+		if (hero != null && hero.belongings.armor() != null){
+			damage = hero.belongings.armor().proc( enemy, this, damage );
+		}
+		return super.magicDefenseProc(enemy, damage);
+	}
+	
 	@Override
 	public int glyphLevel(Class<? extends Armor.Glyph> cls) {
 		if (hero != null){

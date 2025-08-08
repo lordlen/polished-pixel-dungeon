@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle
 import com.shatteredpixel.shatteredpixeldungeon.items.Dewdrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DisintegrationTrap;
@@ -204,8 +205,8 @@ public class Eye extends Mob {
 						dmg *= 0.5f;
 					}
 				}
-
-				ch.damage( dmg, new DeathGaze() );
+				
+				dmg = enemy.magicAttack(this, new DeathGaze(), dmg);
 
 				if (Dungeon.level.heroFOV[pos]) {
 					ch.sprite.flash();

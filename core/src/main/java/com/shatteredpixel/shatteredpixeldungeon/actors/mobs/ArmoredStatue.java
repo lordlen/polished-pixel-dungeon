@@ -84,7 +84,13 @@ public class ArmoredStatue extends Statue {
 		damage = armor.proc(enemy, this, damage);
 		return super.defenseProc(enemy, damage);
 	}
-
+	
+	@Override
+	public int magicDefenseProc(Char enemy, int damage) {
+		damage = armor.proc(enemy, this, damage);
+		return super.magicDefenseProc(enemy, damage);
+	}
+	
 	@Override
 	public int glyphLevel(Class<? extends Armor.Glyph> cls) {
 		if (armor != null && armor.hasGlyph(cls, this)){

@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfFeatherFall;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -153,8 +154,20 @@ public class Chasm implements Hero.Doom {
 		int ht = hero.HT / 4;
 		int min = Math.min(hp, ht);
 		int max = Math.max(hp, ht);
-
-		hero.damage( Math.max( hero.HP / 2, Random.NormalIntRange(min, max)), new Chasm() );
+		
+		int fallDamage = Math.max( hero.HP / 2, Random.NormalIntRange(min, max));
+		
+		int level = hero.glyphLevel(Viscosity.class);
+		if(level >= 0) {
+			Viscosity.ViscosityTracker tracker = Buff.affect(hero, Viscosity.ViscosityTracker.class);
+			
+			tracker.setLevel(level);
+			fallDamage = tracker.deferDamage(fallDamage);
+			
+			tracker.detach();
+		}
+		
+		hero.damage(fallDamage , new Chasm());
 	}
 
 	public static void mobFall( Mob mob ) {
