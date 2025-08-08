@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
@@ -111,8 +112,8 @@ public abstract class ShieldBuff extends Buff {
 	}
 
 	public static int processDamage( Char target, int damage, Object src ){
-		//hunger damage is not affected by shielding
-		if (src instanceof Hunger){
+		//hunger and thorns damage are not affected by shielding
+		if (src instanceof Hunger || src instanceof Thorns){
 			return damage;
 		}
 
