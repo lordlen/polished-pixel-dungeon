@@ -2151,8 +2151,8 @@ public class Hero extends Char {
 		LevelTransition transition = level.getTransition(cell);
 		
 		boolean nearbyMobs = false;
-		if(heap != null || transition != null) {
-			int limit = heap != null ? 10 : 8;
+		if((heap != null && heap.seen) || transition != null) {
+			int limit = heap != null && heap.seen ? 10 : 8;
 			PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), limit);
 			
 			for(Mob mob : visibleEnemies) {
@@ -2198,7 +2198,7 @@ public class Hero extends Char {
 
 			curAction = new HeroAction.Mine( cell );
 
-		} else if (heap != null
+		} else if (heap != null && heap.seen
 				//moving to an item doesn't auto-pickup when enemies are near...
 				&& (!nearbyMobs || cell == pos ||
 				//...but only for standard heaps. Chests and similar open as normal.
