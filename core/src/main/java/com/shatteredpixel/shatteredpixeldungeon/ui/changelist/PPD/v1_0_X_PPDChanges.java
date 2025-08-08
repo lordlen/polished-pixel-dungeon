@@ -48,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bombs.WoollyBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.HoneyedMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.Pasty;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.AquaBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.CausticBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.InfernalBrew;
@@ -68,12 +69,15 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dirk;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glaive;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greataxe;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HandAxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Longsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
@@ -83,6 +87,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sickle;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarScythe;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Whip;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ForceCube;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Tomahawk;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -92,6 +98,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.BruteSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CrabSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DM300Sprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.EarthGuardianSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ElementalSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GhostSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GolemSprite;
@@ -103,6 +110,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.NecromancerSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.PrismaticSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ShopkeeperSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SpectralNecromancerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.WandmakerSprite;
@@ -795,7 +803,7 @@ public class v1_0_X_PPDChanges {
 		glaive.enchant(Reflection.newInstance(Vampiric.class));
 		addChange(glaive, "Enchantments",
 				"_- Vampiric:_\n" +
-						"No longer procs when starving/stalling boss.\n" +
+						"No longer activates when starving/stalling boss.\n" +
 						"\n" +
 						"_- Grim:_\n" +
 						"Deals 3x damage against bosses instead of 50% current HP.\n" +
@@ -865,7 +873,7 @@ public class v1_0_X_PPDChanges {
 						"Replaces _Foresight._\n" +
 						"\n" +
 						"- New talent: _Smart Escape:_\n" +
-						"The Rogue gains _1.5 turns/2 turns_ of haste whenever a trap is activated in his vision. Floors will generate _10%/20%_ more revealed traps.\nTraps that don't break can only grant haste up to 3 times.\n" +
+						"The Rogue gains _1.5 turns/2 turns_ of haste whenever a trap is activated. Floors will generate _10%/20%_ more revealed traps.\nTraps that don't break can only grant haste up to 3 times.\n" +
 						"\n" +
 						"Replaces _Wide Search._"
 		);
@@ -993,6 +1001,155 @@ public class v1_0_X_PPDChanges {
 	
 	public static void add_v1_5_Changes( ArrayList<ChangeInfo> changeInfos ) {
 		
+		addVersion(changeInfos, "v1.5.8");
+		
+		addSection(changeInfos, NEW);
+		// ***
+		addChange(Icons.SHPX, "Shattered Pixel Dungeon 3.2",
+				"Polished Pixel Dungeon got updated to the latest SPD version:\n" +
+						"3.1.1 -> 3.2.0"
+		);
+		// ***
+		
+		// ***
+		addSection(changeInfos, EMPTY);
+		// ***
+		
+		
+		
+		addVersion(changeInfos, "v1.5.7");
+		
+		addSection(changeInfos, CHANGES);
+		// ***
+		addChange(new Greataxe(), "Weapon Encumbrance",
+				"Overweight weapons are no longer guaranteed to fail at surprise attacks.\n" +
+						"\n" +
+						"Instead, they now have a 50%/75%/87.5%... chance to fail (and do a regular attack instead), depending on the strength difference."
+		);
+		
+		addChange(new EarthGuardianSprite(), "Allies",
+				"_- Earth Guardian:_\n" +
+						"Vision range: 8 -> 5\n" +
+						"Armor: 3 + 3 * wand level -> 3 + 2 * wand level\n" +
+						"\n" +
+						"Armor doesn't decrease on FIMA (challenge) anymore.\n" +
+						"Numbers are: 2 + wand level -> 3 + 2 * wand level\n" +
+						"\n" +
+						"_- Prismatic Image:_\n" +
+						"Vision range: 8 -> 3\n" +
+						"\n" +
+						"Summons itself when an enemy is within:\n" +
+						"4 tiles -> 3 tiles\n" +
+						"Now tries to spawn before mob's turn to act.\n" +
+						"\n" +
+						"_- Scroll of Mirror Image:_\n" +
+						"Images spawned: 2 -> 3"
+		);
+		
+		addChange(GAMEPLAY(), "Gameplay Adjustments",
+				"Main NPCs now show in fog. This includes:\n" +
+						"Shopkeeper, Ghost, Wandmaker, Blacksmith, Imp.\n" +
+						"\n" +
+						"Crystal Mimic escape distance: 6 -> 7\n" +
+						"(Now matches Thief's).\n" +
+						"\n" +
+						"Teleportation trap now shows where teleported items end up in fog.\n" +
+						"\n" +
+						"Game no longer prevents you from swapping with allies standing on traps.\n" +
+						"\n" +
+						"Non-Polished nature's aid no longer requires vision of the plant activated, just having it mapped."
+		);
+		// ***
+		
+		addSection(changeInfos, CHANGES);
+		// ***
+		addChange(Icons.DISPLAY_LAND, "UI and Camera",
+				"_- Alchemy scene:_\n" +
+						"Recipe slots:\n" +
+						"Long tap / Right click on an item will show info.\n" +
+						"(PC) Middle click on an item will remove it.\n" +
+						"\n" +
+						"Item selection bag:\n" +
+						"Long tap / Right click on an item will open up the energize window.\n" +
+						"\n" +
+						"_- Item slots:_\n" +
+						"Now prioritize displaying their custom note's title when hovered, instead of their item's name.\n" +
+						"\n" +
+						"_- CAMERA:_\n" +
+						"Opening hero's tab using hotkeys, or tapping on the icon when camera intensity is set to low, no longer moves the camera.\n" +
+						"\n" +
+						"Increased zooming speed\n" +
+						"Adjusted follow intensity."
+		);
+		
+		addChange(Icons.BACKPACK_LRG, "Inventory Sorting",
+				"Weapons, Armor and Throwies now sort themselves based on tier.\n" +
+						"Within the same tier, items sort themselves based on level.\n" +
+						"\n" +
+						"Darts now always go after other Throwies.\n" +
+						"Fixed order for bombs, honeypots, torches and seeds."
+		);
+		
+		addChange(QOL(), "Quality of Life",
+				"Tapping twice no longer cancels opening a chest/door.\n" +
+						"Hero now interrupts movement after every step while affected by vertigo.\n" +
+						"\n" +
+						"Input block now triggers when hero gets hit from out of vision.\n" +
+						"Input block now triggers on explosive's curse chat warning.\n" +
+						"\n" +
+						"Implemented warning for when hero tries to aqua brew on sentry room."
+		);
+		
+		addChange(BUGFIX(), "Bugfixes",
+				"- Wand of Lightning no longer considers flying enemies as standing on water (same as with shocking).\n" +
+						"\n" +
+						"- Explosive no longer shows warning messages on chat when characters other than hero use it.\n" +
+						"\n" +
+						"- Hero no longer tries to pick up items in fog."
+		);
+		// ***
+		
+		addSection(changeInfos, BUFFS);
+		// ***
+		addChange(new Stylus(), "Glyphs",
+				"On-hit glyphs, and Glyph of Stone, now also activate against skeleton explosions.\n" +
+						"\n" +
+						"Glyph of Stone now also protects against magic attacks, instead of just disabling your evasion for no benefit."
+		);
+		
+		ItemSprite shortsword = itemIcon(ItemSpriteSheet.SHORTSWORD);
+		shortsword.glow(new ItemSprite.Glowing(0x000000));
+		addChange(shortsword, "Explosive Curse",
+				"Chat warning now guarantees the very next attack will cause an explosion.\n" +
+						"\n" +
+						"Average turns per explosion: 20 -> 21\n" +
+						"Variance decreased."
+		);
+		
+		addChange(new Pasty(), "Pasties and Alchemize",
+				"_- Pasties:_\n" +
+						"Generate every: 5 floors -> 4 floors\n" +
+						"This ensures 1 per region.\n" +
+						"\n" +
+						"_- Alchemize:_\n" +
+						"Base price per unit: 12.5 -> 10\n" +
+						"Recipe energy cost: 2/1 -> 1/0"
+		);
+		
+		addChange(Talent.NATURES_AID, "Nature's Aid (Polished)",
+				"Activates every: 7/5 charges -> 6/5 charges"
+		);
+		// ***
+		
+		addSection(changeInfos, NERFS);
+		// ***
+		addChange(Talent.NATURES_BOUNTY, "Nature's Bounty",
+				"Berries obtained: 4/6 -> 4/5"
+		);
+		// ***
+		
+		
+		
 		addVersion(changeInfos, "v1.5.6");
 		
 		addSection(changeInfos, NEW);
@@ -1089,13 +1246,8 @@ public class v1_0_X_PPDChanges {
 						"Wraith spawn rate when cursed: 1% per turn -> 2% per turn"
 		);
 		
-		addChange(new WandOfLivingEarth(), "Ally Wands",
-				"_- Wand of Living Earth:_\n" +
-						"Guardian's defense doesn't decrease on FIMA (challenge) anymore.\n" +
-						"Numbers are: 0 - 2 + level -> 0 - 3 + 3 * level\n" +
-						"\n" +
-						"_- Wand of Transfusion:_\n" +
-						"Self damage when shielding ally: 5% max HP -> 3% max HP\n" +
+		addChange(new WandOfTransfusion(), "Wand of Transfusion",
+				"Self damage when shielding ally: 5% max HP -> 3% max HP\n" +
 						"\n" +
 						"Shield given to allies: self damage -> self damage + 3\n" +
 						"Shield given can be stacked up to 3x now."
@@ -1172,7 +1324,7 @@ public class v1_0_X_PPDChanges {
 						"Root duration: 2 turns -> 1 turn\n" +
 						"\n" +
 						"_- Searing Light:_\n" +
-						"Bonus damage already nerfed on PPD. Remains unchanged at +2/+3\n" +
+						"Bonus damage already nerfed on Polished. Remains unchanged at +2/+3\n" +
 						"\n" +
 						"_- Hallowed Ground:_\n" +
 						"Barrier cap: 30 -> no cap\n" +
