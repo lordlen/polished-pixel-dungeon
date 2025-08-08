@@ -1225,7 +1225,6 @@ public class Dungeon {
 				x = ch.pos % level.width();
 				y = ch.pos / level.width();
 
-				//+1 in case they just moved
 				dist = ch.viewDistance+1;
 				l = Math.max( 0, x - dist );
 				r = Math.min( x + dist, level.width() - 1 );
@@ -1242,7 +1241,8 @@ public class Dungeon {
 				
 				Polished.updateFogsEdgeAndExpertise(l, r, t, b);
 				
-				GameScene.updateFog(ch.pos, dist);
+				//it needs to be generous on high speeds to prevent fog update bugs...
+				GameScene.updateFog(ch.pos, dist-1 + 2 * (int)Math.ceil(ch.speed()));
 			}
 		}
 
