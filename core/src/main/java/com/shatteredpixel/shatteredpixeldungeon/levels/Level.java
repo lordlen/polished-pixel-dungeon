@@ -386,6 +386,11 @@ public abstract class Level implements Bundlable {
 		createItems();
 
 		Random.popGenerator();
+		
+		
+		//we have to do this at the end so it doesn't alter level generation
+		ChampionEnemy.Growing.relocateAll(this);
+		
 	}
 	
 	public void setSize(int w, int h){
@@ -425,6 +430,9 @@ public abstract class Level implements Bundlable {
 			}
 		}
 		createMobs();
+		
+		ChampionEnemy.Growing.relocateAll(this);
+		
 	}
 
 	public void playLevelMusic(){
@@ -844,6 +852,10 @@ public abstract class Level implements Bundlable {
 				for (ChampionEnemy champ : mob.buffs(ChampionEnemy.class)) {
 					Class<?> type = champ.getClass();
 					GLog.w(Messages.get(type, "warn"));
+					
+					if(champ instanceof ChampionEnemy.Growing) {
+						ChampionEnemy.Growing.relocateToExit(mob, this);
+					}
 				}
 			}
 			return true;
@@ -863,20 +875,42 @@ public abstract class Level implements Bundlable {
 
 			cell = Random.Int( length() );
 
-		} while ((Dungeon.level == this && heroFOV[cell])
-				|| !passable[cell]
-				|| (Char.hasProp(ch, Char.Property.LARGE) && !openSpace[cell])
-				|| Actor.findChar( cell ) != null);
+		} while (!validRespawn(ch, cell));
 		return cell;
 	}
 	
+	public boolean validRespawn( Char ch, int cell ) {
+		return ((Dungeon.level != this || !heroFOV[cell]) &&
+				(Dungeon.level == this ? Actor.findChar(cell) : findMob(cell)) == null &&
+				passable[cell] &&
+				!solid[cell] &&
+				traps.get(cell) == null &&
+				plants.get(cell) == null &&
+				cell != exit() &&
+				(!Char.hasProp(ch, Char.Property.LARGE) || openSpace[cell]));
+	}
+	
 	public int randomDestination( Char ch ) {
-		int cell;
-		do {
-			cell = Random.Int( length() );
-		} while (!passable[cell]
-				|| (Char.hasProp(ch, Char.Property.LARGE) && !openSpace[cell]));
-		return cell;
+		
+		if(ch != null) {
+			PathFinder.buildDistanceMap(ch.pos, Dungeon.findPassable(ch, passable));
+		}
+		
+		int tries = 0;
+		while (tries++ <= 30) {
+			int cell = Random.Int( length() );
+			
+			if(ch != null) {
+				if(PathFinder.distance[cell] < Integer.MAX_VALUE) {
+					return cell;
+				}
+			}
+			else if(passable[cell]) {
+				return cell;
+			}
+		}
+		
+		return -1;
 	}
 	
 	public void addItemToSpawn( Item item ) {
@@ -980,7 +1014,7 @@ public abstract class Level implements Bundlable {
 			web.clear(pos);
 		}
 
-		if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
+		//if(terr == Terrain.BARRICADE) Notes.LandmarkRecord.Polished.updateOnBarricade(pos);
 	}
 
 	public void cleanWalls() {
@@ -1481,7 +1515,6 @@ public abstract class Level implements Bundlable {
 			c == PowerOfMany.PoweredAlly()) {
 			if(!DirectableAlly.observing) {
 				BArray.or(fieldOfView, heroFOV, fieldOfView);
-				GameScene.updateFog(c.pos, c.viewDistance+(int)Math.ceil(c.speed()));
 			}
 		}
 

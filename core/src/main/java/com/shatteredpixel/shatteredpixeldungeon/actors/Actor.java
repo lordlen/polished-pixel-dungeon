@@ -62,21 +62,24 @@ public abstract class Actor implements Bundlable {
 		return time;
 	}
 	
-	public float Polished_alignTurnWheel( float time ) {
-		float partial = time % TICK;
-		if(partial < 0) partial++;
-
-		spendConstant(partial);
-
-		return partial;
-	}
-	
-	public void Polished_timeToNow() {
-		if(all().contains(this)) {
+	public synchronized void Polished_timeToNow() {
+		if(all.contains(this)) {
 			time = now;
 		} else {
 			time = 0;
 		}
+	}
+	
+	public void Polished_alignTurnWheel( Char target ) {
+		float partial = target.cooldown() % TICK;
+		if(partial < 0) partial++;
+		
+		//if the target has higher priority, they already acted. delay 1 full turn.
+		if (partial == 0 && target.actPriority > curActorPriority()) {
+			partial = 1;
+		}
+		
+		spendConstant(partial);
 	}
 
 	//Always spends exactly the specified amount of time, regardless of time-influencing factors

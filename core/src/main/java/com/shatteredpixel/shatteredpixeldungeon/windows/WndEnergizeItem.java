@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.utils.Callback;
 
 public class WndEnergizeItem extends WndInfoItem {
 
@@ -41,6 +42,7 @@ public class WndEnergizeItem extends WndInfoItem {
 	private static final int BTN_HEIGHT	= 18;
 
 	private WndBag owner;
+	private Callback callback = null;
 
 	public WndEnergizeItem(Item item, WndBag owner) {
 		super(item);
@@ -95,15 +97,22 @@ public class WndEnergizeItem extends WndInfoItem {
 		resize( width, (int)pos );
 
 	}
+	
+	public void afterEnergize(Callback callback) {
+		this.callback = callback;
+	}
 
 	@Override
 	public void hide() {
 
 		super.hide();
-
+		
 		if (owner != null) {
 			owner.hide();
 			openItemSelector();
+		}
+		if(callback != null) {
+			callback.call();
 		}
 	}
 

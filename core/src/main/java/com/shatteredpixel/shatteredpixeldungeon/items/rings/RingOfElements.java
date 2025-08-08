@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -76,10 +77,12 @@ public class RingOfElements extends Ring {
 		RESISTS.add( Chill.class );
 		RESISTS.add( Frost.class );
 		RESISTS.add( Ooze.class );
-		RESISTS.add( Paralysis.class );
-		RESISTS.add( Electrified.class );
 		RESISTS.add( Poison.class );
 		RESISTS.add( Corrosion.class );
+		
+		RESISTS.add( Roots.class );
+		RESISTS.add( Paralysis.class );
+		RESISTS.add( Electrified.class );
 
 		RESISTS.add( ToxicGas.class );
 		RESISTS.add( Electricity.class );

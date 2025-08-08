@@ -88,7 +88,7 @@ public class StoneOfEnchantment extends InventoryStone {
 					
 					@Override
 					protected void onSelect(int index) {
-						if (!anonymous || Polished_wealthDrop != null) {
+						if (!anonymous) {
 							curItem.detach(curUser.belongings.backpack);
 							Catalog.countUse(StoneOfEnchantment.class);
 							Talent.onRunestoneUsed(curUser, curUser.pos, StoneOfEnchantment.class);
@@ -127,7 +127,7 @@ public class StoneOfEnchantment extends InventoryStone {
 			}
 		}
 		
-		if (!anonymous || Polished_wealthDrop != null) {
+		if (!anonymous) {
 			curItem.detach(curUser.belongings.backpack);
 			Catalog.countUse(getClass());
 			Talent.onRunestoneUsed(curUser, curUser.pos, getClass());

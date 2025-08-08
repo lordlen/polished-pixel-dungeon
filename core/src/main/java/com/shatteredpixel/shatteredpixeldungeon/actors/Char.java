@@ -198,6 +198,11 @@ public abstract class Char extends Actor {
 	
 	public boolean[] fieldOfView = null;
 	
+	public boolean validFov() {
+		return  fieldOfView != null && Dungeon.level != null &&
+				fieldOfView.length > 0 && fieldOfView.length == Dungeon.level.length();
+	}
+	
 	private LinkedHashSet<Buff> buffs = new LinkedHashSet<>();
 
 	public boolean isStealthy() {
@@ -261,9 +266,9 @@ public abstract class Char extends Actor {
 	//swaps places by default
 	public boolean interact(Char c){
 
-		//don't allow char to swap onto hazard unless they're flying
-		//you can swap onto a hazard though, as you're not the one instigating the swap
-		if (!Dungeon.level.passable[pos] && !c.flying){
+		//don't allow char to swap onto pits unless they're flying
+		//you can swap onto a pit though, as you're not the one instigating the swap
+		if (Dungeon.level.pit[pos] && !c.flying){
 			return true;
 		}
 
@@ -387,7 +392,7 @@ public abstract class Char extends Actor {
 
 		if (enemy == null) return false;
 		
-		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos] || enemy instanceof DirectableAlly;
+		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
 
 		if (enemy.isInvulnerable(getClass())) {
 
@@ -461,7 +466,7 @@ public abstract class Char extends Actor {
 			}
 
 			for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-				dmg *= buff.meleeDamageFactor(Dungeon.level.adjacent(this.pos, enemy.pos));
+				dmg *= buff.meleeDamageFactor(distance(enemy) > 1);
 			}
 
 			dmg *= AscensionChallenge.statModifier(this);
@@ -493,7 +498,8 @@ public abstract class Char extends Actor {
 			//POLISHED: do we let them stack?
 			if ( buff(Weakness.class) != null ){
 				dmg *= 0.67f;
-			} else if(buff(Brittle.class) != null) {
+			}
+			if(buff(Brittle.class) != null) {
 				dmg *= 0.75f;
 			}
 
@@ -520,11 +526,14 @@ public abstract class Char extends Actor {
 
 				//vulnerable specifically applies after armor reductions
 				//POLISHED: do we let them stack?
+				float multi = 1f;
 				if (enemy.buff(Vulnerable.class) != null) {
-					effectiveDamage *= 1.33f;
-				} else if(enemy.buff(Brittle.class) != null) {
-					effectiveDamage *= 1.25f;
+					multi *= 1.33f;
 				}
+				if(enemy.buff(Brittle.class) != null) {
+					multi *= 1.25f;
+				}
+				effectiveDamage = Math.round(effectiveDamage * multi);
 
 				effectiveDamage = attackProc(enemy, effectiveDamage);
 			}
@@ -647,13 +656,16 @@ public abstract class Char extends Actor {
 	}
 
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
+		
+		if (defender instanceof Hero){
+			Hero hero = (Hero) defender;
+			if(hero.damageInterrupt() && !hero.fieldOfView[attacker.pos]) {
+				GameScene.Polished.blockInput(0.75f);
+			}
+		}
 
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
-
-		if (defender instanceof Hero && ((Hero) defender).damageInterrupt){
-			((Hero) defender).interrupt();
-		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)
 		if (attacker.isStealthyTo(defender) && attacker.canSurpriseAttack()) {
@@ -698,9 +710,7 @@ public abstract class Char extends Actor {
 		if (defender.buff(  Hex.class) != null) defRoll *= 0.75f;
 		if (defender.buff( Daze.class) != null) defRoll *= 0.5f;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
-			boolean surprise = (defender instanceof Mob && ((Mob)defender).surprisedBy(attacker));
-
-			defRoll *= buff.evasionFactor(surprise);
+			defRoll *= buff.evasionFactor();
 		}
 		defRoll *= AscensionChallenge.statModifier(defender);
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC
@@ -871,46 +881,6 @@ public abstract class Char extends Actor {
 		needsShieldUpdate = false;
 		return cachedShield;
 	}
-
-	boolean Polished_isDamageExternal(Object src) {
-		
-		if(!(src instanceof Char)) {
-			//dont get def boost against debuffs, traps and such
-			return false;
-		}
-		if(!(Dungeon.level instanceof RegularLevel)) {
-			return false;
-		}
-		
-		Char attacker = (Char)src;
-		RegularLevel level = (RegularLevel)Dungeon.level;
-
-		ArrayList<Integer> roomCells = new ArrayList<>();
-		Room r = (level.room(pos));
-
-		if(r != null) {
-			for (Point p : r.getPoints()){
-				roomCells.add(level.pointToCell(p));
-			}
-
-			return !roomCells.contains(attacker.pos);
-		}
-		else {
-			boolean enemyRoom = true;
-			for(int i : PathFinder.NEIGHBOURS9) {
-				if (level.room( attacker.pos+i ) == null) {
-					enemyRoom = false;
-				}
-			}
-			if(enemyRoom) {
-				return true;
-			}
-            
-            //if within a reasonable distance, assume they're in the same room
-            return Dungeon.level.distance(attacker.pos, pos) > 8;
-		}
-		
-	}
 	
 	public void damage( int dmg, Object src ) {
 		
@@ -1018,14 +988,10 @@ public abstract class Char extends Actor {
 
 		dmg = Math.round(damage);
 
-
-		ChampionEnemy.Giant giant = this.buff(ChampionEnemy.Giant.class);
-		if (giant != null){
-			boolean externalAttack = Polished_isDamageExternal(src);
-
-			//we ceil these specifically to favor the player vs. champ dmg reduction
-			// most important vs. giant champions in the earlygame
-			dmg = (int) Math.ceil(dmg * giant.damageTakenFactor(externalAttack));
+		
+		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
+			//we ceil these specifically to favor the player vs. champ dmg reduction early game
+			dmg = (int) Math.ceil(dmg * buff.damageTakenFactor(src));
 		}
 		
 		//TODO improve this when I have proper damage source logic
@@ -1358,6 +1324,10 @@ public abstract class Char extends Actor {
 
 		if (travelling && Dungeon.level.adjacent( step, pos ) && buff( Vertigo.class ) != null) {
 			sprite.interruptMotion();
+			if(this instanceof Hero && !Hero.Polished.resuming) {
+				((Hero) this).interrupt();
+			}
+			
 			int newPos = pos + PathFinder.NEIGHBOURS8[Random.Int( 8 )];
 			if (!(Dungeon.level.passable[newPos] || Dungeon.level.avoid[newPos])
 					|| (properties().contains(Property.LARGE) && !Dungeon.level.openSpace[newPos])
@@ -1375,7 +1345,7 @@ public abstract class Char extends Actor {
 
 		pos = step;
 		
-		if (this != Dungeon.hero && !(this instanceof DirectableAlly)) {
+		if (this != Dungeon.hero) {
 			sprite.visible = Dungeon.level.heroFOV[pos];
 		}
 		

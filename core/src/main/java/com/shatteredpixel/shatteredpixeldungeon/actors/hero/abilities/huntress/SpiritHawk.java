@@ -86,6 +86,10 @@ public class SpiritHawk extends ArmorAbility {
 	}
 	
 	public static HawkAlly Hawk() {
+		return Hawk(true);
+	}
+	
+	public static HawkAlly Hawk(boolean checkStasis) {
 		if(hawk != null) {
 			if(!hawk.isAlive()) resetHawk();
 			return hawk;
@@ -101,11 +105,13 @@ public class SpiritHawk extends ArmorAbility {
 			}
 		}
 		
-		Char ally = Stasis.getStasisAlly();
-		if (ally instanceof HawkAlly){
-			hawk = (HawkAlly) ally;
-			hawkID = ally.id();
-			return hawk;
+		if(checkStasis) {
+			Char ally = Stasis.getStasisAlly();
+			if (ally instanceof HawkAlly){
+				hawk = (HawkAlly) ally;
+				hawkID = ally.id();
+				return hawk;
+			}
 		}
 		
 		return null;
@@ -152,10 +158,10 @@ public class SpiritHawk extends ArmorAbility {
 
 			flying = true;
 			if (Dungeon.hero != null) {
-				viewDistance = GameMath.gate(6, 6 + Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE), 8);
+				viewDistance = GameMath.gate(5, 5 + Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE), 9);
 				baseSpeed = 2f + Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT) / 2f;
 			} else {
-				viewDistance = 6;
+				viewDistance = 5;
 				baseSpeed = 2f;
 			}
 
@@ -258,7 +264,7 @@ public class SpiritHawk extends ArmorAbility {
 
 		@Override
 		protected boolean act() {
-			viewDistance = 6+Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE);
+			viewDistance = 5+Dungeon.hero.pointsInTalent(Talent.EAGLE_EYE);
 			baseSpeed = 2f + Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT)/2f;
 			return super.act();
 		}

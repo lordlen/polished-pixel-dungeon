@@ -63,14 +63,19 @@ public class SecretChestChasmRoom extends SecretRoom {
 		Painter.fill(level, this, Terrain.WALL);
 		Painter.fill(level, this, 1, Terrain.CHASM);
 		
+		//landmark
+		for(Point p : getPoints()) {
+			if(inside(p)) {
+				Blob.seed( level.pointToCell(p), 1, SecretChasmID.class, level );
+			}
+		}
+		
 		int chests = 0;
 		
 		Point p = new Point(left+3, top+3);
 		Painter.set(level, p, Terrain.EMPTY_SP);
 		level.drop(Generator.randomUsingDefaults(), level.pointToCell(p)).type = Heap.Type.LOCKED_CHEST;
 		if (level.heaps.get(level.pointToCell(p)) != null) chests++;
-
-		Blob.seed( level.pointToCell(p), 1, SecretChasmID.class, level );
 		
 		p.x = right-3;
 		Painter.set(level, p, Terrain.EMPTY_SP);

@@ -582,6 +582,26 @@ public class AlchemyScene extends PixelScene {
 				}
 			}
 		}
+		
+		@Override
+		public void onRightSelect(Item item) {
+			if(item.energyVal() == 0) {
+				return;
+			}
+			
+			WndEnergizeItem energize = new WndEnergizeItem(item, null);
+			energize.afterEnergize(() -> {
+                WndBag.INSTANCE.hide();
+                AlchemyScene.this.addToFront(WndBag.getBag( itemSelector ));
+            });
+			
+			ShatteredPixelDungeon.scene().addToFront(energize);
+		}
+		
+		@Override
+		public boolean hideAfterRightSelecting() {
+			return false;
+		}
 	};
 	
 	private<T extends Item> ArrayList<T> filterInput(Class<? extends T> itemClass){
@@ -1008,7 +1028,25 @@ public class AlchemyScene extends PixelScene {
 					}
 					return false;
 				}
-
+				
+				@Override
+				protected void onRightClick() {
+					onLongClick();
+				}
+				
+				@Override
+				protected void onMiddleClick() {
+					//remove item
+					Item item = InputButton.this.item;
+					if (item != null) {
+						if (!item.collect()) {
+							Dungeon.level.drop(item, Dungeon.hero.pos);
+						}
+						InputButton.this.item(null);
+						updateState();
+					}
+				}
+				
 				@Override
 				//only the first empty button accepts key input
 				public GameAction keyAction() {

@@ -53,7 +53,6 @@ public class HighGrass {
 
 	public static void trample( Level level, int pos ) {
 		if (freezeTrample) return;
-
 		int trampledItems = 0;
 		
 		Char ch = Actor.findChar(pos);
@@ -61,7 +60,6 @@ public class HighGrass {
 		if (level.map[pos] == Terrain.FURROWED_GRASS){
 			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.HUNTRESS){
 				//Do nothing
-				freezeTrample = true;
 			} else {
 				Level.set(pos, Terrain.GRASS);
 			}
@@ -91,7 +89,8 @@ public class HighGrass {
 				if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.NATURES_BOUNTY)){
 					
 					int berriesAvailable = 2 + 2*((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
-					//if(SPDSettings.Polished.huntress()) berriesAvailable--; // 5/3
+					//unused, 3/5 berries for 150 food value
+					//if(SPDSettings.Polished.huntress()) berriesAvailable--;
 					
 					int targetFloor = 2 + berriesAvailable;
 

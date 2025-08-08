@@ -213,7 +213,9 @@ public class Item implements Bundlable {
 		Heap heap = Dungeon.level.drop( this, cell );
 		if (!heap.isEmpty()) {
 			heap.sprite.drop( cell );
-			heap.seen = true;
+			if(Dungeon.level.visited[cell] || Dungeon.level.mapped[cell]) {
+				heap.seen = true;
+			}
 		}
 	}
 	
@@ -600,7 +602,7 @@ public class Item implements Bundlable {
 	}
 	
 	public String status() {
-		return quantity != 1 ? Integer.toString( quantity ) : null;
+		return quantity > 1 ? Integer.toString( quantity ) : null;
 	}
 
 	public static void updateQuickslot() {

@@ -41,14 +41,15 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Bundle;
 
 public class WaterOfAwareness extends WellWater {
 
-	protected int itemIDS = 2;
+	protected boolean itemID = false;
 
 	@Override
 	protected boolean affectHero( Hero hero ) {
-		if(itemIDS < 2) return false;
+		if(itemID) return false;
 		
 		Sample.INSTANCE.play( Assets.Sounds.DRINK );
 		emitter.parent.add( new Identification( hero.sprite.center() ) );
@@ -92,8 +93,7 @@ public class WaterOfAwareness extends WellWater {
 			
 			Sample.INSTANCE.play( Assets.Sounds.DRINK );
 			emitter.parent.add( new Identification( DungeonTilemap.tileCenterToWorld( pos ) ) );
-
-			itemIDS--;
+			
 			return item;
 		}
 	}
@@ -111,6 +111,25 @@ public class WaterOfAwareness extends WellWater {
 	
 	@Override
 	public String tileDesc() {
-		return Messages.get(this, "desc");
+		if(itemID) {
+			return Messages.get(this, "desc_used");
+		}
+		else {
+			return Messages.get(this, "desc");
+		}
+	}
+	
+	private static final String ITEM_ID = "item_id";
+	
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		bundle.put(ITEM_ID, itemID);
+	}
+	
+	@Override
+	public void restoreFromBundle(Bundle bundle) {
+		super.restoreFromBundle(bundle);
+		itemID = bundle.getBoolean(ITEM_ID);
 	}
 }

@@ -60,8 +60,7 @@ public class Spinner extends Mob {
 
 	@Override
 	public float lootChance() {
-		if(this instanceof FungalSpinner) 	return super.lootChance();
-		else 								return super.lootChance() * ((6f - Dungeon.LimitedDrops.SPINNER_MEAT.count) / 6f);
+		return super.lootChance() * ((6f - Dungeon.LimitedDrops.SPINNER_MEAT.count) / 6f);
 	}
 
 	@Override
@@ -224,21 +223,18 @@ public class Spinner extends Mob {
 
 	@Override
 	protected boolean cellIsPathable( int cell ) {
+		
 		Level level = Dungeon.level;
-		boolean oldval = level.openSpace[cell];
-
-		if (level.solid[cell] && Blob.volumeAt(cell, Web.class) == 0){
-			level.openSpace[cell] = false;
-		} else {
+		if(!properties.contains(Property.LARGE) || level.openSpace[cell]) {
+			return super.cellIsPathable(cell);
+		}
+		
+		if (!level.solid[cell] || Blob.volumeAt(cell, Web.class) > 0) {
 			for (int i = 1; i < PathFinder.CIRCLE8.length; i += 2){
-				if (level.solid[cell+PathFinder.CIRCLE8[i]]
-					&& Blob.volumeAt(cell+PathFinder.CIRCLE8[i], Web.class) == 0) {
-
-					level.openSpace[cell] = false;
-				}
-				else if(( !level.solid[cell+PathFinder.CIRCLE8[(i+1)%8]] || Blob.volumeAt(cell+PathFinder.CIRCLE8[(i+1)%8], Web.class) > 0 )
-					 && ( !level.solid[cell+PathFinder.CIRCLE8[(i+2)%8]] || Blob.volumeAt(cell+PathFinder.CIRCLE8[(i+2)%8], Web.class) > 0 )) {
-
+				if (( !level.solid[cell+PathFinder.CIRCLE8[i]] 		 || Blob.volumeAt(cell+PathFinder.CIRCLE8[i], Web.class) > 0 ) &&
+					( !level.solid[cell+PathFinder.CIRCLE8[(i+1)%8]] || Blob.volumeAt(cell+PathFinder.CIRCLE8[(i+1)%8], Web.class) > 0 ) &&
+					( !level.solid[cell+PathFinder.CIRCLE8[(i+2)%8]] || Blob.volumeAt(cell+PathFinder.CIRCLE8[(i+2)%8], Web.class) > 0 )) {
+					
 					level.openSpace[cell] = true;
 					break;
 				}
@@ -246,7 +242,7 @@ public class Spinner extends Mob {
 		}
 
 		boolean temp = super.cellIsPathable(cell);
-		level.openSpace[cell] = oldval;
+		level.openSpace[cell] = false;
 		return temp;
 	}
 

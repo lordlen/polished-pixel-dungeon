@@ -306,10 +306,10 @@ public class WndBag extends WndTabbed {
 
 				} else if (selector != null) {
 
-					if (selector.hideAfterSelecting()){
+					if (selector.hideAfterRightSelecting()){
 						hide();
 					}
-					selector.onSelect( item );
+					selector.onRightSelect( item );
 
 				} else {
 
@@ -335,8 +335,14 @@ public class WndBag extends WndTabbed {
 					QuickSlotButton.set( item );
 					return true;
 				} else if (selector != null) {
-					Game.scene().addToFront(new WndInfoItem(item));
-					return true;
+					if(selector.hideAfterRightSelecting() != selector.hideAfterSelecting()) {
+						onRightClick();
+						return true;
+					}
+					else {
+						Game.scene().addToFront(new WndInfoItem(item));
+						return true;
+					}
 				} else {
 					return false;
 				}
@@ -476,7 +482,13 @@ public class WndBag extends WndTabbed {
 		public boolean hideAfterSelecting(){
 			return true; //defaults to hiding the window when an item is picked
 		}
+		public boolean hideAfterRightSelecting(){
+			return hideAfterSelecting(); //defaults to left click
+		}
 		public abstract boolean itemSelectable( Item item );
 		public abstract void onSelect( Item item );
+		public void onRightSelect( Item item ) {
+			onSelect(item); //defaults to left click
+		}
 	}
 }

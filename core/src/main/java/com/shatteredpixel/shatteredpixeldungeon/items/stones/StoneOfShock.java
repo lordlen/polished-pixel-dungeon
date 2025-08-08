@@ -42,6 +42,8 @@ public class StoneOfShock extends Runestone {
 	
 	{
 		image = ItemSpriteSheet.STONE_SHOCK;
+		
+		usesTargeting = true;
 	}
 	
 	@Override

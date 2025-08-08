@@ -31,10 +31,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -46,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
+import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 public class Goo extends Mob {
@@ -247,6 +250,21 @@ public class Goo extends Mob {
 			pumpedUp = 0;
 			sprite.idle();
 		}
+		
+		Hero hero = Dungeon.hero;
+		Level level = Dungeon.level;
+		
+		if (HP == HT && !hero.fieldOfView[pos] &&
+			distance(hero) == 2 && level.adjacent(hero.pos, target)) {
+			
+			//if we're about to enter vision, dont move
+			level.updateFieldOfView(hero, hero.fieldOfView);
+			if(hero.fieldOfView[pos]) {
+				notice();
+				return false;
+			}
+		}
+		
 		return super.getCloser( target );
 	}
 

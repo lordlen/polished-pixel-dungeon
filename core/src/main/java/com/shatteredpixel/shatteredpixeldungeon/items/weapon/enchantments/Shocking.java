@@ -35,6 +35,7 @@ import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Shocking extends Weapon.Enchantment {
 
@@ -43,7 +44,6 @@ public class Shocking extends Weapon.Enchantment {
 	@Override
 	public int proc( Weapon weapon, Char attacker, Char defender, int damage ) {
 		int level = Math.max( 0, weapon.buffedLvl() );
-		boolean onWater = Dungeon.level.water[defender.pos];
 
 		// lvl 0 - 25%
 		// lvl 1 - 40%
@@ -56,11 +56,13 @@ public class Shocking extends Weapon.Enchantment {
 			affected.clear();
 			arcs.clear();
 			
+			//always distance of 2 for the first target, regardless of water
 			arc(attacker, defender, 2, affected, arcs);
 			
 			affected.remove(defender); //defender isn't hurt by lightning
 			for (Char ch : affected) {
 				if (ch.alignment != attacker.alignment) {
+					boolean onWater = Dungeon.level.water[ch.pos] && !ch.flying;
 					ch.damage(Math.round(damage * powerMulti * (onWater ? 0.75f : 0.5f)), this);
 				}
 			}
@@ -88,12 +90,12 @@ public class Shocking extends Weapon.Enchantment {
 		defender.sprite.centerEmitter().burst(SparkParticle.FACTORY, 3);
 		defender.sprite.flash();
 
-		ArrayList<Char> hitThisArc = new ArrayList<>();
+		HashSet<Char> hitThisArc = new HashSet<>();
 		PathFinder.buildDistanceMap( defender.pos, BArray.not( Dungeon.level.solid, null ), dist );
 		for (int i = 0; i < PathFinder.distance.length; i++) {
 			if (PathFinder.distance[i] < Integer.MAX_VALUE) {
 				Char n = Actor.findChar(i);
-				if (n != null && n != attacker && !affected.contains(n)) {
+				if (n != null && n != attacker && n != defender && !affected.contains(n)) {
 					hitThisArc.add(n);
 				}
 			}
@@ -102,7 +104,8 @@ public class Shocking extends Weapon.Enchantment {
 		affected.addAll(hitThisArc);
 		for (Char hit : hitThisArc){
 			arcs.add(new Lightning.Arc(defender.sprite.center(), hit.sprite.center()));
-			arc(attacker, hit, (Dungeon.level.water[hit.pos] && !hit.flying) ? 2 : 1, affected, arcs);
+			boolean onWater = Dungeon.level.water[hit.pos] && !hit.flying;
+			arc(attacker, hit, onWater ? 2 : 1, affected, arcs);
 		}
 
 	}

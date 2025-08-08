@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -117,8 +118,14 @@ public class WandOfRegrowth extends Wand {
 					if (ch instanceof DwarfKing){
 						Statistics.qualifiedForBossChallengeBadge = false;
 					}
+					
+					float duration = 4f * chrgUsed;
+					if(ch.buff(ChampionEnemy.AntiMagic.class) != null) {
+						duration /= 2;
+					}
+					
 					wandProc(ch, chargesPerCast());
-					Buff.prolong( ch, Roots.class, 4f * chrgUsed );
+					Buff.prolong( ch, Roots.class, duration );
 				}
 			}
 		}

@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Brittle;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corrosion;
@@ -122,7 +123,7 @@ public class WandOfCorruption extends Wand {
 		MAJOR_DEBUFFS.put(Roots.class,          0f);
 		MAJOR_DEBUFFS.put(Vertigo.class,        0f);
 		MAJOR_DEBUFFS.put(Paralysis.class,      0f);
-		MAJOR_DEBUFFS.put(Electrified.class,      0f);
+		MAJOR_DEBUFFS.put(Electrified.class,    0f);
 		MAJOR_DEBUFFS.put(Blindness.class,     	0f);
 		MAJOR_DEBUFFS.put(Dread.class,          0f);
 		MAJOR_DEBUFFS.put(MagicalSleep.class,   0f);
@@ -139,7 +140,7 @@ public class WandOfCorruption extends Wand {
 		//consumes 35% of current charges instead of the usual 30%
 		//2 charges at 3 (+1)
 		//3 charges at 6 (+4)
-		return (int) GameMath.gate(1, (int)Math.ceil(curCharges*0.35f), 3);
+		return GameMath.gate(1, (int)Math.ceil(curCharges*0.35f), 3);
 	}
 
 	@Override
@@ -159,6 +160,7 @@ public class WandOfCorruption extends Wand {
 			}
 
 			float corruptingPower = 3 + buffedLvl()/3f;
+			float corruptingBoost = 1;
 			
 			//base enemy resistance is usually based on their exp, but in special cases it is based on other criteria
 			float enemyResist;
@@ -195,10 +197,10 @@ public class WandOfCorruption extends Wand {
 
 				//cannot re-corrupt or doom an enemy, so give them a major debuff instead
 				if(enemy.buff(Corruption.class) != null || enemy.buff(Doom.class) != null){
-					corruptingPower = nerfedResist - 0.001f;
+					corruptingPower = nerfedResist - corruptingBoost - 0.001f;
 				}
 
-				if (corruptingPower > nerfedResist){
+				if ((corruptingPower + corruptingBoost) > nerfedResist){
 					corruptEnemy( enemy );
 					break;
 				} else {
@@ -233,15 +235,18 @@ public class WandOfCorruption extends Wand {
 			 	debuffs.put(toAssign, 0f);
 			 }
 		}
-
-		Class<?extends Buff> debuffCls = Random.chances(debuffs);
-		Class<?extends FlavourBuff> flvrDebuffCls = null;
-
-		if(debuffCls != null && FlavourBuff.class.isAssignableFrom(debuffCls))
-			flvrDebuffCls = debuffCls.asSubclass(FlavourBuff.class);
 		
-		if (flvrDebuffCls != null){
-			Buff debuff = Buff.Polished.prolongAligned(enemy, flvrDebuffCls, 6 + buffedLvl()*3);
+		//all buffs with a > 0 chance are flavor buffs
+		Class<?extends FlavourBuff> debuffCls = (Class<? extends FlavourBuff>) Random.chances(debuffs);
+		
+		if (debuffCls != null){
+			
+			int duration = 6 + buffedLvl() * 3;
+			if(enemy.buff(ChampionEnemy.AntiMagic.class) != null) {
+				duration /= 2;
+			}
+			
+			Buff debuff = Buff.Polished.prolongAligned(enemy, debuffCls, duration);
 			if(debuff instanceof Charm) {
 				((Charm) debuff).object = Dungeon.hero.id();
 			}

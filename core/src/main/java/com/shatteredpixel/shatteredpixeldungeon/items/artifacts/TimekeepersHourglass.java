@@ -330,34 +330,28 @@ public class TimekeepersHourglass extends Artifact {
 
 		float turnPenalty = 0f;
 
-		public void increase(float time) {
+		void increase(float time) {
 			turnPenalty += time;
 			spend(time);
 		}
 
-		public void delay(float time) {
+		void delay(float time) {
 			spend(time);
 		}
 
-		public void endFreeze() {
+		void endFreeze() {
 			actPriority=HERO_PRIO+1;
 			slowTimers.add(this);
 		}
 
-		public void initDelay() {
+		void initDelay() {
 			//we do this temporarily so it doesn't instantly detach
 			actPriority = HERO_PRIO-1;
 			spend(baseDelay);
 		}
-
-		@Override
-		public boolean attachTo(Char target) {
-			if (super.attachTo(target)) {
-
-				return true;
-			} else {
-				return false;
-			}
+		
+		void onActiveLoad() {
+			actPriority = HERO_PRIO-1;
 		}
 
 		@Override
@@ -369,16 +363,18 @@ public class TimekeepersHourglass extends Artifact {
 		@Override
 		public void detach() {
 
-			if(turnPenalty > 0 && target.buff(PotionOfCleansing.Cleanse.class) == null) {
+			if(turnPenalty > 0) {
 				GameScene.flash(0x80FFFFFF);
 				Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
-
-				Buff.affect(target, Slow.class, 2* (baseDebt + turnPenalty));
-				target.next();
 				
-				//shouldn't punish the player for going into debt frequently
-				Hunger hunger = Buff.affect(target, Hunger.class);
-				hunger.POLISHED_delay(baseDebt);
+				Slow slow = Buff.affect(target, Slow.class, 2* (baseDebt + turnPenalty));
+				if(target.buffs().contains(slow)) {
+					//shouldn't punish the player for going into debt frequently
+					Hunger hunger = Buff.affect(target, Hunger.class);
+					hunger.POLISHED_delay(baseDebt);
+				}
+				
+				target.next();
 			}
 
 			super.detach();
@@ -682,6 +678,7 @@ public class TimekeepersHourglass extends Artifact {
 
 			if(bundle.contains(TIME_DEBT)) {
 				debt = new timeDebt();
+				debt.onActiveLoad();
 				debt.restoreFromBundle(bundle.getBundle( TIME_DEBT ));
 			}
 		}

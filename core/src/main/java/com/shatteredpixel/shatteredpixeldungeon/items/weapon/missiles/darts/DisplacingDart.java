@@ -49,7 +49,7 @@ public class DisplacingDart extends TippedDart {
 			return super.proc(attacker, defender, damage);
 		}
 
-		//attempts to teleport the enemy to a position 8-10 cells away from the hero
+		//attempts to teleport the enemy to a position 9-11 cells away from the hero
 		//prioritizes the closest visible cell to the defender, or closest non-visible if no visible are present
 		//grants vision on the defender
 		if (!defender.properties().contains(Char.Property.IMMOVABLE)){

@@ -70,7 +70,7 @@ public class Stone extends Armor.Glyph {
 		if (defender.buff(  Hex.class) != null) evasion *= 0.75f;
 		if (defender.buff( Daze.class) != null) evasion *= 0.5f;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
-			evasion *= buff.evasionFactor(false);
+			evasion *= buff.evasionFactor();
 		}
 		evasion *= AscensionChallenge.statModifier(defender);
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC

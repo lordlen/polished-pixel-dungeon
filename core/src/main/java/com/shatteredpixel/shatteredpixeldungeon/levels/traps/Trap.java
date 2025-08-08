@@ -65,7 +65,8 @@ public abstract class Trap implements Bundlable {
 
 	public int pos;
 	public boolean reclaimed = false; //if this trap was spawned by reclaim trap
-
+	public int smartEscapeActivations = 0;
+	
 	public boolean visible;
 	public boolean active = true;
 	public boolean disarmedByActivation = true;
@@ -102,16 +103,19 @@ public abstract class Trap implements Bundlable {
 				Sample.INSTANCE.play(Assets.Sounds.TRAP);
 
 				int points = Dungeon.hero.pointsInTalent(Talent.SMART_ESCAPE);
-				if(points > 0) {
-					float duration = Dungeon.hero.cooldown() + 1f + 0.5f*points;
+				if(points > 0 && smartEscapeActivations < 3) {
+					float duration = 1f + 0.5f*points;
+					float max = 1.5f * duration;
+					
+					duration += Dungeon.hero.cooldown();
+					max += Dungeon.hero.cooldown();
 
 					Haste haste = Dungeon.hero.buff(Haste.class);
 					if(haste != null) {
-						float max = 1.5f*duration;
-						float diff = max(max - haste.cooldown(), 0);
-						duration = min(duration, diff);
+						duration = min(max - haste.cooldown(), duration);
 					}
-
+					
+					smartEscapeActivations++;
 					Buff.affect(Dungeon.hero, Haste.class, duration);
 				}
 			}
@@ -151,6 +155,8 @@ public abstract class Trap implements Bundlable {
 	private static final String POS	= "pos";
 	private static final String VISIBLE	= "visible";
 	private static final String ACTIVE = "active";
+	
+	private static final String SMART_ESCAPE = "smart_escape";
 
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
@@ -159,6 +165,8 @@ public abstract class Trap implements Bundlable {
 		if (bundle.contains(ACTIVE)){
 			active = bundle.getBoolean(ACTIVE);
 		}
+		
+		smartEscapeActivations = bundle.getInt(SMART_ESCAPE);
 	}
 
 	@Override
@@ -166,6 +174,8 @@ public abstract class Trap implements Bundlable {
 		bundle.put( POS, pos );
 		bundle.put( VISIBLE, visible );
 		bundle.put( ACTIVE, active );
+		
+		bundle.put( SMART_ESCAPE, smartEscapeActivations );
 	}
 
 	//this buff is used to keep track of hazards recently affecting a character

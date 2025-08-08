@@ -121,6 +121,10 @@ public class DriedRose extends Artifact {
 	}
 	
 	public static GhostHero Ghost() {
+		return Ghost(true);
+	}
+	
+	public static GhostHero Ghost(boolean checkStasis) {
 		if(ghost != null) {
 			if(!ghost.isAlive()) resetGhost();
 			return ghost;
@@ -136,11 +140,13 @@ public class DriedRose extends Artifact {
 			}
 		}
 		
-		Char ally = Stasis.getStasisAlly();
-		if (ally instanceof GhostHero){
-			ghost = (GhostHero)ally;
-			ghostID = ally.id();
-			return ghost;
+		if(checkStasis) {
+			Char ally = Stasis.getStasisAlly();
+			if (ally instanceof GhostHero){
+				ghost = (GhostHero)ally;
+				ghostID = ally.id();
+				return ghost;
+			}
 		}
 		
 		return null;
@@ -159,7 +165,7 @@ public class DriedRose extends Artifact {
 				&& Ghost() == null) {
 			actions.add(AC_SUMMON);
 		}
-		if (Ghost() != null && !Ghost().stasis()){
+		if (Ghost(false) != null){
 			actions.add(AC_DIRECT);
 			actions.add(AC_CHAIN);
 		}
@@ -178,7 +184,7 @@ public class DriedRose extends Artifact {
 		else if (Ghost() == null) {
 			return AC_SUMMON;
 		}
-		else if (!Ghost().stasis()){
+		else if (!ghost.stasis()){
 			return AC_DIRECT;
 		}
 		else {
@@ -430,7 +436,7 @@ public class DriedRose extends Artifact {
 						GLog.p( Messages.get(DriedRose.class, "charged") );
 					}
 				}
-			} else if (cursed && Random.Int(100) == 0) {
+			} else if (cursed && Random.Int(50) == 0) {
 
 				ArrayList<Integer> spawnPoints = new ArrayList<>();
 
@@ -616,7 +622,7 @@ public class DriedRose extends Artifact {
 			defenseSkill = (Dungeon.hero.lvl+4);
 			if (rose != null) {
 				int oldHT = HT;
-				HT = 25 + 10*rose.level();
+				HT = 20 + 10*rose.level();
 				HP = GameMath.gate(HP, HP + (HT-oldHT), HT);
 			}
 		}

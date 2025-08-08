@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
@@ -44,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -111,18 +113,67 @@ public class Dungeon {
 		static Callback afterLoad = () -> {};
 		
 		static Callback delayed = () -> {};
-		static Actor delayedActor = null;
-		
-		static boolean expertise = false;
+		static Timer timer = null;
 		
 		private static void reset() {
 			DriedRose.resetGhost();
 			SpiritHawk.resetHawk();
 			ShadowClone.resetShadow();
 			PowerOfMany.resetAlly();
+			
+			Hero.Polished.Reset();
 		}
 		
-		private static void updateFogEdgeAndExpertise(int l, int r, int t, int b) {
+		
+		public static void runAfterLoad(Callback callback) {
+			if(!loading) {
+				callback.call();
+				return;
+			}
+			
+			Callback current = afterLoad;
+			afterLoad = () -> {
+				current.call();
+				callback.call();
+			};
+		}
+		
+		public static void runDelayed(Callback callback) {
+			Callback current = delayed;
+			delayed = () -> {
+				current.call();
+				callback.call();
+			};
+			
+			if(timer == null) {
+				timer = Timer.addTimer(() -> {
+					delayed.call();
+					delayed = () -> {};
+					timer = null;
+				});
+				
+				//this should never happen, clear the callback
+				timer.onTransition(() -> {
+					delayed = () -> {};
+				});
+			}
+		}
+		
+		public static void stopLoading() {
+			loading = false;
+			afterLoad.call();
+			afterLoad = () -> {};
+		}
+		
+		public static void callDelayed() {
+			if(timer != null) {
+				timer.call();
+			}
+		}
+		
+		
+		static boolean expertise = false;
+		private static void updateFogsEdgeAndExpertise(int l, int r, int t, int b) {
 			int l_e = Math.max( 0, l-1 );
 			int r_e = Math.min( r+1, level.width() - 1 );
 			int t_e = Math.max( 0, t-1 );
@@ -195,60 +246,11 @@ public class Dungeon {
 			}
 		}
 		
-		public static void runDelayed(Callback callback) {
-			
-			Callback current = delayed;
-			delayed = () -> {
-				current.call();
-				callback.call();
-			};
-			
-			if(delayedActor == null) {
-				delayedActor = new Actor() {
-					{
-						actPriority = VFX_PRIO+20;
-					}
-					
-					@Override
-					protected boolean act() {
-						callDelayed();
-						//this should already be handled but just in case
-						Actor.remove(this);
-						return true;
-					}
-				};
-				
-				Actor.add(delayedActor);
-			}
-		}
-		public static void callDelayed() {
-			if(delayedActor != null) {
-				delayed.call();
-				
-				Actor.remove(delayedActor);
-				delayedActor = null;
-			}
-			delayed = () -> {};
-		}
 		
-		public static void runAfterLoad(Callback callback) {
-			if(!loading) {
-				callback.call();
-				return;
-			}
-			
-			Callback current = afterLoad;
-			afterLoad = () -> {
-				current.call();
-				callback.call();
-			};
-		}
-		
-		
-		public static ConcurrentHashMap<Integer, Integer> levelLocks = new ConcurrentHashMap<>();
-		public static Integer getLock(int depth, int branch) {
+		public static ConcurrentHashMap<Integer, Object> levelLocks = new ConcurrentHashMap<>();
+		public static Object getLock(int depth, int branch) {
 			final Integer id = 1000 * depth + branch;
-			levelLocks.putIfAbsent(id, id);
+			levelLocks.putIfAbsent(id, new Object());
 			return levelLocks.get(id);
 		}
 		
@@ -281,7 +283,16 @@ public class Dungeon {
 				FileUtils.bundleToFile(GamesInProgress.depthFile( GamesInProgress.curSlot, depth, branch ), bundle);
 			}
 		}
-  
+		
+		
+		public static boolean[] openTiles() {
+			boolean[] open = new boolean[level.length()];
+			for (int i = 0; i < level.length(); i++) {
+				open[i] = !level.solid[i] || !level.losBlocking[i] || level.passable[i];
+			}
+			return open;
+		}
+		
 	}
 
 	//enum of items which have limited spawns, records how many have spawned
@@ -478,6 +489,8 @@ public class Dungeon {
 		Wandmaker.Quest.reset();
 		Blacksmith.Quest.reset();
 		Imp.Quest.reset();
+		
+		Shopkeeper.resetBuyback();
 
 		hero = new Hero();
 		hero.live();
@@ -681,12 +694,17 @@ public class Dungeon {
 		for (WarpingTrap.Disoriented disoriented : hero.buffs(WarpingTrap.Disoriented.class)) {
 			disoriented.onLevelSwitch();
 		}
-
+		
+		Polished.loading = true;
+		
 		Mob.restoreAllies( level, pos );
 
 		Actor.init();
 
 		level.addRespawner();
+		
+		Timer.callAll();
+		Polished.stopLoading();
 		
 		for(Mob m : level.mobs){
 			if (m.pos == hero.pos && !Char.hasProp(m, Char.Property.IMMOVABLE)){
@@ -868,6 +886,8 @@ public class Dungeon {
 			Imp			.Quest.storeInBundle( quests );
 			bundle.put( QUESTS, quests );
 			
+			Shopkeeper.storeBuyback(bundle);
+			
 			SpecialRoom.storeRoomsInBundle( bundle );
 			SecretRoom.storeRoomsInBundle( bundle );
 			
@@ -960,7 +980,6 @@ public class Dungeon {
 		if (fullLoad) {
 			
 			LimitedDrops.restore( bundle.getBundle(LIMDROPS) );
-			FoundItems.restore( bundle.getBundle(FOUND_ITEMS) );
 
 			chapters = new HashSet<>();
 			int ids[] = bundle.getIntArray( CHAPTERS );
@@ -982,6 +1001,8 @@ public class Dungeon {
 				Blacksmith.Quest.reset();
 				Imp.Quest.reset();
 			}
+			
+			Shopkeeper.restoreBuyback(bundle);
 			
 			SpecialRoom.restoreRoomsFromBundle(bundle);
 			SecretRoom.restoreRoomsFromBundle(bundle);
@@ -1015,6 +1036,7 @@ public class Dungeon {
 		}
 		
 		Notes.restoreFromBundle( bundle );
+		FoundItems.restore( bundle.getBundle(FOUND_ITEMS) );
 		
 		hero = null;
 		hero = (Hero)bundle.get( HERO );
@@ -1028,24 +1050,22 @@ public class Dungeon {
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
 		Level.Feeling.restoreFromBundle( bundle );
-
-
-		Polished.afterLoad.call();
-		Polished.afterLoad = () -> {};
-		Polished.loading = false;
-
+		
+		
 		Debug.LoadGame();
+		Polished.stopLoading();
 	}
 	
 	public static Level loadLevel( int save ) throws IOException {
-		
+		Polished.loading = true;
 		Dungeon.level = null;
 		Actor.clear();
 
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( save, depth, branch ));
-
 		Level level = (Level)bundle.get( LEVEL );
-
+		
+		Polished.stopLoading();
+		
 		if (level == null){
 			throw new IOException();
 		} else {
@@ -1106,13 +1126,16 @@ public class Dungeon {
 			Statistics.floorsExplored.put( depth, level.levelExplorePercent(depth));
 		}
 	}
-
-	//default to recomputing based on max hero vision, in case vision just shrank/grew
+	
 	public static void observe(){
-		int dist = Math.max(Dungeon.hero.viewDistance, 8);
-		dist *= 1f + 0.18f*Dungeon.hero.pointsInTalent(Talent.FARSIGHT);
+		int dist = hero.viewDistance;
+		dist *= 1f + 0.18f*hero.pointsInTalent(Talent.FARSIGHT);
+		
+		//default to computing based on max vision, in case it just shrank
+		//farsight can't be metamorphed so we don't have to worry about that
+		//dist *= EyeOfNewt.visionRangeMultiplier();
 
-		if (Dungeon.hero.buff(MagicalSight.class) != null){
+		if (hero.buff(MagicalSight.class) != null){
 			dist = Math.max( dist, MagicalSight.DISTANCE );
 		}
 
@@ -1152,9 +1175,9 @@ public class Dungeon {
 			level.visited[hero.pos+i] = true;
 		}
 		
-		GameScene.updateFog(l, t, width, height);
+		Polished.updateFogsEdgeAndExpertise(l, r, t, b);
 		
-		Polished.updateFogEdgeAndExpertise(l, r, t, b);
+		GameScene.updateFog(l, t, width, height);
 		
 		if (hero.buff(MindVision.class) != null || hero.buff(DivineSense.DivineSenseTracker.class) != null){
 			for (Mob m : level.mobs.toArray(new Mob[0])){
@@ -1202,7 +1225,6 @@ public class Dungeon {
 				x = ch.pos % level.width();
 				y = ch.pos / level.width();
 
-				//+1 in case they just moved
 				dist = ch.viewDistance+1;
 				l = Math.max( 0, x - dist );
 				r = Math.min( x + dist, level.width() - 1 );
@@ -1217,10 +1239,10 @@ public class Dungeon {
 					pos+=level.width();
 				}
 				
-				GameScene.updateFog(ch.pos, dist);
+				Polished.updateFogsEdgeAndExpertise(l, r, t, b);
 				
-				Polished.updateFogEdgeAndExpertise(l, r, t, b);
-				
+				//it needs to be generous on high speeds to prevent fog update bugs...
+				GameScene.updateFog(ch.pos, dist-1 + 2 * (int)Math.ceil(ch.speed()));
 			}
 		}
 
@@ -1236,9 +1258,13 @@ public class Dungeon {
 		else
 			BArray.setFalse(passable);
 	}
-
+	
+	public static boolean[] findPassable(Char ch, boolean[] pass){
+		return findPassable(ch, pass, new boolean[pass.length], false, true);
+	}
+	
 	public static boolean[] findPassable(Char ch, boolean[] pass, boolean[] vis, boolean chars){
-		return findPassable(ch, pass, vis, chars, chars);
+		return findPassable(ch, pass, vis, chars, true);
 	}
 
 	public static boolean[] findPassable(Char ch, boolean[] pass, boolean[] vis, boolean chars, boolean considerLarge){
@@ -1278,7 +1304,7 @@ public class Dungeon {
 
 	public static PathFinder.Path findPath(Char ch, int to, boolean[] pass, boolean[] vis, boolean chars) {
 
-		return PathFinder.find( ch.pos, to, findPassable(ch, pass, vis, chars) );
+		return PathFinder.find( ch.pos, to, findPassable(ch, pass, vis, chars, chars) );
 
 	}
 	

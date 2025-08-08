@@ -33,19 +33,6 @@ import com.watabou.utils.Reflection;
 
 public class Blob extends Actor {
 
-	public class Polished {
-		public boolean delayed = false;
-
-		private static final String DELAYED	= "delayed";
-		public void restoreFromBundle(Bundle bundle) {
-			if(bundle.contains(DELAYED)) delayed = bundle.getBoolean(DELAYED);
-		}
-		public void storeInBundle(Bundle bundle) {
-			bundle.put(DELAYED, delayed);
-		}
-	}
-	Polished polished = new Polished();
-
 	{
 		actPriority = BLOB_PRIO;
 	}
@@ -60,10 +47,14 @@ public class Blob extends Actor {
 	public Rect area = new Rect();
 	
 	public boolean alwaysVisible = false;
+	
+	public boolean Polished_wasDelayed = false;
 
 	private static final String CUR		= "cur";
 	private static final String START	= "start";
 	private static final String LENGTH	= "length";
+	
+	private static final String WAS_DELAYED = "was_delayed";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -89,6 +80,8 @@ public class Blob extends Actor {
 			bundle.put( CUR, trim( start, end + 1 ) );
 			
 		}
+		
+		bundle.put(WAS_DELAYED, Polished_wasDelayed);
 	}
 	
 	private int[] trim( int start, int end ) {
@@ -100,7 +93,6 @@ public class Blob extends Actor {
 	
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
-		
 		super.restoreFromBundle( bundle );
 
 		if (bundle.contains( CUR )) {
@@ -116,16 +108,14 @@ public class Blob extends Actor {
 			}
 
 		}
+		
+		Polished_wasDelayed = bundle.getBoolean(WAS_DELAYED);
 	}
 	
 	@Override
 	public boolean act() {
-
-		//POLISHED
-		{
-			polished.delayed = false;
-		}
-
+		
+		Polished_wasDelayed = false;
 		spend( TICK );
 		
 		if (volume > 0) {
@@ -145,13 +135,11 @@ public class Blob extends Actor {
 				area.setEmpty();
 				//clear any values remaining in off
 				System.arraycopy(cur, 0, off, 0, cur.length);
-
-				if(Dungeon.level.blobs.containsKey(this.getClass())) {
-					Dungeon.level.blobs.remove(this.getClass());
-				}
-				if(Actor.all().contains(this)) {
-					Actor.remove(this);
-				}
+			}
+			
+			Dungeon.level.blobs.remove(getClass());
+			if(Actor.all().contains(this)) {
+				Actor.remove(this);
 			}
 		}
 		
@@ -260,6 +248,20 @@ public class Blob extends Actor {
 		return null;
 	}
 	
+	public boolean isVisible() {
+		//Check if a single cell within the blob is visible
+		for (int i=area.top; i < area.bottom; i++) {
+			for (int j = area.left; j < area.right; j++) {
+				int cell = j + i* Dungeon.level.width();
+				
+				if (cur[cell] > 0 && Dungeon.level.heroFOV[cell]) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	public static<T extends Blob> T seed( int cell, int amount, Class<T> type ) {
 		return seed(cell, amount, type, Dungeon.level);
 	}
@@ -287,13 +289,18 @@ public class Blob extends Actor {
 			}
 			//Mob/Debuff actions
 			else {
-				if(Actor.all().contains(gas) && gas.polished.delayed) {
+				if(gas.Polished_wasDelayed) {
+					if(gas.cooldown() == 0) {
+						gas.act();
+					}
+					
 					float delay = GameMath.gate(0, Dungeon.hero.cooldown()-gas.cooldown(), 1f);
 					gas.spendConstant(delay);
-				} else {
+				}
+				else {
 					gas.Polished_timeToNow();
 					gas.spendConstant(1f);
-					gas.polished.delayed=true;
+					gas.Polished_wasDelayed = true;
 				}
 			}
 

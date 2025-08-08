@@ -82,6 +82,9 @@ public class Heap implements Bundlable {
 	public LinkedList<Item> items = new LinkedList<>();
 	
 	public void open( Hero hero ) {
+		
+		//Notes.LandmarkRecord.Polished.updateOnContainerOpen(pos, type);
+		
 		switch (type) {
 		case TOMB:
 			Wraith.spawnAround( hero.pos );
@@ -92,8 +95,6 @@ public class Heap implements Bundlable {
 			break;
 		default:
 		}
-
-		Notes.LandmarkRecord.Polished.updateOnContainerOpen(pos, type);
 		
 		if (haunted){
 			if (Wraith.spawnAt( pos ) == null) {
@@ -110,7 +111,7 @@ public class Heap implements Bundlable {
 		type = Type.HEAP;
 		ArrayList<Item> bonus = RingOfWealth.tryForBonusDrop(hero, 1);
 		if (bonus != null && !bonus.isEmpty()) {
-			items.addAll(0, bonus);
+			for (Item b : bonus) items.add(0, b);
 			RingOfWealth.showFlareForBonusDrop(sprite);
 		}
 		sprite.link();
@@ -202,22 +203,6 @@ public class Heap implements Bundlable {
 	public void remove( Item a ){
 		items.remove(a);
 		if (items.isEmpty()){
-			destroy();
-		} else if (sprite != null) {
-			sprite.view(this).place( pos );
-		}
-	}
-	
-	public void Polished_destroyEquipables() {
-		if(type != Type.HEAP || isEmpty()) return;
-		
-		for (Item item : items.toArray( new Item[0] )) {
-			if (!item.unique && item.level() < 3 && (item.isUpgradable() || item instanceof EquipableItem)) {
-				items.remove(item);
-			}
-		}
-		
-		if (isEmpty()){
 			destroy();
 		} else if (sprite != null) {
 			sprite.view(this).place( pos );
@@ -325,6 +310,22 @@ public class Heap implements Bundlable {
 			} else if (sprite != null) {
 				sprite.view(this).place( pos );
 			}
+		}
+	}
+	
+	public void Polished_destroyEquipables() {
+		if(type != Type.HEAP || isEmpty()) return;
+		
+		for (Item item : items.toArray( new Item[0] )) {
+			if (!item.unique && item.level() < 3 && (item.isUpgradable() || item instanceof EquipableItem)) {
+				items.remove(item);
+			}
+		}
+		
+		if (isEmpty()){
+			destroy();
+		} else if (sprite != null) {
+			sprite.view(this).place( pos );
 		}
 	}
 	

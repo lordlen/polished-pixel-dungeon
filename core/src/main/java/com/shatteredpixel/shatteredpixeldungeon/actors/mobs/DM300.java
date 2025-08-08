@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.CorrosiveGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
@@ -207,7 +208,8 @@ public class DM300 extends Mob {
 				if (!canReach() && turnsSinceLastAbility >= MIN_COOLDOWN) {
           
 					//use a coneAOE to try and account for trickshotting angles
-					if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC)) {
+					if (aim.cells.contains(enemy.pos) && !Char.hasProp(enemy, Property.INORGANIC) &&
+							(Random.Int(4) != 0 || enemy.paralysed > 0)) {
 						lastAbility = GAS;
 						turnsSinceLastAbility = 0;
 
@@ -349,28 +351,17 @@ public class DM300 extends Mob {
 		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
 		if (!supercharged && !flying && Dungeon.level.map[pos] == Terrain.INACTIVE_TRAP && state == HUNTING && fightStarted()) {
-
-			if (/*Dungeon.level.heroFOV[pos]*/true) {
-				GLog.w(Messages.get(this, "wires"));
+			
+			GLog.w(Messages.get(this, "wires"));
+			if (Dungeon.level.heroFOV[pos]) {
 				Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
 				sprite.emitter().start(SparkParticle.STATIC, 0.05f, 20);
 			}
-
-			Actor.add(new Actor(){
-
-				{
-					actPriority = VFX_PRIO;
-				}
-
-				@Override
-				protected boolean act() {
-					Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3.5f);
-					((DM300Sprite)sprite).updateChargeState(true);
-					((DM300Sprite)sprite).charge();
-
-					Actor.remove(this);
-					return true;
-				}
+			
+			Dungeon.Polished.runDelayed(() -> {
+				Buff.Polished.prolongAligned(DM300.this, Adrenaline.class, 3.5f);
+				((DM300Sprite)sprite).updateChargeState(true);
+				((DM300Sprite)sprite).charge();
 			});
 
 		}
@@ -449,7 +440,7 @@ public class DM300 extends Mob {
 		do {
 			safeCell = rockCenter + PathFinder.NEIGHBOURS8[Random.Int(8)];
 		} while (safeCell == pos
-				|| (Dungeon.level.solid[safeCell] && Random.Int(4) != 0)
+				|| (Dungeon.level.solid[safeCell] && Random.Int(2) != 0)
 				|| (Blob.volumeAt(safeCell, CavesBossLevel.PylonEnergy.class) > 0 && Random.Int(2) == 0));
 
 		ArrayList<Integer> rockCells = new ArrayList<>();
@@ -677,19 +668,9 @@ public class DM300 extends Mob {
 			//Make sure DM isn't too aggressive on spawn
 			if(!fightStarted()) {
 				clearEnemy();
-
-				Actor.addDelayed(new Actor() {
-					{
-						actPriority = curActorPriority()+1;
-					}
-
-					@Override
-					protected boolean act() {
-						if(sprite != null) sprite.showLost();
-						Actor.remove(this);
-
-						return true;
-					}
+				
+				Timer.addTimer(() -> {
+					if(sprite != null) sprite.showLost();
 				}, cooldown());
 			}
 
@@ -736,10 +717,10 @@ public class DM300 extends Mob {
 		}
 		 */
 
-		PathFinder.Path path_large = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, true));
+		PathFinder.Path path_long = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, true));
 		PathFinder.Path path_destroy = PathFinder.find(pos, target, Dungeon.findPassable(this, Dungeon.level.passable, fieldOfView, true, false));
 
-		boolean destroy = path_destroy != null && (path_large == null || path_large.size() > path_destroy.size());
+		boolean destroy = path_destroy != null && (path_long == null || path_long.size() > path_destroy.size());
 		destroy = destroy || (Dungeon.level.adjacent(pos, target) && !Dungeon.level.openSpace[target]);
 
 		if(state == HUNTING && destroy ) {
@@ -777,8 +758,8 @@ public class DM300 extends Mob {
 
 		@Override
 		public void affectChar(Char ch) {
-			if (!(ch instanceof DM300) && !ch.isImmune(this.getClass())){
-				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 4 : 3);
+			if (!(ch instanceof DM300) && !ch.isImmune(getClass())){
+				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 4);
 				if (ch == Dungeon.hero) {
 					Statistics.bossScores[2] -= 100;
 				}

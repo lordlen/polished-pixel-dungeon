@@ -57,11 +57,12 @@ public class WaterOfChange extends WellWater {
         int tier_1 = Random.Int(tiersAvailable)+1;
         Talent replace_1 = Random.element(talents.get(tier_1-1).keySet());
         Talent newTalent_1 = Random.element(ScrollOfMetamorphosis.getOptions(tier_1, replace_1).keySet());
-
+        
         ScrollOfMetamorphosis.replaceTalent(replace_1, newTalent_1);
         if (Dungeon.hero.hasTalent(newTalent_1)) {
             Talent.onTalentUpgraded(Dungeon.hero, newTalent_1);
         }
+        Talent.onTalentRemoval(Dungeon.hero, replace_1);
 
 
         int tier_2;
@@ -79,6 +80,7 @@ public class WaterOfChange extends WellWater {
         if (Dungeon.hero.hasTalent(newTalent_2)) {
             Talent.onTalentUpgraded(Dungeon.hero, newTalent_2);
         }
+        Talent.onTalentRemoval(Dungeon.hero, replace_2);
 
 
         Sample.INSTANCE.play( Assets.Sounds.DRINK );

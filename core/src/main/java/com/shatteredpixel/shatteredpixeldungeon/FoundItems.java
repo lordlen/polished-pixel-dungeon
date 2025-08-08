@@ -1,3 +1,24 @@
+/*
+ * Pixel Dungeon
+ * Copyright (C) 2012-2015 Oleg Dolya
+ *
+ * Shattered Pixel Dungeon
+ * Copyright (C) 2014-2025 Evan Debenham
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
 package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -65,10 +86,6 @@ public class FoundItems {
     public static String getDesc(Class<?> cls) {
         Pair pair = floors.get(getEquivalent(cls));
         if(pair == null) return "";
-
-        if (Scroll.class.isAssignableFrom(cls)
-            && Scroll.getKnown().contains(ScrollOfUpgrade.class))
-            return "";
 
         if(pair.first != 0 && pair.second != 0) {
             return "\n\nThis item type was last found on _floors " + pair.first + " and " + pair.second + "_.";

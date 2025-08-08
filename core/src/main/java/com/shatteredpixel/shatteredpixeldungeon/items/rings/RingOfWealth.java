@@ -33,8 +33,16 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.ArcaneBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Firebomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.FlashBangBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Noisemaker;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.ShrapnelBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.SmokeBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.WealthBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.WoollyBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
@@ -47,13 +55,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.WealthPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.AquaBrew;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.BlizzardBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.CausticBrew;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.InfernalBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.ShockingBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.UnstableBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfDragonsBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfIcyTouch;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfToxicEssence;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCorrosiveGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
@@ -96,7 +103,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.WealthStone;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -105,7 +111,6 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndQuickBag;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Visual;
-import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
@@ -172,7 +177,7 @@ public class RingOfWealth extends Ring {
 		}
 	}
 	
-	public static void setExtra(BitmapText extra) {
+	public static void setSlotTimer(BitmapText timer) {
 		WealthDrop.Decay latest = null;
 		
 		if(Dungeon.hero != null) {
@@ -184,16 +189,14 @@ public class RingOfWealth extends Ring {
 		}
 		
 		if(latest == null) {
-			extra.text( null );
-			extra.resetColor();
+			timer.text( null );
 		}
 		else {
-			extra.text(latest.iconTextDisplay());
-			extra.measure();
+			timer.text(latest.iconTextDisplay());
+			timer.measure();
 			
-			//we use a simplified version to not call buff() on render thread a bunch, assume max is 200
 			float percent = latest.cooldown() / latest.max;
-			extra.hardlight(1f, percent, percent);
+			timer.hardlight(1f, percent, percent);
 		}
 	}
 	
@@ -255,13 +258,14 @@ public class RingOfWealth extends Ring {
 		potionChances.put(PotionOfCorrosiveGas.class,   2f);
 		potionChances.put(PotionOfShroudingFog.class,   2f);
 		potionChances.put(PotionOfHaste.class,   		2f);
+		potionChances.put(PotionOfInvisibility.class,   2f);
 		potionChances.put(PotionOfPurity.class,         2f);
-
-		potionChances.put(ElixirOfDragonsBlood.class,	1f);
-		potionChances.put(ElixirOfIcyTouch.class,		1f);
-		potionChances.put(PotionOfInvisibility.class,   1f);
+		
 		potionChances.put(PotionOfStamina.class,   		1f);
 		potionChances.put(PotionOfParalyticGas.class,   1f);
+		potionChances.put(ElixirOfDragonsBlood.class,	1f);
+		potionChances.put(ElixirOfIcyTouch.class,		1f);
+		potionChances.put(ElixirOfToxicEssence.class,	1f);
 	}
 
 	private static HashMap<Class<? extends Scroll>, Float> scrollChances = new HashMap<>();
@@ -301,6 +305,21 @@ public class RingOfWealth extends Ring {
 		spellChances.put(PhaseShift.class,    			2f);
 		spellChances.put(UnstableSpell.class,    		2f);
 	}
+	
+	private static HashMap<Class<? extends Bomb>, Float> bombChances = new HashMap<>();
+	static{
+		bombChances.put(Bomb.class,			5f);
+		
+		bombChances.put(WoollyBomb.class,	2f);
+		bombChances.put(Firebomb.class,		2f);
+		bombChances.put(Noisemaker.class,	2f);
+		bombChances.put(SmokeBomb.class,	2f);
+		bombChances.put(FlashBangBomb.class,2f);
+		
+		bombChances.put(HolyBomb.class,		1f);
+		bombChances.put(ArcaneBomb.class,	1f);
+		bombChances.put(ShrapnelBomb.class,	1f);
+	}
 
 	private static HashMap<Class<? extends Item>, Float> typeChances = new HashMap<>();
 	static{
@@ -308,6 +327,9 @@ public class RingOfWealth extends Ring {
 		typeChances.put(Scroll.class,    				25f);
 		typeChances.put(Runestone.class,    			20f);
 		typeChances.put(Spell.class,    				15f);
+		
+		// yes we go over 100% but oh well im lazy
+		typeChances.put(Bomb.class,    					10f);
 	}
 
 	private static HashMap<Class<? extends Item>, Integer> itemRarities = new HashMap<>();
@@ -330,6 +352,7 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(PotionOfCorrosiveGas.class,	2);
 		itemRarities.put(PotionOfShroudingFog.class, 	2);
 		itemRarities.put(PotionOfHaste.class,   		2);
+		itemRarities.put(PotionOfInvisibility.class,   	2);
 		itemRarities.put(PotionOfPurity.class,         	2);
 
 		itemRarities.put(ScrollOfMirrorImage.class,    	2);
@@ -348,13 +371,15 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(PhaseShift.class,    			2);
 		itemRarities.put(UnstableSpell.class,    		2);
 		
+		itemRarities.put(Bomb.class,    				2);
 		
 		
-		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
-		itemRarities.put(ElixirOfIcyTouch.class,   		3);
-		itemRarities.put(PotionOfInvisibility.class,   	3);
+		
 		itemRarities.put(PotionOfStamina.class,   		3);
 		itemRarities.put(PotionOfParalyticGas.class,   	3);
+		itemRarities.put(ElixirOfDragonsBlood.class,   	3);
+		itemRarities.put(ElixirOfIcyTouch.class,   		3);
+		itemRarities.put(ElixirOfToxicEssence.class,   	3);
 
 		itemRarities.put(ScrollOfTerror.class,   		3);
 		itemRarities.put(ScrollOfRetribution.class, 	3);
@@ -365,6 +390,15 @@ public class RingOfWealth extends Ring {
 		itemRarities.put(StoneOfBlink.class,    		3);
 		itemRarities.put(StoneOfDeepSleep.class,    	3);
 		itemRarities.put(StoneOfAggression.class,    	3);
+		
+		itemRarities.put(WoollyBomb.class,    			3);
+		itemRarities.put(Firebomb.class,	   			3);
+		itemRarities.put(Noisemaker.class,    			3);
+		itemRarities.put(SmokeBomb.class,    			3);
+		itemRarities.put(FlashBangBomb.class,    		3);
+		itemRarities.put(HolyBomb.class,				3);
+		itemRarities.put(ArcaneBomb.class,    			3);
+		itemRarities.put(ShrapnelBomb.class,    		3);
 	}
 
 	public static Item randomItem() {
@@ -381,6 +415,9 @@ public class RingOfWealth extends Ring {
 		}
 		else if(type == Runestone.class) {
 			return randomStone();
+		}
+		else if(type == Bomb.class) {
+			return randomBomb();
 		}
 		else return Reflection.newInstance(Gold.class).quantity(1);
 	}
@@ -411,6 +448,12 @@ public class RingOfWealth extends Ring {
 		return drop;
 	}
 	
+	public static WealthBomb randomBomb() {
+		WealthBomb drop = Reflection.newInstance(WealthBomb.class);
+		drop.set(Random.chances(bombChances));
+		return drop;
+	}
+	
 	public static ArrayList<Item> tryForBonusDrop(Char target, int tries ){
 		int bonus = getBuffedBonus(target, Wealth.class);
 		if (bonus <= 0) return null;
@@ -429,11 +472,15 @@ public class RingOfWealth extends Ring {
 
 		triesToDrop.countDown(tries);
 		while ( triesToDrop.count() <= 0 ){
-			Item i = null;
-
+			triesToDrop.countUp( Random.NormalIntRange(1, max) );
+			
 			if(alchemizeLeft.count() > 0) {
 				if(alchemizeCounter.count() <= 0) {
-					i = Reflection.newInstance(Alchemize.class).quantity(Random.NormalIntRange(3, 4) + bonus);
+					
+					Alchemize alchemize = Reflection.newInstance(Alchemize.class);
+					alchemize.quantity(Random.NormalIntRange(3, 4) + bonus);
+					drops.add(alchemize);
+					
 					alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
 					alchemizeLeft.countDown(1);
 				} else {
@@ -441,17 +488,15 @@ public class RingOfWealth extends Ring {
 				}
 			}
 
-			if(i == null) {
-				do {
-					i = randomItem();
-				} while (Challenges.isItemBlocked(i));
-			}
+			Item drop;
+			do {
+				drop = randomItem();
+			} while (Challenges.isItemBlocked(drop));
 
-			drops.add(i);
+			drops.add(drop);
 
-			Integer rarity = itemRarities.get(i.getClass());
+			Integer rarity = itemRarities.get(drop.getClass());
 			latestDropTier = Math.max(latestDropTier, rarity != null ? rarity : 0);
-			triesToDrop.countUp( Random.NormalIntRange(1, max) );
 		}
 
 		return drops;
@@ -561,8 +606,9 @@ public class RingOfWealth extends Ring {
 
 	public static void onLevelUp(Char target) {
 		AlchemizeLeft alchemizeLeft = target.buff(AlchemizeLeft.class);
-		if(getBuffedBonus(target, Wealth.class) > 0 && alchemizeLeft != null)
+		if(getBuffedBonus(target, Wealth.class) > 0 && alchemizeLeft != null) {
 			alchemizeLeft.countUp(1);
+		}
 	}
 
 	public class Wealth extends RingBuff {}

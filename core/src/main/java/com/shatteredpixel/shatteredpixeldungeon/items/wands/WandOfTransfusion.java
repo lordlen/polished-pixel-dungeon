@@ -47,6 +47,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
@@ -89,16 +90,19 @@ public class WandOfTransfusion extends DamageWand {
 			//heals/shields an ally or a charmed enemy while damaging self
 			if (ch.alignment == Char.Alignment.ALLY || ch.buff(Charm.class) != null){
 				
-				// 5% of max hp
-				int selfDmg = Math.round(curUser.HT*0.05f);
+				// 3% of max hp
+				int selfDmg = Math.round(curUser.HT*0.03f);
 				
-				int healing = selfDmg + 3*buffedLvl();
+				int healing = selfDmg + 3 + 3*buffedLvl();
 				int shielding = (ch.HP + healing) - ch.HT;
+				
+				//max shielding is 3x the heal
+				shielding = Math.min(shielding, 3 * healing - ch.shielding());
+				shielding = Math.max(0, shielding);
+				
 				if (shielding > 0){
 					healing -= shielding;
-					Buff.affect(ch, Barrier.class).setShield(shielding);
-				} else {
-					shielding = 0;
+					Buff.affect(ch, Barrier.class).incShield(shielding);
 				}
 				
 				ch.HP += healing;
@@ -189,17 +193,17 @@ public class WandOfTransfusion extends DamageWand {
 
 	@Override
 	public String statsDesc() {
-		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.05f): 1;
+		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.03f): 1;
 		if (levelKnown)
-			return Messages.get(this, "stats_desc", selfDMG, selfDMG + 3*buffedLvl(), 5+buffedLvl(), min(), max());
+			return Messages.get(this, "stats_desc", selfDMG, selfDMG + 3 + 3*buffedLvl(), 5+buffedLvl(), min(), max());
 		else
-			return Messages.get(this, "stats_desc", selfDMG, selfDMG, 5, min(0), max(0));
+			return Messages.get(this, "stats_desc", selfDMG, selfDMG + 3, 5, min(0), max(0));
 	}
 
 	@Override
 	public String upgradeStat1(int level) {
-		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.05f): 1;
-		return Integer.toString(selfDMG + 3*level);
+		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.03f): 1;
+		return Integer.toString(selfDMG + 3 + 3*level);
 	}
 
 	@Override

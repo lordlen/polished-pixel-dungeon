@@ -86,6 +86,10 @@ public class ShadowClone extends ArmorAbility {
 	}
 	
 	public static ShadowAlly Shadow() {
+		return Shadow(true);
+	}
+	
+	public static ShadowAlly Shadow(boolean checkStasis) {
 		if(shadow != null) {
 			if(!shadow.isAlive()) resetShadow();
 			return shadow;
@@ -101,11 +105,13 @@ public class ShadowClone extends ArmorAbility {
 			}
 		}
 		
-		Char ally = Stasis.getStasisAlly();
-		if (ally instanceof ShadowAlly){
-			shadow = (ShadowAlly) ally;
-			shadowID = ally.id();
-			return shadow;
+		if(checkStasis) {
+			Char ally = Stasis.getStasisAlly();
+			if (ally instanceof ShadowAlly){
+				shadow = (ShadowAlly) ally;
+				shadowID = ally.id();
+				return shadow;
+			}
 		}
 		
 		return null;

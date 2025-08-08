@@ -105,14 +105,15 @@ public class Swarm extends Mob {
 				Swarm clone = split();
 				clone.pos = Random.element( candidates );
 				clone.state = clone.HUNTING;
-				GameScene.add( clone, SPLIT_DELAY ); //we add before assigning HP due to ascension
-
-				clone.HP = (HP - damage) / 2;
-				Actor.add( new Pushing( clone, pos, clone.pos ) );
-
-				Dungeon.level.occupyCell(clone);
 				
+				GameScene.add( clone, SPLIT_DELAY ); //we add before assigning HP due to ascension
+				Buff.Polished.copyPersistent(this, clone);
+				
+				clone.HP = (HP - damage) / 2;
 				HP -= clone.HP;
+				
+				Actor.add( new Pushing( clone, pos, clone.pos ) );
+				Dungeon.level.occupyCell(clone);
 			}
 		}
 		
@@ -128,17 +129,6 @@ public class Swarm extends Mob {
 		Swarm clone = new Swarm();
 		clone.generation = generation + 1;
 		clone.EXP = 0;
-		if (buff( Burning.class ) != null) {
-			Buff.affect( clone, Burning.class ).reignite( clone );
-		}
-		if (buff( Poison.class ) != null) {
-			Buff.affect( clone, Poison.class ).set(2);
-		}
-		for (Buff b : buffs()){
-			if (b.revivePersists) {
-				Buff.affect(clone, b.getClass());
-			}
-		}
 		return clone;
 	}
 

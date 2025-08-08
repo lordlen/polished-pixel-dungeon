@@ -135,11 +135,7 @@ public class Ghoul extends Mob {
 				}
 
 				//champion buff, mainly
-				for (Buff b : buffs()){
-					if (b.revivePersists) {
-						Buff.affect(child, b.getClass());
-					}
-				}
+				Buff.Polished.copyPersistent(this, child);
 
 			}
 			
