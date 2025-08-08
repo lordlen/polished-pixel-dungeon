@@ -60,7 +60,7 @@ public class PoolRoom extends SpecialRoom {
 		//landmark
 		for(Point p : getPoints()) {
 			if(inside(p)) {
-				Blob.seed(level.pointToCell(p), 1, PoolID.class);
+				Blob.seed(level.pointToCell(p), 1, PoolID.class, level);
 			}
 		}
 		
