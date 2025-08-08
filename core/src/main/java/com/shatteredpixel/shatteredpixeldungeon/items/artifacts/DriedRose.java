@@ -436,7 +436,7 @@ public class DriedRose extends Artifact {
 						GLog.p( Messages.get(DriedRose.class, "charged") );
 					}
 				}
-			} else if (cursed && Random.Int(100) == 0) {
+			} else if (cursed && Random.Int(50) == 0) {
 
 				ArrayList<Integer> spawnPoints = new ArrayList<>();
 

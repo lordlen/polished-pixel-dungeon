@@ -44,7 +44,7 @@ public class Thief extends Mob {
 		spriteClass = ThiefSprite.class;
 		
 		HP = HT = 20;
-		defenseSkill = 12;
+		defenseSkill = 15;
 		
 		EXP = 5;
 		maxLvl = 11;
@@ -74,13 +74,13 @@ public class Thief extends Mob {
 
 	@Override
 	public float speed() {
-		if (item != null) return (5*super.speed())/6;
+		if (item != null) return (5/6f) * super.speed();
 		else return super.speed();
 	}
 
 	@Override
 	public int damageRoll() {
-		return Random.NormalIntRange( 1, 10 );
+		return Random.NormalIntRange( 2, 10 );
 	}
 
 	@Override
@@ -114,9 +114,26 @@ public class Thief extends Mob {
 
 	@Override
 	public int attackSkill( Char target ) {
-		return 12;
+		if (item != null) {
+			return 10;
+		}
+		else {
+			return 13;
+		}
 	}
-
+	
+	@Override
+	public int defenseSkill(Char enemy) {
+		if (item != null) {
+			// 10 evasion
+			return Math.round((2/3f) * super.defenseSkill(enemy));
+		}
+		else {
+			// 15 evasion
+			return super.defenseSkill(enemy);
+		}
+	}
+	
 	@Override
 	public int drRoll() {
 		return super.drRoll() + Random.NormalIntRange(0, 3);
@@ -144,8 +161,17 @@ public class Thief extends Mob {
 	}
 
 	protected boolean steal( Hero hero ) {
-
-		Item toSteal = hero.belongings.randomUnequipped();
+		
+		//33% chance to fail
+		if(Random.Int(3) == 0) {
+			return false;
+		}
+		
+		int tries = 10;
+		Item toSteal;
+		do {
+			toSteal = hero.belongings.randomUnequipped();
+		} while (tries-- > 0 && (toSteal == null || toSteal.unique || toSteal.level() > 0));
 
 		if (toSteal != null && !toSteal.unique && toSteal.level() < 1 ) {
 
@@ -199,7 +225,7 @@ public class Thief extends Mob {
 		protected void escaped() {
 			if (item != null
 					&& !Dungeon.level.heroFOV[pos]
-					&& Dungeon.level.distance(Dungeon.hero.pos, pos) >= 6) {
+					&& Dungeon.level.distance(Dungeon.hero.pos, pos) > 6) {
 
 				int count = 32;
 				int newPos;

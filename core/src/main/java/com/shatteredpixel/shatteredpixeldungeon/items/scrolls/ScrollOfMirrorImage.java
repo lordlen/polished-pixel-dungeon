@@ -42,7 +42,7 @@ public class ScrollOfMirrorImage extends Scroll {
 		icon = ItemSpriteSheet.Icons.SCROLL_MIRRORIMG;
 	}
 
-	private static final int NIMAGES	= 2;
+	public static final int NIMAGES	= 3;
 	
 	@Override
 	public void doRead() {
