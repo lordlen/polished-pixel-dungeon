@@ -56,6 +56,8 @@ public class Blacksmith extends NPC {
 		spriteClass = BlacksmithSprite.class;
 
 		properties.add(Property.IMMOVABLE);
+		
+		visibleOnFog = true;
 	}
 
 	@Override

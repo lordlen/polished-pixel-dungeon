@@ -64,6 +64,8 @@ public class Shopkeeper extends NPC {
 		spriteClass = ShopkeeperSprite.class;
 
 		properties.add(Property.IMMOVABLE);
+		
+		visibleOnFog = true;
 	}
 	
 	private int turnsSinceHarmed = -1;
