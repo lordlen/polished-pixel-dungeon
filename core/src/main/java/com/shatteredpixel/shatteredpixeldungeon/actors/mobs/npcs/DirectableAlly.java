@@ -519,7 +519,7 @@ public class DirectableAlly extends NPC {
 				level.updateFieldOfView(ally, ally.fieldOfView);
 				
 				// we don't need to share hero fov with them yet,
-				// since we can't control regular enemies
+				// since we can't control regular enemies anyway
 			}
 			
 		}
@@ -556,7 +556,8 @@ public class DirectableAlly extends NPC {
 	
 	@Override
 	public void move(int step, boolean travelling) {
-		if(!travelling) {
+		Level level = Dungeon.level;
+		if(!travelling && !level.adjacent(pos, step)) {
 			//update fog on previous location before teleporting
 			GameScene.updateFog(pos, viewDistance+1);
 		}
@@ -564,10 +565,10 @@ public class DirectableAlly extends NPC {
 		super.move(step, travelling);
 		
 		//make sure animations play out correctly
-		if(!Dungeon.level.heroFOV[step]) {
+		if(!level.heroFOV[step]) {
 			sprite.visible = true;
-			Dungeon.level.heroFOV[step] = true;
-			Dungeon.level.visited[step] = true;
+			level.heroFOV[step] = true;
+			level.visited[step] = true;
 			//we shouldn't need to handle fog updates here
 		}
 	}
