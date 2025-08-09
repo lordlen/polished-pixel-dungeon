@@ -253,7 +253,7 @@ public enum Talent {
 		}
 	}
 	public static class BountyHunterTracker extends FlavourBuff{};
-	public static class ProjectileMomentum { public static final float ACCU_BOOST = 0.5f; }
+	public static class ProjectileMomentum { public static final float ACCU_BOOST = 0.3334f; }
 	public static class RejuvenatingStepsCooldown extends FlavourBuff{
 		public int icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0f, 0.35f, 0.15f); }
