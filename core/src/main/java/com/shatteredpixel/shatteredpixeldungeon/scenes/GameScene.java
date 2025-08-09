@@ -392,8 +392,9 @@ public class GameScene extends PixelScene {
 		switch (SPDSettings.cameraFollow()) {
 			case 4: default:    Camera.main.setFollowDeadzone(0);      break;
 			case 3:             Camera.main.setFollowDeadzone(0.2f);   break;
-			case 2:             Camera.main.setFollowDeadzone(0.5f);   break;
-			case 1:             Camera.main.setFollowDeadzone(0.9f);   break;
+			case 2:             Camera.main.setFollowDeadzone(0.425f); break;
+			case 1:             Camera.main.setFollowDeadzone(0.6f);   break;
+			case 0:             Camera.main.setFollowDeadzone(0.925f); break;
 		}
 
 		scene = this;

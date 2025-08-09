@@ -123,7 +123,7 @@ public class SPDSettings extends GameSettings {
 	}
 
 	public static int cameraFollow() {
-		return getInt( KEY_CAMERA_FOLLOW, 4, 1, 4 );
+		return getInt( KEY_CAMERA_FOLLOW, 4, 0, 4 );
 	}
 
 	public static void screenShake( int value ){
