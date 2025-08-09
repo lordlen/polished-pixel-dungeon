@@ -54,12 +54,12 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndRanking;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
@@ -474,7 +474,7 @@ public class SpiritBow extends Weapon {
 				
 				if(counter.count() <= 0) {
 					counter.detach();
-					Buff.count(Dungeon.hero, ArrowCounter.class, ArrowCounter.start());
+					Buff.count(Dungeon.hero, ArrowCounter.class, ArrowCounter.arrowsNeeded());
 					
 					Barkskin.conditionallyAppend(Dungeon.hero, 2, 3);
 				}
@@ -624,15 +624,17 @@ public class SpiritBow extends Weapon {
 	
 	public static class ArrowCounter extends CounterBuff {
 		
-		int start = 7;
-		public static int start() {
-			// 7/5
-			return 9 - 2*Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
+		//cache this
+		int arrowsNeeded = 6;
+		public static int arrowsNeeded() {
+			// 6/5
+			return 7 - Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
 		}
 		
 		{
-			Dungeon.Polished.runAfterLoad(() -> start = start());
+			Dungeon.Polished.runAfterLoad(() -> arrowsNeeded = arrowsNeeded());
 		}
+		
 		
 		@Override
 		public String desc() {
@@ -645,7 +647,7 @@ public class SpiritBow extends Weapon {
 		}
 		
 		public float iconFadePercent() {
-			return Math.max(0, count() / start);
+			return GameMath.gate(0, count() / arrowsNeeded, 1);
 		}
 		
 		@Override

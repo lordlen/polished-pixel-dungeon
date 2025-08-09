@@ -48,10 +48,7 @@ import com.watabou.utils.Signal;
 import java.util.Objects;
 
 public class CellSelector extends ScrollArea {
-
-	boolean PC = DeviceCompat.isDesktop();
-
-
+	
 	public Listener listener = null;
 	
 	public boolean enabled;
@@ -72,7 +69,8 @@ public class CellSelector extends ScrollArea {
 	
 	@Override
 	protected void onScroll( ScrollEvent event ) {
-		float diff = event.amount/(PC ? 20f : 10f);
+		boolean PC = DeviceCompat.isDesktop();
+		float diff = event.amount/(PC ? 15f : 10f);
 		
 		//scale zoom difference so zooming is consistent
 		diff /= ((camera.zoom+1)/camera.zoom)-1;
