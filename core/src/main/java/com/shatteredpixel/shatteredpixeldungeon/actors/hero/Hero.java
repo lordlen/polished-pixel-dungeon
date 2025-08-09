@@ -101,6 +101,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.AlchemistsToolkit;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CapeOfThorns;
@@ -1897,10 +1898,10 @@ public class Hero extends Char {
 		dmg = Math.min(dmg, preDmg);
 
 		int preHP = HP + shielding();
-		if (src instanceof Hunger) preHP -= shielding();
+		if (src instanceof Hunger || src instanceof Thorns) preHP -= shielding();
 		super.damage( dmg, src );
 		int postHP = HP + shielding();
-		if (src instanceof Hunger) postHP -= shielding();
+		if (src instanceof Hunger || src instanceof Thorns) postHP -= shielding();
 		int effectiveDamage = preHP - postHP;
 
 		if (effectiveDamage <= 0) return;

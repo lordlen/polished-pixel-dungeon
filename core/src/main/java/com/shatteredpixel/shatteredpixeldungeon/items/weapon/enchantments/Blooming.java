@@ -52,14 +52,14 @@ public class Blooming extends Weapon.Enchantment {
 
 			float powerMulti = Math.max(1f, procChance);
 
-			float plants = (1f + 0.1f*level) * powerMulti;
+			float plants = (2f + 0.1f*level) * powerMulti;
 			if (Random.Float() < plants%1){
 				plants = (float)Math.ceil(plants);
 			} else {
 				plants = (float)Math.floor(plants);
 			}
 			
-			if (plantGrass(defender.pos)){
+			if (plantGrass(defender.pos, false)){
 				plants--;
 				if (plants <= 0){
 					return damage;
@@ -78,13 +78,17 @@ public class Blooming extends Weapon.Enchantment {
 			if (Dungeon.level.adjacent(attacker.pos, defender.pos)){
 				positions.add(attacker.pos);
 			}
-
+			
+			boolean furrowed = true;
 			for (int i : positions){
-				if (plantGrass(i)){
+				if (plantGrass(i, furrowed)){
+					
+					furrowed = !furrowed;
 					plants--;
 					if (plants <= 0) {
 						return damage;
 					}
+					
 				}
 			}
 			
@@ -93,12 +97,17 @@ public class Blooming extends Weapon.Enchantment {
 		return damage;
 	}
 	
-	private boolean plantGrass(int cell){
+	private boolean plantGrass(int cell, boolean furrowed){
+		
+		furrowed = furrowed || !Regeneration.regenOn();
+		
 		int t = Dungeon.level.map[cell];
-		if ((t == Terrain.EMPTY || t == Terrain.EMPTY_DECO || t == Terrain.EMBERS
-				|| t == Terrain.GRASS || t == Terrain.FURROWED_GRASS)
-				&& Dungeon.level.plants.get(cell) == null){
-			if (!Regeneration.regenOn()){
+		if ((t == Terrain.EMPTY || t == Terrain.EMPTY_DECO ||
+			 t == Terrain.EMBERS || t == Terrain.GRASS ||
+			(t == Terrain.FURROWED_GRASS && !furrowed))
+				&& Dungeon.level.plants.get(cell) == null) {
+			
+			if (furrowed){
 				Level.set(cell, Terrain.FURROWED_GRASS);
 			} else {
 				Level.set(cell, Terrain.HIGH_GRASS);

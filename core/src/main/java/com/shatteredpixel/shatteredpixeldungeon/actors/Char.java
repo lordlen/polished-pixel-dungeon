@@ -112,6 +112,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Flow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Obfuscation;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
@@ -1011,7 +1012,7 @@ public abstract class Char extends Actor {
 		}
 
 		BrokenSeal.WarriorShield shield = buff(BrokenSeal.WarriorShield.class);
-		if (!(src instanceof Hunger)
+		if (!(src instanceof Hunger || src instanceof Thorns)
 				&& dmg > 0
 				//either HP is already half or below (ignoring shield)
 				// or the hit will reduce it to half or below
@@ -1108,6 +1109,7 @@ public abstract class Char extends Actor {
 		}
 
 		if (HP < 0) HP = 0;
+		if(src instanceof Thorns) HP = Math.max(1, HP);
 
 		if (!isAlive()) {
 			die( src );
