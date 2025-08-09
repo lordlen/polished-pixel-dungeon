@@ -240,11 +240,12 @@ public class Generator {
 		ARTIFACT( 0, 1, Artifact.class),
 		
 		FOOD	( 0, 0, Food.class ),
+		BOMB	( 0, 0, Bomb.class ),
 		
 		POTION	( 8, 8, Potion.class ),
-		SEED	( 1, 1, Plant.Seed.class ),
-		
 		SCROLL	( 8, 8, Scroll.class ),
+		
+		SEED	( 1, 1, Plant.Seed.class ),
 		STONE   ( 1, 1, Runestone.class),
 		
 		GOLD	( 10, 10,   Gold.class );
@@ -282,18 +283,26 @@ public class Generator {
 			this.secondProb = secondProb;
 			this.superClass = superClass;
 		}
+		
+		static final int CATLESS = 100_000_000;
+		static final int CAT_ORDER = 1_000_000;
+		static final int SUB_ORDER = 10_000;
+		static final int TIER_ORDER = 100;
+		static final int LEVEL_ORDER = 1;
+		static final int MAX = 99;
 
 		//some generator categories can have ordering within that category as well
 		// note that sub category ordering doesn't need to always include items that belong
 		// to that categories superclass, e.g. bombs are ordered within thrown weapons
 		private static HashMap<Class, ArrayList<Class>> subOrderings = new HashMap<>();
 		static {
+			subOrderings.put(Bomb.class, new ArrayList<>(Arrays.asList(Bomb.class, Honeypot.class, Honeypot.ShatteredPot.class)));
 			subOrderings.put(Trinket.class, new ArrayList<>(Arrays.asList(Trinket.class, TrinketCatalyst.class)));
-			subOrderings.put(MissileWeapon.class, new ArrayList<>(Arrays.asList(MissileWeapon.class, Bomb.class)));
+			subOrderings.put(MissileWeapon.class, new ArrayList<>(Arrays.asList(MissileWeapon.class, Dart.class)));
 			subOrderings.put(Potion.class, new ArrayList<>(Arrays.asList(Waterskin.class, Potion.class, ExoticPotion.class, Brew.class, Elixir.class, LiquidMetal.class)));
 			subOrderings.put(Scroll.class, new ArrayList<>(Arrays.asList(Scroll.class, ExoticScroll.class, Spell.class, ArcaneResin.class)));
 		}
-
+		
 		//in case there are multiple matches, this will return the latest match
 		public static int order( Item item ) {
 			int catResult = -1, subResult = 0;
@@ -313,11 +322,32 @@ public class Generator {
 					}
 				}
 			}
-			if (catResult != -1) return catResult*100 + subResult;
+			
+			if (catResult != -1) {
+				return  catResult*CAT_ORDER + subResult*SUB_ORDER +
+						orderByTier(item) * TIER_ORDER + orderByLevel(item) * LEVEL_ORDER;
+			}
 
 			//items without a category-defined order are sorted based on the spritesheet
-			return Short.MAX_VALUE+item.image();
+			return CATLESS + item.image();
 		}
+		
+		public static int orderByTier( Item item ) {
+			if(item instanceof MeleeWeapon) {
+				return MAX - ((MeleeWeapon) item).tier;
+			} else if(item instanceof Armor) {
+				return MAX - ((Armor) item).tier;
+			} else if(item instanceof MissileWeapon) {
+				return MAX - ((MissileWeapon) item).tier;
+			}
+			
+			return 0;
+		}
+		
+		public static int orderByLevel( Item item ) {
+			return item.levelKnown ? MAX-1 - item.level() : MAX;
+		}
+		
 
 		static {
 			GOLD.classes = new Class<?>[]{
@@ -538,6 +568,10 @@ public class Generator {
 					MysteryMeat.class };
 			FOOD.defaultProbs = new float[]{ 4, 1, 0 };
 			FOOD.probs = FOOD.defaultProbs.clone();
+			
+			//dummy category
+			BOMB.classes = new Class<?>[]{};
+			BOMB.probs = new float[]{};
 			
 			RING.classes = new Class<?>[]{
 					RingOfAccuracy.class,
