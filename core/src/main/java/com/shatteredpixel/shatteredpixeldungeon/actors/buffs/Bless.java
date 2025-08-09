@@ -27,6 +27,8 @@ public class Bless extends FlavourBuff {
 	
 	public static final float DURATION	= 30f;
 	
+	public static final float FACTOR = 1.25f;
+	
 	{
 		type = buffType.POSITIVE;
 		announced = true;

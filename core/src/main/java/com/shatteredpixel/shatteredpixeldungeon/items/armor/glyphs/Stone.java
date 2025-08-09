@@ -50,9 +50,9 @@ public class Stone extends Armor.Glyph {
 
 		//FIXME this is duplicated here because these apply in hit(), not in attack/defenseskill
 		// the true solution is probably to refactor accuracy/evasion code a little bit
-		if (attacker.buff(Bless.class) != null) accuracy *= 1.25f;
-		if (attacker.buff(  Hex.class) != null) accuracy *= 0.75f;
-		if (attacker.buff( Daze.class) != null) accuracy *= 0.5f;
+		if (attacker.buff(Bless.class) != null) accuracy *= Bless.FACTOR;
+		if (attacker.buff(  Hex.class) != null) accuracy *= Hex.FACTOR;
+		if (attacker.buff( Daze.class) != null) accuracy *= Daze.FACTOR;
 		for (ChampionEnemy buff : attacker.buffs(ChampionEnemy.class)){
 			accuracy *= buff.accuracyFactor();
 		}
@@ -66,9 +66,9 @@ public class Stone extends Armor.Glyph {
 		Berserk berserk = attacker.buff(Berserk.class);
 		if(berserk != null) accuracy *= berserk.accuracyFactor();
 
-		if (defender.buff(Bless.class) != null) evasion *= 1.25f;
-		if (defender.buff(  Hex.class) != null) evasion *= 0.75f;
-		if (defender.buff( Daze.class) != null) evasion *= 0.5f;
+		if (defender.buff(Bless.class) != null) evasion *= Bless.FACTOR;
+		if (defender.buff(  Hex.class) != null) evasion *= Hex.FACTOR;
+		if (defender.buff( Daze.class) != null) evasion *= Daze.FACTOR;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
 			evasion *= buff.evasionFactor();
 		}

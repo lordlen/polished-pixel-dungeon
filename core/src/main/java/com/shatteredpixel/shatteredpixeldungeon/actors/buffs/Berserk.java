@@ -294,7 +294,10 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		WarriorShield shield = target.buff(WarriorShield.class);
 		if(shield != null) {
+			int preserved = Math.round((1-HoldFast.buffDecayFactor(target)) * shield.shielding());
+			
 			shield.clearShield();
+			Buff.affect(target, Barrier.class).incShield(preserved);
 		}
 
 		switchState(State.RECOVERING);

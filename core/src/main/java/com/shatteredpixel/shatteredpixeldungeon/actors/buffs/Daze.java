@@ -26,6 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 public class Daze extends FlavourBuff {
 
 	public static final float DURATION	= 5f;
+	
+	public static final float FACTOR = 0.5f;
 
 	{
 		type = buffType.NEGATIVE;
