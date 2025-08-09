@@ -849,16 +849,26 @@ public class v1_0_X_PPDChanges {
 		addChange(heroIcon(HeroClass.WARRIOR, 6), "Berserker Rework",
 				"_Removed:_ Rage mechanic.\n" +
 						"\n" +
-						"_New:_ The Berserker can shout a war cry after taking a hit, provoking all enemies within 8 tiles and preparing to go on a rampage.\n" +
+						"_New:_ The Berserker can shout a war cry after getting hit, provoking all enemies within 8 tiles and preparing to go on a rampage.\n" +
 						"\n" +
 						"During this state, the Berserker gains +30% physical damage, +100% accuracy, and a large upfront shield that scales based on his seal, and up to 2x " +
 						"with missing health.\n" +
 						"\n" +
-						"Killing enemies prolongs the duration by 2 turns, but once it ends: all remaining shielding will vanish, and the Berserker must then wait 120 turns " +
-						"before going on a rampage again.\n" +
+						"Rampages last for 8 turns, but killing enemies prolongs the duration by 2 turns. Once it ends, all remaining shielding will vanish, and the Berserker " +
+						"will have to wait 120 turns before going on a rampage again.\n" +
 						"\n" +
-						"Reworked talents: _Last Stand,_ _Undying Rage,_ and _Enraged Catalyst._\n" +
-						"Check the talent descriptions for more info!"
+						"\n" +
+						"Reworked talents:\n" +
+						"_- Last Stand:_\n" +
+						"The Berserker gains 18%/30%/38% damage reduction when facing 3+ enemies at once.\n" +
+						"\n" +
+						"_- Undying Rage:_\n" +
+						"When taking fatal damage, the Berserker refuses to die. He will automatically begin a rampage, and become immortal for 3/5/7 turns. At the end of this effect, " +
+						"he'll also restore 2%/4%/6% of his max HP + 1.2%/2.4%/3.6% per enemy killed during the rage. This ability has a cooldown of 1.5 hero levels.\n" +
+						"\n" +
+						"_- Enraged Catalyst:_\n" +
+						"Glyphs and Enchantments trigger more often the lower the Berserker's health, up to +40%/80%/120% for Glyphs, and +20%/40%/60% for Enchantments. You will " +
+						"always get the max boost while rampaging."
 		);
 		
 		addChange(heroIcon(HeroClass.ROGUE, 3), "Rogue Talents",
@@ -1009,10 +1019,28 @@ public class v1_0_X_PPDChanges {
 				"Polished Pixel Dungeon got updated to the latest SPD version:\n" +
 						"3.1.1 -> 3.2.0"
 		);
+		
+		addChange(Talent.HOLD_FAST, "Hold Fast",
+				"Since PPD berserker's shield doesn't decay with time, Hold Fast instead preserves 33%/67%/100% of remaining shield after rampage as regular shielding."
+		);
 		// ***
 		
+		addSection(changeInfos, CHANGES);
 		// ***
-		addSection(changeInfos, EMPTY);
+		addChange(heroIcon(HeroClass.WARRIOR, 6), "Berserker",
+				"Nerfs from SPD discarded, since they don't interact with PPD version.\n" +
+						"Rampage accuracy boost shares its hit icon with swords dance."
+		);
+		
+		addChange(new Tomahawk(), "Tomahawk",
+				"Changes from PPD to Tomahawk discarded, now matches SPD 3.2"
+		);
+		
+		addChange(Talent.PROJECTILE_MOMENTUM, "Projectile Momentum",
+				"Backtracked buffs from SPD 3.2:" +
+						"\n" +
+						"Accuracy boost: 50%/100%/150% -> 33%/67%/100%"
+		);
 		// ***
 		
 		
