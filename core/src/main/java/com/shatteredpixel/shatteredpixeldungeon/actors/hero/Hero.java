@@ -477,8 +477,6 @@ public class Hero extends Char {
 	private static final String LEVEL		= "lvl";
 	private static final String EXPERIENCE	= "exp";
 	private static final String HTBOOST     = "htboost";
-
-	private static final String JUST_MOVED  = "just_moved";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -499,8 +497,6 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
-
-		bundle.put( JUST_MOVED, justMoved );
 
 		belongings.storeInBundle( bundle );
 	}
@@ -524,8 +520,6 @@ public class Hero extends Char {
 		defenseSkill = bundle.getInt( DEFENSE );
 		
 		STR = bundle.getInt( STRENGTH );
-
-		justMoved = bundle.getBoolean( JUST_MOVED );
 
 		belongings.restoreFromBundle( bundle );
 	}
@@ -676,6 +670,28 @@ public class Hero extends Char {
 	}
 	
 	@Override
+	public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti) {
+		boolean result = super.attack(enemy, dmgMulti, dmgBonus, accMulti);
+		if (!(belongings.attackingWeapon() instanceof MissileWeapon)){
+			
+			Talent.PreciseAssaultTracker preciseAssault = buff(Talent.PreciseAssaultTracker.class);
+			Talent.LiquidAgilACCTracker liquidAgilACC = buff(Talent.LiquidAgilACCTracker.class);
+			
+			if (preciseAssault != null){
+				if(pointsInTalent(Talent.PRECISE_ASSAULT) == 3 && !preciseAssault.secondUse) {
+					preciseAssault.secondUse = true;
+				} else {
+					preciseAssault.detach();
+				}
+			}
+			else if (liquidAgilACC != null && liquidAgilACC.uses <= 0){
+				liquidAgilACC.detach();
+			}
+		}
+		return result;
+	}
+
+	@Override
 	public int attackSkill( Char target ) {
 		KindOfWeapon wep = belongings.attackingWeapon();
 		
@@ -694,13 +710,13 @@ public class Hero extends Char {
 					accuracy *= 1f + 0.1f * pointsInTalent(Talent.PRECISE_ASSAULT);
 				}
 
-				Talent.PreciseAssaultTracker tracker = buff(Talent.PreciseAssaultTracker.class);
+				Talent.PreciseAssaultTracker preciseAssault = buff(Talent.PreciseAssaultTracker.class);
 
 				if (wep instanceof Flail && buff(Flail.SpinAbilityTracker.class) != null){
 					//do nothing, this is not a regular attack so don't consume talent fx
 				} else if (wep instanceof Crossbow && buff(Crossbow.ChargedShot.class) != null){
 					//do nothing, this is not a regular attack so don't consume talent fx
-				} else if (tracker != null) {
+				} else if (preciseAssault != null) {
 					// 3x/inf/inf+3x ACC for duelist if she just used a weapon ability
 					switch (pointsInTalent(Talent.PRECISE_ASSAULT)){
 						default: case 1:
@@ -708,20 +724,19 @@ public class Hero extends Char {
 						case 2:
 							accuracy *= Float.POSITIVE_INFINITY; break;
 						case 3:
-							accuracy *= tracker.secondUse ? 3 : Float.POSITIVE_INFINITY;
-							tracker.secondUse = !tracker.secondUse;
+							accuracy *= preciseAssault.secondUse ? 3 : Float.POSITIVE_INFINITY;
 							break;
 					}
-					if(!tracker.secondUse) tracker.detach();
 				} else if (buff(Talent.LiquidAgilACCTracker.class) != null){
 					// 3x/inf. ACC, depending on talent level
 					accuracy *= pointsInTalent(Talent.LIQUID_AGILITY) == 2 ? Float.POSITIVE_INFINITY : 3f;
 					Talent.LiquidAgilACCTracker buff = buff(Talent.LiquidAgilACCTracker.class);
 					buff.uses--;
-					if (buff.uses <= 0) {
-						buff.detach();
-					}
 				}
+			}
+		} else {
+			if (buff(Momentum.class) != null && buff(Momentum.class).freerunning()){
+				accuracy *= 1f + pointsInTalent(Talent.PROJECTILE_MOMENTUM) * Talent.ProjectileMomentum.ACCU_BOOST;
 			}
 		}
 
@@ -730,9 +745,9 @@ public class Hero extends Char {
 		}
 		
 		if (!RingOfForce.fightingUnarmed(this)) {
-			return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target ));
+			return Math.max(1, Math.round(attackSkill * accuracy * wep.accuracyFactor( this, target )));
 		} else {
-			return (int)(attackSkill * accuracy);
+			return Math.max(1, Math.round(attackSkill * accuracy));
 		}
 	}
 	
@@ -776,7 +791,7 @@ public class Hero extends Char {
 			evasion = belongings.armor().evasionFactor(this, evasion);
 		}
 
-		return Math.round(evasion);
+		return Math.max(1, Math.round(evasion));
 	}
 
 	@Override
@@ -991,9 +1006,8 @@ public class Hero extends Char {
 
 	@Override
 	public void spendConstant(float time) {
-		justMoved = false;
-		Polished.noEnemiesLast = visibleEnemies.isEmpty();
 		super.spendConstant(time);
+		Polished.noEnemiesLast = visibleEnemies.isEmpty();
 	}
 
 	public void spendAndNextConstant(float time ) {
@@ -1324,7 +1338,8 @@ public class Hero extends Char {
 							|| item instanceof TimekeepersHourglass.sandBag
 							|| item instanceof DriedRose.Petal
 							|| item instanceof Key
-							|| item instanceof Guidebook) {
+							|| item instanceof Guidebook
+							|| (item instanceof MissileWeapon && !MissileWeapon.UpgradedSetTracker.pickupValid(this, (MissileWeapon) item))) {
 						//Do Nothing
 					} else if (item instanceof DarkGold) {
 						DarkGold existing = belongings.getItem(DarkGold.class);
@@ -1738,10 +1753,10 @@ public class Hero extends Char {
 					protected boolean act() {
 						if (enemy.isAlive()) {
 							if (hasTalent(Talent.SHARED_UPGRADES)){
-								int bonusTurns = wep.buffedLvl();
-								// bonus dmg is 2.5% x talent lvl x weapon level x weapon tier
-								float bonusDmg = wep.buffedLvl() * ((MissileWeapon) wep).tier * pointsInTalent(Talent.SHARED_UPGRADES) * 0.025f;
-								Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + bonusTurns).set(enemy.id(), bonusDmg);
+								int levelBonus = Math.min( 2*pointsInTalent(Talent.SHARED_UPGRADES), wep.buffedLvl() );
+								// bonus dmg is 16.67% x weapon level, max of 2/4/6
+								float bonusDmg = levelBonus/6f;
+								Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + levelBonus).set(enemy.id(), bonusDmg);
 							} else {
 								Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION).set(enemy.id(), 0);
 							}
@@ -2015,10 +2030,6 @@ public class Hero extends Char {
 	
 	private boolean walkingToVisibleTrapInFog = false;
 	
-	//FIXME this is a fairly crude way to track this, really it would be nice to have a short
-	//history of hero actions
-	public boolean justMoved = false;
-	
 	private boolean getCloser( final int target ) {
 
 		if (target == pos)
@@ -2131,7 +2142,6 @@ public class Hero extends Char {
 			move(step);
 
 			spend( delay );
-			justMoved = true;
 			
 			search(false);
 
@@ -2382,8 +2392,8 @@ public class Hero extends Char {
 	@Override
 	public boolean add( Buff buff ) {
 
-		if (buff(TimekeepersHourglass.timeStasis.class) != null
-			|| buff(TimeStasis.class) != null) {
+		if (buff.type == Buff.buffType.NEGATIVE &&
+				(buff(TimekeepersHourglass.timeStasis.class) != null || buff(TimeStasis.class) != null)) {
 			return false;
 		}
 
