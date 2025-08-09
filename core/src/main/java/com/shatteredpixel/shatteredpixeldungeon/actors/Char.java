@@ -671,7 +671,6 @@ public abstract class Char extends Actor {
 		if (attacker.isStealthyTo(defender) && attacker.canSurpriseAttack()) {
 			acuStat = INFINITE_ACCURACY;
 		}
-		//if(attacker.buff(ChampionEnemy.Blessed.class) != null) acuStat = INFINITE_ACCURACY;
 
 		if (defender.buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class) != null){
 			defStat = INFINITE_EVASION;
@@ -688,9 +687,9 @@ public abstract class Char extends Actor {
 		}
 
 		float acuRoll = Random.Float( acuStat );
-		if (attacker.buff(Bless.class) != null) acuRoll *= 1.25f;
-		if (attacker.buff(  Hex.class) != null) acuRoll *= 0.75f;
-		if (attacker.buff( Daze.class) != null) acuRoll *= 0.5f;
+		if (attacker.buff(Bless.class) != null) acuRoll *= Bless.FACTOR;
+		if (attacker.buff(  Hex.class) != null) acuRoll *= Hex.FACTOR;
+		if (attacker.buff( Daze.class) != null) acuRoll *= Daze.FACTOR;
 		for (ChampionEnemy buff : attacker.buffs(ChampionEnemy.class)){
 			acuRoll *= buff.accuracyFactor();
 		}
@@ -708,9 +707,9 @@ public abstract class Char extends Actor {
 		acuRoll *= accMulti;
 
 		float defRoll = Random.Float( defStat );
-		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
-		if (defender.buff(  Hex.class) != null) defRoll *= 0.75f;
-		if (defender.buff( Daze.class) != null) defRoll *= 0.5f;
+		if (defender.buff(Bless.class) != null) defRoll *= Bless.FACTOR;
+		if (defender.buff(  Hex.class) != null) defRoll *= Hex.FACTOR;
+		if (defender.buff( Daze.class) != null) defRoll *= Daze.FACTOR;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
 			defRoll *= buff.evasionFactor();
 		}

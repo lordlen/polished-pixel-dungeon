@@ -477,8 +477,6 @@ public class Hero extends Char {
 	private static final String LEVEL		= "lvl";
 	private static final String EXPERIENCE	= "exp";
 	private static final String HTBOOST     = "htboost";
-
-	private static final String JUST_MOVED  = "just_moved";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -499,8 +497,6 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
-
-		bundle.put( JUST_MOVED, justMoved );
 
 		belongings.storeInBundle( bundle );
 	}
@@ -524,8 +520,6 @@ public class Hero extends Char {
 		defenseSkill = bundle.getInt( DEFENSE );
 		
 		STR = bundle.getInt( STRENGTH );
-
-		justMoved = bundle.getBoolean( JUST_MOVED );
 
 		belongings.restoreFromBundle( bundle );
 	}
@@ -679,11 +673,19 @@ public class Hero extends Char {
 	public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti) {
 		boolean result = super.attack(enemy, dmgMulti, dmgBonus, accMulti);
 		if (!(belongings.attackingWeapon() instanceof MissileWeapon)){
-			if (buff(Talent.PreciseAssaultTracker.class) != null){
-				buff(Talent.PreciseAssaultTracker.class).detach();
-			} else if (buff(Talent.LiquidAgilACCTracker.class) != null
-						&& buff(Talent.LiquidAgilACCTracker.class).uses <= 0){
-				buff(Talent.LiquidAgilACCTracker.class).detach();
+			
+			Talent.PreciseAssaultTracker preciseAssault = buff(Talent.PreciseAssaultTracker.class);
+			Talent.LiquidAgilACCTracker liquidAgilACC = buff(Talent.LiquidAgilACCTracker.class);
+			
+			if (preciseAssault != null){
+				if(pointsInTalent(Talent.PRECISE_ASSAULT) == 3 && !preciseAssault.secondUse) {
+					preciseAssault.secondUse = true;
+				} else {
+					preciseAssault.detach();
+				}
+			}
+			else if (liquidAgilACC != null && liquidAgilACC.uses <= 0){
+				liquidAgilACC.detach();
 			}
 		}
 		return result;
@@ -708,13 +710,13 @@ public class Hero extends Char {
 					accuracy *= 1f + 0.1f * pointsInTalent(Talent.PRECISE_ASSAULT);
 				}
 
-				Talent.PreciseAssaultTracker tracker = buff(Talent.PreciseAssaultTracker.class);
+				Talent.PreciseAssaultTracker preciseAssault = buff(Talent.PreciseAssaultTracker.class);
 
 				if (wep instanceof Flail && buff(Flail.SpinAbilityTracker.class) != null){
 					//do nothing, this is not a regular attack so don't consume talent fx
 				} else if (wep instanceof Crossbow && buff(Crossbow.ChargedShot.class) != null){
 					//do nothing, this is not a regular attack so don't consume talent fx
-				} else if (tracker != null) {
+				} else if (preciseAssault != null) {
 					// 3x/inf/inf+3x ACC for duelist if she just used a weapon ability
 					switch (pointsInTalent(Talent.PRECISE_ASSAULT)){
 						default: case 1:
@@ -722,11 +724,9 @@ public class Hero extends Char {
 						case 2:
 							accuracy *= Float.POSITIVE_INFINITY; break;
 						case 3:
-							accuracy *= tracker.secondUse ? 3 : Float.POSITIVE_INFINITY;
-							tracker.secondUse = !tracker.secondUse;
+							accuracy *= preciseAssault.secondUse ? 3 : Float.POSITIVE_INFINITY;
 							break;
 					}
-					if(!tracker.secondUse) tracker.detach();
 				} else if (buff(Talent.LiquidAgilACCTracker.class) != null){
 					// 3x/inf. ACC, depending on talent level
 					accuracy *= pointsInTalent(Talent.LIQUID_AGILITY) == 2 ? Float.POSITIVE_INFINITY : 3f;
@@ -736,7 +736,7 @@ public class Hero extends Char {
 			}
 		} else {
 			if (buff(Momentum.class) != null && buff(Momentum.class).freerunning()){
-				accuracy *= 1f + pointsInTalent(Talent.PROJECTILE_MOMENTUM)/2f;
+				accuracy *= 1f + pointsInTalent(Talent.PROJECTILE_MOMENTUM) * Talent.ProjectileMomentum.ACCU_BOOST;
 			}
 		}
 
@@ -1006,9 +1006,8 @@ public class Hero extends Char {
 
 	@Override
 	public void spendConstant(float time) {
-		justMoved = false;
-		Polished.noEnemiesLast = visibleEnemies.isEmpty();
 		super.spendConstant(time);
+		Polished.noEnemiesLast = visibleEnemies.isEmpty();
 	}
 
 	public void spendAndNextConstant(float time ) {
@@ -2031,10 +2030,6 @@ public class Hero extends Char {
 	
 	private boolean walkingToVisibleTrapInFog = false;
 	
-	//FIXME this is a fairly crude way to track this, really it would be nice to have a short
-	//history of hero actions
-	public boolean justMoved = false;
-	
 	private boolean getCloser( final int target ) {
 
 		if (target == pos)
@@ -2147,7 +2142,6 @@ public class Hero extends Char {
 			move(step);
 
 			spend( delay );
-			justMoved = true;
 			
 			search(false);
 

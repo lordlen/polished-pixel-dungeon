@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.effects;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
@@ -349,10 +350,10 @@ public class FloatingText extends RenderedTextBlock {
 		}
 		float blessBoost = 1; //a few different sources contribute to this icon
 		if (attacker.buff(ChampionEnemy.class) != null
-			&& attacker.buff(ChampionEnemy.class).evasionAndAccuracyFactor() > 1){
-			blessBoost *= attacker.buff(ChampionEnemy.class).evasionAndAccuracyFactor();
+			&& attacker.buff(ChampionEnemy.class).accuracyFactor() > 1){
+			blessBoost *= attacker.buff(ChampionEnemy.class).accuracyFactor();
 		}
-		if (attacker.buff(Bless.class) != null) blessBoost *= 1.25f;
+		if (attacker.buff(Bless.class) != null) blessBoost *= Bless.FACTOR;
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC
 				&& Dungeon.hero.hasTalent(Talent.BLESS)
 				&& attacker.alignment == Char.Alignment.ALLY){
@@ -361,10 +362,17 @@ public class FloatingText extends RenderedTextBlock {
 		}
 		if (blessBoost > 1f) hitReasons.put(HIT_BLS, blessBoost);
 		if (RingOfAccuracy.accuracyMultiplier(attacker) > 1)    hitReasons.put(HIT_ACC, RingOfAccuracy.accuracyMultiplier(attacker));
-		if (attacker.buff(Scimitar.SwordDance.class) != null)   hitReasons.put(HIT_DANCE, 1.5f);
+		
+		float danceBoost = 1; //berserk rampage boost also contributes to this icon
+		if(attacker.buff(Scimitar.SwordDance.class) != null) danceBoost *= 1.5f;
+		Berserk berserk = attacker.buff(Berserk.class);
+		if(berserk != null) danceBoost *= berserk.accuracyFactor();
+		if (danceBoost > 1) hitReasons.put(HIT_DANCE, danceBoost);
+		
 		if (!(wep instanceof MissileWeapon)) {
 			if (attacker.buff(Talent.PreciseAssaultTracker.class) != null){
-				hitReasons.put(HIT_PRES, Dungeon.hero.pointsInTalent(Talent.PRECISE_ASSAULT) == 2 ? 5f : 2f);
+				//has to be 3x, we already checked if it was infinite
+				hitReasons.put(HIT_PRES, 3f);
 			} else if (attacker.buff(Talent.LiquidAgilACCTracker.class) != null) {
 				hitReasons.put(HIT_LIQ, 3f);
 			}
@@ -372,13 +380,13 @@ public class FloatingText extends RenderedTextBlock {
 			if (attacker.buff(Momentum.class) != null
 					&& attacker.buff(Momentum.class).freerunning()
 					&& ((Hero)attacker).hasTalent(Talent.PROJECTILE_MOMENTUM)) {
-				hitReasons.put(HIT_MOMEN, 1f + ((Hero) attacker).pointsInTalent(Talent.PROJECTILE_MOMENTUM) / 2f);
+				hitReasons.put(HIT_MOMEN, 1f + ((Hero) attacker).pointsInTalent(Talent.PROJECTILE_MOMENTUM) * Talent.ProjectileMomentum.ACCU_BOOST);
 			}
 		}
 
 		//evasion reductions (always < 1)
-		if (defender.buff(Hex.class) != null)                   hitReasons.put(HIT_HEX, 0.8f);
-		if (defender.buff(Daze.class) != null)                  hitReasons.put(HIT_DAZE, 0.5f);
+		if (defender.buff(Hex.class) != null)                   hitReasons.put(HIT_HEX, Hex.FACTOR);
+		if (defender.buff(Daze.class) != null)                  hitReasons.put(HIT_DAZE, Daze.FACTOR);
 		if (RingOfEvasion.evasionMultiplier(defender) < 1)      hitReasons.put(HIT_EVA, RingOfEvasion.evasionMultiplier(defender));
 		if (arm != null && arm.evasionFactor(defender, 100) < 100) {
 			//we express armor's normally flat evasion boost as a %, yes this is very awkward
@@ -440,10 +448,10 @@ public class FloatingText extends RenderedTextBlock {
 		//evasion boosts (always > 1)
 		float blessBoost = 1; //a few different sources contribute to this icon
 		if (defender.buff(ChampionEnemy.class) != null
-				&& defender.buff(ChampionEnemy.class).evasionAndAccuracyFactor() > 1){
-			blessBoost *= defender.buff(ChampionEnemy.class).evasionAndAccuracyFactor();
+				&& defender.buff(ChampionEnemy.class).evasionFactor() > 1){
+			blessBoost *= defender.buff(ChampionEnemy.class).evasionFactor();
 		}
-		if (defender.buff(Bless.class) != null) blessBoost *= 1.25f;
+		if (defender.buff(Bless.class) != null) blessBoost *= Bless.FACTOR;
 		if (Dungeon.hero.heroClass != HeroClass.CLERIC
 				&& Dungeon.hero.hasTalent(Talent.BLESS)
 				&& defender.alignment == Char.Alignment.ALLY){
@@ -472,8 +480,8 @@ public class FloatingText extends RenderedTextBlock {
 		if (wep != null && wep.accuracyFactor(attacker, defender) < 1){
 			missReasons.put( MISS_WEP, wep.accuracyFactor(attacker, defender));
 		}
-		if (attacker.buff(Hex.class) != null)                   missReasons.put(MISS_HEX, 0.8f);
-		if (attacker.buff(Daze.class) != null)                  missReasons.put(MISS_DAZE, 0.5f);
+		if (attacker.buff(Hex.class) != null)                   missReasons.put(MISS_HEX, Hex.FACTOR);
+		if (attacker.buff(Daze.class) != null)                  missReasons.put(MISS_DAZE, Daze.FACTOR);
 		if (RingOfAccuracy.accuracyMultiplier(attacker) < 1)    missReasons.put(MISS_ACC, RingOfAccuracy.accuracyMultiplier(attacker));
 
 		//sort from largest modifier to smallest one

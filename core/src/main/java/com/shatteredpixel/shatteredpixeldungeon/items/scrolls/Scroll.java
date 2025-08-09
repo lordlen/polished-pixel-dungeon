@@ -196,7 +196,7 @@ public abstract class Scroll extends Item {
 
 	public void readAnimation() {
 		//if scroll is being created for its effect, depend on creating item to dispel
-		if (!anonymous) Invisibility.dispel();
+		if (!anonymous || Polished_wealthDrop != null) Invisibility.dispel();
 		curUser.spend( TIME_TO_READ );
 		curUser.busy();
 		((HeroSprite)curUser.sprite).read();

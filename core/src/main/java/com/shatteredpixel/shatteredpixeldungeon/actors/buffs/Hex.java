@@ -27,6 +27,8 @@ public class Hex extends FlavourBuff {
 	
 	public static final float DURATION	= 30f;
 	
+	public static final float FACTOR = 0.75f;
+	
 	{
 		type = buffType.NEGATIVE;
 		announced = true;
