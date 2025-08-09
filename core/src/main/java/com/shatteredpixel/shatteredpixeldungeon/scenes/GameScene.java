@@ -45,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
@@ -1501,9 +1502,11 @@ public class GameScene extends PixelScene {
 		if (scene != null) {
 			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
 				if (mob.sprite != null) {
-					if (mob instanceof Mimic && mob.state == mob.PASSIVE && Dungeon.level.visited[mob.pos]) {
+					if (mob instanceof Mimic && mob.state == mob.PASSIVE) {
 						//mimics stay visible in fog of war after being first seen
-						mob.sprite.visible = true;
+						mob.sprite.visible = Dungeon.level.visited[mob.pos];
+					} else if (mob instanceof NPC && ((NPC) mob).visibleOnFog) {
+						mob.sprite.visible = Dungeon.level.visited[mob.pos];
 					} else {
 						mob.sprite.visible = Dungeon.level.heroFOV[mob.pos];
 					}
