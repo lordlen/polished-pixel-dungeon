@@ -68,13 +68,16 @@ public abstract class Plant implements Bundlable {
 		}
 		
 		int nature = Dungeon.hero.pointsInTalent(Talent.NATURES_AID);
-		if (Dungeon.level.heroFOV[pos] && nature > 0) {
-			if(!SPDSettings.Polished.huntress()) {
-				// 3/5 turns based on talent points spent
-				Barkskin.conditionallyAppend(Dungeon.hero, 2, 2*nature);
+		if (nature > 0 && (Dungeon.level.visited[pos] || Dungeon.level.mapped[pos])) {
+			
+			if(SPDSettings.Polished.huntress()) {
+				if(Dungeon.hero.heroClass != HeroClass.HUNTRESS) {
+					Barkskin.conditionallyAppend(Dungeon.hero, 2, 1 + 2*nature);
+				}
 			}
-			else if(Dungeon.hero.heroClass != HeroClass.HUNTRESS) {
-				Barkskin.conditionallyAppend(Dungeon.hero, 2, 2*nature);
+			else {
+				// 3/5 turns based on talent points spent
+				Barkskin.conditionallyAppend(Dungeon.hero, 2, 1 + 2*nature);
 			}
 		}
 

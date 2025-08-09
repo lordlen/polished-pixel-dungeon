@@ -99,7 +99,7 @@ public abstract class Trap implements Bundlable {
 
 	public void trigger() {
 		if (active) {
-			if (Dungeon.level.heroFOV[pos]) {
+			if (Dungeon.level.visited[pos] || Dungeon.level.mapped[pos]) {
 				Sample.INSTANCE.play(Assets.Sounds.TRAP);
 
 				int points = Dungeon.hero.pointsInTalent(Talent.SMART_ESCAPE);

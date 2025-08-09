@@ -86,11 +86,16 @@ public class HighGrass {
 				}
 				
 				//berries try to drop on floors 2/3/4/5/6/7, to a max of 4/6
+				//POLISHED: 4/5
 				if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.NATURES_BOUNTY)){
 					
-					int berriesAvailable = 2 + 2*((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
-					//unused, 3/5 berries for 150 food value
-					//if(SPDSettings.Polished.huntress()) berriesAvailable--;
+					int berriesAvailable;
+					if(SPDSettings.Polished.huntress()) {
+						berriesAvailable = 3 + ((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
+					}
+					else {
+						berriesAvailable = 2 + 2*((Hero) ch).pointsInTalent(Talent.NATURES_BOUNTY);
+					}
 					
 					int targetFloor = 2 + berriesAvailable;
 
