@@ -244,9 +244,8 @@ public abstract class RegularLevel extends Level {
 		boolean[] entranceFOV = new boolean[length()];
 		Point c = cellToPoint(entrance());
 		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 9);
-
-		boolean[] entranceWalkable = BArray.or(BArray.not(solid), passable, null);
-		PathFinder.buildDistanceMap(entrance(), entranceWalkable, 9);
+		
+		PathFinder.buildDistanceMap(entrance(), Dungeon.Polished.openTiles(), 9);
 
 		Mob mob = null;
 		while (mobsToSpawn > 0) {

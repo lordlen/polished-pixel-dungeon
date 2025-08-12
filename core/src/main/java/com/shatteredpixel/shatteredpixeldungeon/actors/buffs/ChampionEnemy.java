@@ -408,22 +408,24 @@ public abstract class ChampionEnemy extends Buff {
 		}
 		
 		public static void relocateAll(Level level) {
+			PathFinder.buildDistanceMap(level.entrance(), Dungeon.Polished.openTiles(), 9);
+			
 			for (Mob mob : level.mobs) {
 				if(mob.buff(ChampionEnemy.Growing.class) != null) {
-					relocateToExit(mob, level);
+					relocateToExit(mob, level, PathFinder.distance, 9);
 				}
 			}
 		}
 		
-		public static void relocateToExit(Char ch, Level level) {
+		public static void relocateToExit(Char ch, Level level, int[] distanceMap, int disLimit) {
 			
 			int exit = level.exit();
-			if(exit == 0) return;
+			if (exit == 0) return;
 			
 			for(int offset : PathFinder.NEIGHBOURS8) {
 				int cell = exit + offset;
 				
-				if (level.validRespawn(ch, cell)) {
+				if (distanceMap[cell] > disLimit && level.validRespawn(ch, cell)) {
 					ch.pos = cell;
 					return;
 				}
@@ -431,10 +433,9 @@ public abstract class ChampionEnemy extends Buff {
 			
 			for(int offset : PathFinder.NEIGHBOURS25) {
 				int cell = exit + offset;
+				if(cell < 0 || cell >= level.length()) continue;
 				
-				if (cell >= 0 && cell < level.length() &&
-					level.validRespawn(ch, cell)) {
-					
+				if (distanceMap[cell] > disLimit && level.validRespawn(ch, cell)) {
 					ch.pos = cell;
 					return;
 				}
