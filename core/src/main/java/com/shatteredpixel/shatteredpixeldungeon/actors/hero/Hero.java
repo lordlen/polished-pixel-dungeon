@@ -248,6 +248,10 @@ public class Hero extends Char {
 	public int HTBoost = 0;
 	
 	private ArrayList<Mob> visibleEnemies;
+	
+	//This list is maintained so that some logic checks can be skipped
+	// for enemies we know we aren't seeing normally, resulting in better performance
+	public ArrayList<Mob> mindVisionEnemies = new ArrayList<>();
 
 	public static class Polished {
 		public static void Debug_UpdateStats(int newLvl, int newStr) {
@@ -301,34 +305,24 @@ public class Hero extends Char {
 		}
 		
 		
-		static void checkVisionEdge() {
+		static boolean[] visionLast = null;
+		static boolean checkVisionEdge(Mob m, int[] distanceMap, boolean interrupted) {
 			Hero hero = Dungeon.hero;
-			if(!hero.validFov()) return;
-			if(!SPDSettings.Polished.inputBlock()) return;
+			if(visionLast == null || visionLast.length != hero.fieldOfView.length) {
+				return false;
+			}
 			
-			boolean blocked = false;
-			PathFinder.buildDistanceMap(hero.pos, Dungeon.Polished.openTiles(), 9+1);
-			
-			for (Mob m : Dungeon.level.mobs) {
-				if (hero.fieldOfView[ m.pos ] && m.sprite.visible && m.alignment == Alignment.ENEMY) {
-					if(PathFinder.distance[m.pos] < Integer.MAX_VALUE) {
-						
-						if(!blocked && !m.polished.recentlySpot) {
-							if(hero.mobInterrupt(m)) {
-								GameScene.Polished.blockInput(0.75f);
-								blocked = true;
-							}
-						}
-						
-						noEnemiesLast = false;
-						m.polished.spot();
-						
-						// we dont need to handle m.polished.unseen()
-						// that's done later, after updating fov
-						
+			if (visionLast[ m.pos ] && distanceMap[ m.pos ] < Integer.MAX_VALUE &&
+				m.sprite.visible && m.alignment == Alignment.ENEMY) {
+				
+				if(SPDSettings.Polished.inputBlock() && !m.polished.recentlySpot) {
+					if(interrupted || hero.mobInterrupt(m)) {
+						GameScene.Polished.blockInput(0.75f);
 					}
 				}
+				return true;
 			}
+			return false;
 		}
 		
 		static boolean mobBlock(Mob mob, int[] distanceMap) {
@@ -409,10 +403,6 @@ public class Hero extends Char {
 		}
 		
 	}
-
-	//This list is maintained so that some logic checks can be skipped
-	// for enemies we know we aren't seeing normally, resulting in better performance
-	public ArrayList<Mob> mindVisionEnemies = new ArrayList<>();
 
 	public Hero() {
 		super();
@@ -1025,23 +1015,23 @@ public class Hero extends Char {
 	@Override
 	public boolean act() {
 		
-		//Do an interrupt check before updating fov to account for enemies entering the edge of your vision
-		Polished.checkVisionEdge();
-
-		//calls to dungeon.observe will also update hero's local FOV.
+		Polished.visionLast = fieldOfView;
 		fieldOfView = Dungeon.level.heroFOV;
+		
 		if (!ready) {
 			if (!resting || buff(MindVision.class) != null ||
 				buff(Awareness.class) != null || DirectableAlly.allyActive()) {
+				
 				//do a full observe - includes updates to fog, fog's edge, expertise
 				Dungeon.observe();
-			}
-			else {
+				
+			} else {
 				//otherwise just directly re-calculate FOV
 				Dungeon.level.updateFieldOfView(this, fieldOfView);
 			}
 		}
 		checkVisibleMobs();
+		Polished.visionLast = null;
 		
 		if (buff(Endure.EndureTracker.class) != null){
 			buff(Endure.EndureTracker.class).endEnduring();
@@ -1053,9 +1043,7 @@ public class Hero extends Char {
 		WealthDrop.refreshIndicators();
   
 		if (paralysed > 0) {
-			
 			curAction = null;
-			
 			spendAndNextConstant( TICK );
 			return false;
 		}
@@ -1941,7 +1929,7 @@ public class Hero extends Char {
 		boolean interrupted = false;
 		
 		boolean blocked = false;
-		PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), 9);
+		PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), 10);
 
 		Mob target = null;
 		for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
@@ -1951,13 +1939,12 @@ public class Hero extends Char {
 
 			if (fieldOfView[ m.pos ] && m.alignment == Alignment.ENEMY) {
 				visible.add(m);
+				
 				if (!visibleEnemies.contains( m )) {
 					newMob = true;
-					
 					if(!interrupted && mobInterrupt(m)) {
 						interrupted = true;
 					}
-
 					if(!blocked && interrupted && Polished.mobBlock(m, PathFinder.distance)) {
 						blocked = true;
 					}
@@ -1979,8 +1966,14 @@ public class Hero extends Char {
 					}
 				}
 				
+				Polished.noEnemiesLast = false;
 				m.polished.spot();
-			} else {
+			}
+			else if(Polished.checkVisionEdge(m, PathFinder.distance, interrupted)) {
+				Polished.noEnemiesLast = false;
+				m.polished.spot();
+			}
+			else {
 				m.polished.unseen();
 			}
 		}
