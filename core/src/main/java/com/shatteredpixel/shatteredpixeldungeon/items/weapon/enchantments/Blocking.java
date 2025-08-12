@@ -45,16 +45,17 @@ public class Blocking extends Weapon.Enchantment {
 	public int proc(Weapon weapon, Char attacker, Char defender, int damage) {
 		
 		int level = Math.max( 0, weapon.buffedLvl() );
-
-		// lvl 0 - 10%
-		// lvl 1 ~ 12%
-		// lvl 2 ~ 14%
-		float procChance = (level+4f)/(level+40f) * Polished_procChanceMultiplier(attacker, weapon);
+		
+		// lvl 0 - 20%
+		// lvl 1 ~ 22%
+		// lvl 3 ~ 25.5%
+		// lvl 10 - 36%
+		float procChance = (level+8f)/(level+40f) * Polished_procChanceMultiplier(attacker, weapon);
 		if (Random.Float() < procChance){
 			float powerMulti = Math.max(1f, procChance);
 
 			BlockBuff b = Buff.affect(attacker, BlockBuff.class);
-			int shield = Math.round(powerMulti * (2 + weapon.buffedLvl()));
+			int shield = Math.round(powerMulti * (4 + weapon.buffedLvl() / 2f));
 			b.setShield(shield);
 			attacker.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING);
 			attacker.sprite.emitter().burst(Speck.factory(Speck.LIGHT), 5);
@@ -74,6 +75,7 @@ public class Blocking extends Weapon.Enchantment {
 			type = buffType.POSITIVE;
 
 			shieldUsePriority = 2;
+			actPriority = HERO_PRIO+1;
 		}
 
 		private float left = 5f;
@@ -94,7 +96,13 @@ public class Blocking extends Weapon.Enchantment {
 			super.setShield(shield);
 			left = 5f;
 		}
-
+		
+		@Override
+		public int absorbDamage(int dmg) {
+			detach();
+			return super.absorbDamage(dmg);
+		}
+		
 		@Override
 		public void fx(boolean on) {
 			if (on) {
