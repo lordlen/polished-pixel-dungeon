@@ -245,7 +245,7 @@ public abstract class RegularLevel extends Level {
 		Point c = cellToPoint(entrance());
 		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 9);
 		
-		PathFinder.buildDistanceMap(entrance(), Dungeon.Polished.openTiles(), 9);
+		PathFinder.buildDistanceMap(entrance(), Dungeon.Polished.openTiles(this), 9);
 
 		Mob mob = null;
 		while (mobsToSpawn > 0) {

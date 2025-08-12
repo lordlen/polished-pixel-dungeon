@@ -288,6 +288,9 @@ public class Dungeon {
 		
 		
 		public static boolean[] openTiles() {
+			return openTiles(level);
+		}
+		public static boolean[] openTiles(Level level) {
 			boolean[] open = new boolean[level.length()];
 			for (int i = 0; i < level.length(); i++) {
 				open[i] = !level.solid[i] || !level.losBlocking[i] || level.passable[i];

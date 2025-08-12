@@ -837,7 +837,7 @@ public abstract class Level implements Bundlable {
 	}
 
 	public boolean spawnMob(int disLimit){
-		PathFinder.buildDistanceMap(Dungeon.hero.pos, Dungeon.Polished.openTiles(), disLimit);
+		PathFinder.buildDistanceMap(Dungeon.hero.pos, Dungeon.Polished.openTiles(this), disLimit);
 
 		Mob mob = createMob();
 		if (mob.state != mob.PASSIVE) {

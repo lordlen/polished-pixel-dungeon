@@ -408,7 +408,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 		
 		public static void relocateAll(Level level) {
-			PathFinder.buildDistanceMap(level.entrance(), Dungeon.Polished.openTiles(), 9);
+			PathFinder.buildDistanceMap(level.entrance(), Dungeon.Polished.openTiles(level), 9);
 			
 			for (Mob mob : level.mobs) {
 				if(mob.buff(ChampionEnemy.Growing.class) != null) {
