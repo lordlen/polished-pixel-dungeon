@@ -62,12 +62,12 @@ public class Alchemize extends InventorySpell {
 	
 	@Override
 	public int value() {
-		return (int)(15 * (quantity/(float)Recipe.OUT_QUANTITY));
+		return (int)(12 * (quantity/(float)Recipe.OUT_QUANTITY));
 	}
 
 	@Override
 	public int energyVal() {
-		return (int)(4 * (quantity/(float)Recipe.OUT_QUANTITY));
+		return (int)(3 * (quantity/(float)Recipe.OUT_QUANTITY));
 	}
 
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe {
@@ -83,7 +83,7 @@ public class Alchemize extends InventorySpell {
 		@Override
 		public int cost(ArrayList<Item> ingredients) {
 			if (ingredients.size() != 1) return 0;
-			return ingredients.get(0) instanceof Plant.Seed ? 2 : 1;
+			return ingredients.get(0) instanceof Plant.Seed ? 1 : 0;
 		}
 
 		@Override

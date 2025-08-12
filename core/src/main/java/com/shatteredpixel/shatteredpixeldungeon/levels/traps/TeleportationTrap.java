@@ -63,7 +63,7 @@ public class TeleportationTrap extends Trap {
 				Item item = heap.pickUp();
 
 				if (cell != -1) {
-					Dungeon.level.drop( item, cell );
+					Dungeon.level.drop( item, cell ).seen = true;
 					if (item instanceof Honeypot.ShatteredPot){
 						((Honeypot.ShatteredPot)item).movePot(pos, cell);
 					}

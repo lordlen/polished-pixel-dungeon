@@ -112,7 +112,7 @@ public class DM300 extends Mob {
 	public boolean supercharged = false;
 	public boolean chargeAnnounced = false;
 
-	private final int MIN_COOLDOWN = 5;
+	private final int MIN_COOLDOWN = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 6;
 	private final int MAX_COOLDOWN = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 7 : 9;
 
 	private int turnsSinceLastAbility = -1;
@@ -390,19 +390,21 @@ public class DM300 extends Mob {
 		}
 		Dungeon.hero.interrupt();
 
-		float gasMulti = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 1.5f : 1;
-
 		Ballistica trajectory = new Ballistica(pos, target.pos, Ballistica.STOP_TARGET);
 		int cell = trajectory.path.get(trajectory.dist+1);
 		if(Dungeon.level.solid[cell]) cell = trajectory.collisionPos;
-
-		GameScene.add(Blob.seed(cell, Math.round(100*gasMulti), ToxicGas.class));
+		
+		int gasToVent = 220;
+		float gasMulti = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 1.5f : 1;
+		
 		for (int i : PathFinder.NEIGHBOURS4){
 			if (!Dungeon.level.solid[cell+i]) {
 				GameScene.add(Blob.seed(cell + i, Math.round(30*gasMulti), ToxicGas.class));
+				gasToVent -= 30;
 			}
 		}
-
+		
+		GameScene.add(Blob.seed(cell, Math.round(gasToVent*gasMulti), ToxicGas.class));
 	}
 
 	public void onSlamComplete(){
@@ -759,7 +761,7 @@ public class DM300 extends Mob {
 		@Override
 		public void affectChar(Char ch) {
 			if (!(ch instanceof DM300) && !ch.isImmune(getClass())){
-				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 4);
+				Buff.Polished.prolongAligned(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 3);
 				if (ch == Dungeon.hero) {
 					Statistics.bossScores[2] -= 100;
 				}
