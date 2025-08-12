@@ -138,6 +138,8 @@ public class Dungeon {
 			};
 		}
 		
+		//IMPORTANT: callbacks get cleared on level switches to avoid problems.
+		//this should not be used during level transitions.
 		public static void runDelayed(Callback callback) {
 			Callback current = delayed;
 			delayed = () -> {
@@ -152,7 +154,7 @@ public class Dungeon {
 					timer = null;
 				});
 				
-				//this should never happen, clear the callback
+				//clear the callback before it's called
 				timer.onTransition(() -> {
 					delayed = () -> {};
 				});
@@ -719,6 +721,9 @@ public class Dungeon {
 		}
 		
 		Light light = hero.buff( Light.class );
+		if(light != null) {
+			light.onLevelSwitch();
+		}
 		hero.viewDistance = light == null ? level.viewDistance : Math.max( Light.DISTANCE, level.viewDistance );
 		
 		hero.curAction = hero.lastAction = null;

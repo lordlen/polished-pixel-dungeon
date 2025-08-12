@@ -21,12 +21,17 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
 
 public class Light extends FlavourBuff {
 	
@@ -63,6 +68,17 @@ public class Light extends FlavourBuff {
 			GameScene.updateFog(Dungeon.hero.pos, updateDist+1);
 		}
 		super.detach();
+	}
+	
+	public void onLevelSwitch() {
+		if(Dungeon.level != null && Dungeon.level.feeling == Level.Feeling.DARK) {
+			if(cooldown() > Math.round(DURATION * 2/3f)) {
+				spendConstant(Math.round(DURATION * 2/3f) - cooldown());
+				
+				Dungeon.Polished.runDelayed(() -> GLog.n(Messages.get(this, "dark")));
+				Sample.INSTANCE.playDelayed(Assets.Sounds.BURNING, 0.1f);
+			}
+		}
 	}
 
 	public void weaken( int amount ){

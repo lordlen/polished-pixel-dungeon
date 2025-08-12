@@ -46,12 +46,12 @@ public class WarpingTrap extends TeleportationTrap {
 
 	@Override
 	public void activate() {
-		if (pos == Dungeon.hero.pos || Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
+		boolean removeVision = pos == Dungeon.hero.pos || Dungeon.level.adjacent(pos, Dungeon.hero.pos);
+		super.activate();
+		
+		if(removeVision) {
 			Disoriented.applyToHero(scalingDepth() <= 5 ? Disoriented.DURATION : 2*Disoriented.DURATION);
 		}
-
-		super.activate();
-
 	}
 
 	public static class Disoriented extends FlavourBuff {

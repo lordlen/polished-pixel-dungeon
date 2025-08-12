@@ -793,7 +793,7 @@ public abstract class Mob extends Char {
 					Dungeon.hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(heal), FloatingText.HEALING);
 				}
 
-				//we specifically restore hunger after the heal check so starving characters don't heal
+				//we specifically restore hunger after the heal check so a starving hero doesn't heal
 				Buff.affect(Dungeon.hero, Hunger.class).affectHunger(restoration*Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)/3f);
 			}
 		}

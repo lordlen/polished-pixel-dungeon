@@ -834,7 +834,7 @@ public abstract class Level implements Bundlable {
 	}
 
 	public boolean spawnMob(int disLimit){
-		PathFinder.buildDistanceMap(Dungeon.hero.pos, BArray.or(passable, avoid, null));
+		PathFinder.buildDistanceMap(Dungeon.hero.pos, Dungeon.Polished.openTiles(), disLimit);
 
 		Mob mob = createMob();
 		if (mob.state != mob.PASSIVE) {
@@ -844,17 +844,18 @@ public abstract class Level implements Bundlable {
 		do {
 			mob.pos = randomRespawnCell(mob);
 			tries--;
-		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] <= disLimit) && tries > 0);
+		} while ((mob.pos == -1 || PathFinder.distance[mob.pos] < Integer.MAX_VALUE) && tries > 0);
 
-		if (Dungeon.hero.isAlive() && mob.pos != -1 && PathFinder.distance[mob.pos] > disLimit) {
+		if (Dungeon.hero.isAlive() && mob.pos != -1 && PathFinder.distance[mob.pos] == Integer.MAX_VALUE) {
 			GameScene.add( mob );
+			
 			if (!mob.buffs(ChampionEnemy.class).isEmpty()) {
 				for (ChampionEnemy champ : mob.buffs(ChampionEnemy.class)) {
 					Class<?> type = champ.getClass();
 					GLog.w(Messages.get(type, "warn"));
 					
 					if(champ instanceof ChampionEnemy.Growing) {
-						ChampionEnemy.Growing.relocateToExit(mob, this);
+						ChampionEnemy.Growing.relocateToExit(mob, this, PathFinder.distance, Math.min(disLimit, 10));
 					}
 				}
 			}
