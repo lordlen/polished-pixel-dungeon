@@ -138,6 +138,8 @@ public class Dungeon {
 			};
 		}
 		
+		//IMPORTANT: callbacks get cleared on level switches to avoid problems.
+		//this should not be used during level transitions.
 		public static void runDelayed(Callback callback) {
 			Callback current = delayed;
 			delayed = () -> {
@@ -152,7 +154,7 @@ public class Dungeon {
 					timer = null;
 				});
 				
-				//this should never happen, clear the callback
+				//clear the callback before it's called
 				timer.onTransition(() -> {
 					delayed = () -> {};
 				});

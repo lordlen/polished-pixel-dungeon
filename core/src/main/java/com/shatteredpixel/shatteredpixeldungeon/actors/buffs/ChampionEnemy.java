@@ -390,7 +390,6 @@ public abstract class ChampionEnemy extends Buff {
 			if(huntThreshold()) {
 				
 				if(target.buff(MagicalSleep.class) != null) {
-					Polished_huntNoti = false;
 					return;
 				}
 				if(Dungeon.hero.isStealthyTo(target) || mob.state == mob.FLEEING) {

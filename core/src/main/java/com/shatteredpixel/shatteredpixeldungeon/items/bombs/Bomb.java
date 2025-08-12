@@ -137,11 +137,9 @@ public class Bomb extends Item {
 		if(rowDrop) {
 			//avoid modifying the heap during pickup
 			Dungeon.Polished.runDelayed(() -> {
-				
 				WealthDrop.vanishVFX(pos);
 				Heap heap = Dungeon.level.heaps.get( pos );
 				if(heap != null) heap.pickUp();
-				
 			});
 			return false;
 		}

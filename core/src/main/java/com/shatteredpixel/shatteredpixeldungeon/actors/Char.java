@@ -658,8 +658,7 @@ public abstract class Char extends Actor {
 	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
 		
 		if (defender instanceof Hero){
-			Hero hero = (Hero) defender;
-			if(hero.damageInterrupt() && !hero.fieldOfView[attacker.pos]) {
+			if(((Hero) defender).damageInterrupt() && !defender.fieldOfView[attacker.pos]) {
 				GameScene.Polished.blockInput(0.75f);
 			}
 		}
