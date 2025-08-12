@@ -370,6 +370,14 @@ public class FloatingText extends RenderedTextBlock {
 		if (danceBoost > 1) hitReasons.put(HIT_DANCE, danceBoost);
 		
 		if (!(wep instanceof MissileWeapon)) {
+			if (attacker == Dungeon.hero &&
+				Dungeon.hero.heroClass != HeroClass.DUELIST &&
+				Dungeon.hero.hasTalent(Talent.PRECISE_ASSAULT))
+			{
+				//persistent +10%/20%/30% ACC for other heroes
+				hitReasons.put(HIT_PRES, 1f + 0.1f * Dungeon.hero.pointsInTalent(Talent.PRECISE_ASSAULT));
+			}
+			
 			if (attacker.buff(Talent.PreciseAssaultTracker.class) != null){
 				//has to be 3x, we already checked if it was infinite
 				hitReasons.put(HIT_PRES, 3f);
