@@ -275,25 +275,23 @@ public class GameScene extends PixelScene {
 			indicatorsQueued.put(mob, mob.pos);
 		}
 
-		public static void displayIndicators() {
-			try {
-				for(Mob mob : indicatorsQueued.keySet()) {
-					if(!Dungeon.hero.fieldOfView[mob.pos]) {
-						TargetedCell targeted = new TargetedCell(indicatorsQueued.get(mob), TargetedCell.YELLOW) {
-							float time = Actor.now();
-							@Override
-							protected boolean startFade() {
-								return Actor.now() > time || Dungeon.hero.curAction != null || !mob.isAlive();
-							}
-						};
-						
-						GameScene.effectOverFog(targeted);
-					}
+		public static void displayIndicators(Hero hero) {
+			if(indicatorsQueued.isEmpty() || !hero.validFov()) return;
+			
+			for(Mob mob : indicatorsQueued.keySet()) {
+				if(!hero.fieldOfView[mob.pos]) {
+					TargetedCell targeted = new TargetedCell(indicatorsQueued.get(mob), TargetedCell.YELLOW) {
+						final float time = Actor.now();
+						@Override
+						protected boolean startFade() {
+							return Actor.now() > time || hero.curAction != null || !mob.isAlive();
+						}
+					};
+					
+					GameScene.effectOverFog(targeted);
 				}
-				indicatorsQueued.clear();
-			} catch (Exception e) {
-				indicatorsQueued.clear();
 			}
+			indicatorsQueued.clear();
 		}
 		
 		public static void add( MobBuffDisplay indicator ) {
@@ -1694,9 +1692,6 @@ public class GameScene extends PixelScene {
 			KeyEvent.addKeyEvent(new KeyEvent(KeyBindings.getFirstKeyForAction(Polished.bufferedAction, false), false));
 			Polished.bufferedAction = null;
 		}
-
-		Polished.displayIndicators();
-		DirectableAlly.updateAllPaths();
 	}
 	
 	public static void checkKeyHold(){

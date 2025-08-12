@@ -1157,6 +1157,9 @@ public class Hero extends Char {
 		AttackIndicator.updateState();
 		DangerIndicator.enemyIndex = 0;
 		
+		GameScene.Polished.displayIndicators(this);
+		DirectableAlly.updateAllPaths();
+		
 		GameScene.ready();
 	}
 	
