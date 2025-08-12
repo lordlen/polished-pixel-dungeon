@@ -1070,7 +1070,8 @@ public class v1_0_X_PPDChanges {
 		);
 		
 		addChange(new SpiritHawk.HawkSprite(), "Spirit Hawk",
-				"Lifetime on Into Darkness (challenge): 100 turns -> 70 turns"
+				"Lifetime on Into Darkness (challenge):\n" +
+						"100 turns -> 70 turns"
 		);
 		// ***
 		
