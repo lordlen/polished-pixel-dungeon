@@ -43,12 +43,12 @@ public class Blocking extends Weapon.Enchantment {
 	public int proc(Weapon weapon, Char attacker, Char defender, int damage) {
 		
 		int level = Math.max( 0, weapon.buffedLvl() );
-
-		// lvl 0 - 18%
-		// lvl 1 ~ 19.5%
-		// lvl 2 ~ 21%
-		// lvl 3 ~ 22.5%
-		float procChance = (level+9f)/(level+50f) * Polished_procChanceMultiplier(attacker, weapon);
+		
+		// lvl 0 - 20%
+		// lvl 1 ~ 22%
+		// lvl 3 ~ 25.5%
+		// lvl 10 - 36%
+		float procChance = (level+8f)/(level+40f) * Polished_procChanceMultiplier(attacker, weapon);
 		if (Random.Float() < procChance){
 			float powerMulti = Math.max(1f, procChance);
 
