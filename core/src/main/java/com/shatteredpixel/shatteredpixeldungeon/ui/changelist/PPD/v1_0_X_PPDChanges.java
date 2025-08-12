@@ -1011,7 +1011,7 @@ public class v1_0_X_PPDChanges {
 	
 	public static void add_v1_5_Changes( ArrayList<ChangeInfo> changeInfos ) {
 		
-		addVersion(changeInfos, "v1.5.8");
+		addVersion(changeInfos, "v1.5.8-1.5.9");
 		
 		addSection(changeInfos, NEW);
 		// ***
@@ -1021,7 +1021,8 @@ public class v1_0_X_PPDChanges {
 		);
 		
 		addChange(Talent.HOLD_FAST, "Hold Fast",
-				"Since PPD berserker's shield doesn't decay with time, Hold Fast instead preserves 50%/75%/100% of remaining shield after rampage as regular shielding."
+				"Since PPD berserker's shield doesn't decay with time, Hold Fast instead preserves 50%/75%/100% of remaining shield " +
+						"after rampage as regular shielding."
 		);
 		// ***
 		
@@ -1033,13 +1034,43 @@ public class v1_0_X_PPDChanges {
 		);
 		
 		addChange(new Tomahawk(), "Tomahawk",
-				"Changes from PPD to Tomahawk discarded, now matches SPD 3.2"
+				"Numbers from PPD discarded, now matches SPD 3.2"
 		);
 		
-		addChange(Talent.PROJECTILE_MOMENTUM, "Projectile Momentum",
-				"Backtracked buffs from SPD 3.2:" +
+		addChange(BUGFIX(), "Bugfixes",
+				"- Directable allies no longer aggro enemies when the hero doesn't have the opportunity to cancel the command.\n" +
+						"- Directable allies now properly update their paths when swapping places with hero.\n" +
 						"\n" +
+						"- Metamorphed precise assault now correctly displays its hit icon."
+		);
+		
+		addChange(GAMEPLAY(), "Gameplay Adjustments",
+				"- Torch duration now gets shortened when entering a dark floor, to prevent players from skipping the penalty by lighting " +
+						"them on the previous floor.\n" +
+						"\n" +
+						"- Growing champions no longer spawn near the exit when the hero is nearby.\n" +
+						"\n" +
+						"- Pit rooms (distant well) now always connect to hallways."
+		);
+		// ***
+		
+		addSection(changeInfos, BUFFS);
+		// ***
+		addChange(new ImpSprite(), "Demon Halls Torches",
+				"Torches sold at Imp Shop: 2 -> 3\n" +
+						"(Reverted change, same as SPD)"
+		);
+		// ***
+		
+		addSection(changeInfos, NERFS);
+		// ***
+		addChange(Talent.PROJECTILE_MOMENTUM, "Projectile Momentum",
+				"Backtracked buff from SPD 3.2:\n" +
 						"Accuracy boost: 50%/100%/150% -> 33%/67%/100%"
+		);
+		
+		addChange(new SpiritHawk.HawkSprite(), "Spirit Hawk",
+				"Lifetime on Into Darkness (challenge): 100 turns -> 70 turns"
 		);
 		// ***
 		
@@ -1226,7 +1257,7 @@ public class v1_0_X_PPDChanges {
 		shield.enchant(Reflection.newInstance(Blocking.class));
 		addChange(shield, "Blocking Rework",
 				"- Shield strength: 2 + level -> 4 + level/2 (rounded)\n" +
-						"- Proc chance: 10%/12%/14%... -> 18%/19.5%/21%...\n" +
+						"- Proc chance: 10%/12%/14%... -> 20%/22%/24%...\n" +
 						"\n" +
 						"- Shielding now breaks after the first hit.\n" +
 						"- Duration: 6 turns -> 5 turns"
