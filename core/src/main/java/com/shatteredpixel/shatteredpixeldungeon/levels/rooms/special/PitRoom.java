@@ -30,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.keys.CrystalKey;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.connection.ConnectionRoom;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
@@ -112,5 +114,10 @@ public class PitRoom extends SpecialRoom {
 	@Override
 	public boolean canPlaceGrass(Point p) {
 		return false; //We want the player to be able to see the well through the door
+	}
+	
+	@Override
+	public boolean canConnect(Room r) {
+		return super.canConnect(r) && r instanceof ConnectionRoom; // don't lead the player directly into a room full of enemies
 	}
 }
