@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Identification;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -50,8 +51,11 @@ public class ScrollOfIdentify extends InventoryScroll {
 	protected void onItemSelected( Item item ) {
 		
 		curUser.sprite.parent.add( new Identification( curUser.sprite.center().offset( 0, -16 ) ) );
-
+		
 		IDItem(item);
+		for(Item similar : Dungeon.hero.belongings.getAllSimilar(item)) {
+			IDItem(similar);
+		}
 	}
 
 	public static void IDItem( Item item ){
