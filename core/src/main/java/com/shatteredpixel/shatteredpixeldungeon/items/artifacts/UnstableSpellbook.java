@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -182,10 +183,12 @@ public class UnstableSpellbook extends Artifact {
 						scroll.anonymize();
 						checkForArtifactProc(curUser, scroll);
 						scroll.doRead();
+						Invisibility.dispel();
 						Talent.onArtifactUsed(Dungeon.hero);
 					} else {
 						checkForArtifactProc(curUser, fScroll);
 						fScroll.doRead();
+						Invisibility.dispel();
 						Talent.onArtifactUsed(Dungeon.hero);
 					}
 					updateQuickslot();
@@ -199,6 +202,7 @@ public class UnstableSpellbook extends Artifact {
 		} else {
 			checkForArtifactProc(curUser, scroll);
 			scroll.doRead();
+			Invisibility.dispel();
 			Talent.onArtifactUsed(Dungeon.hero);
 		}
 
@@ -237,6 +241,7 @@ public class UnstableSpellbook extends Artifact {
 				@Override
 				public void call() {
 					scroll.doRead();
+					Invisibility.dispel();
 					Item.updateQuickslot();
 				}
 			});

@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HolyTome;
@@ -121,6 +122,9 @@ public class Sunray extends TargetedClericSpell {
 					Buff.prolong(ch, Blindness.class, Sunray.statusDuration(hero));
 					Buff.prolong(ch, SunRayRecentlyBlindedTracker.class, Sunray.statusDuration(hero));
 					Buff.affect(ch, SunRayUsedTracker.class);
+				}
+				if (hero.subClass == HeroSubClass.PRIEST){
+					Buff.affect(ch, GuidingLight.Illuminated.class);
 				}
 			}
 		}

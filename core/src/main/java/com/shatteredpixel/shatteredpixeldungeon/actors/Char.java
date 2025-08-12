@@ -323,7 +323,6 @@ public abstract class Char extends Actor {
 			if (Dungeon.hero.subClass == HeroSubClass.FREERUNNER){
 				Buff.affect(Dungeon.hero, Momentum.class).gainStack();
 			}
-			Dungeon.hero.justMoved = true;
 
 			Dungeon.hero.busy();
 		}
@@ -625,19 +624,19 @@ public abstract class Char extends Actor {
 		} else {
 
 			if (enemy.sprite != null){
-				if (tuftDodged){
+				if (hitMissIcon != -1){
 					//dooking is a playful sound Ferrets can make, like low pitched chirping
 					// I doubt this will translate, so it's only in English
-					if (Messages.lang() == Languages.ENGLISH && Random.Int(10) == 0) {
-						enemy.sprite.showStatusWithIcon(CharSprite.NEUTRAL, "dooked", FloatingText.TUFT);
+					if (hitMissIcon == FloatingText.MISS_TUFT && Messages.lang() == Languages.ENGLISH && Random.Int(10) == 0) {
+						enemy.sprite.showStatusWithIcon(CharSprite.NEUTRAL, "dooked", hitMissIcon);
 					} else {
-						enemy.sprite.showStatusWithIcon(CharSprite.NEUTRAL, enemy.defenseVerb(), FloatingText.TUFT);
+						enemy.sprite.showStatusWithIcon(CharSprite.NEUTRAL, enemy.defenseVerb(), hitMissIcon);
 					}
+					hitMissIcon = -1;
 				} else {
 					enemy.sprite.showStatus(CharSprite.NEUTRAL, enemy.defenseVerb());
 				}
 			}
-			tuftDodged = false;
 			if (visibleFight) {
 				//TODO enemy.defenseSound? currently miss plays for monks/crab even when they parry
 				Sample.INSTANCE.play(Assets.Sounds.MISS);
@@ -646,6 +645,7 @@ public abstract class Char extends Actor {
 			return false;
 			
 		}
+
 	}
 
 	public static int INFINITE_ACCURACY = 1_000_000;
@@ -670,7 +670,6 @@ public abstract class Char extends Actor {
 		if (attacker.isStealthyTo(defender) && attacker.canSurpriseAttack()) {
 			acuStat = INFINITE_ACCURACY;
 		}
-		//if(attacker.buff(ChampionEnemy.Blessed.class) != null) acuStat = INFINITE_ACCURACY;
 
 		if (defender.buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class) != null){
 			defStat = INFINITE_EVASION;
@@ -679,15 +678,17 @@ public abstract class Char extends Actor {
 		//if accuracy or evasion are large enough, treat them as infinite.
 		//note that infinite evasion beats infinite accuracy
 		if (defStat >= INFINITE_EVASION){
+			hitMissIcon = FloatingText.getMissReasonIcon(attacker, acuStat, defender, INFINITE_EVASION);
 			return false;
 		} else if (acuStat >= INFINITE_ACCURACY){
+			hitMissIcon = FloatingText.getHitReasonIcon(attacker, INFINITE_ACCURACY, defender, defStat);
 			return true;
 		}
 
 		float acuRoll = Random.Float( acuStat );
-		if (attacker.buff(Bless.class) != null) acuRoll *= 1.25f;
-		if (attacker.buff(  Hex.class) != null) acuRoll *= 0.75f;
-		if (attacker.buff( Daze.class) != null) acuRoll *= 0.5f;
+		if (attacker.buff(Bless.class) != null) acuRoll *= Bless.FACTOR;
+		if (attacker.buff(  Hex.class) != null) acuRoll *= Hex.FACTOR;
+		if (attacker.buff( Daze.class) != null) acuRoll *= Daze.FACTOR;
 		for (ChampionEnemy buff : attacker.buffs(ChampionEnemy.class)){
 			acuRoll *= buff.accuracyFactor();
 		}
@@ -705,9 +706,9 @@ public abstract class Char extends Actor {
 		acuRoll *= accMulti;
 
 		float defRoll = Random.Float( defStat );
-		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
-		if (defender.buff(  Hex.class) != null) defRoll *= 0.75f;
-		if (defender.buff( Daze.class) != null) defRoll *= 0.5f;
+		if (defender.buff(Bless.class) != null) defRoll *= Bless.FACTOR;
+		if (defender.buff(  Hex.class) != null) defRoll *= Hex.FACTOR;
+		if (defender.buff( Daze.class) != null) defRoll *= Daze.FACTOR;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
 			defRoll *= buff.evasionFactor();
 		}
@@ -718,17 +719,18 @@ public abstract class Char extends Actor {
 			// + 3%/5%
 			defRoll *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 		}
-
-		if (defRoll < acuRoll && (defRoll*FerretTuft.evasionMultiplier()) >= acuRoll){
-			tuftDodged = true;
-		}
 		defRoll *= FerretTuft.evasionMultiplier();
 
-		return acuRoll >= defRoll;
+		if (acuRoll >= defRoll){
+			hitMissIcon = FloatingText.getHitReasonIcon(attacker, acuRoll, defender, defRoll);
+			return true;
+		} else {
+			hitMissIcon = FloatingText.getMissReasonIcon(attacker, acuRoll, defender, defRoll);
+			return false;
+		}
 	}
 
-	//TODO this is messy and hacky atm, should consider standardizing this so we can have many 'dodge reasons'
-	private static boolean tuftDodged = false;
+	private static int hitMissIcon = -1;
 
 	public int attackSkill( Char target ) {
 		return 0;
@@ -1094,6 +1096,12 @@ public abstract class Char extends Actor {
 			if (src instanceof Viscosity.DeferedDamage)                 icon = FloatingText.DEFERRED;
 			if (src instanceof Corruption)                              icon = FloatingText.CORRUPTION;
 			if (src instanceof AscensionChallenge)                      icon = FloatingText.AMULET;
+
+			if ((icon == FloatingText.PHYS_DMG || icon == FloatingText.PHYS_DMG_NO_BLOCK) && hitMissIcon != -1){
+				if (icon == FloatingText.PHYS_DMG_NO_BLOCK) hitMissIcon += 18; //extra row
+				icon = hitMissIcon;
+			}
+			hitMissIcon = -1;
 
 			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), icon);
 		}
