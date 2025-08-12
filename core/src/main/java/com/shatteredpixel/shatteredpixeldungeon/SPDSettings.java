@@ -338,7 +338,7 @@ public class SPDSettings extends GameSettings {
 		
 		public static void huntress( boolean value ) { put(KEY_HUNTRESS, value); }
 		public static boolean huntress(){
-			return getBoolean(KEY_HUNTRESS, false);
+			return getBoolean(KEY_HUNTRESS, true);
 		}
 		
 		public static final String KEY_REMOVE_NOTES		= "remove_notes";

@@ -581,7 +581,7 @@ public class v1_0_X_PPDChanges {
 						"Instead, activates after spending 7/5 bow charges. Numbers adjusted.\n" +
 						"If gained by a different Hero, it will instead trigger when applying tipped darts.\n" +
 						"\n" +
-						"_IMPORTANT:_ To play the reworked version, you must activate the toggle at hero select screen!\n" +
+						"_IMPORTANT:_ To play with the reworked version, the toggle on the hero select screen must be active!\n" +
 						"If you don't like the new Huntress, you may turn off the toggle at any time, and continue playing the default version."
 		);
 		// ***
