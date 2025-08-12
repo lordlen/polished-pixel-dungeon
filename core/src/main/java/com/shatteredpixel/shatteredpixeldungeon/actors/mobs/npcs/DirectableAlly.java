@@ -363,7 +363,7 @@ public class DirectableAlly extends NPC {
 	public void updatePath() {
 		updateTarget();
 		
-		if(path == null) {
+		if(path == null || !Dungeon.level.adjacent(pos, path.getFirst())) {
 			calculatePath();
 		}
 		else if (path.getLast() != target) {
