@@ -721,6 +721,9 @@ public class Dungeon {
 		}
 		
 		Light light = hero.buff( Light.class );
+		if(light != null) {
+			light.onLevelSwitch();
+		}
 		hero.viewDistance = light == null ? level.viewDistance : Math.max( Light.DISTANCE, level.viewDistance );
 		
 		hero.curAction = hero.lastAction = null;
