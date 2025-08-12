@@ -37,6 +37,9 @@ public abstract class NPC extends Mob {
 	}
 	
 	public boolean visibleOnFog = false;
+	public boolean visibleOnFog() {
+		return visibleOnFog && Dungeon.level.visited[pos];
+	}
 
 	@Override
 	protected boolean act() {
