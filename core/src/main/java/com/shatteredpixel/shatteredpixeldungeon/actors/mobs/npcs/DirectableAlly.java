@@ -92,6 +92,8 @@ public class DirectableAlly extends NPC {
 	@Override
 	public void aggro(Char ch) {
 		if(state == PASSIVE) return;
+		//don't switch command unless hero has the opportunity to cancel it
+		if(!auto && cooldown() < Dungeon.hero.cooldown()) return;
 		
 		enemy = ch;
 		if(enemy != null) {
@@ -234,7 +236,6 @@ public class DirectableAlly extends NPC {
 	
 	void commandAggro(Char ch) {
 		enemy = ch;
-		
 		if(enemy != null) {
 			state = HUNTING;
 		}
@@ -244,9 +245,8 @@ public class DirectableAlly extends NPC {
 	}
 	
 	protected void defaultCommand(boolean onSpawn) {
-		
 		if(onSpawn) {
-			PathFinder.buildDistanceMap(pos, BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), 8);
+			PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), 8);
 			for (Mob mob : Dungeon.hero.getVisibleEnemies()) {
 				if(PathFinder.distance[mob.pos] < Integer.MAX_VALUE) {
 					defendPos(pos);
@@ -255,22 +255,22 @@ public class DirectableAlly extends NPC {
 			}
 			
 			followHero();
-			return;
 		}
-		
-		Char toAttack = null;
-		for (int i : PathFinder.NEIGHBOURS8) {
-			Char ch = Actor.findChar(pos+i);
-			if(ch != null && ch.alignment != alignment) {
-				toAttack = ch;
-				break;
+		else {
+			Char toAttack = null;
+			for (int i : PathFinder.NEIGHBOURS8) {
+				Char ch = Actor.findChar(pos+i);
+				if(ch != null && ch.alignment != alignment) {
+					toAttack = ch;
+					break;
+				}
 			}
-		}
-		
-		if(toAttack != null) {
-			targetChar(toAttack);
-		} else {
-			defendPos(pos);
+			
+			if(toAttack != null) {
+				targetChar(toAttack);
+			} else {
+				defendPos(pos);
+			}
 		}
 	}
 	
@@ -1008,7 +1008,7 @@ public class DirectableAlly extends NPC {
 		
 		// we delay it to prevent acting on its own,
 		// gives the player a chance to cancel the command
-		if(command == Command.NONE) {
+		if(command == Command.NONE && (auto || cooldown() >= Dungeon.hero.cooldown())) {
 			defaultCommand(false);
 		}
 		
@@ -1050,8 +1050,7 @@ public class DirectableAlly extends NPC {
 					
 					if(time() % 1 == 0) {
 						spend( TICK );
-					}
-					else {
+					} else {
 						//ensure we remain aligned
 						spendToWhole();
 					}
