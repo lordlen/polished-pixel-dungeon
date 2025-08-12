@@ -24,6 +24,10 @@ public class LandmarkBlob extends Blob {
             checkVisible = 0;
         }
         
+        if (area.isEmpty()) {
+            setupArea();
+        }
+        
         for (int i=area.top; i < area.bottom; i++) {
             for (int j = area.left; j < area.right; j++) {
                 int cell = j + i* Dungeon.level.width();
