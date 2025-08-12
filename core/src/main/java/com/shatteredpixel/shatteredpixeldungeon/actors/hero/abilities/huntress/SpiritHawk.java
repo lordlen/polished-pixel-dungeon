@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -75,6 +76,15 @@ public class SpiritHawk extends ArmorAbility {
 	
 	float chargeSummon(Hero hero) {
 		return super.chargeUse(hero);
+	}
+	
+	@Override
+	public String desc() {
+		return Messages.get(this, "desc", hawkDuration()) + "\n\n" + Messages.get(this, "cost", (int)baseChargeUse);
+	}
+	
+	public static int hawkDuration() {
+		return Dungeon.isChallenged(Challenges.DARKNESS) ? 70 : 100;
 	}
 	
 	private static HawkAlly hawk = null;
@@ -133,7 +143,7 @@ public class SpiritHawk extends ArmorAbility {
 				Item.updateQuickslot();
 				Invisibility.dispel();
 				
-				Buff.affect(Dungeon.hero, HawkTimer.class, HawkTimer.DURATION);
+				Buff.affect(Dungeon.hero, HawkTimer.class, hawkDuration());
             });
 		}
 	}
@@ -279,6 +289,10 @@ public class SpiritHawk extends ArmorAbility {
 		public String description() {
 			String message = Messages.get(this, "desc");
 			if (Actor.chars().contains(this)){
+				HawkTimer timer = Dungeon.hero.buff(HawkTimer.class);
+				if(timer != null) {
+					message += "\n\n" + Messages.get(HawkTimer.class, "desc", Messages.decimalFormat("#.##", timer.cooldown()));
+				}
 				if (dodgesUsed < 2*Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT)){
 					message += "\n" + Messages.get(this, "desc_dodges", (2*Dungeon.hero.pointsInTalent(Talent.SWIFT_SPIRIT) - dodgesUsed));
 				}
@@ -308,8 +322,6 @@ public class SpiritHawk extends ArmorAbility {
 			revivePersists = true;
 		}
 		
-		public static final float DURATION = 100f;
-		
 		@Override
 		public int icon() {
 			return BuffIndicator.SPIRIT_HAWK;
@@ -317,7 +329,7 @@ public class SpiritHawk extends ArmorAbility {
 		
 		@Override
 		public float iconFadePercent() {
-			return (DURATION - cooldown()) / DURATION;
+			return (hawkDuration() - cooldown()) / hawkDuration();
 		}
 		
 		@Override
