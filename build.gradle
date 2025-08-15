@@ -14,9 +14,9 @@ allprojects {
         appName = 'Polished Pixel Dungeon'
         appPackageName = 'com.polishedpixel.polishedpixeldungeon'
 
-        //just add the PPD version after the SPD code (859)
-        appVersionCode = 859100
-        appVersionName = '1.0.0-SPD3.2.0'
+        //just add the PPD version after the SPD code (861)
+        appVersionCode = 861100
+        appVersionName = '1.0.0-SPD3.2.1'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 
