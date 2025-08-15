@@ -65,6 +65,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAugmentation
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MossyClump;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
@@ -89,7 +90,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarScythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Whip;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ForceCube;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.HeavyBoomerang;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Tomahawk;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.BlindingDart;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.ChangesScene;
@@ -1011,18 +1014,18 @@ public class v1_0_X_PPDChanges {
 	
 	public static void add_v1_5_Changes( ArrayList<ChangeInfo> changeInfos ) {
 		
-		addVersion(changeInfos, "v1.5.8-1.5.9");
+		addVersion(changeInfos, "v1.5.8-1.5.10");
 		
 		addSection(changeInfos, NEW);
 		// ***
 		addChange(Icons.SHPX, "Shattered Pixel Dungeon 3.2",
 				"Polished Pixel Dungeon got updated to the latest SPD version:\n" +
-						"3.1.1 -> 3.2.0"
+						"3.1.1 -> 3.2.1"
 		);
 		
 		addChange(Talent.HOLD_FAST, "Hold Fast",
-				"Since PPD berserker's shield doesn't decay with time, Hold Fast instead preserves 50%/75%/100% of remaining shield " +
-						"after rampage as regular shielding."
+				"Since PPD berserker's rampage shield doesn't decay with time, Hold Fast instead preserves 50%/75%/100% of its " +
+						"remaining amount as regular shielding."
 		);
 		// ***
 		
@@ -1030,48 +1033,115 @@ public class v1_0_X_PPDChanges {
 		// ***
 		addChange(heroIcon(HeroClass.WARRIOR, 6), "Berserker",
 				"Nerfs from SPD discarded, since they don't interact with PPD version.\n" +
+						"\n" +
 						"Rampage accuracy boost shares its hit icon with swords dance."
 		);
 		
-		addChange(new Tomahawk(), "Tomahawk",
-				"Numbers from PPD discarded, now matches SPD 3.2"
+		addChange(new Tomahawk(), "Tomahawk and Bolas",
+				"Bleed/Cripple numbers from PPD discarded, now match SPD 3.2.1\n" +
+						"\n" +
+						"Bolas cripple still aligns itself on offset turn wheels, so its technically a bit higher."
 		);
 		
-		addChange(BUGFIX(), "Bugfixes",
-				"- Directable allies no longer aggro enemies when the hero doesn't have the opportunity to cancel the command.\n" +
-						"- Directable allies now properly update their paths when swapping places with hero.\n" +
+		addChange(Icons.TOXIC_GAS_ROOM, "Puzzle Rooms",
+				"_- Toxic Gas Rooms:_\n" +
+						"Now generate less gas. This means it dissipates faster after clearing the vents, and is much less likely to envelop items stuck on doors.\n" +
 						"\n" +
-						"- Metamorphed precise assault now correctly displays its hit icon."
+						"_- Pit Rooms (Distant Well):_\n" +
+						"Now always connect to hallways.\n" +
+						"\n" +
+						"_- Sentry Rooms:_\n" +
+						"Red sentries no longer charge/zap the Hero when there's not a clear shoot angle."
+		);
+		
+		addChange(Icons.SNAKE, "Mob Spawner",
+				"Initial floor spawn variance decreased, less likely to low/high roll.\n" +
+						"\n" +
+						"No longer has a random chance to fail a spawn when close to the mob limit.\n" +
+						"Instead, now always slows down a bit when close to it.\n" +
+						"\n" +
+						"When trying to spawn a mob when at the mob limit, now waits until a mob dies instead of fully resetting its cooldown.\n" +
+						"\n" +
+						"Mob limit on Demon Halls increased, to account for demon spawners."
 		);
 		
 		addChange(GAMEPLAY(), "Gameplay Adjustments",
 				"- Torch duration now gets shortened when entering a dark floor, to prevent players from skipping the penalty by lighting " +
 						"them on the previous floor.\n" +
 						"\n" +
+						"- Evil eyes, when charging from fog: now also play their sound, and show an indicator on top of the Hero. Note that " +
+						"they don't reveal their position.\n" +
+						"\n" +
 						"- Growing champions no longer spawn near the exit when the hero is nearby.\n" +
 						"\n" +
-						"- Pit rooms (distant well) now always connect to hallways."
+						"- Improvised Projectiles no longer has a lower duration on offset turn wheels."
+		);
+		
+		addChange(QOL(), "Quality of Life",
+				"- Goo will no longer wander into Rat King's room.\n" +
+						"\n" +
+						"- Alchemize can no longer sell energizable items. This prevents accidental missclicks, since energizing is always the better option anyway."
+		);
+		
+		addChange(BUGFIX(), "Bugfixes",
+				"- Directable allies no longer aggro enemies when the hero doesn't have the opportunity to cancel the command.\n" +
+						"- Directable allies now properly update their paths when swapping places with hero.\n" +
+						"\n" +
+						"- Hero no longer dodges attacks when wearing a stone armor.\n" +
+						"\n" +
+						"- Evil eyes now correctly play their zapping animation when targeting a visible character.\n" +
+						"\n" +
+						"- Metamorphed precise assault now correctly displays its hit icon.\n" +
+						"- Blazing and Shocking enchantments now correctly display their damage icon."
 		);
 		// ***
 		
 		addSection(changeInfos, BUFFS);
 		// ***
-		addChange(new ImpSprite(), "Demon Halls Torches",
-				"Torches sold at Imp Shop: 2 -> 3\n" +
-						"(Reverted change, same as SPD)"
+		addChange(new HeavyBoomerang(), "Heavy Boomerang",
+				"Reverted nerf from SPD 3.2.1:\n" +
+						"Circle back delay: 4 turns -> 3 turns"
+		);
+		
+		addChange(new ImpSprite(), "Imp Shop",
+				"Reverted nerf from PPD:\n" +
+						"Torches sold: 2 -> 3"
+		);
+		
+		addChange(new TelekineticGrab(), "Telekinetic Grab",
+				"_New:_ When targeting a tile, now also grabs all nearby items in a 3x3 area!\n" +
+						"\n" +
+						"No longer instantly picks up certain items, such as Throwing Clubs and Hammers."
+		);
+		
+		addChange(buffIcon(BuffIndicator.IMMUNITY), "Potion of Purity",
+				"Now also cleanses Burning, Chill and Corrosion when drank."
 		);
 		// ***
 		
 		addSection(changeInfos, NERFS);
 		// ***
+		addChange(new WandOfBlastWave(), "Wand of Blastwave",
+				"Reverted buff from SPD 3.2.1:\n" +
+						"Knockback on adjacent tiles:\n" +
+						"1.5 + level/2 -> 1 + level/2"
+		);
+		
 		addChange(Talent.PROJECTILE_MOMENTUM, "Projectile Momentum",
 				"Backtracked buff from SPD 3.2:\n" +
 						"Accuracy boost: 50%/100%/150% -> 33%/67%/100%"
 		);
 		
-		addChange(new SpiritHawk.HawkSprite(), "Spirit Hawk",
-				"Lifetime on Into Darkness (challenge):\n" +
+		addChange(new SpiritHawk.HawkSprite(), "Directable Allies",
+				"No longer share their vision with the Hero when their distance is higher than 10 tiles.\n" +
+						"\n" +
+						"_- Spirit Hawk:_\n" +
+						"Lifetime on Into Darkness (challenge):\n" +
 						"100 turns -> 70 turns"
+		);
+		
+		addChange(new BlindingDart(), "Blinding Dart",
+				"Blind duration: 7 turns -> 6 turns"
 		);
 		// ***
 		
@@ -1174,7 +1244,10 @@ public class v1_0_X_PPDChanges {
 		addChange(new Stylus(), "Glyphs",
 				"On-hit glyphs, and Glyph of Stone, now also activate against skeleton explosions.\n" +
 						"\n" +
-						"Glyph of Stone now also protects against magic attacks, instead of just disabling your evasion for no benefit."
+						"_- Glyph of Stone:_\n" +
+						"Now also protects against magic attacks, instead of just disabling your evasion for no benefit.\n" +
+						"\n" +
+						"Damage reduction: 75% of evasion -> 80% of evasion"
 		);
 		
 		ItemSprite shortsword = itemIcon(ItemSpriteSheet.SHORTSWORD);
@@ -1369,7 +1442,7 @@ public class v1_0_X_PPDChanges {
 		addSection(changeInfos, CHANGES);
 		// ***
 		addChange(heroIcon(HeroClass.CLERIC, 6), "Cleric",
-				"Backtracked some changes from the SPD 3.1 update:\n" +
+				"Reverted some changes from SPD 3.1:\n" +
 						"\n" +
 						"_- Guiding Light:_\n" +
 						"Base damage: 2-8 -> 2-6\n" +
@@ -1413,9 +1486,9 @@ public class v1_0_X_PPDChanges {
 		);
 		
 		addChange(new BrokenSeal(), "Broken Seal",
-				"Backtracked some nerfs from the SPD 3.1 update:\n" +
+				"Cooldown: 150 turns -> 120 turns\n" +
 						"\n" +
-						"Cooldown: 150 turns -> 120 turns\n" +
+						"Reverted nerf from SPD 3.1:\n" +
 						"Can be attached to cursed armor like before."
 		);
 		// ***
