@@ -149,33 +149,63 @@ public class QuickSlot {
 		}
 		return Random.element(result);
 	}
-
-	private final String PLACEHOLDERS = "placeholders";
-	private final String PLACEMENTS = "placements";
+	
+	//we store them separately to avoid crashes when transferring files to SPD
+	private final String PLACEHOLDERS_PPD 	= "placeholders_ppd";
+	private final String PLACEMENTS_PPD 	= "placements_ppd";
+	
+	public static final int SIZE_SPD = 6;
+	private final String PLACEHOLDERS_SPD 	= "placeholders";
+	private final String PLACEMENTS_SPD 	= "placements";
+	
 
 	/**
 	 * Placements array is used as order is preserved while bundling, but exact index is not, so if we
 	 * bundle both the placeholders (which preserves their order) and an array telling us where the placeholders are,
 	 * we can reconstruct them perfectly.
 	 */
-
+	
 	public void storePlaceholders(Bundle bundle){
 		ArrayList<Item> placeholders = new ArrayList<>(SIZE);
 		boolean[] placements = new boolean[SIZE];
-
+		
 		for (int i = 0; i < SIZE; i++) {
 			if (isPlaceholder(i)) {
 				placeholders.add(getItem(i));
 				placements[i] = true;
 			}
 		}
-		bundle.put( PLACEHOLDERS, placeholders );
-		bundle.put( PLACEMENTS, placements );
+		bundle.put(PLACEHOLDERS_PPD, placeholders );
+		bundle.put(PLACEMENTS_PPD, placements );
+		
+		
+		ArrayList<Item> placeholders_SPD = new ArrayList<>(SIZE_SPD);
+		boolean[] placements_SPD = new boolean[SIZE_SPD];
+		
+		for (int i = 0; i < SIZE_SPD; i++) {
+			if (isPlaceholder(i)) {
+				placeholders_SPD.add(getItem(i));
+				placements_SPD[i] = true;
+			}
+		}
+		bundle.put(PLACEHOLDERS_SPD, placeholders_SPD );
+		bundle.put(PLACEMENTS_SPD, placements_SPD );
 	}
 
 	public void restorePlaceholders(Bundle bundle){
-		Collection<Bundlable> placeholders = bundle.getCollection(PLACEHOLDERS);
-		boolean[] placements = bundle.getBooleanArray( PLACEMENTS );
+		Collection<Bundlable> placeholders;
+		boolean[] placements;
+		
+		if(bundle.contains(PLACEHOLDERS_PPD) && bundle.contains(PLACEMENTS_PPD)) {
+			placeholders = bundle.getCollection(PLACEHOLDERS_PPD);
+			placements = bundle.getBooleanArray(PLACEMENTS_PPD);
+		} else if(bundle.contains(PLACEHOLDERS_SPD) && bundle.contains(PLACEMENTS_SPD)) {
+			placeholders = bundle.getCollection(PLACEHOLDERS_SPD);
+			placements = bundle.getBooleanArray(PLACEMENTS_SPD);
+		} else {
+			placeholders = new ArrayList<>();
+			placements = new boolean[0];
+		}
 
 		int i = 0;
 		for (Bundlable item : placeholders){

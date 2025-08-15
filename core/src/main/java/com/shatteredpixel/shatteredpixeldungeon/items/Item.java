@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.FoundItems;
+import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -614,10 +615,13 @@ public class Item implements Bundlable {
 	private static final String LEVEL_KNOWN		= "levelKnown";
 	private static final String CURSED			= "cursed";
 	private static final String CURSED_KNOWN	= "cursedKnown";
-	private static final String QUICKSLOT		= "quickslotpos";
 	private static final String KEPT_LOST       = "kept_lost";
 	private static final String TO_FIND       	= "to_find";
 	private static final String CUSTOM_NOTE_ID = "custom_note_id";
+	
+	//we store them separately to avoid crashes when transferring files to SPD
+	private static final String QUICKSLOT_PPD 	= "quickslot_ppd";
+	private static final String QUICKSLOT_SPD 	= "quickslotpos";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -626,12 +630,17 @@ public class Item implements Bundlable {
 		bundle.put( LEVEL_KNOWN, levelKnown );
 		bundle.put( CURSED, cursed );
 		bundle.put( CURSED_KNOWN, cursedKnown );
-		if (Dungeon.quickslot.contains(this)) {
-			bundle.put( QUICKSLOT, Dungeon.quickslot.getSlot(this) );
-		}
 		bundle.put( KEPT_LOST, keptThoughLostInvent );
 		bundle.put( TO_FIND, Polished_levelGen);
 		if (customNoteID != -1)     bundle.put(CUSTOM_NOTE_ID, customNoteID);
+		
+		if (Dungeon.quickslot.contains(this)) {
+			int index = Dungeon.quickslot.getSlot(this);
+			bundle.put(QUICKSLOT_PPD, index );
+			if(index < QuickSlot.SIZE_SPD) {
+				bundle.put(QUICKSLOT_SPD, index );
+			}
+		}
 	}
 	
 	@Override
@@ -647,18 +656,24 @@ public class Item implements Bundlable {
 			degrade( -level );
 		}
 		
-		cursed	= bundle.getBoolean( CURSED );
-
+		cursed = bundle.getBoolean( CURSED );
+		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
+		
+		if (bundle.contains(CUSTOM_NOTE_ID)) {
+			customNoteID = bundle.getInt(CUSTOM_NOTE_ID);
+		}
+		
+		Polished_levelGen = bundle.getBoolean(TO_FIND);
+		//Polished_wealthDrops are managed externally
+		
 		//only want to populate slot on first load.
 		if (Dungeon.hero == null) {
-			if (bundle.contains(QUICKSLOT)) {
-				Dungeon.quickslot.setSlot(bundle.getInt(QUICKSLOT), this);
+			if (bundle.contains(QUICKSLOT_PPD)) {
+				Dungeon.quickslot.setSlot(bundle.getInt(QUICKSLOT_PPD), this);
+			} else if (bundle.contains(QUICKSLOT_SPD)) {
+				Dungeon.quickslot.setSlot(bundle.getInt(QUICKSLOT_SPD), this);
 			}
 		}
-
-		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
-		Polished_levelGen = bundle.getBoolean(TO_FIND);
-		if (bundle.contains(CUSTOM_NOTE_ID))    customNoteID = bundle.getInt(CUSTOM_NOTE_ID);
 	}
 
 	public int targetingPos( Hero user, int dst ){
