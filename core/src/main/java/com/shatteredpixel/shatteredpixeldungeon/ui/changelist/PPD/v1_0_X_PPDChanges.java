@@ -1058,7 +1058,7 @@ public class v1_0_X_PPDChanges {
 		// ***
 		addChange(new ImpSprite(), "Demon Halls Torches",
 				"Torches sold at Imp Shop: 2 -> 3\n" +
-						"(Reverted change, same as SPD)"
+						"(This is a revert, same as SPD)"
 		);
 		// ***
 		
