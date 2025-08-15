@@ -83,7 +83,7 @@ public class TelekineticGrab extends TargetedSpell {
 				Item item = ch.buff(PinCushion.class).grabOne();
 
 				if (item.doPickUp(hero, ch.pos)) {
-					hero.spend(-Item.TIME_TO_PICK_UP); //casting the spell already takes a turn
+					hero.spend(-hero.cooldown()); //casting the spell already takes a turn
 					GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
 
 				} else {
@@ -130,7 +130,7 @@ public class TelekineticGrab extends TargetedSpell {
 						
 						if (successful) {
 							h.pickUp();
-							hero.spend(-Item.TIME_TO_PICK_UP); //casting the spell already takes a turn
+							hero.spend(-hero.cooldown()); //casting the spell already takes a turn
 							
 							if(offset != 0) {
 								CellEmitter.get(bolt.collisionPos + offset).start(Speck.factory(Speck.LIGHT), 0.2f, 3);
@@ -158,34 +158,6 @@ public class TelekineticGrab extends TargetedSpell {
 					}
 				}
 			}
-			
-			/*if (Dungeon.level.heaps.get(bolt.collisionPos) != null){
-				
-				Heap h = Dungeon.level.heaps.get(bolt.collisionPos);
-				
-				if (h.type != Heap.Type.HEAP){
-					GLog.w(Messages.get(this, "cant_grab"));
-					h.sprite.drop();
-					return;
-				}
-				
-				while (!h.isEmpty()) {
-					Item item = h.peek();
-					if (item.doPickUp(hero, h.pos)) {
-						h.pickUp();
-						hero.spend(-Item.TIME_TO_PICK_UP); //casting the spell already takes a turn
-						GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
-						
-					} else {
-						GLog.w(Messages.get(this, "cant_grab"));
-						h.sprite.drop();
-						return;
-					}
-				}
-				
-			} else {
-				GLog.w(Messages.get(this, "no_target"));
-			}*/
 		}
 
 	}
