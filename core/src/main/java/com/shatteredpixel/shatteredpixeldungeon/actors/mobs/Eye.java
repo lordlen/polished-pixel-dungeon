@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -37,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DisintegrationTrap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -44,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.EyeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -132,15 +135,17 @@ public class Eye extends Mob {
 		if (beamCooldown > 0 || (!beamCharged && !beam.subPath(1, beam.dist).contains(enemy.pos))) {
 			return super.doAttack(enemy);
 		} else if (!beamCharged){
-			((EyeSprite)sprite).charge( enemy.pos );
-			spend( attackDelay()*2f );
-			beamCharged = true;
+			chargeGaze();
 			return true;
 		} else {
 
 			spend( attackDelay() );
 			
-			if (Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[beam.collisionPos] ) {
+			Level level = Dungeon.level;
+			if( level.heroFOV[pos] || level.heroFOV[beam.collisionPos] ||
+				beam.path.contains(Dungeon.hero.pos) ||
+				( beam.path.contains(enemy.pos) && level.heroFOV[enemy.pos] ))
+			{
 				sprite.zap( beam.collisionPos );
 				return false;
 			} else {
@@ -166,6 +171,23 @@ public class Eye extends Mob {
 	
 	//used so resistances can differentiate between melee and magical attacks
 	public static class DeathGaze{}
+	
+	public void chargeGaze() {
+		((EyeSprite)sprite).charge( enemy.pos );
+		spend( attackDelay()*2f );
+		beamCharged = true;
+		
+		if(Dungeon.level.heroFOV[pos]) {
+			Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
+		} else if(enemy == Dungeon.hero) {
+			Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
+			sprite.parent.add(new TargetedCell(enemy.pos));
+		}
+		
+		if(enemy == Dungeon.hero) {
+			Dungeon.hero.interrupt();
+		}
+	}
 
 	public void deathGaze(){
 		if (!beamCharged || beamCooldown > 0 || beam == null)
