@@ -105,7 +105,6 @@ public class EyeSprite extends MobSprite {
 	public void charge( int pos ){
 		turnTo(ch.pos, pos);
 		play(charging);
-		if (visible) Sample.INSTANCE.play( Assets.Sounds.CHARGEUP );
 	}
 
 	@Override
