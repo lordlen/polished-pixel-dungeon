@@ -595,6 +595,9 @@ public abstract class Char extends Actor {
 				}
 				combinedLethality.detach();
 			}
+			
+			Weapon.EncumbranceRollTracker encumbrance = buff(Weapon.EncumbranceRollTracker.class);
+			if(encumbrance != null) encumbrance.detach();
 
 			if (enemy.sprite != null) {
 				enemy.sprite.bloodBurstA(sprite.center(), effectiveDamage);
@@ -623,6 +626,9 @@ public abstract class Char extends Actor {
 			return true;
 			
 		} else {
+			
+			Weapon.EncumbranceRollTracker encumbrance = buff(Weapon.EncumbranceRollTracker.class);
+			if(encumbrance != null) encumbrance.detach();
 
 			if (enemy.sprite != null){
 				if (hitMissIcon != -1){

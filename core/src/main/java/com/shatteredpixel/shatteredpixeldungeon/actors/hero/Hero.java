@@ -925,8 +925,12 @@ public class Hero extends Char {
 		KindOfWeapon w = belongings.attackingWeapon();
 		if (!(w instanceof Weapon))             return true;
 		if (RingOfForce.fightingUnarmed(this))  return true;
-		if (STR() < ((Weapon)w).STRReq())       return false;
 		if (w instanceof Flail)                 return false;
+		
+		Weapon weapon = (Weapon) w;
+		if (STR() < weapon.STRReq() && !weapon.encumbranceSurpriseRoll(this)) {
+			return false;
+		}
 
 		return super.canSurpriseAttack();
 	}

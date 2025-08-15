@@ -26,6 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -299,6 +301,25 @@ abstract public class Weapon extends KindOfWeapon {
 		}
 
 		return encumbrance > 0 ? (float)(ACC / Math.pow( 1.5, encumbrance )) : ACC;
+	}
+	
+	public boolean encumbranceSurpriseRoll(Hero owner) {
+		EncumbranceRollTracker tracker = owner.buff(EncumbranceRollTracker.class);
+		if(tracker != null) return tracker.surprised;
+		
+		//has a 50%/25%/12.5%... chance to surprise attack based on encumbrance
+		boolean surprised = Random.Int((int)Math.pow(2, STRReq() - owner.STR())) == 0;
+		
+		//use a tracker to make sure we don't reroll the chance for the same hit
+		Buff.affect(owner, EncumbranceRollTracker.class).surprised = surprised;
+		return surprised;
+	}
+	
+	public static class EncumbranceRollTracker extends FlavourBuff {
+		{
+			actPriority = VFX_PRIO;
+		}
+		boolean surprised;
 	}
 	
 	@Override
