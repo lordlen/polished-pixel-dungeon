@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.RatKing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
@@ -62,6 +63,8 @@ public class Goo extends Mob {
 		properties.add(Property.BOSS);
 		properties.add(Property.DEMONIC);
 		properties.add(Property.ACIDIC);
+		
+		WANDERING = new Wandering();
 	}
 
 	private int pumpedUp = 0;
@@ -364,6 +367,50 @@ public class Goo extends Mob {
 		if ((HP*2 <= HT)) BossHealthBar.bleed(true);
 
 		healInc = bundle.getInt(HEALINC);
+	}
+	
+	
+	protected class Wandering extends Mob.Wandering{
+		@Override
+		protected int randomDestination() {
+			
+			// avoid wandering into ratking's treasure room
+			// rooms aren't stored in boss levels, so we use a hacky solution
+			
+			RatKing rk = null;
+			for(Mob mob : Dungeon.level.mobs) {
+				if(mob instanceof RatKing) {
+					rk = (RatKing) mob;
+					break;
+				}
+			}
+			
+			// if the player wakes up the all mighty king, they lose their precious protection
+			if(rk == null || rk.state != rk.SLEEPING) {
+				return super.randomDestination();
+			}
+			
+			// we have to save a copy since randomDestination() overwrites the distance map
+			PathFinder.buildDistanceMap(rk.pos, Dungeon.level.openSpace);
+			int[] distanceMap = PathFinder.distance.clone();
+			
+			int cell;
+			boolean valid;
+			int tries = 10;
+			do {
+				cell = super.randomDestination();
+				valid = true;
+				
+				for (int offset : PathFinder.NEIGHBOURS9) {
+					if(distanceMap[cell+offset] != Integer.MAX_VALUE) {
+						valid = false;
+						break;
+					}
+				}
+			} while(!valid && tries-- > 0);
+			
+			return cell;
+		}
 	}
 	
 }
