@@ -149,6 +149,13 @@ public class HallsLevel extends RegularLevel {
 	}
 	
 	@Override
+	public int mobLimit() {
+		//higher than usual, account for demon spawners
+		//initial mob spawns unchanged
+		return super.mobLimit() + 2;
+	}
+	
+	@Override
 	public String tileName( int tile ) {
 		switch (tile) {
 			case Terrain.WATER:

@@ -47,7 +47,8 @@ public class MobSpawner extends Actor {
 			}
 
 		} else {
-			spend(Dungeon.level.respawnCooldown());
+			//try again in 10 turns
+			spend(10*TICK);
 		}
 
 		return true;

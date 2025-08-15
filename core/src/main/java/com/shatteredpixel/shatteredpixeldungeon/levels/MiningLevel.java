@@ -154,6 +154,12 @@ public class MiningLevel extends CavesLevel {
 		//1 fewer than usual
 		return super.mobLimit()-1;
 	}
+	
+	@Override
+	public int mobsToSpawn() {
+		//1 fewer than usual
+		return super.mobsToSpawn()-1;
+	}
 
 	@Override
 	public Mob createMob() {
