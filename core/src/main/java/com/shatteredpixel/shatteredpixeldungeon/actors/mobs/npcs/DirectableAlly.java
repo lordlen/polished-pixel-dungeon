@@ -568,7 +568,9 @@ public class DirectableAlly extends NPC {
 		if(!level.heroFOV[step]) {
 			sprite.visible = true;
 			level.heroFOV[step] = true;
+			
 			level.visited[step] = true;
+			level.fogEdge[step] = true;
 			//we shouldn't need to handle fog updates here
 		}
 	}
