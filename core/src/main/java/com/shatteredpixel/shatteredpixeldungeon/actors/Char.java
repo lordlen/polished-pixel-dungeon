@@ -596,7 +596,7 @@ public abstract class Char extends Actor {
 				combinedLethality.detach();
 			}
 			
-			Weapon.EncumbranceTracker encumbrance = buff(Weapon.EncumbranceTracker.class);
+			Weapon.EncumbranceRollTracker encumbrance = buff(Weapon.EncumbranceRollTracker.class);
 			if(encumbrance != null) encumbrance.detach();
 
 			if (enemy.sprite != null) {
@@ -626,6 +626,9 @@ public abstract class Char extends Actor {
 			return true;
 			
 		} else {
+			
+			Weapon.EncumbranceRollTracker encumbrance = buff(Weapon.EncumbranceRollTracker.class);
+			if(encumbrance != null) encumbrance.detach();
 
 			if (enemy.sprite != null){
 				if (tuftDodged){

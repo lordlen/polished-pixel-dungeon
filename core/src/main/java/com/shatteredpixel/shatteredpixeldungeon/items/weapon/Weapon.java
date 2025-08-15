@@ -288,18 +288,18 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 	
 	public boolean encumbranceSurpriseRoll(Hero owner) {
-		EncumbranceTracker tracker = owner.buff(EncumbranceTracker.class);
+		EncumbranceRollTracker tracker = owner.buff(EncumbranceRollTracker.class);
 		if(tracker != null) return tracker.surprised;
 		
 		//has a 50%/25%/12.5%... chance to surprise attack based on encumbrance
 		boolean surprised = Random.Int((int)Math.pow(2, STRReq() - owner.STR())) == 0;
 		
 		//use a tracker to make sure we don't reroll the chance for the same hit
-		Buff.affect(owner, EncumbranceTracker.class).surprised = surprised;
+		Buff.affect(owner, EncumbranceRollTracker.class).surprised = surprised;
 		return surprised;
 	}
 	
-	public static class EncumbranceTracker extends FlavourBuff {
+	public static class EncumbranceRollTracker extends FlavourBuff {
 		{
 			actPriority = VFX_PRIO;
 		}
