@@ -26,6 +26,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlobImmunity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corrosion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -94,6 +97,17 @@ public class PotionOfPurity extends Potion {
 		GLog.w( Messages.get(this, "protected") );
 		Buff.prolong( hero, BlobImmunity.class, 3*BlobImmunity.DURATION );
 		SpellSprite.show(hero, SpellSprite.PURITY);
+		
+		if(hero.buff(Burning.class) != null) {
+			hero.buff(Burning.class).detach();
+		}
+		if(hero.buff(Chill.class) != null) {
+			hero.buff(Chill.class).detach();
+		}
+		for(Corrosion corrosion : hero.buffs(Corrosion.class)) {
+			corrosion.detach();
+		}
+		
 		identify();
 	}
 	
