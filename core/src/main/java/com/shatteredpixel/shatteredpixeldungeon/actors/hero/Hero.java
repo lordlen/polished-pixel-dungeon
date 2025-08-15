@@ -262,18 +262,19 @@ public class Hero extends Char {
 			Hero hero = Dungeon.hero;
 			if(newLvl > hero.lvl) {
 				int diff = newLvl - hero.lvl;
-				Dungeon.hero.attackSkill+=diff;
-				Dungeon.hero.defenseSkill+=diff;
+				hero.attackSkill+=diff;
+				hero.defenseSkill+=diff;
 				
 				hero.lvl = newLvl;
 				hero.updateHT(true);
-				
-				SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
-				if(bow != null) bow.Polished_resetCharges();
 			}
-			
 			hero.STR = Math.max(hero.STR, newStr);
 			
+			SpiritBow bow = hero.belongings.getItem(SpiritBow.class);
+			if(bow != null) bow.Polished_resetCharges();
+			
+			MeleeWeapon.Charger charger = hero.buff(MeleeWeapon.Charger.class);
+			if(charger != null) charger.gainCharge(charger.chargeCap() - charger.charges);
 		}
 		
 		public static boolean resuming = false;
