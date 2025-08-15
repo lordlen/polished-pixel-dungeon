@@ -83,6 +83,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -1245,7 +1246,10 @@ public class Hero extends Char {
 			
 		} else {
 			
-			if (fieldOfView[ch.pos] && getCloser( ch.pos )) {
+			boolean visible = fieldOfView[ch.pos] ||
+					(ch instanceof NPC && ((NPC) ch).visibleOnFog());
+			
+			if (visible && getCloser( ch.pos )) {
 
 				return true;
 
@@ -2176,9 +2180,16 @@ public class Hero extends Char {
 		Heap heap = level.heaps.get( cell );
 		LevelTransition transition = level.getTransition(cell);
 		
+		boolean isMobVisible =
+				ch instanceof Mob && (fieldOfView[ch.pos] ||
+				( ch instanceof NPC && ((NPC) ch).visibleOnFog() ));
+		
+		boolean isHeapVisible = heap != null && heap.seen;
+		boolean isTransitionVisible = transition != null && ( level.visited[cell] || level.mapped[cell] );
+		
 		boolean nearbyMobs = false;
-		if((heap != null && heap.seen) || transition != null) {
-			int limit = heap != null && heap.seen ? 10 : 8;
+		if(isHeapVisible || isTransitionVisible) {
+			int limit = isHeapVisible ? 10 : 8;
 			PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), limit);
 			
 			for(Mob mob : visibleEnemies) {
@@ -2196,8 +2207,8 @@ public class Hero extends Char {
 			//remove old path
 			path = null;
 			
-			if(!(fieldOfView[cell] && ch instanceof Mob)) {
-				//if we're not attacking, forget previous action
+			if(!isMobVisible) {
+				//if we're not attacking/interacting, forget previous action
 				lastAction = null;
 			}
 		}
@@ -2206,7 +2217,7 @@ public class Hero extends Char {
 			
 			curAction = new HeroAction.Alchemy( cell );
 			
-		} else if (fieldOfView[cell] && ch instanceof Mob) {
+		} else if (isMobVisible) {
 
 			if (((Mob) ch).heroShouldInteract()) {
 				curAction = new HeroAction.Interact( ch );
@@ -2224,7 +2235,7 @@ public class Hero extends Char {
 
 			curAction = new HeroAction.Mine( cell );
 
-		} else if (heap != null && heap.seen
+		} else if (isHeapVisible
 				//moving to an item doesn't auto-pickup when enemies are near...
 				&& (!nearbyMobs || cell == pos ||
 				//...but only for standard heaps. Chests and similar open as normal.
@@ -2247,7 +2258,7 @@ public class Hero extends Char {
 			
 			curAction = new HeroAction.Unlock( cell );
 			
-		} else if (transition != null
+		} else if (isTransitionVisible
 				//moving to a transition doesn't automatically trigger it when enemies are near
 				&& (!nearbyMobs || cell == pos)
 				&& !Dungeon.level.locked

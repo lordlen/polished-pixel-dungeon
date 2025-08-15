@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 
 public abstract class NPC extends Mob {
 
@@ -33,6 +34,11 @@ public abstract class NPC extends Mob {
 
 		alignment = Alignment.NEUTRAL;
 		state = PASSIVE;
+	}
+	
+	public boolean visibleOnFog = false;
+	public boolean visibleOnFog() {
+		return visibleOnFog && Dungeon.level.visited[pos];
 	}
 
 	@Override
@@ -44,6 +50,31 @@ public abstract class NPC extends Mob {
 		return super.act();
 	}
 
+	@Override
+	public void move(int step, boolean travelling) {
+		super.move(step, travelling);
+		if(visibleOnFog && Dungeon.level.visited[pos]) {
+			sprite.visible = true;
+		}
+	}
+	
+	@Override
+	protected boolean moveSprite(int from, int to) {
+		Level level = Dungeon.level;
+		if (visibleOnFog && !level.heroFOV[to] &&
+			( level.visited[from] || level.visited[to] )) {
+			
+			//a bit messy, ensure the animation plays out
+			Dungeon.level.heroFOV[to] = true;
+			boolean result = super.moveSprite(from, to);
+			Dungeon.level.heroFOV[to] = false;
+			return result;
+		}
+		else {
+			return super.moveSprite(from, to);
+		}
+	}
+	
 	@Override
 	public void beckon( int cell ) {
 	}
