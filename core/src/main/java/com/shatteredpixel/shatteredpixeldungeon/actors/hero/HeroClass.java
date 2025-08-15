@@ -270,6 +270,9 @@ public enum HeroClass {
 	}
 
 	public String desc(){
+		if(this == HUNTRESS && SPDSettings.Polished.huntress()) {
+			return Messages.get(HeroClass.class, "polished_"+name()+"_desc");
+		}
 		return Messages.get(HeroClass.class, name()+"_desc");
 	}
 
