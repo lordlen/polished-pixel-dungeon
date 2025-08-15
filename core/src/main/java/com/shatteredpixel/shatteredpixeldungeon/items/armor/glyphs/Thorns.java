@@ -41,11 +41,18 @@ public class Thorns extends Armor.Glyph {
 		// lvl 1 - 23.1%
 		// lvl 2 - 28.5%
 		float procChance = (level+2f)/(level+12f) * procChanceMultiplier(defender);
+		procChance = 1f;
 		if ( attacker.alignment != defender.alignment && Random.Float() < procChance ) {
 
 			float powerMulti = Math.max(1f, procChance);
-
-			Buff.affect( attacker, Bleeding.class).set( Math.round((4 + level)*powerMulti) );
+			float bleed = (4 + level)*powerMulti;
+			
+			if(!Char.hasProp(attacker, Char.Property.INORGANIC)) {
+				Buff.affect( attacker, Bleeding.class).set( Math.round(bleed) );
+			}
+			else if(attacker.HP > 0) {
+				attacker.damage(Math.round(Random.Float(1.25f, 2.5f) * bleed), this);
+			}
 
 		}
 
