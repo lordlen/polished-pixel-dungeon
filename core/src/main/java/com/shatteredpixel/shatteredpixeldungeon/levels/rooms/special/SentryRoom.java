@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Eye;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
@@ -46,6 +47,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.EmptyRoom;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -279,44 +281,47 @@ public class SentryRoom extends SpecialRoom {
 		@Override
 		protected boolean act() {
 			if(paralysed > 0) return super.act();
-
-			if (Dungeon.level.heroFOV[pos]){
+			
+			Level level = Dungeon.level;
+			Hero hero = Dungeon.hero;
+			if (!validFov()){
+				fieldOfView = new boolean[level.length()];
+			}
+			level.updateFieldOfView( this, fieldOfView );
+			
+			if (level.heroFOV[pos]){
 				Bestiary.setSeen(getClass());
 			}
-
-			if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
-				fieldOfView = new boolean[Dungeon.level.length()];
-			}
-			Dungeon.level.updateFieldOfView( this, fieldOfView );
-
+			
 			if (properties().contains(Property.IMMOVABLE)){
 				throwItems();
 			}
-
-			if (Dungeon.hero != null){
-				if (fieldOfView[Dungeon.hero.pos]
-						&& (Dungeon.level.map[Dungeon.hero.pos] == Terrain.EMPTY_SP || Dungeon.level.map[Dungeon.hero.pos] == Terrain.WATER)
-						&& room.inside(Dungeon.level.cellToPoint(Dungeon.hero.pos))
-						&& !Dungeon.hero.belongings.lostInventory()){
+			
+			if (hero != null){
+				Ballistica aim = new Ballistica(pos, hero.pos, Ballistica.PROJECTILE);
+				if (fieldOfView[hero.pos] && aim.collisionPos == hero.pos
+						&& ( level.map[hero.pos] == Terrain.EMPTY_SP || level.map[hero.pos] == Terrain.WATER )
+						&& room.inside(level.cellToPoint(hero.pos))
+						&& !hero.belongings.lostInventory()){
 
 					if (curChargeDelay > 0.001f){ //helps prevent rounding errors
 						if (curChargeDelay == initialChargeDelay) {
 							((SentrySprite) sprite).charge();
 						}
-						curChargeDelay -= Dungeon.hero.cooldown();
+						curChargeDelay -= hero.cooldown();
 						//pity mechanic so mistaps don't get people instakilled
-						if (Dungeon.hero.cooldown() >= 0.34f){
-							Dungeon.hero.interrupt();
+						if (hero.cooldown() >= 0.34f){
+							hero.interrupt();
 						}
 					}
-
+					
 					if (curChargeDelay <= .001f){
 						curChargeDelay = 1f;
-						sprite.zap(Dungeon.hero.pos);
+						sprite.zap(hero.pos);
 						((SentrySprite) sprite).charge();
 					}
 
-					spend(Dungeon.hero.cooldown());
+					spend(hero.cooldown());
 					return true;
 
 				} else {
@@ -324,7 +329,7 @@ public class SentryRoom extends SpecialRoom {
 					sprite.idle();
 				}
 
-				spend(Dungeon.hero.cooldown());
+				spend(hero.cooldown());
 			} else {
 				spend(1f);
 			}

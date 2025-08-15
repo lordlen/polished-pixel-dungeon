@@ -58,7 +58,7 @@ public class ToxicGasRoom extends SpecialRoom {
 			int cell = level.pointToCell(p);
 			if (level.map[cell] == Terrain.EMPTY) {
 				//as if gas has been spreading in the room for a while
-				Blob.seed(cell, 30, ToxicGas.class, level);
+				Blob.seed(cell, 20, ToxicGas.class, level);
 				
 				//landmark
 				Blob.seed(cell, 1, GasID.class, level);
@@ -66,14 +66,25 @@ public class ToxicGasRoom extends SpecialRoom {
 		}
 
 		int traps = Math.min(width()-2, height()-2);
-
+		int closeTrapsLimit = 2;
+		
+		int door = level.pointToCell(entrance());
 		for (int i = 0; i < traps; i++){
+			
 			int cell;
+			boolean close;
+			int tries = 30;
 			do {
 				cell = level.pointToCell(random(2));
-			} while (level.map[cell] != Terrain.EMPTY);
+				close = level.distance(cell, door) <= 2;
+			} while (tries-- > 0 && (level.map[cell] != Terrain.EMPTY || (closeTrapsLimit <= 0 && close)));
+			
+			if(close) {
+				closeTrapsLimit--;
+			}
+			
 			level.setTrap(new ToxicVent().reveal(), cell);
-			Blob.seed(cell, 12, ToxicGasSeed.class, level);
+			Blob.seed(cell, 8, ToxicGasSeed.class, level);
 			Painter.set(level, cell, Terrain.INACTIVE_TRAP);
 		}
 
@@ -148,7 +159,7 @@ public class ToxicGasRoom extends SpecialRoom {
 
 						if (gas == null || gas.volume == 0){
 							GameScene.add(Blob.seed(cell, off[cell], ToxicGas.class));
-						} else if (gas.cur[cell] <= 9*off[cell]){
+						} else if (gas.cur[cell] <= 8*off[cell]){
 							GameScene.add(Blob.seed(cell, off[cell], ToxicGas.class));
 						}
 					}
