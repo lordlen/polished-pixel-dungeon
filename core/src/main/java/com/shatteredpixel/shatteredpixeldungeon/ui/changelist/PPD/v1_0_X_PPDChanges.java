@@ -1739,7 +1739,7 @@ public class v1_0_X_PPDChanges {
 						"If the total delay is over 1 turn, turns red.\n" +
 						"\n" +
 						"- Added a display for mob's buffs, set above their heads.\n" +
-						"When a buff is about to decay next turn, turns red."
+						"When a buff is about to decay before mob's turn to act, turns red."
 		);
 		
 		addChange(Icons.SCROLL_COLOR, "Notes QoL",

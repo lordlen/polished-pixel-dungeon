@@ -199,17 +199,18 @@ public class Buff extends Actor {
 			}
 		}
 		
-		public static float customIconFade(Buff buff) {
-			float fade = -1f;
+		public static boolean aboutToFade(Buff buff) {
+			float cd = buff.cooldown();
+			float cdTarget = buff.target.cooldown();
 			
+			return  ( cd < 1 		|| 	(cd == 1 		&& buff.actPriority > HERO_PRIO) ) &&
+					( cd < cdTarget || 	(cd == cdTarget && buff.actPriority > MOB_PRIO)  );
+		}
+		
+		public static float customIconFade(Buff buff) {
+			float fade;
 			if(buff instanceof FlavourBuff) {
-				boolean aboutToFade = 	buff.cooldown() < 1 || (buff.cooldown() == 1 && buff.actPriority > HERO_PRIO);
-				if(aboutToFade) {
-					aboutToFade = 		buff.cooldown() < buff.target.cooldown() ||
-										(buff.cooldown() == buff.target.cooldown() && buff.actPriority > MOB_PRIO);
-				}
-				
-				if (aboutToFade) {
+				if (aboutToFade(buff)) {
 					fade = 1f;
 				} else {
 					fade = GameMath.gate(0, (10f - buff.visualcooldown()) / 10f, 1);
@@ -218,7 +219,9 @@ public class Buff extends Actor {
 			else {
 				try {
 					fade = GameMath.gate(0, (10f - Integer.parseInt(buff.iconTextDisplay())) / 10f, 1);
-				} catch (NumberFormatException e) {}
+				} catch (NumberFormatException e) {
+					fade = GameMath.gate(0, buff.iconFadePercent(), 1);
+				}
 			}
 			
 			//to avoid scaling problems

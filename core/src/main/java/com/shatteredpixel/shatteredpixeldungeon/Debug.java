@@ -90,7 +90,7 @@ public class Debug {
                 PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class,
                 ScrollOfMagicMapping.class, ScrollOfUpgrade.class,
                 StoneOfBlink.class, StoneOfBlast.class, StoneOfShock.class,
-                Food.class, EnergyCrystal.class
+                Food.class, Torch.class, EnergyCrystal.class
             ));
         }
     }
@@ -101,18 +101,6 @@ public class Debug {
         for(Class<?extends Item> itemType : Starting_Items) {
             DebugCollect(itemType);
         }
-        if(Dungeon.isChallenged(Challenges.DARKNESS)) {
-            DebugCollect(Torch.class);
-        }
-        
-        
-    }
-    
-    public static void LoadGame() {
-        if(!DEBUG_MODE || !ActOnLoad) return;
-        
-        //Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
-        //Starting_Bag();
         
         
     }
@@ -122,10 +110,17 @@ public class Debug {
         
         Starting_Bag();
         SetQuickslots();
-        
         Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
-        MeleeWeapon.Charger charger = Dungeon.hero.buff(MeleeWeapon.Charger.class);
-        if(charger != null) charger.gainCharge(charger.chargeCap() - charger.charges);
+    }
+    
+    public static void LoadGame() {
+        if(!DEBUG_MODE || !ActOnLoad) return;
+        
+        //Starting_Bag();
+        //SetQuickslots();
+        //Hero.Polished.Debug_UpdateStats(Starting_HeroLevel, Starting_Str);
+        
+        
     }
     
     
@@ -138,19 +133,28 @@ public class Debug {
     }
     
     
+    
+    
+    
     public static<T extends Item> T DebugCollect(Class<T> itemType) {
-        return DebugCollect(itemType, 0, 99, null);
+        return DebugCollect(itemType, 0, 99, true, null);
     }
     public static<T extends Item> T DebugCollect(Class<T> itemType, int level) {
-        return DebugCollect(itemType, level, 99, null);
+        return DebugCollect(itemType, level, 99, true, null);
     }
     public static<T extends Item> T DebugCollect(Class<T> itemType, int level, int quantity) {
-        return DebugCollect(itemType, level, quantity, null);
+        return DebugCollect(itemType, level, quantity, true, null);
+    }
+    public static<T extends Item> T DebugCollect(Class<T> itemType, int level, int quantity, boolean identify) {
+        return DebugCollect(itemType, level, quantity, identify, null);
+    }
+    public static<T extends Item> T DebugCollect(Class<T> itemType, boolean identify) {
+        return DebugCollect(itemType, 0, 99, identify, null);
     }
     public static<T extends Item, E> T DebugCollect(Class<T> itemType, Class<E> enchant) {
-        return DebugCollect(itemType, 0, 1, enchant);
+        return DebugCollect(itemType, 0, 1, true, enchant);
     }
-    public static<T extends Item, E> T DebugCollect(Class<T> itemType, int level, int quantity, Class<E> enchant) {
+    public static<T extends Item, E> T DebugCollect(Class<T> itemType, int level, int quantity, boolean identify, Class<E> enchant) {
         if(!DEBUG_MODE) return null;
         Item i = Reflection.newInstance(itemType);
         if(i == null) return null;
@@ -159,10 +163,10 @@ public class Debug {
             Dungeon.energy += i.quantity();
             return null;
         }
-
-        i.quantity(i.stackable ? quantity : 1);
-        i.identify();
+        
+        if(identify) i.identify();
         i.level(i.isUpgradable() ? level : 0);
+        i.quantity(i.stackable ? quantity : 1);
 
         if(enchant != null) {
             if(Weapon.Enchantment.class.isAssignableFrom(enchant) && i instanceof Weapon) {
@@ -183,8 +187,7 @@ public class Debug {
         i.collect();
         return (T)i;
     }
-
-
+    
     private static void SetQuickslots() {
         List<Class<? extends Item>> quickslot = Arrays.asList(
                 StoneOfBlast.class, ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class

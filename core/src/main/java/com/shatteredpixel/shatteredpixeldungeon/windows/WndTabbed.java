@@ -268,6 +268,8 @@ public class WndTabbed extends Window {
 			icon.frame(defaultFrame);
 			icon.x = x + (width - icon.width) / 2;
 			icon.y = y + (height - icon.height) / 2;
+			PixelScene.align(icon);
+			
 			if (!selected) {
 				icon.y -= 2;
 				//if some of the icon is going into the window, cut it off
@@ -277,8 +279,8 @@ public class WndTabbed extends Window {
 					icon.frame( frame );
 					icon.y = y + CUT;
 				}
+				PixelScene.align(icon);
 			}
-			PixelScene.align(icon);
 		}
 		
 		@Override

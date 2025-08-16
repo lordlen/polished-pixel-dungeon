@@ -117,8 +117,9 @@ public class SpiritBow extends Weapon {
 	}
 	
 	public void Polished_resetCharges() {
-		if(SPDSettings.Polished.huntress())
+		if(SPDSettings.Polished.huntress()) {
 			curCharges = Math.max(curCharges, Polished_getMaxCharge());
+		}
 	}
 
 	@Override
