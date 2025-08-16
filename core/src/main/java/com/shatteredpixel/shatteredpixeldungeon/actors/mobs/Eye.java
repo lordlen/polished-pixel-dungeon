@@ -177,15 +177,14 @@ public class Eye extends Mob {
 		spend( attackDelay()*2f );
 		beamCharged = true;
 		
-		if(Dungeon.level.heroFOV[pos]) {
+		if(Dungeon.level.heroFOV[pos] || enemy == Dungeon.hero) {
 			Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
-		} else if(enemy == Dungeon.hero) {
-			Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
-			sprite.parent.add(new TargetedCell(enemy.pos));
 		}
-		
 		if(enemy == Dungeon.hero) {
 			Dungeon.hero.interrupt();
+			if(!Dungeon.level.heroFOV[pos]) {
+				sprite.parent.add(new TargetedCell(enemy.pos));
+			}
 		}
 	}
 
