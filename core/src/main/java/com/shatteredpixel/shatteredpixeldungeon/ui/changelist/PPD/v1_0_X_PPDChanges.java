@@ -1024,8 +1024,8 @@ public class v1_0_X_PPDChanges {
 		);
 		
 		addChange(Talent.HOLD_FAST, "Hold Fast",
-				"Since PPD berserker's rampage shield doesn't decay with time, Hold Fast instead preserves 50%/75%/100% of its " +
-						"remaining amount as regular shielding."
+				"Since PPD berserker's rampage shield doesn't decay with time, Hold Fast instead preserves 50%/75%/100% of its remaining shielding " +
+						"at the end of the duration, as a regular barrier."
 		);
 		// ***
 		
