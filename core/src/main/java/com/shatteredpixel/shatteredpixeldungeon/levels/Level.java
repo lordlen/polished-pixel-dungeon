@@ -1611,14 +1611,20 @@ public abstract class Level implements Bundlable {
 					m instanceof DirectableAlly ||
 					m == PowerOfMany.PoweredAlly()) {
 					
-					if (m.fieldOfView == null || m.fieldOfView.length != length()){
+					if (!m.validFov()){
 						m.fieldOfView = new boolean[length()];
-						Dungeon.level.updateFieldOfView( m, m.fieldOfView );
+						updateFieldOfView( m, m.fieldOfView );
 					}
-					if(m.viewDistance > 0) {
+					
+					if(m.viewDistance == 0) {
+						heroMindFov[m.pos] = true;
+					} else if(m instanceof DirectableAlly && !((DirectableAlly) m).sharesVision()) {
+						for (int offset : PathFinder.NEIGHBOURS9) {
+							heroMindFov[m.pos + offset] = true;
+						}
+					} else {
 						BArray.or(heroMindFov, m.fieldOfView, heroMindFov);
 					}
-					else { heroMindFov[m.pos] = true; }
 				}
 			}
 

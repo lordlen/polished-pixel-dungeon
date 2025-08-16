@@ -38,7 +38,7 @@ public class BlindingDart extends TippedDart {
 
 		//when processing charged shot, only blind enemies
 		if (!processingChargedShot || attacker.alignment != defender.alignment) {
-			Buff.Polished.affectAligned(defender, Blindness.class, 6f);
+			Buff.Polished.affectAligned(defender, Blindness.class, Blindness.DURATION/2);
 		}
 		
 		return super.proc(attacker, defender, damage);

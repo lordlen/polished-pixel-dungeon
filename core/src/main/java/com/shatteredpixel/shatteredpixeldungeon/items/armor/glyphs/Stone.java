@@ -92,12 +92,13 @@ public class Stone extends Armor.Glyph {
 			hitChance = 1f - (evasion/accuracy)/2f;
 		}
 		
-		//75% of dodge chance is applied as damage reduction
+		//80% of dodge chance is applied as damage reduction
 		// we clamp in case accuracy or evasion were negative
-		hitChance = GameMath.gate(0.25f, (1f + 3f*hitChance)/4f, 1f);
+		float factor = 0.8f;
+		float min = 1f-factor;
+		hitChance = GameMath.gate(min, min + factor * hitChance, 1f);
 		
 		damage = (int)Math.ceil(damage * hitChance);
-		
 		return damage;
 	}
 	

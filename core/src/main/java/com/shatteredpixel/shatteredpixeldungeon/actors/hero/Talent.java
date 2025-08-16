@@ -629,7 +629,7 @@ public enum Talent {
 			}
 		}
 		
-		if(talent == DURABLE_PROJECTILES && hero.pointsInTalent(talent) == 2 && SPDSettings.Polished.huntress()) {
+		if(talent == DURABLE_PROJECTILES && hero.pointsInTalent(talent) == 2) {
 			SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
 			if(bow != null) bow.Polished_resetCharges();
 		}

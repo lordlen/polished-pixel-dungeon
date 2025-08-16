@@ -291,11 +291,11 @@ public class Dungeon {
 			return openTiles(level);
 		}
 		public static boolean[] openTiles(Level level) {
-			boolean[] open = new boolean[level.length()];
+			setupPassable();
 			for (int i = 0; i < level.length(); i++) {
-				open[i] = !level.solid[i] || !level.losBlocking[i] || level.passable[i];
+				passable[i] = !level.solid[i] || !level.losBlocking[i] || level.passable[i];
 			}
-			return open;
+			return passable;
 		}
 		
 	}
@@ -1268,7 +1268,9 @@ public class Dungeon {
 	}
 	
 	public static boolean[] findPassable(Char ch, boolean[] pass){
-		return findPassable(ch, pass, new boolean[pass.length], false, true);
+		// we're using pass as a placeholder for vision,
+		// shouldn't matter since we're not considering chars.
+		return findPassable(ch, pass, pass, false, true);
 	}
 	
 	public static boolean[] findPassable(Char ch, boolean[] pass, boolean[] vis, boolean chars){

@@ -461,7 +461,7 @@ public abstract class ChampionEnemy extends Buff {
 			
 			ArrayList<Integer> candidates = new ArrayList<>();
 			for(int i = 0; i < level.length(); i++) {
-				if(PathFinder.distance[i] <= 7 && i != exit) {
+				if(PathFinder.distance[i] <= 6 && i != exit) {
 					candidates.add(i);
 				}
 			}

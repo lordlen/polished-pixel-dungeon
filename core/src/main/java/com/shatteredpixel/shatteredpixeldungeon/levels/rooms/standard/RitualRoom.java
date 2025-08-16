@@ -107,6 +107,7 @@ public class RitualRoom extends PatchRoom {
 
 		if (prize == null){
 			prize = Generator.random( Random.oneOf(Generator.Category.POTION, Generator.Category.SCROLL));
+			prize.Polished_levelGen = true;
 		}
 
 		level.drop(prize, level.pointToCell(p));

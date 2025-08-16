@@ -45,7 +45,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.LostBackpack;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.BeaconOfReturning;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -82,8 +81,10 @@ import com.watabou.utils.PathFinder;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 
 public class Notes {
 	
@@ -129,6 +130,13 @@ public class Notes {
 		}
 	}
 	
+	// IMPORTANT: make sure to update the list if a new landmark is added
+	public static final HashSet<Landmark> POLISHED_LANDMARKS = new HashSet<>(Arrays.asList(
+			Landmark.RED_SENTRY, Landmark.TRAPS_ROOM, Landmark.CHASM_ROOM, Landmark.MAGICAL_FIRE, Landmark.POOL_ROOM,
+			Landmark.BARRICADE, Landmark.BARRICADE_QUEST, Landmark.TOXIC_GAS_ROOM, Landmark.CHASM_ROOM_SECRET,
+			Landmark.INVALID
+	));
+	
 	public enum Landmark {
 		CHASM_FLOOR,
 		WATER_FLOOR,
@@ -138,6 +146,11 @@ public class Notes {
 		TRAPS_FLOOR,
 		SECRETS_FLOOR,
 
+		SHOP,
+		ALCHEMY,
+		GARDEN,
+		
+		// *** PPD
 		RED_SENTRY,
 		TRAPS_ROOM,
 		CHASM_ROOM,
@@ -147,10 +160,8 @@ public class Notes {
 		BARRICADE_QUEST,
 		TOXIC_GAS_ROOM,
 		CHASM_ROOM_SECRET,
-
-		SHOP,
-		ALCHEMY,
-		GARDEN,
+		// *** PPD
+		
 		DISTANT_WELL,
 		WELL_OF_HEALTH,
 		WELL_OF_AWARENESS,
@@ -203,6 +214,14 @@ public class Notes {
 				case SECRETS_FLOOR:
 					return Icons.STAIRS_SECRETS.get();
 
+				case SHOP:
+					if (depth == 20)    return new Image(new ImpSprite());
+					else                return new Image(new ShopkeeperSprite());
+				case ALCHEMY:
+					return Icons.get(Icons.ALCHEMY);
+				case GARDEN:
+					return Icons.get(Icons.GRASS);
+				
 				case RED_SENTRY:
 					return Icons.RED_SENTRY.get();
 				case TRAPS_ROOM:
@@ -219,14 +238,7 @@ public class Notes {
 					return Icons.TOXIC_GAS_ROOM.get();
 				case CHASM_ROOM_SECRET:
 					return Icons.CHASM_ROOM_SECRET.get();
-
-				case SHOP:
-					if (depth == 20)    return new Image(new ImpSprite());
-					else                return new Image(new ShopkeeperSprite());
-				case ALCHEMY:
-					return Icons.get(Icons.ALCHEMY);
-				case GARDEN:
-					return Icons.get(Icons.GRASS);
+					
 				case DISTANT_WELL:
 					return Icons.get(Icons.DISTANT_WELL);
 				case WELL_OF_HEALTH:
@@ -335,6 +347,13 @@ public class Notes {
 				case TRAPS_FLOOR:   return Messages.get(Level.Feeling.class, "traps_desc");
 				case SECRETS_FLOOR: return Messages.get(Level.Feeling.class, "secrets_desc");
 
+				case SHOP:
+					if (depth == 20)    return Messages.get(ImpShopkeeper.class, "desc");
+					else                return Messages.get(Shopkeeper.class, "desc");
+				case ALCHEMY:           return Messages.get(Level.class, "alchemy_desc");
+				case GARDEN:            return Messages.get(Foliage.class, "desc");
+				
+				// *** PPD
 				case RED_SENTRY: return Messages.get(SentryRoom.Sentry.class, "desc");
 				case TRAPS_ROOM: return Messages.get(Landmark.class, "traps_room_desc");
 				case CHASM_ROOM: return Messages.get(Level.class, "chasm_desc");
@@ -343,12 +362,8 @@ public class Notes {
 				case BARRICADE: case BARRICADE_QUEST: return Messages.get(Level.class, "barricade_desc");
 				case TOXIC_GAS_ROOM: return Messages.get(ToxicGasRoom.ToxicVent.class, "desc");
 				case CHASM_ROOM_SECRET: return Messages.get(Level.class, "chasm_desc");
-
-				case SHOP:
-					if (depth == 20)    return Messages.get(ImpShopkeeper.class, "desc");
-					else                return Messages.get(Shopkeeper.class, "desc");
-				case ALCHEMY:           return Messages.get(Level.class, "alchemy_desc");
-				case GARDEN:            return Messages.get(Foliage.class, "desc");
+				// ***
+				
 				case DISTANT_WELL:      return Messages.get(WeakFloorRoom.HiddenWell.class, "desc");
 				case WELL_OF_HEALTH:    return Messages.get(WaterOfHealth.class, "desc");
 				case WELL_OF_AWARENESS: return Messages.get(WaterOfAwareness.class, "desc");
@@ -381,22 +396,40 @@ public class Notes {
 					&& depth() == ((LandmarkRecord) obj).depth();
 		}
 		
-		private static final String LANDMARK	= "landmark";
+		//we store them separately to avoid crashes when transferring files to SPD
+		private static final String LANDMARK_PPD 	= "landmark_ppd";
+		private static final String LANDMARK_SPD 	= "landmark";
 		
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
+			
 			try{
-				landmark = Landmark.valueOf(bundle.getString(LANDMARK));
+				landmark = Landmark.valueOf(bundle.getString(LANDMARK_PPD));
 			} catch (IllegalArgumentException invalid) {
 				landmark = Landmark.INVALID;
+			}
+			
+			if(landmark == Landmark.INVALID) {
+				try{
+					landmark = Landmark.valueOf(bundle.getString(LANDMARK_SPD));
+				} catch (IllegalArgumentException invalid) {
+					landmark = Landmark.INVALID;
+				}
 			}
 		}
 		
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
-			bundle.put( LANDMARK, landmark.name() );
+			
+			if(POLISHED_LANDMARKS.contains(landmark)) {
+				bundle.put( LANDMARK_PPD, landmark.name() );
+				bundle.put( LANDMARK_SPD, Landmark.DEMON_SPAWNER );
+			} else {
+				bundle.put( LANDMARK_PPD, Landmark.INVALID );
+				bundle.put( LANDMARK_SPD, landmark.name() );
+			}
 		}
 	}
 	

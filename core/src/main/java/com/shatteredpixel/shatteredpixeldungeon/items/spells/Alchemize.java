@@ -135,7 +135,7 @@ public class Alchemize extends InventorySpell {
 
 			float pos = height;
 
-			if (Shopkeeper.canSell(item)) {
+			if (Shopkeeper.canSell(item) && item.energyVal() <= 0) {
 				if (item.quantity() == 1 || (item instanceof MissileWeapon && item.isUpgradable())) {
 
 					if (item instanceof MissileWeapon && ((MissileWeapon) item).extraThrownLeft){

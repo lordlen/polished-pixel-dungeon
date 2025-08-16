@@ -59,7 +59,7 @@ import com.watabou.utils.PathFinder;
 import java.util.ArrayList;
 
 public class DirectableAlly extends NPC {
-
+	
 	{
 		alignment = Char.Alignment.ALLY;
 		intelligentAlly = true;
@@ -77,6 +77,19 @@ public class DirectableAlly extends NPC {
 		immunities.add( Dread.class );
 		immunities.add( Amok.class );
 		immunities.add( AllyBuff.class );
+	}
+	
+	public boolean sharesVision() {
+		Level level = Dungeon.level;
+		
+		if(Dungeon.hero.distance(this) <= 6) {
+			return true;
+		} else if(Dungeon.hero.distance(this) > 10) {
+			return false;
+		} else {
+			PathFinder.buildDistanceMap(Dungeon.hero.pos, Dungeon.findPassable(this, level.passable), 10);
+			return PathFinder.distance[pos] != Integer.MAX_VALUE;
+		}
 	}
 	
 	protected boolean auto = false;
@@ -559,6 +572,9 @@ public class DirectableAlly extends NPC {
 		Level level = Dungeon.level;
 		if(!travelling && !level.adjacent(pos, step)) {
 			//update fog on previous location before teleporting
+			//technically we should observe first to prevent bugs, but im prioritizing performance
+			
+			//Dungeon.observe();
 			GameScene.updateFog(pos, viewDistance+1);
 		}
 		
@@ -568,7 +584,9 @@ public class DirectableAlly extends NPC {
 		if(!level.heroFOV[step]) {
 			sprite.visible = true;
 			level.heroFOV[step] = true;
+			
 			level.visited[step] = true;
+			level.fogEdge[step] = true;
 			//we shouldn't need to handle fog updates here
 		}
 	}
@@ -1075,12 +1093,13 @@ public class DirectableAlly extends NPC {
 	private class Hunting extends Mob.Hunting {
 		
 		{
-			//basically it prevents allies from switching aggro when their path is blocked
+			//this basically prevents allies from switching aggro when their path is blocked
 			recursing = !auto;
 		}
 
 		@Override
 		public boolean act(boolean enemyInFOV, boolean justAlerted) {
+			recursing = !auto;
 			return super.act(enemyInFOV, justAlerted);
 		}
 
