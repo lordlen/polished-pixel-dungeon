@@ -374,9 +374,9 @@ public class v1_0_X_PPDChanges {
 						"_Antimagic:_\n" +
 						"50% dmg reduction -> 40%\n" +
 						"\n" +
-						"Now also immune to Wand of Corrosion damage.\n" +
-						"Now also resistant to wands of Blastwave, Regrowth and Corruption effects.\n" +
-						"No longer immune to Shocking\n" +
+						"No longer immune to Shocking and Blazing.\n" +
+						"Now also immune to Wand of Corrosion.\n" +
+						"Now also resistant to wands of Blastwave, Regrowth and Corruption.\n" +
 						"\n" +
 						"_Projecting:_\n" +
 						"_New:_ Its range now has a 1 turn cooldown after landing a hit.\n" +
