@@ -55,7 +55,7 @@ public class ConfusionGas extends Blob {
 	public void use( BlobEmitter emitter ) {
 		super.use( emitter );
 
-		emitter.pour( Speck.factory( Speck.CONFUSION, true ), 0.4f );
+		emitter.pour( Speck.factory( Speck.CONFUSION, true ), 0.3f );
 	}
 
 	@Override
