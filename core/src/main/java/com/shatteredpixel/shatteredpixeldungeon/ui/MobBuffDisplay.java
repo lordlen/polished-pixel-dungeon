@@ -186,10 +186,7 @@ public class MobBuffDisplay extends Component {
         }
         
         public void updateIcon(){
-            float custom = Buff.Polished.customIconFade(buff);
-            float generic = GameMath.gate(0, buff.iconFadePercent(), 1);
-            
-            float fadeHeight = custom != -1 ? custom : generic;
+            float fadeHeight = Buff.Polished.customIconFade(buff);
             fadeHeight *= icon.height();
             
             float zoom = camera() != null ? camera().zoom : 1;
@@ -202,10 +199,9 @@ public class MobBuffDisplay extends Component {
             
             grey.scale.set(icon.width(), rounded / zoom);
             
-            if(custom >= 1f) {
+            if(Buff.Polished.aboutToFade(buff)) {
                 grey.color(0x804040);
-            }
-            else {
+            } else {
                 grey.resetColor();
             }
         }
