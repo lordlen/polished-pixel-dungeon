@@ -219,7 +219,7 @@ public class GameScene extends PixelScene {
 		private static long inputBlockTimer = 0;
 
 		public static void blockInput() {
-			blockInput(1f);
+			blockInput(0.9f);
 		}
 		public static void blockInput(float multi) {
 			if(SPDSettings.Polished.inputBlock()) {
