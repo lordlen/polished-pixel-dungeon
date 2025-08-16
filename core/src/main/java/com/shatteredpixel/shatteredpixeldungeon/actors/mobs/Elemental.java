@@ -511,7 +511,7 @@ public abstract class Elemental extends Mob {
 			spriteClass = ElementalSprite.Shock.class;
 			
 			loot = ScrollOfRecharging.class;
-			lootChance = 1/4f;
+			lootChance = 1/5f;
 			
 			properties.add( Property.ELECTRIC );
 		}
