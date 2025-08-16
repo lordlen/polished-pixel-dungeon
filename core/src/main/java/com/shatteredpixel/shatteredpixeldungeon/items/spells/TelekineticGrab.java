@@ -30,7 +30,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DwarfKing;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
@@ -42,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 
 public class TelekineticGrab extends TargetedSpell {
 
@@ -80,7 +83,7 @@ public class TelekineticGrab extends TargetedSpell {
 				Item item = ch.buff(PinCushion.class).grabOne();
 
 				if (item.doPickUp(hero, ch.pos)) {
-					hero.spend(-Item.TIME_TO_PICK_UP); //casting the spell already takes a turn
+					hero.spend(-hero.cooldown()); //casting the spell already takes a turn
 					GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
 
 				} else {
@@ -99,32 +102,62 @@ public class TelekineticGrab extends TargetedSpell {
 			ScrollOfRecharging.charge(curUser);
 			Sample.INSTANCE.play( Assets.Sounds.CHARGEUP );
 
-		} else if (Dungeon.level.heaps.get(bolt.collisionPos) != null){
-
-			Heap h = Dungeon.level.heaps.get(bolt.collisionPos);
-
-			if (h.type != Heap.Type.HEAP){
-				GLog.w(Messages.get(this, "cant_grab"));
-				h.sprite.drop();
-				return;
-			}
-
-			while (!h.isEmpty()) {
-				Item item = h.peek();
-				if (item.doPickUp(hero, h.pos)) {
-					h.pickUp();
-					hero.spend(-Item.TIME_TO_PICK_UP); //casting the spell already takes a turn
-					GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
-
-				} else {
-					GLog.w(Messages.get(this, "cant_grab"));
-					h.sprite.drop();
-					return;
+		} else {
+			
+			int pickedUp = 0;
+			boolean cantGrab = false;
+			boolean grabbedAdjacent = false;
+			
+			nearbyHeaps:
+			for (int offset : PathFinder.NEIGHBOURS9) {
+				Heap h = Dungeon.level.heaps.get(bolt.collisionPos + offset);
+				if(h != null) {
+					if (h.type != Heap.Type.HEAP){
+						h.sprite.drop();
+						cantGrab = true;
+						continue;
+					}
+					
+					while (!h.isEmpty()) {
+						
+						//avoid spamming loud pickup noises
+						boolean oldVal = Sample.INSTANCE.isEnabled();
+						Sample.INSTANCE.enable(false);
+						
+						Item item = h.peek();
+						boolean successful = item.doPickUp(hero, h.pos);
+						Sample.INSTANCE.enable(oldVal);
+						
+						if (successful) {
+							h.pickUp();
+							hero.spend(-hero.cooldown()); //casting the spell already takes a turn
+							
+							if(offset != 0) {
+								CellEmitter.get(bolt.collisionPos + offset).start(Speck.factory(Speck.LIGHT), 0.2f, 3);
+								grabbedAdjacent = true;
+							}
+							GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
+							pickedUp++;
+							
+						} else {
+							h.sprite.drop();
+							cantGrab = true;
+							continue nearbyHeaps;
+						}
+					}
 				}
 			}
-
-		} else {
-			GLog.w(Messages.get(this, "no_target"));
+			
+			if(pickedUp == 0) {
+				GLog.w(Messages.get(this, cantGrab ? "cant_grab" : "no_target"));
+			} else {
+				Sample.INSTANCE.play(Assets.Sounds.ITEM);
+				if(grabbedAdjacent) {
+					for(int i = 0; i < Math.min(pickedUp, 3); i++) {
+						Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
+					}
+				}
+			}
 		}
 
 	}
