@@ -1069,8 +1069,7 @@ public class v1_0_X_PPDChanges {
 				"- Torch duration now gets shortened when entering a dark floor, to prevent players from skipping the penalty by lighting " +
 						"them on the previous floor.\n" +
 						"\n" +
-						"- Evil eyes, when charging from fog: now also play their sound, and show an indicator on top of the Hero. Note that " +
-						"they don't reveal their position.\n" +
+						"- Evil eyes now give a visual/audio cue when charging at Hero from fog. Note that they don't reveal their position.\n" +
 						"\n" +
 						"- Growing champions no longer spawn near the exit when the hero is nearby.\n" +
 						"\n" +
@@ -1079,6 +1078,8 @@ public class v1_0_X_PPDChanges {
 		
 		addChange(QOL(), "Quality of Life",
 				"- Goo will no longer wander into Rat King's room.\n" +
+						"\n" +
+						"- Evil eyes now interrupt Hero's movement when charging at him.\n" +
 						"\n" +
 						"- Alchemize can no longer sell energizable items. This prevents accidental missclicks, since energizing is always the better option anyway."
 		);
