@@ -554,8 +554,20 @@ public class Potion extends Item {
 		
 		@Override
 		public Item sampleOutput(ArrayList<Item> ingredients) {
+			
+			if (ingredients.size() == 3) {
+				Item seed = ingredients.get(0);
+				if (seed instanceof Plant.Seed &&
+					seed.isSimilar(ingredients.get(1)) &&
+					seed.isSimilar(ingredients.get(2))) {
+					
+					Potion pot = Reflection.newInstance(types.get(((Plant.Seed) seed).getClass()));
+					if(!pot.isKnown()) pot.anonymize();
+					return pot;
+				}
+			}
+			
 			return new WndBag.Placeholder(ItemSpriteSheet.POTION_HOLDER){
-
 				@Override
 				public String name() {
 					return Messages.get(Potion.SeedToPotion.class, "name");
