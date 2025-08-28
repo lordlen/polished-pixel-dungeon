@@ -55,6 +55,7 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -63,6 +64,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.TerrainFeaturesTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BadgesGrid;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BadgesList;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Button;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickRecipe;
@@ -72,6 +74,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollingGridPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollingListPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.input.GameAction;
 import com.watabou.input.KeyBindings;
 import com.watabou.input.KeyEvent;
 import com.watabou.noosa.BitmapText;
@@ -330,6 +333,25 @@ public class WndJournal extends WndTabbed {
 				add( pageButtons[i] );
 			}
 			
+			if(ShatteredPixelDungeon.scene() instanceof AlchemyScene) {
+				//hidden button for cycling
+				add(new Button(){
+					@Override
+					protected void onClick() {
+						currentPageIdx++;
+						if(currentPageIdx >= NUM_BUTTONS) {
+							currentPageIdx = 0;
+						}
+						updateList();
+					}
+					
+					@Override
+					public GameAction keyAction() {
+						return SPDAction.CYCLE;
+					}
+				});
+			}
+			
 			title = new IconTitle();
 			title.icon( new ItemSprite(ItemSpriteSheet.ALCH_PAGE));
 			title.visible = false;
@@ -408,7 +430,7 @@ public class WndJournal extends WndTabbed {
 			title.setRect(0, 0, width(), 10);
 			content.add(title);
 			
-			body.maxWidth((int)width());
+			body.maxWidth((int)width()-1);
 			body.text(Document.ALCHEMY_GUIDE.pageBody(currentPageIdx));
 			body.setPos(0, title.bottom());
 			content.add(body);
@@ -418,7 +440,7 @@ public class WndJournal extends WndTabbed {
 			ArrayList<QuickRecipe> toAdd = QuickRecipe.getRecipes(currentPageIdx);
 			
 			float left;
-			float top = body.bottom()+2;
+			float top = body.bottom()+5;
 			int w;
 			ArrayList<QuickRecipe> toAddThisRow = new ArrayList<>();
 			while (!toAdd.isEmpty()){
