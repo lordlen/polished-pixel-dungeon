@@ -291,7 +291,7 @@ public class Dungeon {
 			return openTiles(level);
 		}
 		public static boolean[] openTiles(Level level) {
-			setupPassable();
+			setupPassable(level);
 			for (int i = 0; i < level.length(); i++) {
 				passable[i] = !level.solid[i] || !level.losBlocking[i] || level.passable[i];
 			}
@@ -1259,10 +1259,13 @@ public class Dungeon {
 
 	//we store this to avoid having to re-allocate the array with each pathfind
 	private static boolean[] passable;
-
+	
 	private static void setupPassable(){
-		if (passable == null || passable.length != Dungeon.level.length())
-			passable = new boolean[Dungeon.level.length()];
+		setupPassable(level);
+	}
+	private static void setupPassable(Level level){
+		if (passable == null || passable.length != level.length())
+			passable = new boolean[level.length()];
 		else
 			BArray.setFalse(passable);
 	}
