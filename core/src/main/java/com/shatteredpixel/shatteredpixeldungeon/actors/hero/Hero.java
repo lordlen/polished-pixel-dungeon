@@ -2000,7 +2000,7 @@ public class Hero extends Char {
 				!lastTarget.isAlive() || !lastTarget.isActive() ||
 				lastTarget.alignment == Alignment.ALLY ||
 				!fieldOfView[lastTarget.pos] ||
-				( distance(lastTarget) > 8 && QuickSlotButton.autoAim(lastTarget) == -1 ))
+				( distance(lastTarget) > 9 && QuickSlotButton.autoAim(lastTarget) == -1 ))
 			{
 				QuickSlotButton.target(target);
 				//its a soft target, meaning it wont lock in until we actually shoot it

@@ -62,18 +62,19 @@ public class Debug {
     public static final boolean DEBUG_MODE = DeviceCompat.isDebug();
 
 
-    private static final boolean DebuggingStats = false
+    private static final boolean DebuggingStats = true
     ;
     //                                                                  Debug  /  Default
     public static final float Spawn_Multiplier = DebuggingStats ?       .635f   : 1;
     public static final float Respawn_Multiplier = DebuggingStats ?     0f      : 1;
 
-    public static final int Starting_Floor = DebuggingStats ?           6       : 1;
+    public static final int Starting_Floor = DebuggingStats ?           26       : 1;
     public static final int Starting_HeroLevel = DebuggingStats ?       15      : 1;
     public static final int Starting_Str = DebuggingStats ?             16      : 10;
     public static final int Starting_HP = DebuggingStats ?              2000    : 20;
     
-    private static final boolean ActOnStart = false || DebuggingStats;
+    private static final boolean ActOnStart = DebuggingStats || false
+    ;
     private static final boolean ActOnLoad = false
     ;
     private static final ArrayList<Class<?extends Item>> Starting_Items;
