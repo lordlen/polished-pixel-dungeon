@@ -1210,7 +1210,10 @@ public abstract class Char extends Actor {
 
 	@Override
 	protected void spend( float time ) {
-
+		super.spend( time / timeScale() );
+	}
+	
+	protected float timeScale() {
 		float timeScale = 1f;
 		if (buff( Slow.class ) != null) {
 			timeScale *= 0.5f;
@@ -1218,8 +1221,7 @@ public abstract class Char extends Actor {
 		} else if (buff( Chill.class ) != null) {
 			timeScale *= buff( Chill.class ).speedFactor();
 		}
-		
-		super.spend( time / timeScale );
+		return timeScale;
 	}
 	
 	public synchronized LinkedHashSet<Buff> buffs() {

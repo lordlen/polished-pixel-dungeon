@@ -28,7 +28,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.LandmarkBlob;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Eye;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
@@ -39,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHaste;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Bestiary;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
@@ -271,6 +273,12 @@ public class SentryRoom extends SpecialRoom {
 			spriteClass = SentrySprite.class;
 
 			properties.add(Property.IMMOVABLE);
+			properties.add(Property.MINIBOSS);
+			
+			immunities.add(Amok.class);
+			immunities.add(StoneOfAggression.Aggression.class);
+			
+			resistances.add(Terror.class);
 		}
 
 		private float initialChargeDelay;
@@ -280,8 +288,6 @@ public class SentryRoom extends SpecialRoom {
 
 		@Override
 		protected boolean act() {
-			if(paralysed > 0) return super.act();
-			
 			Level level = Dungeon.level;
 			Hero hero = Dungeon.hero;
 			if (!validFov()){
@@ -297,41 +303,45 @@ public class SentryRoom extends SpecialRoom {
 				throwItems();
 			}
 			
+			if(paralysed > 0) {
+				enemySeen = false;
+				spendConstant(TICK);
+				return true;
+			}
+			
 			if (hero != null){
-				Ballistica aim = new Ballistica(pos, hero.pos, Ballistica.PROJECTILE);
-				if (fieldOfView[hero.pos] && aim.collisionPos == hero.pos
+				if (fieldOfView[hero.pos] && state != FLEEING
 						&& ( level.map[hero.pos] == Terrain.EMPTY_SP || level.map[hero.pos] == Terrain.WATER )
 						&& room.inside(level.cellToPoint(hero.pos))
-						&& !hero.belongings.lostInventory()){
-
-					if (curChargeDelay > 0.001f){ //helps prevent rounding errors
-						if (curChargeDelay == initialChargeDelay) {
-							((SentrySprite) sprite).charge();
-						}
-						curChargeDelay -= hero.cooldown();
-						//pity mechanic so mistaps don't get people instakilled
-						if (hero.cooldown() >= 0.34f){
-							hero.interrupt();
-						}
-					}
+						&& !hero.belongings.lostInventory()) {
 					
-					if (curChargeDelay <= .001f){
-						curChargeDelay = 1f;
-						sprite.zap(hero.pos);
+					if (curChargeDelay == initialChargeDelay) {
 						((SentrySprite) sprite).charge();
 					}
-
-					spend(hero.cooldown());
-					return true;
+					//pity mechanic so mistaps don't get people instakilled
+					if (hero.cooldown() >= 0.34f){
+						hero.interrupt();
+					}
+					
+					curChargeDelay -= hero.cooldown() * timeScale();
+					//helps prevent rounding errors
+					if (curChargeDelay <= .001f){
+						Ballistica aim = new Ballistica(pos, hero.pos, Ballistica.PROJECTILE);
+						if(aim.collisionPos == hero.pos) {
+							curChargeDelay = 1f;
+							sprite.zap(hero.pos);
+							((SentrySprite) sprite).charge();
+						}
+					}
 
 				} else {
 					curChargeDelay = initialChargeDelay;
 					sprite.idle();
 				}
 
-				spend(hero.cooldown());
+				spendConstant(hero.cooldown());
 			} else {
-				spend(1f);
+				spendConstant(TICK);
 			}
 			return true;
 		}
