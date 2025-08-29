@@ -54,7 +54,9 @@ public class ScrollOfIdentify extends InventoryScroll {
 		
 		IDItem(item);
 		for(Item similar : Dungeon.hero.belongings.getAllSimilar(item)) {
-			IDItem(similar);
+			if(!similar.isIdentified()) {
+				IDItem(similar);
+			}
 		}
 	}
 
