@@ -774,6 +774,15 @@ public abstract class Char extends Actor {
 	}
 	
 	public int defenseProc( Char enemy, int damage ) {
+		
+		// hero and pris images skip this as they already benefit from hero's armor glyph proc
+		if (!(this instanceof Hero || this instanceof PrismaticImage)) {
+			if (Dungeon.hero.alignment == alignment && Dungeon.hero.belongings.armor() != null
+					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
+					&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)) {
+				damage = Dungeon.hero.belongings.armor().proc( enemy, this, damage );
+			}
+		}
 
 		Earthroot.Armor armor = buff( Earthroot.Armor.class );
 		if (armor != null) {
@@ -792,15 +801,6 @@ public abstract class Char extends Actor {
 			//33/50%
 			if (Random.Int(6) < 1+Dungeon.hero.pointsInTalent(Talent.SHIELD_OF_LIGHT)){
 				damage -= 1;
-			}
-		}
-
-		// hero and pris images skip this as they already benefit from hero's armor glyph proc
-		if (!(this instanceof Hero || this instanceof PrismaticImage)) {
-			if (Dungeon.hero.alignment == alignment && Dungeon.hero.belongings.armor() != null
-					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
-					&& (Dungeon.level.distance(pos, Dungeon.hero.pos) <= 2 || buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)) {
-				damage = Dungeon.hero.belongings.armor().proc( enemy, this, damage );
 			}
 		}
 
