@@ -71,6 +71,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
+import com.watabou.noosa.particles.PixelParticle;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
@@ -675,7 +676,7 @@ public class Tengu extends Mob {
 				for (int i = 0; i < PathFinder.distance.length; i++) {
 					if (PathFinder.distance[i] < Integer.MAX_VALUE) {
 						Emitter e = CellEmitter.get(i);
-						e.pour( SmokeParticle.FACTORY, 0.25f );
+						e.pour( BombSmokeParticle.FACTORY, 0.15f );
 						smokeEmitters.add(e);
 					}
 				}
@@ -706,7 +707,6 @@ public class Tengu extends Mob {
 		public static class BombItem extends Item {
 			
 			{
-				dropsDownHeap = true;
 				unique = true;
 				
 				image = ItemSpriteSheet.TENGU_BOMB;
@@ -716,6 +716,23 @@ public class Tengu extends Mob {
 			public boolean doPickUp(Hero hero, int pos) {
 				GLog.w( Messages.get(this, "cant_pickup") );
 				return false;
+			}
+			
+			@Override
+			public String desc() {
+				int timer = -1;
+				for(Char ch : Actor.chars()) {
+					if(ch instanceof Tengu) {
+						for(BombAbility bomb : ch.buffs(BombAbility.class)) {
+							if(Dungeon.level.heaps.get(bomb.bombPos).peek() == this) {
+								timer = bomb.timer;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				return Messages.get(this, "desc", timer+1);
 			}
 			
 			@Override
@@ -732,9 +749,9 @@ public class Tengu extends Mob {
 			@Override
 			public Emitter emitter() {
 				Emitter emitter = new Emitter();
-				emitter.pos(7.5f, 3.5f);
+				emitter.pos(7.5f, 2.5f);
 				emitter.fillTarget = false;
-				emitter.pour(SmokeParticle.SPEW, 0.05f);
+				emitter.pour(BombFlameParticle.SPEW, 0.075f);
 				return emitter;
 			}
 		}
@@ -1134,4 +1151,75 @@ public class Tengu extends Mob {
 		}
 		
 	}
+	
+	
+	public static class BombSmokeParticle extends SmokeParticle {
+		public static final Emitter.Factory FACTORY = new Emitter.Factory() {
+			@Override
+			public void emit( Emitter emitter, int index, float x, float y ) {
+				((BombSmokeParticle)emitter.recycle( BombSmokeParticle.class )).reset( x, y );
+			}
+		};
+		
+		@Override
+		public void update() {
+			super.update();
+			am *= 1.2f;
+		}
+	}
+	
+	public static class BombFlameParticle extends PixelParticle {
+		public BombFlameParticle() {
+			super();
+			
+			color( 0xEE7722 );
+			
+			acc.set( 0, -40 );
+		}
+		
+		public static final Emitter.Factory SPEW = new Emitter.Factory() {
+			@Override
+			public void emit( Emitter emitter, int index, float x, float y ) {
+				((BombFlameParticle)emitter.recycle( BombFlameParticle.class )).resetSpew( x, y );
+			}
+			
+			@Override
+			public boolean lightMode() {
+				return true;
+			}
+		};
+		
+		public void reset( float x, float y ) {
+			revive();
+			
+			this.x = x;
+			this.y = y;
+			
+			left = lifespan = Random.Float( 0.6f, 1f );
+			speed.set( Random.Float( -4, +4 ), Random.Float( -8, +8 ) );
+		}
+		
+		public void resetSpew( float x, float y ) {
+			revive();
+			
+			this.x = x;
+			this.y = y;
+			
+			acc.set( -40, 40 );
+			
+			left = lifespan = Random.Float( 0.6f, 1f );
+			speed.polar( Random.Float(PointF.PI*1.7f, PointF.PI*1.8f), Random.Float( 30, 55 ));
+		}
+		
+		@Override
+		public void update() {
+			super.update();
+			
+			float p = left / lifespan;
+			am = p > 0.8f ? 2 - 2*p : p * 0.5f;
+			am *= 1.2f;
+			size( 12 - p * 6 );
+		}
+	}
+	
 }
