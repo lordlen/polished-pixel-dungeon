@@ -125,9 +125,10 @@ public class AntiMagic extends Armor.Glyph {
 		
 		RESISTS.add( ElementalStrike.class );
 		RESISTS.add( Grim.class );
-		RESISTS.add( Blazing.class );
+		
 		// Shocking uses electricity, not magic
-		//RESISTS.add( Shocking.class );
+		// Blazing isn't magic either, but I'm keeping this for the sake of balance
+		RESISTS.add( Blazing.class );
 		
 		RESISTS.add( WandOfFireblast.FireBlastOnHit.class );
 		RESISTS.add( WandOfLightning.LightningOnHit.class );
