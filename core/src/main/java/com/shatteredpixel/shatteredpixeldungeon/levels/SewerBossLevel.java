@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Goo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.levels.builders.Builder;
@@ -46,12 +47,15 @@ import com.watabou.noosa.Group;
 import com.watabou.noosa.audio.Music;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
 public class SewerBossLevel extends SewerLevel {
+	
+	public RatKingRoom ratKingRoom = null;
 
 	{
 		color1 = 0x48763c;
@@ -153,6 +157,22 @@ public class SewerBossLevel extends SewerLevel {
 				}
 			}
 		Random.popGenerator();
+		
+		if(ratKingRoom != null && ratKingRoom.entrance() != null) {
+			int door = pointToCell(ratKingRoom.entrance());
+			
+			ArrayList<Integer> candidates = new ArrayList<>();
+			for (int offset : PathFinder.NEIGHBOURS8) {
+				int cell = door + offset;
+				if(!solid[cell] && !ratKingRoom.inside(cellToPoint(cell))) {
+					candidates.add(cell);
+				}
+			}
+			
+			if(!candidates.isEmpty()) {
+				drop(new Gold(Random.IntRange( 10, 25 )), Random.element(candidates));
+			}
+		}
 	}
 
 	@Override
@@ -226,9 +246,20 @@ public class SewerBossLevel extends SewerLevel {
 		return visuals;
 	}
 	
+	static final String RATKING_ROOM = "ratking_room";
+	
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		
+		bundle.put(RATKING_ROOM, ratKingRoom);
+	}
+	
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle( bundle );
 		roomExit = roomEntrance;
+		
+		ratKingRoom = (RatKingRoom) bundle.get(RATKING_ROOM);
 	}
 }

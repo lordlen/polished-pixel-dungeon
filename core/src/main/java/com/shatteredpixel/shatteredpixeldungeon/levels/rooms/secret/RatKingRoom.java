@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.SewerBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
@@ -68,6 +69,11 @@ public class RatKingRoom extends SecretRoom {
 		RatKing king = new RatKing();
 		king.pos = level.pointToCell(random( 2 ));
 		level.mobs.add( king );
+		
+		if(level instanceof SewerBossLevel) {
+			((SewerBossLevel) level).ratKingRoom = this;
+		}
+		
 	}
 	
 	private static void addChest( Level level, int pos, int door ) {

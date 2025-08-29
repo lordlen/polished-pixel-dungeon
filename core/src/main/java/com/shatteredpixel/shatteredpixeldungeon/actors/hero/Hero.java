@@ -164,9 +164,11 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.MiningLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.SewerBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.RatKingRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ExplosiveTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -2826,6 +2828,17 @@ public class Hero extends Char {
 						//don't want to let the player search though hidden doors in tutorial
 						if (SPDSettings.intro()){
 							chance = 0;
+						}
+						
+						//ratking's secret treasure room can't be accidentally found
+						else if(Dungeon.level instanceof SewerBossLevel && !intentional) {
+							
+							RatKingRoom ratKingRoom = ((SewerBossLevel) Dungeon.level).ratKingRoom;
+							if (ratKingRoom != null && ratKingRoom.entrance() != null &&
+								Dungeon.level.pointToCell(ratKingRoom.entrance()) == curr)
+							{
+								chance = 0;
+							}
 						}
 						
 						if (Random.Float() < chance) {
