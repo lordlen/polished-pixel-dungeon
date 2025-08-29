@@ -491,8 +491,12 @@ public class Speck extends Image {
 			case CORROSION:
 				hardlight( ColorMath.interpolate( 0xAAAAAA, 0xFF8800 , p ));
 			case STENCH:
-			case SMOKE:
 				am = (float)Math.sqrt( (p < 0.5f ? p : 1 - p) );
+				scale.set( 1 + p );
+				break;
+				
+			case SMOKE:
+				am = (float)Math.sqrt( (p < 0.5f ? p : 1 - p) * 0.75f );
 				scale.set( 1 + p );
 				break;
 				
