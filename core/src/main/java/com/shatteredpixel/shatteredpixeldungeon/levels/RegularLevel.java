@@ -460,33 +460,22 @@ public abstract class RegularLevel extends Level {
 			}
 		}
 
-		//use separate generator(s) for this to prevent held items, meta progress, and talents from affecting levelgen
+		//use separate generator(s) for this to prevent challenges, held items, meta progress, and talents from affecting levelgen
 		//we can use a random long for these as they will be the same longs every time
 
 		Random.pushGenerator( Random.Long() );
-			boolean darkness = Dungeon.isChallenged(Challenges.DARKNESS);
-			boolean halls = this instanceof HallsLevel;
-			int torches = 0;
-			
-			if(darkness && !halls) {
-				torches++;
-				
-				//add a second torch to help with the larger floor
-				if (feeling == Feeling.LARGE){
-					torches++;
-				}
+			int torches;
+			if(this instanceof HallsLevel) {
+				torches = Dungeon.isChallenged(Challenges.DARKNESS) ? 1 : 2;
+			} else if(Dungeon.isChallenged(Challenges.DARKNESS)) {
+				torches = 1;
+			} else {
+				torches = 0;
 			}
 			
-			else if(halls) {
-				//halls gets -1 torch on darkness
-				if(!darkness) {
-					torches++;
-				}
-				
-				//add a second torch to help with the larger floor
-				if (feeling == Feeling.LARGE){
-					torches++;
-				}
+			//add a second torch to help with the larger floor
+			if (feeling == Feeling.LARGE && torches > 0) {
+				torches++;
 			}
 			
 			for(int i = 0; i < torches; i++) {

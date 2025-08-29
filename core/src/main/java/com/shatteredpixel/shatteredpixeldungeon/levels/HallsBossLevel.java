@@ -223,8 +223,7 @@ public class HallsBossLevel extends Level {
 		ArrayList<Integer> candidates = new ArrayList<>();
 		for (int offset : PathFinder.NEIGHBOURS8) {
 			int cell = entrance() + offset;
-			
-			if(passable[cell] && heaps.get(cell) == null) {
+			if(!solid[cell] && heaps.get(cell) == null) {
 				candidates.add(cell);
 			}
 		}
@@ -233,8 +232,7 @@ public class HallsBossLevel extends Level {
 		torch.Polished_levelGen=true;
 		if(!candidates.isEmpty()) {
 			drop( torch, Random.element(candidates) );
-		}
-		else {
+		} else {
 			drop( torch, entrance() );
 		}
 	}

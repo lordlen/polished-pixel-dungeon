@@ -38,6 +38,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.SewerBossLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.RatKingRoom;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -373,42 +375,17 @@ public class Goo extends Mob {
 	protected class Wandering extends Mob.Wandering{
 		@Override
 		protected int randomDestination() {
-			
 			// avoid wandering into ratking's treasure room
-			// rooms aren't stored in boss levels, so we use a hacky solution
 			
-			RatKing rk = null;
-			for(Mob mob : Dungeon.level.mobs) {
-				if(mob instanceof RatKing) {
-					rk = (RatKing) mob;
-					break;
-				}
+			RatKingRoom ratKingRoom = null;
+			if(Dungeon.level instanceof SewerBossLevel) {
+				ratKingRoom = ((SewerBossLevel) Dungeon.level).ratKingRoom;
 			}
-			
-			// if the player wakes up the all mighty king, they lose their precious protection
-			if(rk == null || rk.state != rk.SLEEPING) {
-				return super.randomDestination();
-			}
-			
-			// we have to save a copy since randomDestination() overwrites the distance map
-			PathFinder.buildDistanceMap(rk.pos, Dungeon.level.openSpace);
-			int[] distanceMap = PathFinder.distance.clone();
 			
 			int cell;
-			boolean valid;
-			int tries = 10;
 			do {
 				cell = super.randomDestination();
-				valid = true;
-				
-				for (int offset : PathFinder.NEIGHBOURS9) {
-					if(distanceMap[cell+offset] != Integer.MAX_VALUE) {
-						valid = false;
-						break;
-					}
-				}
-			} while(!valid && tries-- > 0);
-			
+			} while(ratKingRoom != null && ratKingRoom.within(Dungeon.level.cellToPoint(cell)));
 			return cell;
 		}
 	}
