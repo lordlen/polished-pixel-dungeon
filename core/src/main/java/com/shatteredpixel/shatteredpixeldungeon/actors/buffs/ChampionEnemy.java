@@ -383,8 +383,8 @@ public abstract class ChampionEnemy extends Buff {
 		private boolean Polished_huntNoti = false;
 		public void updateState() {
 			Mob mob = (Mob) target;
-			if(campExit) {
-				campExit = mob.state != mob.HUNTING;
+			if(mob.state == mob.HUNTING) {
+				campExit = false;
 			}
 			
 			if(huntThreshold()) {
