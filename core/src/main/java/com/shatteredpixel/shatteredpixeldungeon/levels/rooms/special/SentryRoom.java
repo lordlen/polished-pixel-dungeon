@@ -304,7 +304,6 @@ public class SentryRoom extends SpecialRoom {
 			}
 			
 			if(paralysed > 0) {
-				enemySeen = false;
 				spendConstant(TICK);
 				return true;
 			}
