@@ -559,7 +559,8 @@ public class Potion extends Item {
 				Item seed = ingredients.get(0);
 				if (seed instanceof Plant.Seed &&
 					seed.isSimilar(ingredients.get(1)) &&
-					seed.isSimilar(ingredients.get(2))) {
+					seed.isSimilar(ingredients.get(2)) &&
+					!(seed instanceof Sungrass.Seed && Dungeon.LimitedDrops.COOKING_HP.count > 0)) {
 					
 					Potion pot = Reflection.newInstance(types.get(((Plant.Seed) seed).getClass()));
 					if(!pot.isKnown()) pot.anonymize();
