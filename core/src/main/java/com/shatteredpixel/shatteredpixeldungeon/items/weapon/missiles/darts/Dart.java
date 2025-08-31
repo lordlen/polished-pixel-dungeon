@@ -127,6 +127,12 @@ public class Dart extends MissileWeapon {
 		} else {
 			bow = null;
 		}
+		
+		if(bow != null) {
+			augment = bow.augment;
+		} else {
+			augment = Augment.NONE;
+		}
 	}
 
 	public boolean crossbowHasEnchant( Char owner ){
