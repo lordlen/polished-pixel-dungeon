@@ -2675,9 +2675,12 @@ public class Hero extends Char {
 	@Override
 	public void onOperateComplete() {
 		
+		//only crystal unlocks can be cancelled
+		boolean actionCancelled = curAction == null;
+		
 		if (operateAction instanceof HeroAction.Unlock) {
 
-			int doorCell = ((HeroAction.Unlock)operateAction).dst;
+			int doorCell = operateAction.dst;
 			int door = Dungeon.level.map[doorCell];
 			
 			if (Dungeon.level.distance(pos, doorCell) <= 1) {
@@ -2686,7 +2689,7 @@ public class Hero extends Char {
 					hasKey = Notes.remove(new IronKey(Dungeon.depth));
 					if (hasKey) Level.set(doorCell, Terrain.DOOR);
 				} else if (door == Terrain.CRYSTAL_DOOR) {
-					hasKey = Notes.remove(new CrystalKey(Dungeon.depth));
+					hasKey = !actionCancelled && Notes.remove(new CrystalKey(Dungeon.depth));
 					if (hasKey) {
 						Level.set(doorCell, Terrain.EMPTY);
 						Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
@@ -2706,7 +2709,7 @@ public class Hero extends Char {
 			
 		} else if (operateAction instanceof HeroAction.OpenChest) {
 			
-			Heap heap = Dungeon.level.heaps.get( ((HeroAction.OpenChest)operateAction).dst );
+			Heap heap = Dungeon.level.heaps.get( operateAction.dst );
 			
 			if (Dungeon.level.distance(pos, heap.pos) <= 1){
 				boolean hasKey = true;
@@ -2715,7 +2718,7 @@ public class Hero extends Char {
 				} else if (heap.type == Type.LOCKED_CHEST){
 					hasKey = Notes.remove(new GoldenKey(Dungeon.depth));
 				} else if (heap.type == Type.CRYSTAL_CHEST){
-					hasKey = Notes.remove(new CrystalKey(Dungeon.depth));
+					hasKey = !actionCancelled && Notes.remove(new CrystalKey(Dungeon.depth));
 				}
 				
 				if (hasKey) {
