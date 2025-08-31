@@ -309,7 +309,7 @@ public class SentryRoom extends SpecialRoom {
 			}
 			
 			if (hero != null){
-				if (fieldOfView[hero.pos] && state != FLEEING
+				if (fieldOfView[hero.pos] && state != FLEEING && !isCharmedBy(hero)
 						&& ( level.map[hero.pos] == Terrain.EMPTY_SP || level.map[hero.pos] == Terrain.WATER )
 						&& room.inside(level.cellToPoint(hero.pos))
 						&& !hero.belongings.lostInventory()) {
