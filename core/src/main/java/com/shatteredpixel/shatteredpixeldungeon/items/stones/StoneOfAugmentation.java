@@ -48,7 +48,8 @@ public class StoneOfAugmentation extends InventoryStone {
 
 	@Override
 	protected boolean usableOnItem(Item item) {
-		return ScrollOfEnchantment.enchantable(item);
+		return (item instanceof Weapon || item instanceof Armor)
+				&& (item.isUpgradable() || item instanceof SpiritBow);
 	}
 
 	@Override
