@@ -800,9 +800,7 @@ public abstract class Level implements Bundlable {
 			Actor.addDelayed(respawner, respawnCooldown());
 		} else {
 			Actor.add(respawner);
-			if (respawner.cooldown() > respawnCooldown()){
-				respawner.resetCooldown();
-			}
+			respawner.capCooldown(Math.round(1.5f * respawnCooldown()));
 		}
 		return respawner;
 	}
