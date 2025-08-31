@@ -150,9 +150,7 @@ public class HallsLevel extends RegularLevel {
 	
 	@Override
 	public int mobLimit() {
-		//higher than usual, account for demon spawners
-		//initial mob spawns unchanged
-		return super.mobLimit() + 2;
+		return super.mobLimit()+1;
 	}
 	
 	@Override

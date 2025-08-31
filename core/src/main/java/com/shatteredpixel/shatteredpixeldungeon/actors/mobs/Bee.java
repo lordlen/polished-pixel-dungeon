@@ -78,6 +78,11 @@ public class Bee extends Mob {
 		potHolder = bundle.getInt( POTHOLDER );
 		if (bundle.contains(ALIGMNENT)) alignment = bundle.getEnum( ALIGMNENT, Alignment.class);
 	}
+	
+	@Override
+	public float spawningWeight() {
+		return 0;
+	}
 
 	@Override
 	public void die(Object cause) {
