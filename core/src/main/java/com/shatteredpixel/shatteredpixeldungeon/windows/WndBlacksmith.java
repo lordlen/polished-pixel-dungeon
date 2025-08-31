@@ -139,8 +139,10 @@ public class WndBlacksmith extends Window {
 		};
 		upgrade.enable(Blacksmith.Quest.favor >= upgradeCost);
 		buttons.add(upgrade);
-
-		RedButton smith = new RedButton(Messages.get(this, "smith", 2000), 6){
+		
+		
+		int smithCost = 2000 + 1000*Blacksmith.Quest.smiths;
+		RedButton smith = new RedButton(Messages.get(this, "smith", smithCost), 6){
 			@Override
 			protected void onClick() {
 				GameScene.show(new WndOptions(
@@ -153,7 +155,7 @@ public class WndBlacksmith extends Window {
 					@Override
 					protected void onSelect(int index) {
 						if (index == 0){
-							Blacksmith.Quest.favor -= 2000;
+							Blacksmith.Quest.favor -= smithCost;
 							Blacksmith.Quest.smiths++;
 							WndBlacksmith.this.hide();
 							GameScene.show(new WndSmith(troll, hero));
@@ -162,7 +164,7 @@ public class WndBlacksmith extends Window {
 				});
 			}
 		};
-		smith.enable(Blacksmith.Quest.favor >= 2000);
+		smith.enable(Blacksmith.Quest.favor >= smithCost);
 		buttons.add(smith);
 
 		RedButton cashOut = new RedButton(Messages.get(this, "cashout"), 6){

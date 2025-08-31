@@ -566,8 +566,7 @@ public class DriedRose extends Artifact {
 			GLog.newLine();
 			if(command == Command.NONE) {
 				GLog.n( "%s: \"%s\" ", Messages.titleCase(name()), str );
-			}
-			else {
+			} else {
 				GLog.i( "%s: \"%s\" ", Messages.titleCase(name()), str );
 			}
 		}
