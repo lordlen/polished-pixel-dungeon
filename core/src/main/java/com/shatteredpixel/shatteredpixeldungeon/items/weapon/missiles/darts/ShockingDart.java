@@ -46,32 +46,33 @@ public class ShockingDart extends TippedDart {
 	
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
+		
+		//3x3 AoE dmg + mini-stun
+		ArrayList<Lightning.Arc> arcs = new ArrayList<>();
+		for (int i : PathFinder.NEIGHBOURS9) {
+			Char ch = Actor.findChar(defender.pos + i);
+			
+			//when processing charged shot, only shock enemies
+			if(ch != null && ch != attacker && (!processingChargedShot || ch.alignment != attacker.alignment)) {
+				ch.damage(Random.NormalIntRange(5 + Dungeon.scalingDepth() / 4, 10 + Dungeon.scalingDepth() / 4), new Electricity());
 
-		//when processing charged shot, only shock enemies
-		if (!processingChargedShot || attacker.alignment != defender.alignment) {
-
-			//3x3 AoE dmg + mini-stun
-			ArrayList<Lightning.Arc> arcs = new ArrayList<>();
-			for (int i : PathFinder.NEIGHBOURS9) {
-				Char ch = Actor.findChar(defender.pos + i);
-
-				if(ch != null) {
-					ch.damage(Random.NormalIntRange(5 + Dungeon.scalingDepth() / 4, 10 + Dungeon.scalingDepth() / 4), new Electricity());
-
-					//<1 turn stun
+				//<1 turn stun, don't stack when processing charged shot
+				if(processingChargedShot) {
+					Buff.Polished.prolongAligned(ch, Paralysis.class, 0.75f);
+				} else {
 					Buff.Polished.affectAligned(ch, Paralysis.class, 0.75f);
-					arcs.add(new Lightning.Arc(defender.sprite.center(), ch.sprite.center()));
 				}
+				arcs.add(new Lightning.Arc(defender.sprite.center(), ch.sprite.center()));
 			}
+		}
 
-			CharSprite s = defender.sprite;
-			if (s != null && s.parent != null) {
-				arcs.add(new Lightning.Arc(new PointF(s.x, s.y + s.height / 2), new PointF(s.x + s.width, s.y + s.height / 2)));
-				arcs.add(new Lightning.Arc(new PointF(s.x + s.width / 2, s.y), new PointF(s.x + s.width / 2, s.y + s.height)));
+		CharSprite s = defender.sprite;
+		if (s != null && s.parent != null) {
+			arcs.add(new Lightning.Arc(new PointF(s.x, s.y + s.height / 2), new PointF(s.x + s.width, s.y + s.height / 2)));
+			arcs.add(new Lightning.Arc(new PointF(s.x + s.width / 2, s.y), new PointF(s.x + s.width / 2, s.y + s.height)));
 
-				s.parent.add(new Lightning(arcs, null));
-				Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
-			}
+			s.parent.add(new Lightning(arcs, null));
+			Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
 		}
 		
 		return super.proc(attacker, defender, damage);
