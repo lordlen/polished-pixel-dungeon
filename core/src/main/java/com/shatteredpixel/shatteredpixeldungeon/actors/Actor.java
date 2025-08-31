@@ -70,7 +70,7 @@ public abstract class Actor implements Bundlable {
 		}
 	}
 	
-	public void Polished_alignTurnWheel( Char target ) {
+	public float Polished_alignment(Actor target ) {
 		float partial = target.cooldown() % TICK;
 		if(partial < 0) partial++;
 		
@@ -78,8 +78,7 @@ public abstract class Actor implements Bundlable {
 		if (partial == 0 && target.actPriority > curActorPriority()) {
 			partial = 1;
 		}
-		
-		spendConstant(partial);
+		return partial;
 	}
 
 	//Always spends exactly the specified amount of time, regardless of time-influencing factors
