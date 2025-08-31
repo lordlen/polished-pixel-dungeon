@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Random;
 
@@ -54,7 +55,7 @@ public class Tomahawk extends MissileWeapon {
 	@Override
 	public int proc( Char attacker, Char defender, int damage ) {
 		//33% damage roll as bleed, but ignores armor and str bonus
-		Buff.affect( defender, Bleeding.class ).set( Math.round(augment.damageFactor(Random.NormalIntRange(min(), max()))/3f) );
+		Buff.affect( defender, Bleeding.class ).set( Math.round(augment.damageFactor(Hero.heroDamageIntRange(min(), max()))/3f) );
 		return super.proc( attacker, defender, damage );
 	}
 }

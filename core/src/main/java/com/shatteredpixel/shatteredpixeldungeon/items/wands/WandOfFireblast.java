@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
@@ -200,7 +201,7 @@ public class WandOfFireblast extends DamageWand {
 						}
 						if (ch.alignment == Char.Alignment.ENEMY) {
 							//A 2-charge zap's base dmg with a 1-charge zap's scaling
-							ch.damage(Math.round(powerMulti*Random.NormalIntRange(2 + buffedLvl(), 8 + 2*buffedLvl())), this);
+							ch.damage(Math.round(powerMulti * Hero.heroDamageIntRange(2 + buffedLvl(), 8 + 2*buffedLvl())), this);
 						}
 					}
 				}

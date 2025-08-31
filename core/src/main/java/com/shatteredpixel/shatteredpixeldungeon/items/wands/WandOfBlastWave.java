@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
@@ -175,7 +176,15 @@ public class WandOfBlastWave extends DamageWand {
 				int oldPos = ch.pos;
 				ch.pos = newPos;
 				if (finalCollided && ch.isActive()) {
-					ch.damage(Random.NormalIntRange(finalDist, 2*finalDist), new Knockback());
+					
+					int dmg;
+					if(cause instanceof WandOfBlastWave) {
+						dmg = Hero.heroDamageIntRange(finalDist, 2*finalDist);
+					} else {
+						dmg = Random.NormalIntRange(finalDist, 2*finalDist);
+					}
+					ch.damage(dmg, new Knockback());
+					
 					if (ch.isActive()) {
 						Buff.Polished.prolongAligned(ch, Paralysis.class, 0.75f + finalDist/2f);
 					} else if (ch == Dungeon.hero){
@@ -207,7 +216,7 @@ public class WandOfBlastWave extends DamageWand {
 
 		if (defender.buff(Paralysis.class) != null && defender.buff(BWaveOnHitTracker.class) == null){
 			defender.buff(Paralysis.class).detach();
-			int dmg = Random.NormalIntRange(6+buffedLvl(), 12+2*buffedLvl());
+			int dmg = Hero.heroDamageIntRange(6+buffedLvl(), 12+2*buffedLvl());
 			defender.damage(Math.round(procChanceMultiplier(attacker) * dmg), this);
 			BlastWave.blast(defender.pos);
 			Sample.INSTANCE.play( Assets.Sounds.BLAST );
