@@ -575,7 +575,14 @@ public class CursedWand {
 				//does not harm allies if positive only
 				if (ch.alignment != Char.Alignment.ALLY || !positiveOnly){
 					//shocking dart damage and a little stun
-					ch.damage(Random.NormalIntRange(5 + Dungeon.scalingDepth() / 4, 10 + Dungeon.scalingDepth() / 4), new Electricity());
+					int dmg;
+					if(user == Dungeon.hero) {
+						dmg = Hero.heroDamageIntRange(5 + Dungeon.scalingDepth() / 4, 10 + Dungeon.scalingDepth() / 4);
+					} else {
+						dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth() / 4, 10 + Dungeon.scalingDepth() / 4);
+					}
+					ch.damage(dmg, new Electricity());
+					
 					if (ch.isAlive()) {
 						Buff.affect(ch, Paralysis.class, Paralysis.DURATION / 2f);
 					} else if (ch == Dungeon.hero){
@@ -815,7 +822,13 @@ public class CursedWand {
 						Char ch = Actor.findChar(i);
 						Burning burning = Buff.affect(ch, Burning.class);
 						burning.reignite(ch);
-						int dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
+						
+						int dmg;
+						if(user == Dungeon.hero) {
+							dmg = Hero.heroDamageIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
+						} else {
+							dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
+						}
 						ch.damage(dmg, burning);
 					}
 					if (Dungeon.level.flamable[i]){
@@ -895,7 +908,13 @@ public class CursedWand {
 					continue;
 				} else {
 
-					int dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
+					int dmg;
+					if(user == Dungeon.hero) {
+						dmg = Hero.heroDamageIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
+					} else {
+						dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
+					}
+					
 					switch (Random.Int(5)){
 						case 0: default:
 							Burning burning = Buff.affect(ch, Burning.class);
