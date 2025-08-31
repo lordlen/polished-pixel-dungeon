@@ -159,8 +159,8 @@ public class WandOfCorruption extends Wand {
 				Statistics.qualifiedForBossChallengeBadge = false;
 			}
 
-			float corruptingPower = 3 + buffedLvl()/3f;
-			float corruptingBoost = 1;
+			float basePower 		= 3 + buffedLvl()/3f;
+			float corruptingBoost 	= 1 + buffedLvl()/6f;
 			
 			//base enemy resistance is usually based on their exp, but in special cases it is based on other criteria
 			float enemyResist;
@@ -197,14 +197,14 @@ public class WandOfCorruption extends Wand {
 
 				//cannot re-corrupt or doom an enemy, so give them a major debuff instead
 				if(enemy.buff(Corruption.class) != null || enemy.buff(Doom.class) != null){
-					corruptingPower = nerfedResist - corruptingBoost - 0.001f;
+					basePower = nerfedResist - corruptingBoost - 0.001f;
 				}
 
-				if ((corruptingPower + corruptingBoost) > nerfedResist){
+				if ((basePower + corruptingBoost) > nerfedResist){
 					corruptEnemy( enemy );
 					break;
 				} else {
-					float debuffChance = corruptingPower / nerfedResist;
+					float debuffChance = basePower / nerfedResist;
 					if (Random.Float() < debuffChance){
 						debuffEnemy( enemy, MAJOR_DEBUFFS);
 					} else {
