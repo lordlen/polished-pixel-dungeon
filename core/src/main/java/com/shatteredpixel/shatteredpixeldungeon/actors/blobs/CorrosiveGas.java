@@ -55,10 +55,14 @@ public class CorrosiveGas extends Blob {
 			for (int i = area.left; i < area.right; i++){
 				for (int j = area.top; j < area.bottom; j++){
 					cell = i + j*Dungeon.level.width();
-					if (cur[cell] > 0 && (ch = Actor.findChar( cell )) != null) {
-						if (!ch.isImmune(this.getClass())
-							&& (ch.buff(ChampionEnemy.AntiMagic.class) == null || source != WandOfCorrosion.class))
-							Buff.affect(ch, Corrosion.class).set(2f, strength, source);
+					if (cur[cell] > 0 && (ch = Actor.findChar( cell )) != null && !ch.isImmune(this.getClass())) {
+						
+						int str = strength;
+						if(source == WandOfCorrosion.class && ch.buff(ChampionEnemy.AntiMagic.class) != null) {
+							str = Math.round(str / 2f);
+						}
+						Buff.affect(ch, Corrosion.class).set(2f, str, source);
+						
 					}
 				}
 			}
