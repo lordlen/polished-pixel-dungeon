@@ -539,7 +539,7 @@ public class Potion extends Item {
 				result.identify();
 			}
 
-			while (result instanceof PotionOfHealing
+			while (result instanceof PotionOfHealing && Dungeon.LimitedDrops.COOKING_HP.count >= 3
 					&& Random.Int(10) < Dungeon.LimitedDrops.COOKING_HP.count) {
 
 				result = (Potion) Generator.randomUsingDefaults(Generator.Category.POTION);
@@ -560,7 +560,7 @@ public class Potion extends Item {
 				if (seed instanceof Plant.Seed &&
 					seed.isSimilar(ingredients.get(1)) &&
 					seed.isSimilar(ingredients.get(2)) &&
-					!(seed instanceof Sungrass.Seed && Dungeon.LimitedDrops.COOKING_HP.count > 0)) {
+					!(seed instanceof Sungrass.Seed && Dungeon.LimitedDrops.COOKING_HP.count >= 3)) {
 					
 					Potion pot = Reflection.newInstance(types.get(((Plant.Seed) seed).getClass()));
 					if(!pot.isKnown()) pot.anonymize();
