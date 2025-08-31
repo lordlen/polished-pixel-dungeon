@@ -1262,8 +1262,9 @@ public abstract class Mob extends Char {
 			enemySeen = false;
 			
 			int oldPos = pos;
+			float delay = 1 / speed();
 			if (target != -1 && getCloser( target )) {
-				spend( 1 / speed() );
+				spend( delay );
 				return moveSprite( oldPos, pos );
 			} else {
 				target = randomDestination();
@@ -1334,9 +1335,10 @@ public abstract class Mob extends Char {
 				}
 				
 				int oldPos = pos;
+				float delay = 1 / speed();
 				if (target != -1 && getCloser( target )) {
 					
-					spend( 1 / speed() );
+					spend( delay );
 					return moveSprite( oldPos,  pos );
 
 				} else {
@@ -1388,9 +1390,10 @@ public abstract class Mob extends Char {
 			}
 
 			int oldPos = pos;
+			float delay = 1 / speed();
 			if (target != -1 && getFurther( target )) {
 
-				spend( 1 / speed() );
+				spend( delay );
 				return moveSprite( oldPos, pos );
 
 			} else {

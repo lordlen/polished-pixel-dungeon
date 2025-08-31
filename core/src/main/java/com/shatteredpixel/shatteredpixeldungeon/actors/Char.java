@@ -309,8 +309,10 @@ public abstract class Char extends Actor {
 				|| buff(Vertigo.class) != null || c.buff(Vertigo.class) != null){
 			return true;
 		}
-
+		
+		float delay = 1 / c.speed();
 		c.pos = oldPos;
+		
 		moveSprite( oldPos, newPos );
 		move( newPos );
 
@@ -318,7 +320,7 @@ public abstract class Char extends Actor {
 		c.sprite.move( newPos, oldPos );
 		c.move( oldPos );
 		
-		c.spend( 1 / c.speed() );
+		c.spend( delay );
 
 		if (c == Dungeon.hero){
 			if (Dungeon.hero.subClass == HeroSubClass.FREERUNNER){
