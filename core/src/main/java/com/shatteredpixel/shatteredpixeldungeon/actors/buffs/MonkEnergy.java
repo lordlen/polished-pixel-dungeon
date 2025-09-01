@@ -78,8 +78,10 @@ public class MonkEnergy extends Buff implements ActionIndicator.Action {
 
 	@Override
 	public void tintIcon(Image icon) {
-		if (cooldown > 0){
+		if(cooldown > 0) {
 			icon.hardlight(0.33f, 0.33f, 1f);
+		} else if (abilitiesEmpowered(Dungeon.hero)){
+			icon.hardlight(1.4f, 1.2f, 0.25f);
 		} else {
 			icon.resetColor();
 		}
@@ -87,7 +89,7 @@ public class MonkEnergy extends Buff implements ActionIndicator.Action {
 
 	@Override
 	public float iconFadePercent() {
-		return GameMath.gate(0, cooldown/MAX_COOLDOWN, 1);
+		return GameMath.gate(0, (energyCap()-(int)energy) / energyCap(), 1);
 	}
 
 	@Override
@@ -95,7 +97,11 @@ public class MonkEnergy extends Buff implements ActionIndicator.Action {
 		if (cooldown > 0){
 			return Integer.toString(cooldown);
 		} else {
-			return "";
+			if(energy >= 1) {
+				return Integer.toString((int)energy);
+			} else {
+				return " ";
+			}
 		}
 	}
 
@@ -256,7 +262,7 @@ public class MonkEnergy extends Buff implements ActionIndicator.Action {
 	@Override
 	public Visual secondaryVisual() {
 		BitmapText txt = new BitmapText(PixelScene.pixelFont);
-		txt.text( Integer.toString((int)energy) );
+		txt.text( (int)energy + "/" + energyCap() );
 		txt.hardlight(CharSprite.POSITIVE);
 		txt.measure();
 		return txt;
