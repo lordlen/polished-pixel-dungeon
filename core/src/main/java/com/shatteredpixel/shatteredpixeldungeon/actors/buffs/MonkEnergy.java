@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Timer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Ghoul;
@@ -33,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RipperDemon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Wraith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
@@ -622,37 +624,25 @@ public class MonkEnergy extends Buff implements ActionIndicator.Action {
 				hero.sprite.operate(hero.pos);
 				GameScene.flash(0x88000000, false);
 				Sample.INSTANCE.play(Assets.Sounds.SCAN);
-
-				for (Buff b : hero.buffs()){
-					if (b.type == Buff.buffType.NEGATIVE
-							&& !(b instanceof AllyBuff)
-							&& !(b instanceof LostInventory)){
-						b.detach();
-					}
-				}
-
+				
+				PotionOfCleansing.cleanse(hero, 0, false);
+				
 				//we process this as 5x wait actions instead of one 5 tick action to prevent
 				// effects like time freeze from eating the whole action duration
 				for (int i = 0; i < 5; i++) hero.spendConstant(Actor.TICK);
-
-				if (Buff.affect(hero, MonkEnergy.class).abilitiesEmpowered(hero)){
+				
+				boolean empowered = Buff.affect(hero, MonkEnergy.class).abilitiesEmpowered(hero);
+				if (empowered){
 					Buff.affect(hero, MeditateResistance.class, hero.cooldown());
 				}
-				Buff.affect(hero, Hunger.class).affectHunger(8f);
-
-				Actor.addDelayed(new Actor() {
-
-					{
-						actPriority = VFX_PRIO;
+				
+				Timer.addTimer(() -> {
+					Buff.affect(hero, Hunger.class).affectHunger(8f);
+					Buff.affect(hero, Recharging.class, 8f);
+					if (empowered){
+						Buff.affect(hero, Barrier.class).setShield(Math.round(0.08f * hero.HT));
 					}
-
-					@Override
-					protected boolean act() {
-						Buff.affect(hero, Recharging.class, 8f);
-						Actor.remove(this);
-						return true;
-					}
-				}, hero.cooldown()-1);
+				}).setBeforeHero();
 
 				hero.next();
 				hero.busy();
