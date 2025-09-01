@@ -126,7 +126,7 @@ public class Dread extends Buff {
 
 	public void recover() {
 		left -= 5;
-		if (left <= 0){
+		if (left < 0){
 			detach();
 		}
 	}

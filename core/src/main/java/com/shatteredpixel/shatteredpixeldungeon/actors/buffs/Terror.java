@@ -67,7 +67,7 @@ public class Terror extends FlavourBuff {
 			return;
 		}
 		spend(-5f);
-		if (cooldown() <= 0){
+		if (cooldown() < 0){
 			detach();
 		}
 	}

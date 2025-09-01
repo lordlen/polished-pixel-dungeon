@@ -46,7 +46,7 @@ public class Friendly extends Weapon.Enchantment {
 			Buff.affect( attacker, Charm.class, Charm.DURATION ).object = defender.id();
 			attacker.sprite.centerEmitter().start( Speck.factory( Speck.HEART ), 0.2f, 5 );
 			
-			Charm c = Buff.affect( defender, Charm.class, Charm.DURATION/2 );
+			Charm c = Buff.Polished.affectAligned( defender, Charm.class, Charm.DURATION/2 );
 			c.ignoreNextHit = true;
 			c.object = attacker.id();
 			defender.sprite.centerEmitter().start( Speck.factory( Speck.HEART ), 0.2f, 5 );
