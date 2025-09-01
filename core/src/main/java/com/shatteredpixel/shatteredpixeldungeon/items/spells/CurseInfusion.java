@@ -61,7 +61,7 @@ public class CurseInfusion extends InventorySpell {
 	
 	//need to manually change SpiritBow.max() as well
 	public static int boostedLevel(int level) {
-		return level+1 + level/6;
+		return level+1 + level/5;
 	}
 	
 	private void curseEnchant(Weapon w) {
