@@ -1090,7 +1090,7 @@ public abstract class Char extends Actor {
 			}
 
 			if (src instanceof Hunger)                                  icon = FloatingText.HUNGER;
-			if (src instanceof Burning || src instanceof Blazing)       icon = FloatingText.BURNING;
+			if (src instanceof Burning)       							icon = FloatingText.BURNING;
 			if (src instanceof Chill || src instanceof Frost)           icon = FloatingText.FROST;
 			if (src instanceof GeyserTrap || src instanceof StormCloud) icon = FloatingText.WATER;
 			if (src instanceof Burning)                                 icon = FloatingText.BURNING;
