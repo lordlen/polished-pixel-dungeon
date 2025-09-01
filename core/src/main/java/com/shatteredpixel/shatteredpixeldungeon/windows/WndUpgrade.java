@@ -110,14 +110,20 @@ public class WndUpgrade extends Window {
 		boolean curseInfused = (toUpgrade instanceof Weapon && ((Weapon) toUpgrade).curseInfusionBonus)
 				|| (toUpgrade instanceof Armor && ((Armor) toUpgrade).curseInfusion())
 				|| (toUpgrade instanceof Wand && ((Wand) toUpgrade).curseInfusionBonus);
-
+		
 		if (curseInfused){
-			if (CurseInfusion.boostedLevel(toUpgrade.trueLevel()) < CurseInfusion.boostedLevel(toUpgrade.trueLevel()+1)){
+			//account for double infusion
+			if(toUpgrade instanceof Armor && ((Armor) toUpgrade).doubleInfusion()) {
+				int currrentLevel = CurseInfusion.boostedLevel(CurseInfusion.boostedLevel(toUpgrade.trueLevel()));
+				int newLevel = CurseInfusion.boostedLevel(CurseInfusion.boostedLevel(toUpgrade.trueLevel()+1));
+				levelTo += newLevel-currrentLevel;
+			}
+			
+			else if (CurseInfusion.boostedLevel(toUpgrade.trueLevel()) < CurseInfusion.boostedLevel(toUpgrade.trueLevel()+1)){
 				//new level bracket for curse infusion bonus
 				levelTo++;
 			}
 		}
-		// *** We dont calculate double armor infusions because it would be a mess...
 
 		// *** Sprites, showing item at current level and with +1 ***
 

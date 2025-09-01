@@ -958,6 +958,11 @@ public class Armor extends EquipableItem {
 				(seal != null && seal.curseInfusion());
 	}
 	
+	public boolean doubleInfusion() {
+		return  (curseInfusionBonus && glyph() == activeGlyph()) &&
+				(seal != null && seal.curseInfusion());
+	}
+	
 	public boolean displayGlyph() {
 		return activeGlyph() != null && (!activeGlyph().curse() || cursedKnown || (Armor.runic > 0 && seal != null && seal.overwriteGlyph()));
 	}
