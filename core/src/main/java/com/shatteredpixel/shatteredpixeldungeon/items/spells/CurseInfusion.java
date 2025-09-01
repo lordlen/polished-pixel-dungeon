@@ -59,6 +59,11 @@ public class CurseInfusion extends InventorySpell {
 		talentChance = 1/(float)Recipe.OUT_QUANTITY;
 	}
 	
+	//need to manually change SpiritBow.max() as well
+	public static int boostedLevel(int level) {
+		return level+1 + level/5;
+	}
+	
 	private void curseEnchant(Weapon w) {
 		//if we are freshly applying curse infusion, don't replace an existing curse
 		if (w.enchantment == null || !w.hasCurseEnchant() || w.curseInfusionBonus) {

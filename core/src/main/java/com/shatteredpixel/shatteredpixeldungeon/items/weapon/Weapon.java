@@ -45,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
@@ -384,7 +385,7 @@ abstract public class Weapon extends KindOfWeapon {
 	@Override
 	public int level() {
 		int level = super.level();
-		if (curseInfusionBonus) level += 1 + level/6;
+		if (curseInfusionBonus) level = CurseInfusion.boostedLevel(level);
 		return level;
 	}
 	

@@ -53,6 +53,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.WondrousResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -350,7 +351,7 @@ public abstract class Wand extends Item {
 			updateLevel();
 		}
 		int level = super.level();
-		if (curseInfusionBonus) level += 1 + level/6;
+		if (curseInfusionBonus) level = CurseInfusion.boostedLevel(level);
 		level += resinBonus;
 		return level;
 	}

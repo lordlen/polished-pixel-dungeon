@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -181,7 +182,7 @@ public class BrokenSeal extends Item {
 	
 	@Override
 	public int buffedVisiblyUpgraded() {
-		return curseInfusionBonus ? buffedLvl()+1 : buffedLvl();
+		return curseInfusionBonus ? CurseInfusion.boostedLevel(buffedLvl()) : buffedLvl();
 	}
 
 	@Override
