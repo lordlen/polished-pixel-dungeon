@@ -95,7 +95,7 @@ public class Cleanse extends ClericSpell {
 		}
 
 		for (Char ch : affected) {
-			PotionOfCleansing.cleanse(ch, immuneDuration(hero));
+			PotionOfCleansing.cleanse(ch, immuneDuration(hero), false);
 			Buff.affect(ch, Barrier.class).setShield(shieldAmount(hero));
 			
 			new Flare( 6, 32 ).color(0xFF4CD2, true).show( ch.sprite, 2f );

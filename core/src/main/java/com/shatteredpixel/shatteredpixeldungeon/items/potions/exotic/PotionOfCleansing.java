@@ -69,10 +69,10 @@ public class PotionOfCleansing extends ExoticPotion {
 	}
 
 	public static void cleanse(Char ch){
-		cleanse(ch, Cleanse.DURATION);
+		cleanse(ch, Cleanse.DURATION, true);
 	}
 
-	public static void cleanse(Char ch, float duration){
+	public static void cleanse(Char ch, float duration, boolean cleanseHunger){
 		if(duration > 0) {
 			Buff.prolong(ch, Cleanse.class, duration);
 		}
@@ -83,7 +83,7 @@ public class PotionOfCleansing extends ExoticPotion {
 					&& !(b instanceof LostInventory)){
 				b.detach();
 			}
-			if (b instanceof Hunger){
+			if (b instanceof Hunger && cleanseHunger){
 				((Hunger) b).satisfy(Hunger.STARVING);
 			}
 		}

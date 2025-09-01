@@ -39,11 +39,11 @@ public class CleansingDart extends TippedDart {
 	
 	@Override
 	public int proc(Char attacker, final Char defender, int damage) {
-
+		
 		if (processingChargedShot && defender == attacker) {
 			//do nothing to the hero when processing charged shot
 		} else if (attacker.alignment == defender.alignment){
-			PotionOfCleansing.cleanse(defender, PotionOfCleansing.Cleanse.DURATION*2f);
+			PotionOfCleansing.cleanse(defender, PotionOfCleansing.Cleanse.DURATION*2f, false);
 			return 0;
 		} else {
 			for (Buff b : defender.buffs()){
