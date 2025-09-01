@@ -68,6 +68,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
@@ -521,8 +522,8 @@ public class Armor extends EquipableItem {
 		int level = super.level();
 		//TODO warrior's seal upgrade should probably be considered here too
 		// instead of being part of true level
-		if (curseInfusionBonus && glyph() == activeGlyph()) level += 1 + level/6;
-		if (seal != null && seal.curseInfusion()) level += 1 + level/6;
+		if (curseInfusionBonus && glyph() == activeGlyph()) level = CurseInfusion.boostedLevel(level);
+		if (seal != null && seal.curseInfusion()) level = CurseInfusion.boostedLevel(level);
 		
 		return level;
 	}

@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.MagicalInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -111,12 +112,12 @@ public class WndUpgrade extends Window {
 				|| (toUpgrade instanceof Wand && ((Wand) toUpgrade).curseInfusionBonus);
 
 		if (curseInfused){
-			if (toUpgrade.trueLevel()/6 < (toUpgrade.trueLevel()+1)/6){
+			if (CurseInfusion.boostedLevel(toUpgrade.trueLevel()) < CurseInfusion.boostedLevel(toUpgrade.trueLevel()+1)){
 				//new level bracket for curse infusion bonus
 				levelTo++;
 			}
 		}
-		//we dont calculate double armor infusions because it would be a mess...
+		// *** We dont calculate double armor infusions because it would be a mess...
 
 		// *** Sprites, showing item at current level and with +1 ***
 
