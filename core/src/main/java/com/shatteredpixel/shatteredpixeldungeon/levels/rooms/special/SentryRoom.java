@@ -303,6 +303,9 @@ public class SentryRoom extends SpecialRoom {
 				throwItems();
 			}
 			
+			if(state == WANDERING) {
+				state = PASSIVE;
+			}
 			if(paralysed > 0) {
 				spendConstant(TICK);
 				return true;
