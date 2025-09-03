@@ -155,7 +155,6 @@ public class DirectableAlly extends NPC {
 				commander.showPrompt = true;
 				
 				GameScene.Polished.simulateTilemapClick();
-				
 				GameScene.cancelCellSelector();
 			}
 			else {
@@ -165,13 +164,18 @@ public class DirectableAlly extends NPC {
 	}
 	
 	public void chainCommand() {
-		if(!chainAnnounced) {
-			chainAnnounced = true;
-			WndMessage msg = new WndMessage(Messages.get(this, "chain_info"));
-			Game.runOnRenderThread(() -> GameScene.show(msg));
-		}
-		else {
+		if(chainAnnounced) {
 			GameScene.selectCell(chainer);
+		} else {
+			chainAnnounced = true;
+			Game.runOnRenderThread(() -> GameScene.show(
+			new WndMessage(Messages.get(this, "chain_info")) {
+				@Override
+				public void onBackPressed() {
+					super.onBackPressed();
+					GameScene.selectCell(chainer);
+				}
+			}));
 		}
 	}
 	
@@ -186,13 +190,13 @@ public class DirectableAlly extends NPC {
 				return;
 			}
 			else if (!Dungeon.level.heroFOV[cell] || ch == null ||
-					( ch != Dungeon.hero && ch.alignment != Char.Alignment.ENEMY ))
-			{
+					( ch != Dungeon.hero && ch.alignment != Char.Alignment.ENEMY )) {
 				defendPos( cell );
 			}
 			else if (ch == Dungeon.hero) {
 				followHero();
-			} else {
+			}
+			else {
 				targetChar(ch);
 			}
 			
@@ -616,7 +620,8 @@ public class DirectableAlly extends NPC {
 			
 			for (int offset : PathFinder.NEIGHBOURS25) {
 				int cell = Dungeon.hero.pos + offset;
-				if(cell >= 0 && cell < Dungeon.level.width() && valid[cell]) {
+				if(cell >= 0 && cell < Dungeon.level.length() && valid[cell]) {
+					
 					candidates.add(cell);
 					
 					TargetedCell targeted = new TargetedCell(cell, TargetedCell.YELLOW) {
@@ -625,7 +630,6 @@ public class DirectableAlly extends NPC {
 							return !GameScene.Polished.isListenerActive(summoner);
 						}
 					};
-					
 					Dungeon.hero.sprite.parent.add(targeted);
 				}
 			}
@@ -664,14 +668,12 @@ public class DirectableAlly extends NPC {
 			Level level = Dungeon.level;
 			boolean[] valid = BArray.or( level.passable, level.avoid, null );
 			
-			boolean[] v = level.visited;
-			boolean[] m = level.mapped;
 			for (int i = 0; i < level.length(); i++) {
-				valid[i] = valid[i] && (v[i] || m[i]);
+				valid[i] = valid[i] && (level.visited[i] || level.mapped[i]);
 			}
 			
 			if (!ch.flying) {
-				BArray.and( valid, BArray.not(level.pit, null), valid );
+				BArray.and( valid, BArray.not(level.pit), valid );
 			}
 			
 			if (Char.hasProp(ch, Char.Property.LARGE)){
@@ -731,7 +733,7 @@ public class DirectableAlly extends NPC {
 		}
 	};
 	
-	boolean chainAnnounced = false;
+	boolean chainAnnounced, chainFollowAnnounced = false;
 	private CellSelector.Listener chainer = new CellSelector.Listener() {
 		@Override
 		public void onSelect(Integer cell) {
@@ -753,7 +755,13 @@ public class DirectableAlly extends NPC {
 		ChainedCommand last = !chain.isEmpty() ? chain.get(chain.size()-1) : null;
 		
 		if((last != null ? last.end() : commandPos) == cell) return;
-		if((last != null ? last.targetCommand : command) == Command.FOLLOW) return;
+		if((last != null ? last.targetCommand : command) == Command.FOLLOW) {
+			if(!chainFollowAnnounced) {
+				chainFollowAnnounced=true;
+				GLog.i(Messages.get(DirectableAlly.class, "chain_follow"));
+			}
+			return;
+		}
 		if(chain.size() >= MAX_CHAIN) return;
 		
 		Char ch = Actor.findChar(cell);
