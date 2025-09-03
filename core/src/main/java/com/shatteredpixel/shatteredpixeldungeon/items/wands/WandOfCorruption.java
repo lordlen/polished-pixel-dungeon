@@ -243,7 +243,7 @@ public class WandOfCorruption extends Wand {
 			
 			int duration = 6 + buffedLvl() * 3;
 			if(enemy.buff(ChampionEnemy.AntiMagic.class) != null) {
-				duration /= 2;
+				duration = Math.round(duration/2f);
 			}
 			
 			Buff debuff = Buff.Polished.prolongAligned(enemy, debuffCls, duration);

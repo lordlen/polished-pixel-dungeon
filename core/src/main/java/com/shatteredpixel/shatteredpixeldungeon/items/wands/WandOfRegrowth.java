@@ -119,7 +119,7 @@ public class WandOfRegrowth extends Wand {
 						Statistics.qualifiedForBossChallengeBadge = false;
 					}
 					
-					float duration = 4f * chrgUsed;
+					int duration = 4 * chrgUsed;
 					if(ch.buff(ChampionEnemy.AntiMagic.class) != null) {
 						duration /= 2;
 					}
