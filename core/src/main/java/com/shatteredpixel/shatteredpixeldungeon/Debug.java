@@ -191,7 +191,7 @@ public class Debug {
     
     private static void SetQuickslots() {
         List<Class<? extends Item>> quickslot = Arrays.asList(
-                StoneOfBlast.class, ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class
+                StoneOfBlast.class, ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, Torch.class
         );
         
         ArrayList<Item> items = new ArrayList<>();
