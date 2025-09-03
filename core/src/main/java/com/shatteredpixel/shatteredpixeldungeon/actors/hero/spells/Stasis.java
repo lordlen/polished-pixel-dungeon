@@ -153,16 +153,31 @@ public class Stasis extends ClericSpell {
 
 		@Override
 		public boolean act() {
+			dropEnemy();
+			return super.act();
+		}
+		
+		void dropEnemy() {
+			dropEnemy(-1);
+		}
+		public void dropEnemy(int avoid) {
 			ArrayList<Integer> spawnPoints = new ArrayList<>();
 			for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
 				int p = target.pos + PathFinder.NEIGHBOURS8[i];
-				if (Actor.findChar(p) == null
-						&& (Dungeon.level.passable[p] || (stasisAlly.flying && Dungeon.level.avoid[p])) ){
-					spawnPoints.add(p);
+				
+				if (Actor.findChar(p) == null && p != avoid) {
+					if(Dungeon.level.passable[p] || (stasisAlly.flying && Dungeon.level.avoid[p])) {
+						spawnPoints.add(p);
+					}
 				}
 			}
 			if (spawnPoints.isEmpty()){
-				spawnPoints.add(target.pos + PathFinder.NEIGHBOURS8[Random.Int(8)]);
+				int cell = Dungeon.level.randomRespawnCell(stasisAlly);
+				if(cell != -1) {
+					spawnPoints.add(cell);
+				} else {
+					spawnPoints.add(target.pos);
+				}
 			}
 			stasisAlly.pos = Random.element(spawnPoints);
 			GameScene.add(stasisAlly);
@@ -174,16 +189,14 @@ public class Stasis extends ClericSpell {
 				// we have to call this manually
 				((DirectableAlly) stasisAlly).drawPath();
 			}
-
+			
 			if (stasisAlly.buff(LifeLink.class) != null){
 				Buff.prolong(Dungeon.hero, LifeLink.class, stasisAlly.buff(LifeLink.class).cooldown()).object = stasisAlly.id();
 			}
-
+			
 			ScrollOfTeleportation.appear(stasisAlly, stasisAlly.pos);
 			Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
 			GameScene.Polished.updateMobBuffIndicators();
-
-			return super.act();
 		}
 
 		Mob stasisAlly;

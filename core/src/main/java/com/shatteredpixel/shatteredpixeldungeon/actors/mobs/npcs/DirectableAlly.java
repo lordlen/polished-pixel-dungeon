@@ -155,6 +155,8 @@ public class DirectableAlly extends NPC {
 				commander.showPrompt = true;
 				
 				GameScene.Polished.simulateTilemapClick();
+				
+				GameScene.cancelCellSelector();
 			}
 			else {
 				GameScene.selectCell(commander);

@@ -160,12 +160,14 @@ public class DriedRose extends Artifact {
 		if(!isEquipped(Dungeon.hero)) {
 			return super.defaultAction();
 		}
+		
 		else if (Ghost() == null) {
 			return AC_SUMMON;
 		} else if (ghost.isInsideLevel()){
 			return AC_DIRECT;
 		} else {
-			return super.defaultAction();
+			// will show a text message
+			return AC_SUMMON;
 		}
 	}
 
