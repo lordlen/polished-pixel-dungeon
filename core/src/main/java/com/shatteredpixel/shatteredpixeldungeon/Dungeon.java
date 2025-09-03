@@ -700,9 +700,18 @@ public class Dungeon {
 			disoriented.onLevelSwitch();
 		}
 		
-		Polished.loading = true;
-		
+		PowerOfMany.resetAlly();
+		if(PowerOfMany.AllyExists()) {
+			//can only have one empowered ally at once, prioritize incoming ally
+			for (Mob mob : level.mobs.toArray( new Mob[0] )) {
+				if (mob.buff(PowerOfMany.PowerBuff.class) != null){
+					mob.buff(PowerOfMany.PowerBuff.class).detach();
+				}
+			}
+		}
 		Mob.restoreAllies( level, pos );
+		
+		Polished.loading = true;
 
 		Actor.init();
 

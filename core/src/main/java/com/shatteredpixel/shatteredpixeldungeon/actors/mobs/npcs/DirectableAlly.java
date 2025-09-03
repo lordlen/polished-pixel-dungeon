@@ -33,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.ShadowClone;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.AllyPath;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -145,8 +144,6 @@ public class DirectableAlly extends NPC {
 	protected int commandPos = -1;
 	
 	public void command() {
-		if(stasis()) return;
-		
 		if(GameScene.Polished.isListenerActive(CommandListener.class)) {
 			GameScene.selectCell(chainer);
 		}
@@ -166,8 +163,6 @@ public class DirectableAlly extends NPC {
 	}
 	
 	public void chainCommand() {
-		if(stasis()) return;
-		
 		if(!chainAnnounced) {
 			chainAnnounced = true;
 			WndMessage msg = new WndMessage(Messages.get(this, "chain_info"));
@@ -498,8 +493,8 @@ public class DirectableAlly extends NPC {
 	}
 	
 	public static boolean allyActive() {
-		return  DriedRose.Ghost(false) != null || SpiritHawk.Hawk(false) != null ||
-				ShadowClone.Shadow(false) != null || PowerOfMany.PoweredAlly(false) != null;
+		return  DriedRose.Ghost(true) != null || SpiritHawk.Hawk(true) != null ||
+				ShadowClone.Shadow(true) != null || PowerOfMany.PoweredAlly(true) != null;
 	}
 	
 	public static boolean observing = false;
@@ -507,20 +502,24 @@ public class DirectableAlly extends NPC {
 		
 		observing = true;
 		
-		if(DriedRose.Ghost(false) != null) {
-			DriedRose.Ghost(false).observe();
-		}
-		if(SpiritHawk.Hawk(false) != null) {
-			SpiritHawk.Hawk(false).observe();
-		}
-		if(ShadowClone.Shadow(false) != null) {
-			ShadowClone.Shadow(false).observe();
+		if(DriedRose.Ghost(true) != null) {
+			DriedRose.Ghost().observe();
 		}
 		
-		Char ally = PowerOfMany.PoweredAlly(false);
+		if(SpiritHawk.Hawk(true) != null) {
+			SpiritHawk.Hawk().observe();
+		}
+		
+		if(ShadowClone.Shadow(true) != null) {
+			ShadowClone.Shadow().observe();
+		}
+		
+		Char ally = PowerOfMany.PoweredAlly(true);
 		if(ally != null) {
-			if(ally instanceof PowerOfMany.LightAlly) {
-				((PowerOfMany.LightAlly) ally).observe();
+			if(ally instanceof DirectableAlly) {
+				if(ally instanceof PowerOfMany.LightAlly) {
+					((DirectableAlly) ally).observe();
+				}
 			}
 			
 			else {
@@ -534,7 +533,6 @@ public class DirectableAlly extends NPC {
 				// we don't need to share hero fov with them yet,
 				// since we can't control regular enemies anyway
 			}
-			
 		}
 		
 		observing = false;
@@ -552,19 +550,14 @@ public class DirectableAlly extends NPC {
 	}
 	
 	protected void afterObserve() {
-		Level level = Dungeon.level;
 		//since this runs delayed we take some extra precautions
-		if(level == null || level.heroFOV == null || level.heroFOV.length != level.length()) {
-			return;
+		Level level = Dungeon.level;
+		if (level != null && level.heroFOV != null && validFov()) {
+			System.arraycopy(
+					level.heroFOV, 0,
+					fieldOfView, 0,
+					level.length());
 		}
-		if(!validFov()) {
-			fieldOfView = new boolean[level.length()];
-		}
-		
-		System.arraycopy(
-				level.heroFOV, 0,
-				fieldOfView, 0,
-				level.length());
 	}
 	
 	@Override
@@ -598,8 +591,8 @@ public class DirectableAlly extends NPC {
 		GameScene.updateFog(pos, viewDistance+1);
 	}
 	
-	public boolean stasis() {
-		return this == Stasis.getStasisAlly();
+	public boolean isInsideLevel() {
+		return Dungeon.level.mobs.contains(this);
 	}
 	
 	public static class SummonSelector {
@@ -621,7 +614,7 @@ public class DirectableAlly extends NPC {
 			
 			for (int offset : PathFinder.NEIGHBOURS25) {
 				int cell = Dungeon.hero.pos + offset;
-				if(valid[cell]) {
+				if(cell >= 0 && cell < Dungeon.level.width() && valid[cell]) {
 					candidates.add(cell);
 					
 					TargetedCell targeted = new TargetedCell(cell, TargetedCell.YELLOW) {

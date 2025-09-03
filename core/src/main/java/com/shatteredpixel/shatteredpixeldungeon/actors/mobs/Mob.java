@@ -1441,20 +1441,18 @@ public abstract class Mob extends Char {
 	public static void holdAllies( Level level, int holdFromPos ){
 		heldAllies.clear();
 		for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-			//preserve directable allies or empowered allies no matter where they are
-			if (mob instanceof DirectableAlly
-				|| (mob == PowerOfMany.PoweredAlly())) {
-				if (mob instanceof DirectableAlly) {
-					((DirectableAlly) mob).clearState();
-					((DirectableAlly) mob).erasePath();
-				}
+			if (mob instanceof DirectableAlly) {
+				((DirectableAlly) mob).clearState();
+				((DirectableAlly) mob).erasePath();
 				level.mobs.remove( mob );
 				heldAllies.add(mob);
-				
+			}
+			
 			//preserve other intelligent allies if they are near the hero
-			} else if (mob.alignment == Alignment.ALLY
+			else if (mob.alignment == Alignment.ALLY
 					&& mob.intelligentAlly
-					&& Dungeon.level.distance(holdFromPos, mob.pos) <= 5){
+					&& !mob.properties.contains(Property.IMMOVABLE)
+					&& Dungeon.level.distance(holdFromPos, mob.pos) <= 5) {
 				level.mobs.remove( mob );
 				heldAllies.add(mob);
 			}
@@ -1470,7 +1468,7 @@ public abstract class Mob extends Char {
 			
 			ArrayList<Integer> candidatePositions = new ArrayList<>();
 			for (int i : PathFinder.NEIGHBOURS8) {
-				if (!Dungeon.level.solid[i+pos] && !Dungeon.level.avoid[i+pos] && level.findMob(i+pos) == null){
+				if (!level.solid[i+pos] && !level.avoid[i+pos] && level.findMob(i+pos) == null){
 					candidatePositions.add(i+pos);
 				}
 			}
@@ -1482,13 +1480,22 @@ public abstract class Mob extends Char {
 				Collections.sort(candidatePositions, new Comparator<Integer>() {
 					@Override
 					public int compare(Integer t1, Integer t2) {
-						return Dungeon.level.distance(gravitatePos, t1) -
-								Dungeon.level.distance(gravitatePos, t2);
+						return 	level.distance(gravitatePos, t1) -
+								level.distance(gravitatePos, t2);
 					}
 				});
 			}
 			
 			for (Mob ally : heldAllies) {
+				
+				//can only have one empowered ally at once, prioritize incoming ally
+				if (ally.buff(PowerOfMany.PowerBuff.class) != null){
+					for (Mob mob : level.mobs.toArray( new Mob[0] )) {
+						if (mob.buff(PowerOfMany.PowerBuff.class) != null){
+							mob.buff(PowerOfMany.PowerBuff.class).detach();
+						}
+					}
+				}
 
 				level.mobs.add(ally);
 				
@@ -1497,17 +1504,19 @@ public abstract class Mob extends Char {
 				} else {
 					ally.pos = pos;
 				}
-				if (ally.sprite != null) ally.sprite.place(ally.pos);
+				
+				if (ally.sprite != null) {
+					ally.sprite.place(ally.pos);
+				}
 
 				if (!ally.validFov()){
 					ally.fieldOfView = new boolean[level.length()];
 				}
-				Dungeon.level.updateFieldOfView( ally, ally.fieldOfView );
+				level.updateFieldOfView( ally, ally.fieldOfView );
 				
 				if(ally instanceof DirectableAlly) {
 					((DirectableAlly) ally).followHero();
-				}
-				else {
+				} else {
 					ally.state = ally.WANDERING;
 				}
 				

@@ -46,7 +46,7 @@ public class PrismaticGuard extends Buff {
 	
 	private float HP;
 
-	private float powerOfManyTurns = 0;
+	private float powerOfManyTurns = -1;
 	
 	@Override
 	public boolean act() {
@@ -78,7 +78,7 @@ public class PrismaticGuard extends Buff {
 			if (bestPos != -1) {
 				PrismaticImage pris = new PrismaticImage();
 				pris.duplicate(hero, (int)Math.floor(HP) );
-				if (powerOfManyTurns > 0){
+				if (powerOfManyTurns >= 0){
 					Buff.affect(pris, PowerOfMany.PowerBuff.class, powerOfManyTurns);
 				}
 				pris.state = pris.HUNTING;
@@ -95,13 +95,14 @@ public class PrismaticGuard extends Buff {
 			spend(TICK);
 		}
 		
-		if (HP < maxHP() && Regeneration.regenOn()){
+		if (Regeneration.regenOn()){
 			HP += 0.1f;
+			HP = Math.min(HP, maxHP());
 		}
-		if (powerOfManyTurns > 0){
+		if (powerOfManyTurns >= 0){
 			powerOfManyTurns--;
-			if (powerOfManyTurns <= 0){
-				powerOfManyTurns = 0;
+			if (powerOfManyTurns < 0){
+				powerOfManyTurns = -1;
 				BuffIndicator.refreshHero();
 			}
 		}
@@ -111,15 +112,14 @@ public class PrismaticGuard extends Buff {
 	
 	public void set( int HP ){
 		this.HP = HP;
-		powerOfManyTurns = 0;
 	}
 
 	public void set( PrismaticImage img){
 		this.HP = img.HP;
 		if (img.buff(PowerOfMany.PowerBuff.class) != null){
-			powerOfManyTurns = img.buff(PowerOfMany.PowerBuff.class).cooldown()+1;
+			powerOfManyTurns = img.buff(PowerOfMany.PowerBuff.class).cooldown();
 		} else {
-			powerOfManyTurns = 0;
+			powerOfManyTurns = -1;
 		}
 	}
 	
@@ -132,7 +132,7 @@ public class PrismaticGuard extends Buff {
 	}
 
 	public boolean isEmpowered(){
-		return powerOfManyTurns > 0;
+		return powerOfManyTurns >= 0;
 	}
 	
 	@Override
@@ -163,7 +163,7 @@ public class PrismaticGuard extends Buff {
 	public String desc() {
 		String desc = Messages.get(this, "desc", (int)HP, maxHP());
 		if (isEmpowered()){
-			desc += "\n\n" + Messages.get(this, "desc_many", (int)powerOfManyTurns);
+			desc += "\n\n" + Messages.get(this, "desc_many", (int)powerOfManyTurns+1);
 		}
 		return desc;
 	}

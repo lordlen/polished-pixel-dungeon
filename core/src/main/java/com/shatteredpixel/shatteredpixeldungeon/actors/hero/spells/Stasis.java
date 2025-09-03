@@ -64,9 +64,8 @@ public class Stasis extends ClericSpell {
 
 	@Override
 	public boolean canCast(Hero hero) {
-		return super.canCast(hero)
-				&& hero.hasTalent(Talent.STASIS)
-				&& (PowerOfMany.getPoweredAlly() != null || hero.buff(StasisBuff.class) != null);
+		return 	super.canCast(hero) && hero.hasTalent(Talent.STASIS) &&
+				((PowerOfMany.PoweredAlly(true) != null) || Stasis.getStasisAlly() != null);
 	}
 
 	@Override
@@ -167,10 +166,12 @@ public class Stasis extends ClericSpell {
 			}
 			stasisAlly.pos = Random.element(spawnPoints);
 			GameScene.add(stasisAlly);
-
+			
+			Dungeon.observe();
+			
 			if (stasisAlly instanceof DirectableAlly){
 				((DirectableAlly) stasisAlly).followHero();
-				//we have to call this since Stasis::act gets manually activated and doesn't lead to Gamescene::ready
+				// we have to call this manually
 				((DirectableAlly) stasisAlly).drawPath();
 			}
 
@@ -180,6 +181,7 @@ public class Stasis extends ClericSpell {
 
 			ScrollOfTeleportation.appear(stasisAlly, stasisAlly.pos);
 			Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
+			GameScene.Polished.updateMobBuffIndicators();
 
 			return super.act();
 		}

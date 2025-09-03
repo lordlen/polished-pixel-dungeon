@@ -267,14 +267,14 @@ public class WandOfLivingEarth extends DamageWand {
 		private int wandLevel;
 		private int armor;
 
-		private float powerOfManyTurns = 0;
+		private float powerOfManyTurns = -1;
 
 		@Override
 		public boolean act() {
-			if (powerOfManyTurns > 0){
+			if (powerOfManyTurns >= 0){
 				powerOfManyTurns--;
-				if (powerOfManyTurns <= 0){
-					powerOfManyTurns = 0;
+				if (powerOfManyTurns < 0){
+					powerOfManyTurns = -1;
 					BuffIndicator.refreshHero();
 				}
 			}
@@ -304,7 +304,7 @@ public class WandOfLivingEarth extends DamageWand {
 		}
 
 		public boolean isEmpowered(){
-			return powerOfManyTurns > 0;
+			return powerOfManyTurns >= 0;
 		}
 
 		@Override
@@ -335,7 +335,7 @@ public class WandOfLivingEarth extends DamageWand {
 		public String desc() {
 			String desc = Messages.get( this, "desc", armor, armorToGuardian());
 			if (isEmpowered()){
-				desc += "\n\n" + Messages.get(this, "desc_many", (int)powerOfManyTurns);
+				desc += "\n\n" + Messages.get(this, "desc_many", (int)powerOfManyTurns+1);
 			}
 			return desc;
 		}
@@ -469,7 +469,7 @@ public class WandOfLivingEarth extends DamageWand {
 				if (!enemyInFOV){
 					Buff.affect(Dungeon.hero, RockArmor.class).addArmor(wandLevel, HP);
 					if (buff(PowerOfMany.PowerBuff.class) != null){
-						Buff.affect(Dungeon.hero, RockArmor.class).powerOfManyTurns = buff(PowerOfMany.PowerBuff.class).cooldown()+1;
+						Buff.affect(Dungeon.hero, RockArmor.class).powerOfManyTurns = buff(PowerOfMany.PowerBuff.class).cooldown();
 					}
 					Dungeon.hero.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + wandLevel/2);
 					destroy();

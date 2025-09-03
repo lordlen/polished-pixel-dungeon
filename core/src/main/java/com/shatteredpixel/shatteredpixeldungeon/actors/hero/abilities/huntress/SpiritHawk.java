@@ -35,15 +35,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
@@ -52,8 +49,6 @@ import com.watabou.noosa.TextureFilm;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.Random;
-
-import java.util.ArrayList;
 
 public class SpiritHawk extends ArmorAbility {
 	
@@ -88,53 +83,30 @@ public class SpiritHawk extends ArmorAbility {
 	}
 	
 	private static HawkAlly hawk = null;
-	private static int hawkID = -1;
-	
 	public static void resetHawk() {
 		hawk = null;
-		hawkID = -1;
 	}
 	
 	public static HawkAlly Hawk() {
-		return Hawk(true);
+		return Hawk(false);
 	}
 	
-	public static HawkAlly Hawk(boolean checkStasis) {
+	public static HawkAlly Hawk(boolean onlyActive) {
 		if(hawk != null) {
-			if(!hawk.isAlive()) resetHawk();
-			return hawk;
-		}
-		
-		if(hawkID != -1) {
-			Actor a = Actor.findById(hawkID);
-			if (a instanceof HawkAlly){
-				hawk = (HawkAlly) a;
-				return hawk;
-			} else {
-				hawkID = -1;
-			}
-		}
-		
-		if(checkStasis) {
-			Char ally = Stasis.getStasisAlly();
-			if (ally instanceof HawkAlly){
-				hawk = (HawkAlly) ally;
-				hawkID = ally.id();
+			if(!onlyActive || hawk.isInsideLevel()) {
 				return hawk;
 			}
 		}
-		
 		return null;
 	}
 	
 	@Override
 	protected void activate(ClassArmor armor, Hero hero, Integer target) {
 		if (Hawk() != null){
-			if(hawk.stasis()) {
-				GLog.i( Messages.get(this, "spawned") );
-			}
-			else {
+			if(hawk.isInsideLevel()) {
 				hawk.command();
+			} else {
+				GLog.i( Messages.get(this, "spawned") );
 			}
 		}
 		else {
@@ -211,9 +183,7 @@ public class SpiritHawk extends ArmorAbility {
 		@Override
 		protected void onAdd() {
 			super.onAdd();
-			
 			SpiritHawk.hawk = this;
-			SpiritHawk.hawkID = id();
 		}
 		
 		@Override
@@ -288,7 +258,7 @@ public class SpiritHawk extends ArmorAbility {
 		@Override
 		public String description() {
 			String message = Messages.get(this, "desc");
-			if (Actor.chars().contains(this)){
+			if (isInsideLevel()){
 				HawkTimer timer = Dungeon.hero.buff(HawkTimer.class);
 				if(timer != null) {
 					message += "\n\n" + Messages.get(HawkTimer.class, "desc", Messages.decimalFormat("#.##", timer.cooldown()));
@@ -336,7 +306,7 @@ public class SpiritHawk extends ArmorAbility {
 		public void detach() {
 			super.detach();
 			
-			if(SpiritHawk.Hawk() != null) {
+			if(SpiritHawk.Hawk(true) != null) {
 				SpiritHawk.hawk.die(null);
 				Dungeon.hero.interrupt();
 			}
