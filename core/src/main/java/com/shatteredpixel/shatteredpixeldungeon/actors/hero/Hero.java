@@ -2178,7 +2178,7 @@ public class Hero extends Char {
 			fieldOfView = new boolean[level.length()];
 			level.updateFieldOfView( this, fieldOfView );
 		}
-
+		
 		if (!Dungeon.level.visited[cell] && !Dungeon.level.mapped[cell]
 				&& Dungeon.level.traps.get(cell) != null
 				&& Dungeon.level.traps.get(cell).visible
@@ -2196,13 +2196,9 @@ public class Hero extends Char {
 				ch instanceof Mob && (fieldOfView[ch.pos] ||
 				( ch instanceof NPC && ((NPC) ch).visibleOnFog() ));
 		
-		boolean isHeapVisible = heap != null && heap.seen;
-		boolean isTransitionVisible = transition != null && ( level.visited[cell] || level.mapped[cell] );
-		
 		boolean nearbyMobs = false;
-		if(isHeapVisible || isTransitionVisible) {
-			int limit = isHeapVisible ? 10 : 8;
-			PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), limit);
+		if(heap != null || transition != null) {
+			PathFinder.buildDistanceMap(pos, Dungeon.Polished.openTiles(), heap != null ? 10 : 8);
 			
 			for(Mob mob : visibleEnemies) {
 				if(PathFinder.distance[mob.pos] < Integer.MAX_VALUE || distance(mob) <= 3) {
@@ -2224,8 +2220,13 @@ public class Hero extends Char {
 				lastAction = null;
 			}
 		}
-
-		if (Dungeon.level.map[cell] == Terrain.ALCHEMY && cell != pos) {
+		
+		if(!level.visited[cell] && !level.mapped[cell]) {
+			
+			curAction = new HeroAction.Move( cell );
+			lastAction = null;
+			
+		} else if (level.map[cell] == Terrain.ALCHEMY) {
 			
 			curAction = new HeroAction.Alchemy( cell );
 			
@@ -2238,16 +2239,16 @@ public class Hero extends Char {
 			}
 
 		//TODO perhaps only trigger this if hero is already adjacent? reducing mistaps
-		} else if (Dungeon.level instanceof MiningLevel &&
+		} else if(	level instanceof MiningLevel &&
 					belongings.getItem(Pickaxe.class) != null &&
-				(Dungeon.level.map[cell] == Terrain.WALL
-						|| Dungeon.level.map[cell] == Terrain.WALL_DECO
-						|| Dungeon.level.map[cell] == Terrain.MINE_CRYSTAL
-						|| Dungeon.level.map[cell] == Terrain.MINE_BOULDER)){
+						(level.map[cell] == Terrain.WALL
+						|| level.map[cell] == Terrain.WALL_DECO
+						|| level.map[cell] == Terrain.MINE_CRYSTAL
+						|| level.map[cell] == Terrain.MINE_BOULDER)) {
 
 			curAction = new HeroAction.Mine( cell );
 
-		} else if (isHeapVisible
+		} else if (heap != null && heap.seen
 				//moving to an item doesn't auto-pickup when enemies are near...
 				&& (!nearbyMobs || cell == pos ||
 				//...but only for standard heaps. Chests and similar open as normal.
@@ -2266,16 +2267,16 @@ public class Hero extends Char {
 				curAction = new HeroAction.OpenChest( cell );
 			}
 			
-		} else if (Dungeon.level.map[cell] == Terrain.LOCKED_DOOR || Dungeon.level.map[cell] == Terrain.CRYSTAL_DOOR || Dungeon.level.map[cell] == Terrain.LOCKED_EXIT) {
+		} else if (level.map[cell] == Terrain.LOCKED_DOOR || level.map[cell] == Terrain.CRYSTAL_DOOR || level.map[cell] == Terrain.LOCKED_EXIT) {
 			
 			curAction = new HeroAction.Unlock( cell );
 			
-		} else if (isTransitionVisible
+		} else if (transition != null
 				//moving to a transition doesn't automatically trigger it when enemies are near
 				&& (!nearbyMobs || cell == pos)
-				&& !Dungeon.level.locked
-				&& !Dungeon.level.plants.containsKey(cell)
-				&& (Dungeon.depth < 26 || transition.type == LevelTransition.Type.REGULAR_ENTRANCE) ) {
+				&& !level.locked
+				&& !level.plants.containsKey(cell)
+				&& (Dungeon.depth < 26 || transition.type == LevelTransition.Type.REGULAR_ENTRANCE)) {
 
 			curAction = new HeroAction.LvlTransition( cell );
 			
@@ -2858,7 +2859,6 @@ public class Hero extends Char {
 		
 		if (intentional) {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
-			operateAction = null;
 			sprite.operate( pos );
 			if (!Dungeon.level.locked) {
 				float searchTime = hasTalent(Talent.ROGUES_EXPERTISE) ? 1f : TIME_TO_SEARCH;
