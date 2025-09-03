@@ -46,12 +46,15 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.TextureFilm;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -69,7 +72,7 @@ public class PowerOfMany extends ArmorAbility {
 	
 	@Override
 	public float chargeUse(Hero hero) {
-		if (AllyExists()){
+		if (PoweredAlly() instanceof LightAlly){
 			return 0;
 		}
 		return super.chargeUse(hero);
@@ -116,7 +119,7 @@ public class PowerOfMany extends ArmorAbility {
 
 	@Override
 	public String targetingPrompt() {
-		if (!AllyExists()){
+		if (!(PoweredAlly() instanceof LightAlly)){
 			return Messages.get(this, "prompt_default");
 		} else {
 			return null;
@@ -136,8 +139,39 @@ public class PowerOfMany extends ArmorAbility {
 				GLog.w( Messages.get(this, "spawned"));
 			}
 		}
-		else if (AllyExists()) {
-			GLog.w( Messages.get(this, "ally_exists"));
+		
+		else if (AllyExists() && target != null && Actor.findChar(target) != ally) {
+			GameScene.show(
+					new WndOptions(new ItemSprite(armor),
+							Messages.titleCase(Messages.get(PowerOfMany.class, "name")),
+							Messages.get(PowerOfMany.class, "sure_replace"),
+							Messages.get(PowerOfMany.class, "yes"), Messages.get(PowerOfMany.class, "no") ) {
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0) {
+								
+								Stasis.StasisBuff stasis = hero.buff(Stasis.StasisBuff.class);
+								PrismaticGuard prismatic = hero.buff(PrismaticGuard.class);
+								WandOfLivingEarth.RockArmor rockArmor = hero.buff(WandOfLivingEarth.RockArmor.class);
+								
+								if(stasis != null) {
+									stasis.dropEnemy(target);
+									stasis.detach();
+								}
+								
+								if(PoweredAlly() != null && ally.buff(PowerBuff.class) != null) {
+									ally.buff(PowerBuff.class).detach();
+								} else if(prismatic != null && prismatic.isEmpowered()) {
+									prismatic.resetEmpower();
+								} else if(rockArmor != null && rockArmor.isEmpowered()) {
+									rockArmor.resetEmpower();
+								}
+								
+								activate(armor, hero, target);
+							}
+						}
+					}
+			);
 		}
 		
 		else {

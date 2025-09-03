@@ -306,6 +306,10 @@ public class WandOfLivingEarth extends DamageWand {
 		public boolean isEmpowered(){
 			return powerOfManyTurns >= 0;
 		}
+		
+		public void resetEmpower(){
+			powerOfManyTurns = -1;
+		}
 
 		@Override
 		public int icon() {

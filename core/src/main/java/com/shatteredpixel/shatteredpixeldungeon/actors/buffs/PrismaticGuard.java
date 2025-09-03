@@ -135,6 +135,10 @@ public class PrismaticGuard extends Buff {
 		return powerOfManyTurns >= 0;
 	}
 	
+	public void resetEmpower(){
+		powerOfManyTurns = -1;
+	}
+	
 	@Override
 	public int icon() {
 		return BuffIndicator.ARMOR;
