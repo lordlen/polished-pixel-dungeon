@@ -46,6 +46,8 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
 import com.watabou.utils.PathFinder;
 
+import java.util.ArrayList;
+
 public class TelekineticGrab extends TargetedSpell {
 
 	{
@@ -67,6 +69,7 @@ public class TelekineticGrab extends TargetedSpell {
 	@Override
 	protected void affectTarget(Ballistica bolt, Hero hero) {
 		Char ch = Actor.findChar(bolt.collisionPos);
+		SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
 
 		//special logic for DK when he is on his throne
 		if (ch == null && bolt.path.size() > bolt.dist+1){
@@ -75,8 +78,7 @@ public class TelekineticGrab extends TargetedSpell {
 				ch = null;
 			}
 		}
-
-		SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+		
 		if (ch != null && ch.buff(PinCushion.class) != null){
 
 			while (ch.buff(PinCushion.class) != null) {
@@ -91,11 +93,10 @@ public class TelekineticGrab extends TargetedSpell {
 					Dungeon.level.drop(item, ch.pos).sprite.drop();
 					return;
 				}
-
 			}
 
-		} else if (	ch != null && ch == Dungeon.hero &&
-					bow != null && SPDSettings.Polished.huntress()) {
+		} else if (ch == Dungeon.hero && bow != null && SPDSettings.Polished.huntress()) {
+			
 			bow.Polished_resetCharges();
 			updateQuickslot();
 			
@@ -104,17 +105,24 @@ public class TelekineticGrab extends TargetedSpell {
 
 		} else {
 			
-			int pickedUp = 0;
-			boolean cantGrab = false;
-			boolean grabbedAdjacent = false;
+			int pickedItems = 0;
+			boolean failedGrab = false;
+			boolean adjacentGrab = false;
 			
-			nearbyHeaps:
-			for (int offset : PathFinder.NEIGHBOURS9) {
-				Heap h = Dungeon.level.heaps.get(bolt.collisionPos + offset);
+			ArrayList<Integer> affected = new ArrayList<>();
+			affected.add(bolt.collisionPos);
+			for (int offset : PathFinder.NEIGHBOURS8) {
+				affected.add(bolt.collisionPos + offset);
+			}
+			
+			AFFECTED_HEAPS:
+			for (int cell : affected) {
+				Heap h = Dungeon.level.heaps.get(cell);
 				if(h != null) {
+					
 					if (h.type != Heap.Type.HEAP){
 						h.sprite.drop();
-						cantGrab = true;
+						failedGrab = true;
 						continue;
 					}
 					
@@ -132,28 +140,29 @@ public class TelekineticGrab extends TargetedSpell {
 							h.pickUp();
 							hero.spend(-hero.cooldown()); //casting the spell already takes a turn
 							
-							if(offset != 0) {
-								CellEmitter.get(bolt.collisionPos + offset).start(Speck.factory(Speck.LIGHT), 0.2f, 3);
-								grabbedAdjacent = true;
+							if(cell != bolt.collisionPos) {
+								CellEmitter.get(cell).start(Speck.factory(Speck.LIGHT), 0.2f, 3);
+								adjacentGrab = true;
 							}
 							GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
-							pickedUp++;
+							pickedItems++;
 							
 						} else {
 							h.sprite.drop();
-							cantGrab = true;
-							continue nearbyHeaps;
+							failedGrab = true;
+							continue AFFECTED_HEAPS;
 						}
 					}
+					
 				}
 			}
 			
-			if(pickedUp == 0) {
-				GLog.w(Messages.get(this, cantGrab ? "cant_grab" : "no_target"));
+			if(pickedItems == 0) {
+				GLog.w(Messages.get(this, failedGrab ? "cant_grab" : "no_target"));
 			} else {
 				Sample.INSTANCE.play(Assets.Sounds.ITEM);
-				if(grabbedAdjacent) {
-					for(int i = 0; i < Math.min(pickedUp, 3); i++) {
+				if(adjacentGrab) {
+					for(int i = 0; i < Math.min(pickedItems, 3); i++) {
 						Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
 					}
 				}
