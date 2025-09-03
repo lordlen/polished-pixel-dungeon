@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.GameMath;
 
 public class Barrier extends ShieldBuff {
 	
@@ -89,6 +90,11 @@ public class Barrier extends ShieldBuff {
 	@Override
 	public String iconTextDisplay() {
 		return Integer.toString(shielding());
+	}
+	
+	@Override
+	public float iconFadePercent() {
+		return GameMath.gate(0, (10 - shielding()) / 10f, 1);
 	}
 	
 	@Override
