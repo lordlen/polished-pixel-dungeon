@@ -448,19 +448,22 @@ public abstract class Mob extends Char {
 							currDist = PathFinder.distance[curr.pos+i];
 						}
 					}
-					if (closest == null){
+					
+					if(closest == null) {
 						closest = curr;
 						closestDist = currDist;
-					} else if (canAttack(closest) && !canAttack(curr)){
+					}
+					else if(canAttack(closest) && !canAttack(curr)) {
 						continue;
-					} else if ((canAttack(curr) && !canAttack(closest))
-							|| (currDist < closestDist)){
+					}
+					else if(	(!canAttack(closest) && canAttack(curr))
+							||	 currDist < closestDist
+							|| 	(currDist == closestDist && curr == Dungeon.hero)) {
 						closest = curr;
-					} else if ( curr == Dungeon.hero &&
-							(currDist == closestDist) || (canAttack(curr) && canAttack(closest))){
-						closest = curr;
+						closestDist = currDist;
 					}
 				}
+				
 				//if we were going to target the hero, but an afterimage exists, target that instead
 				if (closest == Dungeon.hero){
 					for (Char ch : enemies){
