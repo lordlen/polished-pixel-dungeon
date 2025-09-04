@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
@@ -155,7 +156,7 @@ public class WandOfWarding extends Wand {
 			Ward ward = new Ward();
 			ward.pos = target;
 			ward.wandLevel = buffedLvl();
-			GameScene.add(ward, 1f);
+			GameScene.add(ward, 2f);
 			Dungeon.level.occupyCell(ward);
 			ward.sprite.emitter().burst(MagicMissile.WardParticle.UP, ward.tier);
 			Dungeon.level.pressCell(target);
@@ -242,6 +243,10 @@ public class WandOfWarding extends Wand {
 			properties.add(Property.INORGANIC);
 
 			viewDistance = 4;
+			//always act before mobs
+			actPriority = MOB_PRIO+1;
+			
+			WANDERING = new Wandering();
 			state = WANDERING;
 		}
 
@@ -490,6 +495,18 @@ public class WandOfWarding extends Wand {
 			immunities.add( Dread.class );
 			immunities.add( Vertigo.class );
 			immunities.add( AllyBuff.class );
+		}
+		
+		// always spot enemies no matter distance/stealth
+		protected class Wandering extends Mob.Wandering {
+			@Override
+			public boolean act(boolean enemyInFOV, boolean justAlerted) {
+				if (enemyInFOV) {
+					return noticeEnemy();
+				} else {
+					return continueWandering();
+				}
+			}
 		}
 
 		private static final String TIER = "tier";

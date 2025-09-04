@@ -55,11 +55,9 @@ public abstract class EquipableItem extends Item {
 	public String defaultAction() {
 		if(!isEquipped(Dungeon.hero) && canBeEquipped()) {
 			return AC_EQUIP;
-		}
-		else if(defaultAction == null && canBeEquipped()) {
+		} else if(defaultAction == null && canBeEquipped()) {
 			return AC_UNEQUIP;
-		}
-		else {
+		} else {
 			return defaultAction;
 		}
 	}

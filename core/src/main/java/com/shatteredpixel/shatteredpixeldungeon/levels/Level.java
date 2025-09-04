@@ -687,10 +687,10 @@ public abstract class Level implements Bundlable {
 		Char ally = Stasis.getStasisAlly();
 		if (Char.hasProp(ally, Char.Property.IMMOVABLE)){
 			Dungeon.hero.buff(Stasis.StasisBuff.class).act();
-			GLog.w(Messages.get(Stasis.StasisBuff.class, "left_behind"));
+			GLog.n(Messages.get(Stasis.StasisBuff.class, "left_behind"));
 		}
 
-		//spend the hero's partial turns,  so the hero cannot take partial turns between floors
+		//spend the hero's partial turns, so the hero cannot take partial turns between floors
 		Dungeon.hero.spendToWhole();
 		for (Actor a : Actor.all()){
 			//also adjust any other actors that are now ahead of the hero due to this

@@ -40,10 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Wraith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
-import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
@@ -102,9 +99,6 @@ public class DriedRose extends Artifact {
 	private boolean talkedTo = false;
 	private boolean firstSummon = true;
 	
-	private static GhostHero ghost = null;
-	private static int ghostID = -1;
-	
 	private MeleeWeapon weapon = null;
 	private Armor armor = null;
 
@@ -115,40 +109,25 @@ public class DriedRose extends Artifact {
 	public static final String AC_CHAIN = "CHAIN";
 	public static final String AC_OUTFIT = "OUTFIT";
 	
+	private static GhostHero ghost = null;
 	public static void resetGhost() {
 		ghost = null;
-		ghostID = -1;
 	}
 	
 	public static GhostHero Ghost() {
-		return Ghost(true);
+		return Ghost(false);
 	}
 	
-	public static GhostHero Ghost(boolean checkStasis) {
+	public static GhostHero Ghost(boolean onlyActive) {
+		if(ghost == null && Stasis.getStasisAlly() instanceof GhostHero) {
+			ghost = (GhostHero) Stasis.getStasisAlly();
+		}
+		
 		if(ghost != null) {
-			if(!ghost.isAlive()) resetGhost();
-			return ghost;
-		}
-		
-		if(ghostID != -1) {
-			Actor a = Actor.findById(ghostID);
-			if (a instanceof GhostHero){
-				ghost = (GhostHero)a;
-				return ghost;
-			} else {
-				ghostID = -1;
-			}
-		}
-		
-		if(checkStasis) {
-			Char ally = Stasis.getStasisAlly();
-			if (ally instanceof GhostHero){
-				ghost = (GhostHero)ally;
-				ghostID = ally.id();
+			if(!onlyActive || ghost.isInsideLevel()) {
 				return ghost;
 			}
 		}
-		
 		return null;
 	}
 
@@ -158,6 +137,7 @@ public class DriedRose extends Artifact {
 		if (!Ghost.Quest.completed()){
 			return actions;
 		}
+		
 		if (isEquipped( hero )
 				&& charge == chargeCap
 				&& !cursed
@@ -165,14 +145,13 @@ public class DriedRose extends Artifact {
 				&& Ghost() == null) {
 			actions.add(AC_SUMMON);
 		}
-		if (Ghost(false) != null){
+		if (Ghost(true) != null){
 			actions.add(AC_DIRECT);
 			actions.add(AC_CHAIN);
 		}
 		if (isIdentified() && !cursed){
 			actions.add(AC_OUTFIT);
 		}
-		
 		return actions;
 	}
 
@@ -181,21 +160,22 @@ public class DriedRose extends Artifact {
 		if(!isEquipped(Dungeon.hero)) {
 			return super.defaultAction();
 		}
+		
 		else if (Ghost() == null) {
 			return AC_SUMMON;
-		}
-		else if (!ghost.stasis()){
+		} else if (ghost.isInsideLevel()){
 			return AC_DIRECT;
-		}
-		else {
-			return super.defaultAction();
+		} else {
+			// will show a text message
+			return AC_SUMMON;
 		}
 	}
 
 	@Override
 	public void execute( Hero hero, String action ) {
 
-		//messy workaround to prevent chainCommand listener cancel, resting will get "canceled" instead
+		// messy workaround to prevent the chain command listener from cancelling,
+		// tricks the game into cancelling a fake rest instead
 		hero.resting = true;
 		super.execute(hero, action);
 
@@ -215,12 +195,12 @@ public class DriedRose extends Artifact {
 
 		}
 		else if (action.equals(AC_DIRECT)){
-			if (Ghost() != null) {
+			if (Ghost(true) != null) {
 				ghost.command();
 			}
 		}
 		else if (action.equals(AC_CHAIN)){
-			if (Ghost() != null) {
+			if (Ghost(true) != null) {
 				ghost.chainCommand();
 			}
 		}
@@ -323,7 +303,9 @@ public class DriedRose extends Artifact {
 				}
 				updateQuickslot();
 			}
-		} else if (ghost.HP < ghost.HT) {
+		}
+		
+		else if (ghost.HP < ghost.HT) {
 			int heal = Math.round((1 + level()/3f)*amount);
 			ghost.HP = Math.min( ghost.HT, ghost.HP + heal);
 			if (ghost.sprite != null) {
@@ -800,9 +782,7 @@ public class DriedRose extends Artifact {
 		@Override
 		protected void onAdd() {
 			super.onAdd();
-			
 			DriedRose.ghost = this;
-			DriedRose.ghostID = id();
 		}
 		
 		@Override

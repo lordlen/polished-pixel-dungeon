@@ -30,7 +30,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.Trinity;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.ShadowClone;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -206,7 +209,15 @@ abstract public class ClassArmor extends Armor {
 
 	@Override
 	public void execute( Hero hero, String action ) {
-
+		
+		if(		hero.armorAbility instanceof SpiritHawk
+				|| hero.armorAbility instanceof ShadowClone
+				|| hero.armorAbility instanceof PowerOfMany) {
+			// messy workaround to prevent chain command listener from cancelling,
+			// tricks the game into cancelling a fake rest instead
+			hero.resting = true;
+		}
+		
 		super.execute( hero, action );
 
 		if (action.equals(AC_ABILITY)){

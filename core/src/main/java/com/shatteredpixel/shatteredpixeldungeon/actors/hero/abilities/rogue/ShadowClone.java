@@ -30,7 +30,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -38,7 +37,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CityLevel;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
@@ -51,8 +49,6 @@ import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
-
-import java.util.ArrayList;
 
 public class ShadowClone extends ArmorAbility {
 
@@ -78,53 +74,31 @@ public class ShadowClone extends ArmorAbility {
 	}
 	
 	private static ShadowAlly shadow = null;
-	private static int shadowID = -1;
-	
 	public static void resetShadow() {
 		shadow = null;
-		shadowID = -1;
 	}
 	
 	public static ShadowAlly Shadow() {
-		return Shadow(true);
+		return Shadow(false);
 	}
 	
-	public static ShadowAlly Shadow(boolean checkStasis) {
+	public static ShadowAlly Shadow(boolean onlyActive) {
 		if(shadow != null) {
-			if(!shadow.isAlive()) resetShadow();
-			return shadow;
-		}
-		
-		if(shadowID != -1) {
-			Actor a = Actor.findById(shadowID);
-			if (a instanceof ShadowAlly){
-				shadow = (ShadowAlly) a;
-				return shadow;
-			} else {
-				shadowID = -1;
-			}
-		}
-		
-		if(checkStasis) {
-			Char ally = Stasis.getStasisAlly();
-			if (ally instanceof ShadowAlly){
-				shadow = (ShadowAlly) ally;
-				shadowID = ally.id();
+			if(!onlyActive || shadow.isInsideLevel()) {
 				return shadow;
 			}
 		}
-		
 		return null;
+		
 	}
 	
 	@Override
 	protected void activate(ClassArmor armor, Hero hero, Integer target) {
 		if (Shadow() != null){
-			if(shadow.stasis()) {
-				GLog.i( Messages.get(this, "spawned") );
-			}
-			else {
+			if(shadow.isInsideLevel()) {
 				shadow.command();
+			} else {
+				GLog.i( Messages.get(this, "spawned") );
 			}
 		}
 		else {
@@ -211,9 +185,7 @@ public class ShadowClone extends ArmorAbility {
 		@Override
 		protected void onAdd() {
 			super.onAdd();
-			
 			ShadowClone.shadow = this;
-			ShadowClone.shadowID = id();
 		}
 		
 		@Override

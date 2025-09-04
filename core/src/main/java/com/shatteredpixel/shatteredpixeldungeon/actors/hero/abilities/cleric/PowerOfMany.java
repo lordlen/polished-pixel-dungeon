@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BeamingRay;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.LifeLinkSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
@@ -45,12 +46,15 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.TextureFilm;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -90,56 +94,32 @@ public class PowerOfMany extends ArmorAbility {
 		return PoweredAlly(false);
 	}
 	
-	public static Char PoweredAlly(boolean checkStasis) {
-		if(ally != null) {
-			if(!ally.isAlive()) resetAlly();
-			return ally;
-		}
-		
-		if(allyID != -1) {
-			Actor a = Actor.findById(allyID);
-			if(a instanceof Char) {
-				Char ch = (Char) a;
-				
-				if (ch.buff(PowerBuff.class) != null) {
-					ally = ch;
+	public static Char PoweredAlly(boolean onlyActive) {
+		if(Dungeon.hero.armorAbility instanceof PowerOfMany) {
+			if(ally == null && Stasis.getStasisAlly() != null) {
+				ally = Stasis.getStasisAlly();
+				allyID = ally.id();
+			}
+			
+			if(ally != null) {
+				if(!onlyActive || Dungeon.level.mobs.contains((Mob) ally)) {
 					return ally;
 				}
 			}
-			allyID = -1;
 		}
-		
-		if(checkStasis) {
-			Char stasisAlly = Stasis.getStasisAlly();
-			if (stasisAlly != null) {
-				ally = stasisAlly;
-				allyID = stasisAlly.id();
-				return ally;
-			}
-		}
-		
 		return null;
+	}
+	
+	public static boolean AllyExists() {
+		Hero hero = Dungeon.hero;
+		return 	PoweredAlly() != null ||
+				( hero.buff(PrismaticGuard.class) != null && hero.buff(PrismaticGuard.class).isEmpowered() ) ||
+				( hero.buff(WandOfLivingEarth.RockArmor.class) != null && hero.buff(WandOfLivingEarth.RockArmor.class).isEmpowered() );
 	}
 
 	@Override
 	public String targetingPrompt() {
-		Char ally = PoweredAlly();
-
-		boolean allyExists = ally != null;
-
-		if (Dungeon.hero.buff(PrismaticGuard.class) != null
-				&& Dungeon.hero.buff(PrismaticGuard.class).isEmpowered()){
-			allyExists = true;
-		}
-
-		if (Dungeon.hero.buff(WandOfLivingEarth.RockArmor.class) != null
-				&& Dungeon.hero.buff(WandOfLivingEarth.RockArmor.class).isEmpowered()){
-			allyExists = true;
-		}
-
-		if (ally instanceof LightAlly){
-			return null;
-		} else if (!allyExists){
+		if (!(PoweredAlly() instanceof LightAlly)){
 			return Messages.get(this, "prompt_default");
 		} else {
 			return null;
@@ -151,37 +131,53 @@ public class PowerOfMany extends ArmorAbility {
 		
 		//to fix a weird SPD bug
 		if(!Dungeon.hero.ready) return;
-
-		Char ally = PoweredAlly();
-
-		boolean allyExists = ally != null;
-
-		if (hero.buff(PrismaticGuard.class) != null
-				&& hero.buff(PrismaticGuard.class).isEmpowered()){
-			allyExists = true;
-		}
-
-		if (hero.buff(WandOfLivingEarth.RockArmor.class) != null
-				&& hero.buff(WandOfLivingEarth.RockArmor.class).isEmpowered()){
-			allyExists = true;
-		}
-
-		if (ally instanceof LightAlly){
-			if (((LightAlly) ally).stasis()) {
+		
+		if (PoweredAlly() instanceof LightAlly){
+			if (((LightAlly) ally).isInsideLevel()) {
+				((LightAlly) ally).command();
+			} else {
 				GLog.w( Messages.get(this, "spawned"));
 			}
-			else {
-				((LightAlly) ally).command();
-			}
 		}
-		else if (allyExists) {
-			GLog.w( Messages.get(this, "ally_exists"));
+		
+		else if (AllyExists() && target != null && Actor.findChar(target) != ally) {
+			GameScene.show(
+					new WndOptions(new ItemSprite(armor),
+							Messages.titleCase(Messages.get(PowerOfMany.class, "name")),
+							Messages.get(PowerOfMany.class, "sure_replace"),
+							Messages.get(PowerOfMany.class, "yes"), Messages.get(PowerOfMany.class, "no") ) {
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0) {
+								
+								Stasis.StasisBuff stasis = hero.buff(Stasis.StasisBuff.class);
+								PrismaticGuard prismatic = hero.buff(PrismaticGuard.class);
+								WandOfLivingEarth.RockArmor rockArmor = hero.buff(WandOfLivingEarth.RockArmor.class);
+								
+								if(stasis != null) {
+									stasis.dropEnemy(target);
+									stasis.detach();
+								}
+								
+								if(PoweredAlly() != null && ally.buff(PowerBuff.class) != null) {
+									ally.buff(PowerBuff.class).detach();
+								} else if(prismatic != null && prismatic.isEmpowered()) {
+									prismatic.resetEmpower();
+								} else if(rockArmor != null && rockArmor.isEmpowered()) {
+									rockArmor.resetEmpower();
+								}
+								
+								activate(armor, hero, target);
+							}
+						}
+					}
+			);
 		}
+		
 		else {
 			if (target == null){
 				return;
 			}
-
 			if (!Dungeon.level.heroFOV[target]){
 				GLog.w(Messages.get(this, "no_vision"));
 				return;
@@ -189,7 +185,6 @@ public class PowerOfMany extends ArmorAbility {
 
 			Char ch = Actor.findChar(target);
 			if (ch != null){
-				
 				if (ch.alignment != Char.Alignment.ALLY || ch == Dungeon.hero){
 					GLog.w(Messages.get(this, "only_allies"));
 					return;
@@ -197,32 +192,28 @@ public class PowerOfMany extends ArmorAbility {
 				else {
 					hero.spendAndNext(Actor.TICK);
 				}
-				
 			}
 			else {
-
 				if (!Dungeon.level.passable[target] || Dungeon.level.avoid[target]){
 					GLog.w(Messages.get(ClericSpell.class, "invalid_target"));
 					return;
 				}
-
-				ch = new LightAlly(hero.lvl);
-				DirectableAlly.SummonSelector.summon((DirectableAlly) ch, target);
-				hero.next();
-				
+				else {
+					ch = new LightAlly(hero.lvl);
+					DirectableAlly.SummonSelector.summon((DirectableAlly) ch, target);
+					hero.next();
+				}
 			}
 
 			Buff.affect(ch, PowerBuff.class, 100f);
 			Buff.affect(ch, Barrier.class).setShield(25);
+			Invisibility.dispel();
 
 			armor.charge -= chargeSummon(hero);
 			Item.updateQuickslot();
 
 			hero.sprite.zap(target);
 			Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
-
-			Invisibility.dispel();
-
 		}
 
 	}
@@ -237,12 +228,9 @@ public class PowerOfMany extends ArmorAbility {
 		return new Talent[]{Talent.BEAMING_RAY, Talent.LIFE_LINK, Talent.STASIS, Talent.HEROIC_ENERGY};
 	}
 
-	//kept for compatibility with SPD, only returns if !stasis
+	//kept for compatibility with SPD
 	public static Char getPoweredAlly(){
-		if(PoweredAlly(false) != null) {
-			return ally;
-		}
-		return null;
+		return PoweredAlly(true);
 	}
 
 	public static class PowerBuff extends FlavourBuff {
@@ -281,19 +269,20 @@ public class PowerOfMany extends ArmorAbility {
 		}
 		
 		@Override
-		public boolean attachTo(Char target) {
-			if(super.attachTo(target)) {
+		protected void onAdd() {
+			super.onAdd();
+			if(target != null) {
 				PowerOfMany.ally = target;
 				PowerOfMany.allyID = target.id();
-				return true;
 			}
-			return false;
 		}
 		
 		@Override
 		public void detach() {
 			super.detach();
-			PowerOfMany.resetAlly();
+			if(target == PowerOfMany.ally || target.id() == PowerOfMany.allyID) {
+				PowerOfMany.resetAlly();
+			}
 		}
 	}
 
@@ -353,7 +342,6 @@ public class PowerOfMany extends ArmorAbility {
 		@Override
 		protected void onAdd() {
 			super.onAdd();
-			
 			PowerOfMany.ally = this;
 			PowerOfMany.allyID = id();
 		}
