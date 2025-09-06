@@ -57,7 +57,7 @@ public class StormCloud extends Blob {
 					}
 
 					if(ch != null) {
-						Buff.prolong(ch, Daze.class, 2f);
+						Buff.Polished.prolongAligned(ch, Daze.class, 2f);
 					}
 				}
 			}
