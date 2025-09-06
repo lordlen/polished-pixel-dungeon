@@ -1240,7 +1240,7 @@ public abstract class Char extends Actor {
 
 	@SuppressWarnings("unchecked")
 	//returns an instance of the specific buff class, if it exists. Not just assignable
-	public synchronized <T extends Buff> T buff( Class<T> c ) {
+	public synchronized  <T extends Buff> T buff( Class<T> c ) {
 		for (Buff b : buffs) {
 			if (b.getClass() == c) {
 				return (T)b;
@@ -1462,14 +1462,14 @@ public abstract class Char extends Actor {
 		DEMONIC,
 		INORGANIC ( new HashSet<Class>(),
 				new HashSet<Class>( Arrays.asList(Bleeding.class, ToxicGas.class, Poison.class) )),
-		FIERY ( new HashSet<Class>( Arrays.asList(Elemental.FireElemental.class)),
-				new HashSet<Class>( Arrays.asList(WandOfFireblast.class, Blazing.class, Burning.class))),
-		ICY ( new HashSet<Class>( Arrays.asList(Elemental.FrostElemental.class)),
-				new HashSet<Class>( Arrays.asList(WandOfFrost.class, Frost.class, Chill.class))),
+		FIERY ( new HashSet<Class>( Arrays.asList(WandOfFireblast.class, Elemental.FireElemental.class)),
+				new HashSet<Class>( Arrays.asList(Burning.class, Blazing.class))),
+		ICY ( new HashSet<Class>( Arrays.asList(WandOfFrost.class, Elemental.FrostElemental.class)),
+				new HashSet<Class>( Arrays.asList(Frost.class, Chill.class))),
 		ACIDIC ( new HashSet<Class>( Arrays.asList(Corrosion.class)),
 				new HashSet<Class>( Arrays.asList(Ooze.class))),
-		ELECTRIC ( new HashSet<Class>( Arrays.asList(WandOfLightning.class, ShockingDart.class, Shocking.class, Potential.class,
-										Electricity.class, Elemental.ShockElemental.class )),
+		ELECTRIC ( new HashSet<Class>( Arrays.asList(WandOfLightning.class, Shocking.class, Potential.class,
+										Electricity.class, ShockingDart.class, Elemental.ShockElemental.class )),
 				new HashSet<Class>()),
 		LARGE,
 		IMMOVABLE ( new HashSet<Class>(),
