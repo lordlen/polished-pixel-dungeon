@@ -409,6 +409,17 @@ public abstract class Elemental extends Mob {
 				super.meleeProc(enemy, damage);
 			}
 		}
+		
+		// takes double damage from harmful buffs compared to other elementals
+		@Override
+		public boolean add( Buff buff ) {
+			if (!summonedALly && harmfulBuffs.contains( buff.getClass() )) {
+				damage( Random.NormalIntRange( HT/4, HT/3 ), buff );
+				return false;
+			} else {
+				return super.add( buff );
+			}
+		}
 
 		@Override
 		public void die(Object cause) {
