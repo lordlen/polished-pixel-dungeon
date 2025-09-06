@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 
 import java.util.ArrayList;
@@ -123,7 +124,23 @@ public class ToxicGasRoom extends SpecialRoom {
 		entrance().set( Door.Type.UNLOCKED );
 
 	}
-
+	
+	@Override
+	public void customDoorPaint(Level level, Door door) {
+		if(door.type == Door.Type.UNLOCKED) {
+			for(int offset : PathFinder.NEIGHBOURS8) {
+				int cell = level.pointToCell(door) + offset;
+				
+				if ((Terrain.flags[level.map[cell]] & Terrain.SOLID) == 0 &&
+					(Terrain.flags[level.map[cell]] & Terrain.PIT) == 0 &&
+					!inside(level.cellToPoint(cell)))
+				{
+					level.map[cell] = Terrain.EMPTY_SP;
+				}
+			}
+		}
+	}
+	
 	@Override
 	public boolean canPlaceCharacter(Point p, Level l) {
 		Blob gas = l.blobs.get(ToxicGas.class);

@@ -298,6 +298,9 @@ public abstract class RegularPainter extends Painter {
 						l.map[door] = Terrain.WALL;
 						break;
 				}
+				
+				r.customDoorPaint(l, d);
+				
 			}
 		}
 	}

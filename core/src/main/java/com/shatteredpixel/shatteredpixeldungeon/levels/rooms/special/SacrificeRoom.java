@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
@@ -80,8 +81,24 @@ public class SacrificeRoom extends SpecialRoom {
 
 		door.set( Door.Type.EMPTY );
 	}
-
-	public static Item prize( Level level ) {
+	
+	@Override
+	public void customDoorPaint(Level level, Door door) {
+		if(door.type == Door.Type.UNLOCKED) {
+			for(int offset : PathFinder.NEIGHBOURS8) {
+				int cell = level.pointToCell(door) + offset;
+				
+				if ((Terrain.flags[level.map[cell]] & Terrain.SOLID) == 0 &&
+					(Terrain.flags[level.map[cell]] & Terrain.PIT) == 0 &&
+					!inside(level.cellToPoint(cell)))
+				{
+					level.map[cell] = Terrain.EMPTY_SP;
+				}
+			}
+		}
+	}
+	
+	public static Item prize(Level level ) {
 
 		//1 floor set higher than normal
 		Weapon prize = Generator.randomWeapon( (Dungeon.depth / 5) + 1);
