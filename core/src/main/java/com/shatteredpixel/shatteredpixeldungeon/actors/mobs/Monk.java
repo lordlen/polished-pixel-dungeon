@@ -24,7 +24,9 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
@@ -49,8 +51,9 @@ public class Monk extends Mob {
 		
 		loot = Food.class;
 		lootChance = 0.125f;
-
-		properties.add(Property.UNDEAD);
+		
+		resistances.add(ToxicGas.class);
+		resistances.add(Burning.class);
 	}
 
 	@Override
@@ -96,15 +99,14 @@ public class Monk extends Mob {
 	
 	@Override
 	protected boolean act() {
-		boolean result = super.act();
-		if (buff(Focus.class) == null && state == HUNTING && focusCooldown <= 0) {
+		if (state == HUNTING && paralysed <= 0 && focusCooldown <= 0) {
 			Buff.affect( this, Focus.class );
 		}
-		return result;
+		return super.act();
 	}
 	
 	@Override
-	protected void spend( float time ) {
+	protected void spendConstant( float time ) {
 		focusCooldown -= time;
 		super.spend( time );
 	}
@@ -135,7 +137,7 @@ public class Monk extends Mob {
 			if (sprite != null && sprite.visible) {
 				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			}
-			focusCooldown = Random.NormalFloat( 6, 7 );
+			focusCooldown = Random.NormalIntRange( 5, 6 );
 			return Messages.get(this, "parried");
 		}
 	}

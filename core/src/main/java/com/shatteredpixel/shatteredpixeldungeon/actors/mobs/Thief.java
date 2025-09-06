@@ -54,8 +54,6 @@ public class Thief extends Mob {
 
 		WANDERING = new Wandering();
 		FLEEING = new Fleeing();
-
-		properties.add(Property.UNDEAD);
 	}
 
 	private static final String ITEM = "item";
