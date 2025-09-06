@@ -305,6 +305,10 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 	
 	public abstract void paint(Level level);
 	
+	public void customDoorPaint(Level level, Door door) {
+		//does nothing by default
+	};
+	
 	//whether or not a painter can make its own modifications to a specific point
 	public boolean canPlaceWater(Point p){
 		return true;
