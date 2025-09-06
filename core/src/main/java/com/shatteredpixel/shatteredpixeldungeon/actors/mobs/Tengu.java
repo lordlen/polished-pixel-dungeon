@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
@@ -348,6 +349,7 @@ public class Tengu extends Mob {
 	
 	{
 		immunities.add( Roots.class );
+		immunities.add( Cripple.class );
 		immunities.add( Blindness.class );
 		immunities.add( Dread.class );
 		immunities.add( Terror.class );

@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Lightning;
@@ -190,7 +191,7 @@ public abstract class Elemental extends Mob {
 	@Override
 	public boolean add( Buff buff ) {
 		if (harmfulBuffs.contains( buff.getClass() )) {
-			damage( Random.NormalIntRange( HT/2, HT * 3/5 ), buff );
+			damage( Random.NormalIntRange( HT/4, HT/3 ), buff );
 			return false;
 		} else {
 			return super.add( buff );
@@ -234,7 +235,7 @@ public abstract class Elemental extends Mob {
 			
 			properties.add( Property.FIERY );
 			
-			harmfulBuffs.add( com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost.class );
+			harmfulBuffs.add( Frost.class );
 			harmfulBuffs.add( Chill.class );
 		}
 		
@@ -492,6 +493,7 @@ public abstract class Elemental extends Mob {
 		@Override
 		protected void meleeProc( Char enemy, int damage ) {
 			if (Random.Int( 3 ) == 0 || Dungeon.level.water[enemy.pos]) {
+				Buff.Polished.affectAligned(enemy, Chill.class, 1f);
 				Freezing.freeze( enemy.pos );
 				if (enemy.sprite.visible) Splash.at( enemy.sprite.center(), sprite.blood(), 5);
 			}
