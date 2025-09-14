@@ -158,6 +158,10 @@ public class QuickRecipe extends Component {
 		
 		anonymize(output);
 		this.output = new ItemSlot(output){
+			{
+				hotArea.blockLevel = PointerArea.NEVER_BLOCK;
+			}
+			
 			@Override
 			protected void onClick() {
 				ShatteredPixelDungeon.scene().addToFront(new WndInfoItem(output));
@@ -280,13 +284,28 @@ public class QuickRecipe extends Component {
 						return "";
 					}
 				}));
+				
+				result.add(null);
+				result.add(null);
+				
+				Recipe r = new Potion.SeedToPotion();
+				for (Class<?> cls : Generator.Category.SEED.classes){
+					Plant.Seed seed = (Plant.Seed) Reflection.newInstance(cls);
+					Potion pot = Reflection.newInstance(Potion.SeedToPotion.types.get(cls));
+					
+					seed.quantity(3);
+					if(!pot.isKnown()) pot.anonymize();
+					
+					ArrayList<Item> in = new ArrayList<>(Arrays.asList(seed));
+					result.add(new QuickRecipe( r, in, pot));
+				}
 				return result;
 			case 1:
-				Recipe r = new Scroll.ScrollToStone();
+				r = new Scroll.ScrollToStone();
 				for (Class<?> cls : Generator.Category.SCROLL.classes){
 					Scroll scroll = (Scroll) Reflection.newInstance(cls);
 					if (!scroll.isKnown()) scroll.anonymize();
-					ArrayList<Item> in = new ArrayList<Item>(Arrays.asList(scroll));
+					ArrayList<Item> in = new ArrayList<>(Arrays.asList(scroll));
 					result.add(new QuickRecipe( r, in, r.sampleOutput(in)));
 				}
 				return result;
@@ -352,46 +371,49 @@ public class QuickRecipe extends Component {
 						new ArcaneResin()));
 				return result;
 			case 7:
+				boolean landscape = PixelScene.landscape() && !(ShatteredPixelDungeon.scene() instanceof AlchemyScene);
+				
 				result.add(new QuickRecipe(new UnstableBrew.Recipe(), new ArrayList<>(Arrays.asList(new Potion.PlaceHolder(), new  Plant.Seed.PlaceHolder())), new UnstableBrew()));
 				result.add(new QuickRecipe(new Alchemize.Recipe(), new ArrayList<>(Arrays.asList(new Plant.Seed.PlaceHolder())), new Alchemize().quantity(12)));
-				if (!PixelScene.landscape()) result.add(null);
+				if (!landscape) result.add(null);
 				result.add(null);
 				result.add(new QuickRecipe(new ShockingBrew.Recipe()));
 				result.add(new QuickRecipe(new AquaBrew.Recipe()));
 				result.add(new QuickRecipe(new CausticBrew.Recipe()));
-				if (!PixelScene.landscape()) result.add(null);
+				if (!landscape) result.add(null);
 				result.add(null);
 				result.add(new QuickRecipe(new ElixirOfDragonsBlood.Recipe()));
 				result.add(new QuickRecipe(new ElixirOfIcyTouch.Recipe()));
 				result.add(new QuickRecipe(new ElixirOfToxicEssence.Recipe()));
-				if(PixelScene.landscape()) {
+				if(landscape) {
 					result.add(null);
 					result.add(new QuickRecipe(new ElixirOfMight.Recipe()));
 					result.add(new QuickRecipe(new ElixirOfFeatherFall.Recipe()));
-				}
-				else {
+				} else {
 					result.add(new QuickRecipe(new ElixirOfFeatherFall.Recipe()));
 					result.add(new QuickRecipe(new ElixirOfMight.Recipe()));
 				}
 				result.add(new QuickRecipe(new ElixirOfArcaneArmor.Recipe()));
-				if(PixelScene.landscape()) result.add(null);
+				if(landscape) result.add(null);
 				result.add(new QuickRecipe(new ElixirOfHoneyedHealing.Recipe()));
 				result.add(new QuickRecipe(new ElixirOfAquaticRejuvenation.Recipe()));
 				return result;
 			case 8:
+				landscape = PixelScene.landscape() && !(ShatteredPixelDungeon.scene() instanceof AlchemyScene);
+				
 				result.add(new QuickRecipe(new UnstableSpell.Recipe(), new ArrayList<>(Arrays.asList(new Scroll.PlaceHolder(), new  Runestone.PlaceHolder())), new UnstableSpell()));
 				result.add(new QuickRecipe(new Alchemize.Recipe(), new ArrayList<>(Arrays.asList(new Runestone.PlaceHolder())), new Alchemize().quantity(12)));
-				if (!PixelScene.landscape()) result.add(null);
+				if (!landscape) result.add(null);
 				result.add(null);
 				result.add(new QuickRecipe(new MagicalInfusion.Recipe()));
 				result.add(new QuickRecipe(new CurseInfusion.Recipe()));
 				result.add(new QuickRecipe(new Recycle.Recipe()));
-				if (!PixelScene.landscape()) result.add(null);
+				if (!landscape) result.add(null);
 				result.add(null);
 				result.add(new QuickRecipe(new TelekineticGrab.Recipe()));
 				result.add(new QuickRecipe(new WildEnergy.Recipe()));
 				result.add(new QuickRecipe(new PhaseShift.Recipe()));
-				if (!PixelScene.landscape()) result.add(null);
+				if (!landscape) result.add(null);
 				result.add(null);
 				result.add(new QuickRecipe(new SummonElemental.Recipe()));
 				result.add(new QuickRecipe(new ReclaimTrap.Recipe()));

@@ -370,6 +370,33 @@ public class AlchemyScene extends PixelScene {
 		repeat.setRect(left + 24, pos + 2, 16, 16);
 		repeat.enable(false);
 		add(repeat);
+		
+		//hidden button for alternative cancel keybind
+		add(new Button(){
+			@Override
+			protected void onClick() {
+				clearSlots();
+				updateState();
+			}
+			
+			@Override
+			public GameAction keyAction() {
+				if(cancel.active) 	return SPDAction.WAIT_OR_PICKUP;
+				else 				return null;
+			}
+			
+			//make sure the real button is highlighted
+			@Override
+			protected void onPointerDown() {
+				Sample.INSTANCE.play( Assets.Sounds.CLICK );
+				if (cancel.icon() != null) cancel.icon().brightness( 1.5f );
+			}
+			
+			@Override
+			protected void onPointerUp() {
+				if (cancel.icon() != null) cancel.icon().resetColor();
+			}
+		});
 
 		lastIngredients.clear();
 		lastRecipe = null;
@@ -1025,9 +1052,10 @@ public class AlchemyScene extends PixelScene {
 					Item item = InputButton.this.item;
 					if (item != null){
 						AlchemyScene.this.addToFront(new WndInfoItem(item));
-						return true;
+					} else {
+						onClick();
 					}
-					return false;
+					return true;
 				}
 				
 				@Override
