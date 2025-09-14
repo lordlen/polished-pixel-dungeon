@@ -87,7 +87,7 @@ public class Inferno extends Blob {
 	public void use( BlobEmitter emitter ) {
 		super.use( emitter );
 		
-		emitter.pour( Speck.factory( Speck.INFERNO, true ), 0.4f );
+		emitter.pour( Speck.factory( Speck.INFERNO, true ), 0.3f );
 	}
 	
 	@Override

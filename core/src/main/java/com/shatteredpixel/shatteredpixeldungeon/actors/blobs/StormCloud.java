@@ -67,7 +67,7 @@ public class StormCloud extends Blob {
 	@Override
 	public void use( BlobEmitter emitter ) {
 		super.use( emitter );
-		emitter.pour( Speck.factory( Speck.STORM ), 0.4f );
+		emitter.pour( Speck.factory( Speck.STORM ), 0.3f );
 	}
 	
 	@Override

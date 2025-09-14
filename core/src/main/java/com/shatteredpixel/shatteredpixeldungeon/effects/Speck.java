@@ -311,56 +311,56 @@ public class Speck extends Image {
 			hardlight( 0x50FF60 );
 			angularSpeed = 30;
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 
 		case CORROSION:
 			hardlight( 0xAAAAAA );
 			angularSpeed = 30;
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 			
 		case PARALYSIS:
 			hardlight( 0xFFFF66 );
 			angularSpeed = -30;
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 
 		case STENCH:
 			hardlight( 0x003300 );
 			angularSpeed = -30;
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 
 		case CONFUSION:
 			hardlight( Random.Int( 0x1000000 ) | 0x000080 );
 			angularSpeed = Random.Float( -20, +20 );
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 			
 		case STORM:
 			hardlight( 0x8AD8D8 );
 			angularSpeed = Random.Float( -20, +20 );
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 			
 		case INFERNO:
 			hardlight( 0xEE7722 );
 			angularSpeed = Random.Float( 200, 300 ) * (Random.Int(2) == 0 ? -1 : 1);
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 			
 		case BLIZZARD:
 			hardlight( 0xFFFFFF );
 			angularSpeed = Random.Float( 200, 300 ) * (Random.Int(2) == 0 ? -1 : 1);
 			angle = Random.Float( 360 );
-			lifespan = Random.Float( 1f, 3f );
+			lifespan = Random.Float( 1f, 1.5f );
 			break;
 			
 		case SMOKE:
