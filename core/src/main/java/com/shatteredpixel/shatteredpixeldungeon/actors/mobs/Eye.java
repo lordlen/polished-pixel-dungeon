@@ -141,11 +141,15 @@ public class Eye extends Mob {
 
 			spend( attackDelay() );
 			
-			Level level = Dungeon.level;
-			if( level.heroFOV[pos] || level.heroFOV[beam.collisionPos] ||
-				beam.path.contains(Dungeon.hero.pos) ||
-				( beam.path.contains(enemy.pos) && level.heroFOV[enemy.pos] ))
-			{
+			boolean visible = Dungeon.level.heroFOV[pos];
+			for (int affected : beam.subPath(1, beam.dist)) {
+				if(Dungeon.level.heroFOV[affected]) {
+					visible = true;
+					break;
+				}
+			}
+			
+			if(visible) {
 				sprite.zap( beam.collisionPos );
 				return false;
 			} else {
