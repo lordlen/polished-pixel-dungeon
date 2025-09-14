@@ -149,6 +149,11 @@ public class HallsLevel extends RegularLevel {
 	}
 	
 	@Override
+	public int mobLimit() {
+		return super.mobLimit()+1;
+	}
+	
+	@Override
 	public String tileName( int tile ) {
 		switch (tile) {
 			case Terrain.WATER:

@@ -800,9 +800,7 @@ public abstract class Level implements Bundlable {
 			Actor.addDelayed(respawner, respawnCooldown());
 		} else {
 			Actor.add(respawner);
-			if (respawner.cooldown() > respawnCooldown()){
-				respawner.resetCooldown();
-			}
+			respawner.capCooldown(Math.round(1.5f * respawnCooldown()));
 		}
 		return respawner;
 	}
@@ -819,7 +817,12 @@ public abstract class Level implements Bundlable {
 			}
 		}
 		else {
-			cooldown = TIME_TO_RESPAWN;
+			//slow down a bit when close to the limit
+			if(Dungeon.level.mobCount() >= Dungeon.level.mobLimit()-1) {
+				cooldown = 1.5f * TIME_TO_RESPAWN;
+			} else {
+				cooldown = TIME_TO_RESPAWN;
+			}
 		}
 		
 		if (Dungeon.level.feeling == Feeling.DARK){

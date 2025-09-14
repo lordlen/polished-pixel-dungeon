@@ -155,6 +155,11 @@ public class DemonSpawner extends Mob {
 		GLog.h(Messages.get(this, "on_death"));
 		super.die(cause);
 	}
+	
+	@Override
+	public float spawningWeight() {
+		return 0;
+	}
 
 	public static final String SPAWN_COOLDOWN = "spawn_cooldown";
 	public static final String SPAWN_RECORDED = "spawn_recorded";
