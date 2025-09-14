@@ -411,7 +411,7 @@ public class TimekeepersHourglass extends Artifact {
 		@Override
 		public String desc() {
 			float total = baseDebt + turnPenalty;
-			return Messages.get(this, "desc", dispTurns(total), dispTurns(total).equals("1") ? "turn" : "turns", dispTurns(2*total), dispTurns(cooldown()));
+			return Messages.get(this, "desc", dispTurns(total), dispTurns(2*total), dispTurns(cooldown()));
 		}
 
 

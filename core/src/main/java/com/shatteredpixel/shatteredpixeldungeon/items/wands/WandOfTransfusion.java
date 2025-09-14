@@ -122,7 +122,7 @@ public class WandOfTransfusion extends DamageWand {
 				}
 
 			//for enemies...
-			//(or for mimics which are hiding, special case)
+			//(or for mimics, special case)
 			} else if (ch.alignment == Char.Alignment.ENEMY || ch instanceof Mimic) {
 
 				//grant a self-shield, and...

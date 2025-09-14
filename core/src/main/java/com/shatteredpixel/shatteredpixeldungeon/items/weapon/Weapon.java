@@ -424,8 +424,7 @@ abstract public class Weapon extends KindOfWeapon {
 				return Messages.get(HolyWeapon.class, "ench_name", super.name());
 			} else {
 				return enchantment != null && (cursedKnown || !enchantment.curse()) ? enchantment.name(super.name()) : super.name();
-
-		}
+			}
 	}
 	
 	@Override

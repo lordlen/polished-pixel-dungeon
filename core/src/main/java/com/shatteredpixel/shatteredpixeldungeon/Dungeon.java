@@ -712,7 +712,7 @@ public class Dungeon {
 		Polished.stopLoading();
 		
 		for(Mob m : level.mobs){
-			if (m.pos == hero.pos && !Char.hasProp(m, Char.Property.IMMOVABLE)){
+			if (m.pos == hero.pos) {
 				//displace mob
 				for(int i : PathFinder.NEIGHBOURS8){
 					if (Actor.findChar(m.pos+i) == null && level.passable[m.pos + i]){
@@ -729,7 +729,7 @@ public class Dungeon {
 		}
 		hero.viewDistance = light == null ? level.viewDistance : Math.max( Light.DISTANCE, level.viewDistance );
 		
-		hero.curAction = hero.lastAction = null;
+		hero.curAction = hero.lastAction = hero.operateAction = null;
 
 		observe();
 		try {

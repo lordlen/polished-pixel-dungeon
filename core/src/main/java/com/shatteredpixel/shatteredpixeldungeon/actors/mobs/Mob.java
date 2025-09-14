@@ -995,19 +995,7 @@ public abstract class Mob extends Char {
 	}
 	
 	public void rollToDropLoot(){
-		if (Dungeon.hero.lvl > maxLvl + 2) return;
 		boolean dropped = false;
-
-		MasterThievesArmband.StolenTracker stolen = buff(MasterThievesArmband.StolenTracker.class);
-		if (stolen == null || !stolen.itemWasStolen()) {
-			if (Random.Float() < lootChance()) {
-				Item loot = createLoot();
-				if (loot != null) {
-					Dungeon.level.drop(loot, pos).sprite.drop();
-					dropped=true;
-				}
-			}
-		}
 		
 		//ring of wealth logic
 		if (Ring.getBuffedBonus(Dungeon.hero, RingOfWealth.Wealth.class) > 0) {
@@ -1022,26 +1010,38 @@ public abstract class Mob extends Char {
 			}
 		}
 		
-		//lucky enchant logic
-		if (buff(Lucky.LuckProc.class) != null){
-			Dungeon.level.drop(buff(Lucky.LuckProc.class).genLoot(), pos).sprite.drop();
-			Lucky.showFlare(sprite);
-			dropped=true;
-		}
-
-		//soul eater talent
-		if (buff(SoulMark.class) != null &&
-				Random.Int(10) < Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)){
-			Talent.onFoodEaten(Dungeon.hero, 0, null);
+		if (Dungeon.hero.lvl <= maxLvl + 2) {
+			MasterThievesArmband.StolenTracker stolen = buff(MasterThievesArmband.StolenTracker.class);
+			if (stolen == null || !stolen.itemWasStolen()) {
+				if (Random.Float() < lootChance()) {
+					Item loot = createLoot();
+					if (loot != null) {
+						Dungeon.level.drop(loot, pos).sprite.drop();
+						dropped=true;
+					}
+				}
+			}
+			
+			//lucky enchant logic
+			if (buff(Lucky.LuckProc.class) != null){
+				Dungeon.level.drop(buff(Lucky.LuckProc.class).genLoot(), pos).sprite.drop();
+				Lucky.showFlare(sprite);
+				dropped=true;
+			}
+			
+			//soul eater talent
+			if (buff(SoulMark.class) != null &&
+					Random.Int(10) < Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)){
+				Talent.onFoodEaten(Dungeon.hero, 0, null);
+			}
 		}
 		
 		Heap heap = Dungeon.level.heaps.get(pos);
 		if (dropped && heap != null &&
-			(Dungeon.level.visited[pos] || Dungeon.level.mapped[pos]))
+			( Dungeon.level.visited[pos] || Dungeon.level.mapped[pos] ))
 		{
 			heap.seen = true;
 		}
-
 	}
 	
 	protected Object loot = null;
@@ -1262,8 +1262,9 @@ public abstract class Mob extends Char {
 			enemySeen = false;
 			
 			int oldPos = pos;
+			float delay = 1 / speed();
 			if (target != -1 && getCloser( target )) {
-				spend( 1 / speed() );
+				spend( delay );
 				return moveSprite( oldPos, pos );
 			} else {
 				target = randomDestination();
@@ -1334,9 +1335,10 @@ public abstract class Mob extends Char {
 				}
 				
 				int oldPos = pos;
+				float delay = 1 / speed();
 				if (target != -1 && getCloser( target )) {
 					
-					spend( 1 / speed() );
+					spend( delay );
 					return moveSprite( oldPos,  pos );
 
 				} else {
@@ -1388,9 +1390,10 @@ public abstract class Mob extends Char {
 			}
 
 			int oldPos = pos;
+			float delay = 1 / speed();
 			if (target != -1 && getFurther( target )) {
 
-				spend( 1 / speed() );
+				spend( delay );
 				return moveSprite( oldPos, pos );
 
 			} else {

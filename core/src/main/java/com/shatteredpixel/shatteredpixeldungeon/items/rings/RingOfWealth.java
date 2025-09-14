@@ -465,7 +465,7 @@ public class RingOfWealth extends Ring {
 		CounterBuff alchemizeLeft = 	Buff.count(target, AlchemizeLeft.class, 2);
 		
 		CounterBuff alchemizeCounter = 	Buff.count(target, AlchemizeCounter.class,
-										Random.NormalIntRange(5, 7));
+										Random.IntRange(5, 7));
 
 		//now handle reward logic
 		ArrayList<Item> drops = new ArrayList<>();
@@ -478,11 +478,12 @@ public class RingOfWealth extends Ring {
 				if(alchemizeCounter.count() <= 0) {
 					
 					Alchemize alchemize = Reflection.newInstance(Alchemize.class);
-					alchemize.quantity(Random.NormalIntRange(3, 4) + bonus);
+					alchemize.quantity(Random.IntRange(3, 4) + bonus);
 					drops.add(alchemize);
 					
-					alchemizeCounter.countUp( Random.NormalIntRange(5, 7) );
+					alchemizeCounter.countUp( Random.IntRange(5, 7) );
 					alchemizeLeft.countDown(1);
+					
 				} else {
 					alchemizeCounter.countDown(1);
 				}

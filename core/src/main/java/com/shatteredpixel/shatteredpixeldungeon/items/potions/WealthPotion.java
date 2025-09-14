@@ -26,6 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.WealthDrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.UnstableBrew;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -102,7 +104,8 @@ public class WealthPotion extends Potion implements WealthDrop<Potion> {
 	}
 	@Override
 	public void doThrow(Hero hero) {
-		if (!mustThrowPots.contains(pot.getClass()) && !canThrowPots.contains(pot.getClass())) {
+		if (!mustThrowPots.contains(pot.getClass()) && !canThrowPots.contains(pot.getClass()) &&
+			( !(pot instanceof Brew) || pot instanceof UnstableBrew )){
 			
 			GameScene.show(
 					new WndOptions(new ItemSprite(this),

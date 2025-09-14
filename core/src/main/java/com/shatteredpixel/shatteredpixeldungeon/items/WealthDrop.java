@@ -193,11 +193,10 @@ public interface WealthDrop<T extends Item> {
     static void refreshIndicators() {
         for (Decay decay : Dungeon.hero.buffs(Decay.class)) {
             if (decay.cooldown() <= 10 && decay.warning && decay.item != null) {
-                decay.warning = false;
-                
                 GLog.newLine();
                 GLog.w(Messages.get(WealthDrop.class, "warning", decay.item.name()));
                 Dungeon.hero.interrupt();
+                decay.warning = false;
             }
             
             Item.updateQuickslot();

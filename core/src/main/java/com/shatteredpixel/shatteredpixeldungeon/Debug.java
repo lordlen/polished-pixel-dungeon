@@ -73,7 +73,8 @@ public class Debug {
     public static final int Starting_Str = DebuggingStats ?             16      : 10;
     public static final int Starting_HP = DebuggingStats ?              2000    : 20;
     
-    private static final boolean ActOnStart = false || DebuggingStats;
+    private static final boolean ActOnStart = DebuggingStats || false
+    ;
     private static final boolean ActOnLoad = false
     ;
     private static final ArrayList<Class<?extends Item>> Starting_Items;
@@ -190,7 +191,7 @@ public class Debug {
     
     private static void SetQuickslots() {
         List<Class<? extends Item>> quickslot = Arrays.asList(
-                StoneOfBlast.class, ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, ElixirOfFeatherFall.class
+                StoneOfBlast.class, ScrollOfMagicMapping.class, PotionOfMindVision.class, PotionOfInvisibility.class, PotionOfHaste.class, Torch.class
         );
         
         ArrayList<Item> items = new ArrayList<>();

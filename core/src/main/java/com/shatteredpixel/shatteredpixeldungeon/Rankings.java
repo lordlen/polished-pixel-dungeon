@@ -319,6 +319,7 @@ public enum Rankings {
 		Dungeon.level = null;
 		Generator.fullReset();
 		Notes.reset();
+		FoundItems.reset();
 		Dungeon.quickslot.reset();
 		QuickSlotButton.reset();
 		Toolbar.swappedQuickslots = false;
